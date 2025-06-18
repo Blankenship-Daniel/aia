@@ -3,4 +3,4 @@ node_modules/
 .aia/
 *.log
 .DS_Store
-.gitihub/
+.github/

@@ -1,0 +1,406 @@
+// Core application types
+export interface AIAConfig {
+  preferredModel: string;
+  openaiApiKey?: string;
+  anthropicApiKey?: string;
+  autoExecute: boolean;
+  plugins: Record<string, PluginConfig>;
+  profiles: Record<string, ConfigProfile>;
+}
+
+export interface ConfigProfile {
+  name: string;
+  description: string;
+  settings: Partial<AIAConfig>;
+  active: boolean;
+}
+
+export interface PluginConfig {
+  enabled: boolean;
+  version: string;
+  settings: Record<string, unknown>;
+}
+
+export type AIModel =
+  | 'gpt-4'
+  | 'gpt-3.5-turbo'
+  | 'claude-3.5-sonnet'
+  | 'claude-3-haiku';
+
+export interface CommandResult {
+  success: boolean;
+  data?: unknown;
+  error?: string;
+  output?: string;
+}
+
+export interface CommandOptions {
+  model?: AIModel;
+  context?: string;
+  verbose?: boolean;
+  autoExecute?: boolean;
+  [key: string]: unknown;
+}
+
+export interface CommandOption {
+  name: string;
+  description: string;
+  type: 'string' | 'number' | 'boolean';
+  required?: boolean;
+  default?: unknown;
+}
+
+export type AsyncResult<T> = Promise<{
+  success: boolean;
+  data?: T;
+  error?: string;
+}>;
+
+export type ServiceResult<T> = { success: boolean; data?: T; error?: string };
+
+export interface MemoryEntry {
+  query: string;
+  response: string;
+  timestamp: string;
+  context: Record<string, unknown>;
+  semanticTags: string[];
+  confidence: number;
+}
+
+export interface MemoryData {
+  conversations: MemoryEntry[];
+  commands: CommandHistoryEntry[];
+  preferences: Record<string, unknown>;
+  workingDirectories: Record<string, Record<string, unknown>>;
+  semanticIndex: Record<string, unknown>;
+  agenticHistory: AgenticGoal[];
+}
+
+export interface Conversation {
+  query: string;
+  response: string;
+  timestamp: string;
+  context: ContextInfo;
+  semanticTags: string[];
+  confidence: number;
+}
+
+export interface CommandHistory {
+  command: string;
+  timestamp: string;
+  workingDirectory: string;
+  exitCode: number;
+  duration: number;
+  optimized: boolean;
+}
+
+export interface CommandHistoryEntry {
+  command: string;
+  timestamp: string;
+  workingDirectory: string;
+  exitCode: number;
+  duration: number;
+  optimized: boolean;
+}
+
+export interface ContextInfo {
+  workingDirectory: string;
+  platform: string;
+  arch: string;
+  nodeVersion: string;
+  user: string;
+  shell: string;
+  timestamp: string;
+  projectType: string;
+  projectInfo: Record<string, unknown>;
+  gitStatus: string;
+  environmentScore: number;
+  performanceMetrics?: Record<string, unknown>;
+  securityStatus?: Record<string, unknown>;
+  pluginContext?: Record<string, unknown>;
+}
+
+export interface AgenticGoal {
+  goal: string;
+  plan: AgenticStep[];
+  executionResults: AgenticExecutionResult[];
+  learnings: string[];
+  timestamp: string;
+}
+
+export interface AgenticStep {
+  description: string;
+  command?: string;
+  expectedOutcome: string;
+  reasoning: string;
+}
+
+export interface AgenticExecutionResult {
+  step: AgenticStep;
+  success: boolean;
+  output: string;
+  error?: string;
+  confidence: number;
+}
+
+export interface PluginManifest {
+  name: string;
+  version: string;
+  description: string;
+  author: string;
+  main: string;
+  hooks?: string[];
+  commands?: PluginCommand[];
+  dependencies?: Record<string, string>;
+  permissions?: string[];
+  license?: string;
+  keywords?: string[];
+  aia?: {
+    version: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface PluginCommand {
+  name: string;
+  description: string;
+  usage: string;
+  options?: PluginCommandOption[];
+}
+
+export interface PluginCommandOption {
+  flag: string;
+  description: string;
+  required?: boolean;
+  type: 'string' | 'boolean' | 'number';
+}
+
+export interface WorkflowStep {
+  command: string;
+  description?: string;
+  expectedOutput?: string;
+  timestamp: string;
+}
+
+export interface Workflow {
+  name: string;
+  description: string;
+  author: string;
+  tags: string[];
+  steps: WorkflowStep[];
+  createdAt: string;
+  lastExecuted?: string;
+}
+
+// Error handling types
+export interface ErrorContext {
+  operation: string;
+  component: string;
+  timestamp: string;
+  details: Record<string, unknown>;
+}
+
+export interface RecoveryStrategy {
+  name: string;
+  description: string;
+  execute: () => Promise<boolean>;
+}
+
+// Performance and security types
+export interface PerformanceMetrics {
+  memoryUsage: number;
+  responseTime: number;
+  cacheHitRate: number;
+  [key: string]: unknown;
+}
+
+export interface SecurityStatus {
+  threats: string[];
+  lastScan: string;
+  riskLevel: 'low' | 'medium' | 'high';
+  [key: string]: unknown;
+}
+
+// Plugin system types
+export interface PluginPermission {
+  type: 'filesystem' | 'network' | 'command' | 'memory';
+  scope: string;
+  description: string;
+}
+
+export interface PluginHook {
+  name: string;
+  type: 'beforeCommand' | 'afterCommand' | 'beforeAIQuery' | 'afterAIQuery';
+  handler: string;
+}
+
+export interface Plugin {
+  manifest: PluginManifest;
+  initialize: (config: Record<string, unknown>) => Promise<void>;
+  executeCommand: (
+    commandName: string,
+    args: string[],
+    options: Record<string, unknown>
+  ) => Promise<CommandResult>;
+  executeHook: (
+    hookName: string,
+    context: Record<string, unknown>
+  ) => Promise<void>;
+  cleanup: () => Promise<void>;
+}
+
+// Plugin system types
+export interface PluginInfo {
+  name: string;
+  version: string;
+  description: string;
+  author: string;
+  dependencies?: Record<string, string>;
+  commands: PluginCommand[];
+  permissions: string[];
+  loaded: boolean;
+  enabled: boolean;
+  manifest: PluginManifest;
+}
+
+export interface PluginInstallOptions {
+  name?: string;
+  version?: string;
+  source?: string;
+  force?: boolean;
+  dryRun?: boolean;
+}
+
+export interface PluginUninstallOptions {
+  force?: boolean;
+  purge?: boolean;
+}
+
+export interface PluginListFilters {
+  enabled?: boolean;
+  loaded?: boolean;
+  author?: string;
+}
+
+export interface PluginSearchOptions {
+  limit?: number;
+  category?: string;
+  sort?: 'name' | 'popularity' | 'updated';
+}
+
+export interface PluginValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+export interface PluginStats {
+  totalPlugins: number;
+  enabledPlugins: number;
+  loadedPlugins: number;
+  hooks: number;
+}
+
+export interface PluginCommandResult {
+  plugin: string;
+  command: string;
+  args: string[];
+  result: string;
+  exitCode: number;
+}
+
+export interface HookContext {
+  [key: string]: unknown;
+}
+
+export interface HookResult {
+  success: boolean;
+  data?: unknown;
+  error?: string;
+}
+
+// Workflow types
+export interface WorkflowExecutionContext {
+  variables: Record<string, unknown>;
+  currentStep: number;
+  startTime: string;
+  executionId: string;
+}
+
+export interface WorkflowExecutionResult {
+  success: boolean;
+  stepsExecuted: number;
+  totalSteps: number;
+  output: string[];
+  errors: string[];
+  duration: number;
+}
+
+// Agentic reasoning types
+export interface ExecutionStep {
+  description: string;
+  command: string;
+  expectedOutcome: string;
+  reasoning: string;
+  priority: number;
+}
+
+export interface ExecutionResult {
+  step: ExecutionStep;
+  success: boolean;
+  output: string;
+  error?: string;
+  confidence: number;
+  timestamp: string;
+}
+
+export interface LearningEntry {
+  pattern: string;
+  outcome: 'success' | 'failure';
+  context: Record<string, unknown>;
+  recommendation: string;
+  confidence: number;
+  timestamp: string;
+}
+
+// Search and analysis types
+export interface SearchResult {
+  relevance: number;
+  content: string;
+  source: string;
+  context: Record<string, unknown>;
+}
+
+export interface SemanticAnalysis {
+  sentiment: number;
+  intent: string;
+  entities: string[];
+  confidence: number;
+  domain: string;
+}
+
+// Configuration types for different components
+export interface ModelConfiguration {
+  temperature: number;
+  maxTokens: number;
+  timeout: number;
+  retries: number;
+}
+
+export interface CacheConfiguration {
+  enabled: boolean;
+  ttl: number;
+  maxSize: number;
+  strategy: 'lru' | 'fifo' | 'lfu';
+}
+
+export interface CommandContext {
+  workingDirectory: string;
+  environment: Record<string, string>;
+  args: string[];
+  options: Record<string, unknown>;
+  session?: {
+    id: string;
+    timestamp: string;
+  };
+}

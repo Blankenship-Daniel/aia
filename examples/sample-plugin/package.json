@@ -1,0 +1,9 @@
+{
+  "name": "hello-plugin",
+  "version": "1.0.0",
+  "description": "A simple hello world plugin for AIA",
+  "main": "index.js",
+  "dependencies": {
+    "chalk": "^4.1.2"
+  }
+}

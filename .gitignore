@@ -1,0 +1,6 @@
+node_modules/
+.env
+.aia/
+*.log
+.DS_Store
+.gitihub/

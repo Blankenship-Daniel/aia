@@ -19,7 +19,7 @@ process.emitWarning = (warning, name, ctor, ...args) => {
   return originalProcessEmitWarning.call(process, warning, name, ctor, ...args);
 };
 
-const CLIApplication = require('./src/cli/CLIApplication');
+const CLIApplication = require('./dist/cli/CLIApplication').default;
 
 /**
  * Main entry point for AIA CLI

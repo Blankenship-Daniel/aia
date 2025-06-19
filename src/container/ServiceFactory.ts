@@ -140,25 +140,27 @@ export class ServiceFactory {
   public static registerUtilityServices(container: DIContainer): void {
     // Error Handler
     container.registerFactory('errorHandler', (container) => {
-      const ErrorHandler = require('../ErrorHandler');
+      const ErrorHandler = require('../../dist/ErrorHandler').default;
       return new ErrorHandler();
     });
 
     // Security Validator
     container.registerFactory('security', (container) => {
-      const SecurityValidator = require('../SecurityValidator');
+      const SecurityValidator = require('../../dist/SecurityValidator').default;
       return new SecurityValidator();
     });
 
     // CLI Formatter
     container.registerFactory('formatter', (container) => {
-      const CLIFormatter = require('../CLIFormatter');
+      const { CLIFormatter } = require('../../dist/CLIFormatter');
       return new CLIFormatter();
     });
 
     // Performance Optimizer
     container.registerFactory('performance', (container) => {
-      const PerformanceOptimizer = require('../PerformanceOptimizer');
+      const {
+        PerformanceOptimizer,
+      } = require('../../dist/PerformanceOptimizer');
       return new PerformanceOptimizer();
     });
   }

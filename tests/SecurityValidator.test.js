@@ -1,4 +1,4 @@
-const SecurityValidator = require('../src/SecurityValidator');
+const { SecurityValidator } = require('../dist/SecurityValidator');
 
 describe('SecurityValidator', () => {
   let securityValidator;

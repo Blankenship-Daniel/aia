@@ -1,4 +1,4 @@
-const CommandHandler = require('../src/CommandHandler');
+const { CommandHandler } = require('../dist/CommandHandler');
 
 // Mock AIA instance
 const mockAIA = {

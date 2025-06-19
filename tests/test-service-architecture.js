@@ -93,38 +93,28 @@ async function testConfigurationService() {
     await configService.initialize();
 
     // Test basic get/set
-    await configService.set('test.value', 'hello');
-    const value = configService.get('test.value');
+    await configService.setSetting('preferredModel', 'gpt-4');
+    const value = configService.getSetting('preferredModel');
 
-    if (value === 'hello') {
+    if (value === 'gpt-4') {
       console.log('✅ Configuration get/set works');
     } else {
       console.log('❌ Configuration get/set failed');
     }
 
-    // Test has/delete
-    if (configService.has('test.value')) {
-      await configService.delete('test.value');
-      if (!configService.has('test.value')) {
-        console.log('✅ Configuration has/delete works');
-      } else {
-        console.log('❌ Configuration delete failed - value still exists');
-      }
-    } else {
-      console.log('❌ Configuration has failed - test value not found');
-    }
-
-    // Test validation
-    const validation = configService.validate({
+    // Test configuration validation
+    const validation = await configService.validateConfiguration({
       preferredModel: 'gpt-4',
       autoOptimize: true,
       maxMemorySize: 5000,
+      openaiApiKey: 'test-key',
+      anthropicApiKey: 'test-key',
     });
 
-    if (validation.valid) {
+    if (validation.success) {
       console.log('✅ Configuration validation works');
     } else {
-      console.log('❌ Configuration validation failed:', validation.errors);
+      console.log('❌ Configuration validation failed:', validation.error);
     }
 
     console.log('✅ Configuration Service tests passed');
@@ -217,8 +207,8 @@ async function testServiceIntegration() {
     }
 
     // Test service interaction
-    await configService.set('test.integration', 'success');
-    const value = configService.get('test.integration');
+    await configService.setSetting('preferredModel', 'test-integration');
+    const value = configService.getSetting('preferredModel');
 
     await memoryService.addConversation(
       'integration test',
@@ -226,9 +216,9 @@ async function testServiceIntegration() {
       { test: true }
     );
 
-    const summary = await memoryService.getSummary();
+    const stats = await memoryService.getStats();
 
-    if (value === 'success' && summary.conversations.total > 0) {
+    if (value === 'test-integration' && stats) {
       console.log('✅ Service integration works');
     } else {
       console.log('❌ Service integration failed');

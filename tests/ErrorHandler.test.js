@@ -1,4 +1,4 @@
-const ErrorHandler = require('../src/ErrorHandler');
+const { ErrorHandler } = require('../dist/ErrorHandler');
 
 describe('ErrorHandler', () => {
   let errorHandler;

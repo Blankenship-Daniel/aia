@@ -1,4 +1,4 @@
-const AIA = require('../index');
+const AIA = require('../dist/index');
 const path = require('path');
 const fs = require('fs-extra');
 

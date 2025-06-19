@@ -436,3 +436,82 @@ export interface CommandContext {
     timestamp: string;
   };
 }
+
+// NLP and Agentic Reasoning types
+export interface NLPAnalysis {
+  intent: {
+    intent: string;
+    subType?: string;
+    confidence: number;
+  };
+  goalType: 'SIMPLE' | 'COMPLEX' | 'MULTI_STEP';
+  complexity: 'LOW' | 'MEDIUM' | 'HIGH';
+  confidence: number;
+  enhancedGoal: string;
+  entities: Record<string, string[]>;
+  suggestedRefinements: string[];
+}
+
+export interface AgenticPlan {
+  id: string;
+  description: string;
+  confidence: number;
+  steps: AgenticPlanStep[];
+  reasoning: string;
+  fallbackOptions: string[];
+}
+
+export interface AgenticPlanStep {
+  id: string;
+  description: string;
+  type: 'SEARCH' | 'COMMAND' | 'ANALYSIS' | 'OTHER';
+  command?: string;
+  query?: string;
+  critical: boolean;
+  expectedOutput: string;
+}
+
+export interface EvaluationResult {
+  goalAchieved: boolean;
+  confidence: number;
+  reason: string;
+  shouldContinue: boolean;
+  suggestedImprovements?: string[];
+  partialSuccess?: boolean;
+  nextSteps?: string[];
+  result?: ExecutionResult;
+}
+
+export interface RecoveryResult {
+  canRecover: boolean;
+  strategy: string;
+  steps: string[];
+  reason: string;
+  adjustedGoal?: string;
+  timeoutRecommendation?: string;
+}
+
+export interface AgenticContext {
+  goal: string;
+  enhancedGoal: string;
+  nlpAnalysis: NLPAnalysis;
+  iterations: number;
+  maxIterations: number;
+  currentPlan?: AgenticPlan;
+  executionHistory: ExecutionResult[];
+}
+
+// Extended ExecutionResult for agentic reasoning
+export interface AgenticExecutionResult extends ExecutionResult {
+  planId?: string;
+  stepId?: string;
+  steps?: StepResult[];
+}
+
+export interface StepResult {
+  stepId: string;
+  success: boolean;
+  output: string;
+  error?: string;
+  timestamp: string;
+}

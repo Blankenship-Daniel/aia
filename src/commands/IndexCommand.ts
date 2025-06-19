@@ -12,7 +12,7 @@ import { CommandResult, CommandOptions, AsyncResult } from '../types/index.js';
 // Import JavaScript modules with explicit types
 const CodeIndexService =
   require('../../dist/services/CodeIndexService.js').CodeIndexService;
-const CodebaseSummarizer = require('../../src/CodebaseSummarizer.js');
+import CodebaseSummarizer from '../CodebaseSummarizer.js';
 const SemanticCodeAnalyzer = require('../../src/SemanticCodeAnalyzer.js');
 const ConfigurationManager = require('../../src/ConfigurationManager.js');
 
@@ -97,13 +97,38 @@ interface AnalysisResult {
   };
 }
 
+// Added CodebaseIndex and related interfaces
+interface CodebaseIndex {
+  files: Map<string, FileInfo>;
+  metadata: {
+    totalFiles: number;
+    linesOfCode: number;
+    totalClasses: number;
+    totalFunctions: number;
+    languages: Record<string, number>;
+    dependencies: Record<string, string[]>;
+  };
+  dependencies: Record<string, string[]>;
+}
+
+interface FileInfo {
+  path: string;
+  content?: string;
+  exports?: string[];
+  imports?: string[];
+  classes?: string[];
+  functions?: string[];
+  type?: string;
+  size?: number;
+}
+
 export class IndexCommand implements ICommand {
   private name = 'index';
   private description = 'Create and manage codebase index for AI analysis';
   private aliases = ['idx', 'scan'];
 
   private codeIndexService: any;
-  private codebaseSummarizer: any;
+  private codebaseSummarizer: CodebaseSummarizer;
   private semanticAnalyzer: any;
 
   constructor() {
@@ -375,37 +400,48 @@ export class IndexCommand implements ICommand {
 
       console.log(chalk.blue('🤖 Generating AI-friendly summary...'));
 
-      const summary = await this.codebaseSummarizer.generateAISummary(index);
+      const codebaseIndex = this.convertToCodebaseIndex(index);
+      const summaryData = await this.codebaseSummarizer.generateAISummary(
+        codebaseIndex as any
+      );
 
       if (options.json) {
-        console.log(JSON.stringify(summary, null, 2));
-        return { success: true, output: 'Summary generated', data: summary };
+        console.log(JSON.stringify(summaryData, null, 2));
+        return {
+          success: true,
+          output: 'Summary generated',
+          data: summaryData,
+        };
       }
 
       console.log(chalk.blue.bold('\n📋 Codebase Summary'));
       console.log(
-        chalk.white(`Project Type: ${summary.summary.overview.projectType}`)
+        chalk.white(`Project Type: ${summaryData.summary.overview.projectType}`)
       );
       console.log(
         chalk.white(
-          `Primary Language: ${summary.summary.overview.primaryLanguage}`
+          `Primary Language: ${summaryData.summary.overview.primaryLanguage}`
         )
       );
       console.log(
-        chalk.white(`Architecture: ${summary.summary.overview.architecture}`)
+        chalk.white(
+          `Architecture: ${summaryData.summary.overview.architecture}`
+        )
       );
-      console.log(chalk.white(`Purpose: ${summary.summary.overview.purpose}`));
+      console.log(
+        chalk.white(`Purpose: ${summaryData.summary.overview.purpose}`)
+      );
 
-      if (summary.summary.entryPoints.length > 0) {
+      if (summaryData.summary.entryPoints.length > 0) {
         console.log(chalk.blue('\n🚪 Entry Points:'));
-        summary.summary.entryPoints.forEach((entry: EntryPoint) => {
+        summaryData.summary.entryPoints.forEach((entry: EntryPoint) => {
           console.log(chalk.gray(`  ${entry.file}: ${entry.purpose}`));
         });
       }
 
-      if (summary.summary.keyComponents.length > 0) {
+      if (summaryData.summary.keyComponents.length > 0) {
         console.log(chalk.blue('\n🔧 Key Components:'));
-        summary.summary.keyComponents
+        summaryData.summary.keyComponents
           .slice(0, 5)
           .forEach((comp: ComponentInfo) => {
             console.log(chalk.gray(`  ${comp.file}: ${comp.purpose}`));
@@ -414,20 +450,28 @@ export class IndexCommand implements ICommand {
 
       if (options.verbose) {
         console.log(chalk.blue('\n💡 AI Context:'));
-        console.log(chalk.gray('  ' + summary.summary.aiContext.prompt));
+        // AIContext doesn't have prompt property, show something else
+        console.log(
+          chalk.gray(
+            '  Suggested starting points: ' +
+              summaryData.summary.aiContext.suggestedStartingPoints.join(', ')
+          )
+        );
 
-        if (summary.summary.aiContext.keyInsights.length > 0) {
-          console.log(chalk.blue('\n🔍 Key Insights:'));
-          summary.summary.aiContext.keyInsights.forEach((insight: string) => {
-            console.log(chalk.gray(`  - ${insight}`));
-          });
+        if (summaryData.summary.aiContext.importantFiles.length > 0) {
+          console.log(chalk.blue('\n🔍 Important Files:'));
+          summaryData.summary.aiContext.importantFiles.forEach(
+            (file: string) => {
+              console.log(chalk.gray(`  - ${file}`));
+            }
+          );
         }
       }
 
       return {
         success: true,
         output: 'Summary displayed',
-        data: summary,
+        data: summaryData,
       };
     } catch (error) {
       const errorMessage =
@@ -804,8 +848,11 @@ export class IndexCommand implements ICommand {
     content += `*Generated on ${new Date().toISOString()}*\n\n`;
 
     // Project Overview
-    const summaryData = await this.codebaseSummarizer.generateAISummary(index);
-    const summary = summaryData.summary || summaryData; // Handle both formats
+    const codebaseIndex = this.convertToCodebaseIndex(index);
+    const summaryData = await this.codebaseSummarizer.generateAISummary(
+      codebaseIndex as any
+    );
+    const summary = summaryData.summary;
     const overview = summary.overview || {};
 
     content += '## Project Overview\n\n';
@@ -842,7 +889,10 @@ export class IndexCommand implements ICommand {
     if (entryPoints && entryPoints.length > 0) {
       content += '## Entry Points\n\n';
       for (const entry of entryPoints) {
-        content += `- **${entry.file}** - ${entry.purpose}\n`;
+        const entryFile = typeof entry === 'string' ? entry : entry.file;
+        const entryPurpose =
+          typeof entry === 'string' ? 'Entry point' : entry.purpose;
+        content += `- **${entryFile}** - ${entryPurpose}\n`;
       }
       content += '\n';
     }
@@ -964,7 +1014,10 @@ export class IndexCommand implements ICommand {
     options: { includeCode?: boolean; includeDetails?: boolean } = {}
   ): Promise<Record<string, unknown>> {
     const { includeCode, includeDetails } = options;
-    const summary = await this.codebaseSummarizer.generateAISummary(index);
+    const codebaseIndex = this.convertToCodebaseIndex(index);
+    const summaryData = await this.codebaseSummarizer.generateAISummary(
+      codebaseIndex as any
+    );
 
     const structured = {
       metadata: {
@@ -975,14 +1028,14 @@ export class IndexCommand implements ICommand {
         totalTodos: index.todos.length,
       },
       project: {
-        type: summary.projectType,
-        primaryLanguage: summary.primaryLanguage,
-        architecture: summary.architecture,
-        purpose: summary.purpose,
+        type: summaryData.summary.overview.projectType,
+        primaryLanguage: summaryData.summary.overview.primaryLanguage,
+        architecture: summaryData.summary.overview.architecture,
+        purpose: summaryData.summary.overview.purpose,
       },
       languages: this.codeIndexService.getLanguageDistribution(),
-      entryPoints: summary.entryPoints || [],
-      keyComponents: (summary.keyComponents || []).slice(0, 10),
+      entryPoints: summaryData.summary.entryPoints || [],
+      keyComponents: (summaryData.summary.keyComponents || []).slice(0, 10),
       classes: Array.from(index.classes.entries())
         .slice(0, includeDetails ? -1 : 20)
         .map(([name, info]: [string, any]) => ({
@@ -1025,12 +1078,15 @@ export class IndexCommand implements ICommand {
     content += 'CODEBASE ANALYSIS\n';
     content += '=================\n\n';
 
-    const summary = await this.codebaseSummarizer.generateAISummary(index);
+    const codebaseIndex = this.convertToCodebaseIndex(index);
+    const summaryData = await this.codebaseSummarizer.generateAISummary(
+      codebaseIndex as any
+    );
 
-    content += `Project Type: ${summary.projectType}\n`;
-    content += `Primary Language: ${summary.primaryLanguage}\n`;
-    content += `Architecture: ${summary.architecture}\n`;
-    content += `Purpose: ${summary.purpose}\n\n`;
+    content += `Project Type: ${summaryData.summary.overview.projectType}\n`;
+    content += `Primary Language: ${summaryData.summary.overview.primaryLanguage}\n`;
+    content += `Architecture: ${summaryData.summary.overview.architecture}\n`;
+    content += `Purpose: ${summaryData.summary.overview.purpose}\n\n`;
 
     content += `Statistics:\n`;
     content += `- Files: ${index.files.size}\n`;
@@ -1045,9 +1101,12 @@ export class IndexCommand implements ICommand {
     }
     content += '\n';
 
-    if (summary.entryPoints && summary.entryPoints.length > 0) {
+    if (
+      summaryData.summary.entryPoints &&
+      summaryData.summary.entryPoints.length > 0
+    ) {
       content += 'Entry Points:\n';
-      for (const entry of summary.entryPoints) {
+      for (const entry of summaryData.summary.entryPoints) {
         content += `- ${entry.file}: ${entry.purpose}\n`;
       }
       content += '\n';
@@ -1208,6 +1267,58 @@ export class IndexCommand implements ICommand {
       console.error(chalk.red('Failed to generate prompts:'), errorMessage);
       return { success: false, error: errorMessage };
     }
+  }
+
+  private convertToCodebaseIndex(indexData: IndexData): CodebaseIndex {
+    // Convert IndexData to CodebaseIndex format
+    const files = new Map<string, FileInfo>();
+
+    // Convert files from unknown to FileInfo
+    for (const [path, data] of indexData.files.entries()) {
+      files.set(path, {
+        path,
+        content:
+          typeof data === 'object' && data !== null && 'content' in data
+            ? (data as any).content
+            : undefined,
+        exports:
+          typeof data === 'object' && data !== null && 'exports' in data
+            ? (data as any).exports
+            : [],
+        imports:
+          typeof data === 'object' && data !== null && 'imports' in data
+            ? (data as any).imports
+            : [],
+        classes:
+          typeof data === 'object' && data !== null && 'classes' in data
+            ? (data as any).classes
+            : [],
+        functions:
+          typeof data === 'object' && data !== null && 'functions' in data
+            ? (data as any).functions
+            : [],
+        type:
+          typeof data === 'object' && data !== null && 'type' in data
+            ? (data as any).type
+            : undefined,
+        size:
+          typeof data === 'object' && data !== null && 'size' in data
+            ? (data as any).size
+            : undefined,
+      });
+    }
+
+    return {
+      files,
+      metadata: {
+        totalFiles: indexData.metadata.totalFiles,
+        linesOfCode: 0, // Calculate if needed
+        totalClasses: indexData.metadata.totalClasses,
+        totalFunctions: indexData.metadata.totalFunctions,
+        languages: indexData.metadata.languages,
+      } as any, // Type assertion to avoid complex type issues
+      dependencies: {},
+    };
   }
 
   private findEntryPoints(index: IndexData): EntryPoint[] {

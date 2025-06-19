@@ -8,7 +8,7 @@ const {
 const fs = require('fs-extra');
 const path = require('path');
 const os = require('os');
-const MemoryManager = require('../src/MemoryManager');
+const { MemoryManager } = require('../dist/MemoryManager');
 
 describe('MemoryManager', () => {
   let memoryManager;

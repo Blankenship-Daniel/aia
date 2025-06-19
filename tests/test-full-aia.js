@@ -5,7 +5,7 @@ async function testFullAIA() {
   console.log('🔧 Testing Full AIA System with API Key');
 
   // Import main AIA class
-  const AIA = require('../index.js');
+  const AIA = require('../dist/index.js');
 
   try {
     // Create AIA instance

@@ -11,7 +11,7 @@ console.log('==================================\n');
 console.log('1. Testing Semantic Search...');
 try {
   // Import and test MemoryService functionality
-  const { MemoryService } = require('../src/services/MemoryService.ts');
+  const { MemoryService } = require('../dist/services/MemoryService');
 
   // Test data
   const testMemory = {

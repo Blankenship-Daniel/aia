@@ -1,12 +1,136 @@
 // Enhanced Testing Infrastructure
 // Comprehensive test utilities and integration testing framework
 
-const { spawn } = require('child_process');
-const fs = require('fs-extra');
-const path = require('path');
-const chalk = require('chalk');
+import { spawn, ChildProcess } from 'child_process';
+import fs from 'fs-extra';
+import path from 'path';
+import os from 'os';
+// @ts-ignore - chalk doesn't have types available
+import chalk from 'chalk';
+
+interface TestConfig {
+  timeout: number;
+  parallel: boolean;
+  maxConcurrency: number;
+  coverage: boolean;
+}
+
+interface TestFunction {
+  (context: TestContext): Promise<void> | void;
+}
+
+interface Test {
+  name: string;
+  run: TestFunction;
+  setup?: TestFunction;
+  teardown?: TestFunction;
+}
+
+interface TestSuite {
+  name: string;
+  tests: Test[];
+  setup?: TestFunction;
+  teardown?: TestFunction;
+}
+
+interface TestResult {
+  name: string;
+  status: 'running' | 'passed' | 'failed' | 'skipped';
+  duration: number;
+  error: string | null;
+  logs: string[];
+}
+
+interface SuiteResult {
+  name: string;
+  tests: TestResult[];
+  passed: number;
+  failed: number;
+  skipped: number;
+  duration: number;
+  error?: string;
+}
+
+interface MockFunction {
+  (...args: unknown[]): unknown;
+  calls: unknown[][];
+  returnValue: unknown;
+  returns: (value: unknown) => MockFunction;
+}
+
+interface TestAssertions {
+  equal: (actual: unknown, expected: unknown, message?: string) => void;
+  deepEqual: (actual: unknown, expected: unknown, message?: string) => void;
+  truthy: (value: unknown, message?: string) => void;
+  falsy: (value: unknown, message?: string) => void;
+  throws: (
+    fn: () => Promise<void> | void,
+    expectedError?: string,
+    message?: string
+  ) => Promise<void>;
+}
+
+interface TestMock {
+  fn: () => MockFunction;
+}
+
+interface TestUtils {
+  sleep: (ms: number) => Promise<void>;
+  createTempFile: (content?: string) => Promise<string>;
+  createTempDir: () => Promise<string>;
+}
+
+interface TestContext {
+  log: (message: string) => void;
+  assert: TestAssertions;
+  mock: TestMock;
+  utils: TestUtils;
+}
+
+interface IntegrationTestEnvironment {
+  tempDir: string;
+  configDir: string;
+  cleanup: () => Promise<void>;
+}
+
+interface PerformanceTestOptions {
+  iterations?: number;
+  warmupIterations?: number;
+  maxDuration?: number;
+}
+
+interface PerformanceStats {
+  average: number;
+  median: number;
+  min: number;
+  max: number;
+  p95: number;
+  p99: number;
+}
+
+interface PerformanceTestResult {
+  name: string;
+  stats: PerformanceStats;
+  results: number[];
+}
+
+interface TestSummary {
+  total: number;
+  passed: number;
+  failed: number;
+  skipped: number;
+}
+
+interface TestResults {
+  suites: SuiteResult[];
+  summary: TestSummary;
+}
 
 class TestRunner {
+  private testSuites: Map<string, TestSuite>;
+  private results: SuiteResult[];
+  private config: TestConfig;
+
   constructor() {
     this.testSuites = new Map();
     this.results = [];
@@ -19,12 +143,12 @@ class TestRunner {
   }
 
   // Register test suite
-  registerSuite(name, suite) {
+  registerSuite(name: string, suite: TestSuite): void {
     this.testSuites.set(name, suite);
   }
 
   // Run all tests
-  async runAllTests(options = {}) {
+  async runAllTests(options: Partial<TestConfig> = {}): Promise<TestResults> {
     const config = { ...this.config, ...options };
     const startTime = Date.now();
 
@@ -46,7 +170,10 @@ class TestRunner {
   }
 
   // Run specific test suite
-  async runSuite(suiteName, options = {}) {
+  async runSuite(
+    suiteName: string,
+    options: Partial<TestConfig> = {}
+  ): Promise<SuiteResult> {
     const suite = this.testSuites.get(suiteName);
     if (!suite) {
       throw new Error(`Test suite '${suiteName}' not found`);
@@ -54,7 +181,7 @@ class TestRunner {
 
     console.log(chalk.blue(`\n🧪 Running ${suiteName} tests...`));
 
-    const suiteResult = {
+    const suiteResult: SuiteResult = {
       name: suiteName,
       tests: [],
       passed: 0,
@@ -75,8 +202,10 @@ class TestRunner {
         else if (testResult.status === 'skipped') suiteResult.skipped++;
       }
     } catch (error) {
-      console.error(chalk.red(`Suite ${suiteName} failed:`, error.message));
-      suiteResult.error = error.message;
+      console.error(
+        chalk.red(`Suite ${suiteName} failed:`, (error as Error).message)
+      );
+      suiteResult.error = (error as Error).message;
     }
 
     suiteResult.duration = Date.now() - startTime;
@@ -86,10 +215,13 @@ class TestRunner {
   }
 
   // Run individual test
-  async runTest(test, options = {}) {
+  async runTest(
+    test: Test,
+    options: Partial<TestConfig> = {}
+  ): Promise<TestResult> {
     const { timeout = this.config.timeout } = options;
 
-    const testResult = {
+    const testResult: TestResult = {
       name: test.name,
       status: 'running',
       duration: 0,
@@ -101,7 +233,7 @@ class TestRunner {
 
     try {
       // Set up test timeout
-      const timeoutPromise = new Promise((_, reject) => {
+      const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(
           () => reject(new Error(`Test timed out after ${timeout}ms`)),
           timeout
@@ -115,8 +247,8 @@ class TestRunner {
       console.log(chalk.green(`  ✅ ${test.name}`));
     } catch (error) {
       testResult.status = 'failed';
-      testResult.error = error.message;
-      console.log(chalk.red(`  ❌ ${test.name}: ${error.message}`));
+      testResult.error = (error as Error).message;
+      console.log(chalk.red(`  ❌ ${test.name}: ${(error as Error).message}`));
     }
 
     testResult.duration = Date.now() - startTime;
@@ -124,7 +256,7 @@ class TestRunner {
   }
 
   // Execute test function
-  async executeTest(test, testResult) {
+  private async executeTest(test: Test, testResult: TestResult): Promise<void> {
     const testContext = this.createTestContext(testResult);
 
     if (test.setup) {
@@ -141,14 +273,14 @@ class TestRunner {
   }
 
   // Create test context with utilities
-  createTestContext(testResult) {
+  private createTestContext(testResult: TestResult): TestContext {
     return {
-      log: (message) => {
+      log: (message: string) => {
         testResult.logs.push(`${new Date().toISOString()}: ${message}`);
       },
 
       assert: {
-        equal: (actual, expected, message = '') => {
+        equal: (actual: unknown, expected: unknown, message = '') => {
           if (actual !== expected) {
             throw new Error(
               `Assertion failed: ${
@@ -158,13 +290,13 @@ class TestRunner {
           }
         },
 
-        deepEqual: (actual, expected, message = '') => {
+        deepEqual: (actual: unknown, expected: unknown, message = '') => {
           if (JSON.stringify(actual) !== JSON.stringify(expected)) {
             throw new Error(`Deep equality assertion failed: ${message}`);
           }
         },
 
-        truthy: (value, message = '') => {
+        truthy: (value: unknown, message = '') => {
           if (!value) {
             throw new Error(
               `Assertion failed: Expected truthy value, got ${value}. ${message}`
@@ -172,7 +304,7 @@ class TestRunner {
           }
         },
 
-        falsy: (value, message = '') => {
+        falsy: (value: unknown, message = '') => {
           if (value) {
             throw new Error(
               `Assertion failed: Expected falsy value, got ${value}. ${message}`
@@ -180,16 +312,25 @@ class TestRunner {
           }
         },
 
-        throws: async (fn, expectedError, message = '') => {
+        throws: async (
+          fn: () => Promise<void> | void,
+          expectedError?: string,
+          message = ''
+        ) => {
           try {
             await fn();
             throw new Error(
               `Expected function to throw, but it didn't. ${message}`
             );
           } catch (error) {
-            if (expectedError && !error.message.includes(expectedError)) {
+            if (
+              expectedError &&
+              !(error as Error).message.includes(expectedError)
+            ) {
               throw new Error(
-                `Expected error containing "${expectedError}", got "${error.message}". ${message}`
+                `Expected error containing "${expectedError}", got "${
+                  (error as Error).message
+                }". ${message}`
               );
             }
           }
@@ -197,16 +338,16 @@ class TestRunner {
       },
 
       mock: {
-        fn: () => {
-          const calls = [];
-          const mockFn = (...args) => {
+        fn: (): MockFunction => {
+          const calls: unknown[][] = [];
+          const mockFn = (...args: unknown[]) => {
             calls.push(args);
             return mockFn.returnValue;
           };
           mockFn.calls = calls;
           mockFn.returnValue = undefined;
-          mockFn.returns = (value) => {
-            mockFn.returnValue = value;
+          mockFn.returns = (value: unknown) => {
+            (mockFn as any).returnValue = value;
             return mockFn;
           };
           return mockFn;
@@ -214,20 +355,15 @@ class TestRunner {
       },
 
       utils: {
-        sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+        sleep: (ms: number) =>
+          new Promise<void>((resolve) => setTimeout(resolve, ms)),
         createTempFile: async (content = '') => {
-          const tempPath = path.join(
-            require('os').tmpdir(),
-            `aia-test-${Date.now()}.tmp`
-          );
+          const tempPath = path.join(os.tmpdir(), `aia-test-${Date.now()}.tmp`);
           await fs.writeFile(tempPath, content);
           return tempPath;
         },
         createTempDir: async () => {
-          const tempDir = path.join(
-            require('os').tmpdir(),
-            `aia-test-dir-${Date.now()}`
-          );
+          const tempDir = path.join(os.tmpdir(), `aia-test-dir-${Date.now()}`);
           await fs.ensureDir(tempDir);
           return tempDir;
         },
@@ -236,7 +372,10 @@ class TestRunner {
   }
 
   // Integration test utilities
-  async runIntegrationTest(testName, testFn) {
+  async runIntegrationTest(
+    testName: string,
+    testFn: (env: IntegrationTestEnvironment) => Promise<void>
+  ): Promise<{ name: string; status: string; error?: string }> {
     console.log(chalk.blue(`\n🔌 Running integration test: ${testName}`));
 
     const testEnv = await this.setupIntegrationEnvironment();
@@ -246,19 +385,22 @@ class TestRunner {
       console.log(chalk.green(`  ✅ ${testName} passed`));
       return { name: testName, status: 'passed' };
     } catch (error) {
-      console.log(chalk.red(`  ❌ ${testName} failed: ${error.message}`));
-      return { name: testName, status: 'failed', error: error.message };
+      console.log(
+        chalk.red(`  ❌ ${testName} failed: ${(error as Error).message}`)
+      );
+      return {
+        name: testName,
+        status: 'failed',
+        error: (error as Error).message,
+      };
     } finally {
       await this.cleanupIntegrationEnvironment(testEnv);
     }
   }
 
   // Set up integration test environment
-  async setupIntegrationEnvironment() {
-    const tempDir = path.join(
-      require('os').tmpdir(),
-      `aia-integration-${Date.now()}`
-    );
+  private async setupIntegrationEnvironment(): Promise<IntegrationTestEnvironment> {
+    const tempDir = path.join(os.tmpdir(), `aia-integration-${Date.now()}`);
     await fs.ensureDir(tempDir);
 
     const configDir = path.join(tempDir, '.aia');
@@ -299,14 +441,20 @@ class TestRunner {
   }
 
   // Clean up integration environment
-  async cleanupIntegrationEnvironment(env) {
+  private async cleanupIntegrationEnvironment(
+    env: IntegrationTestEnvironment
+  ): Promise<void> {
     if (env.cleanup) {
       await env.cleanup();
     }
   }
 
   // Performance testing
-  async runPerformanceTest(testName, testFn, options = {}) {
+  async runPerformanceTest(
+    testName: string,
+    testFn: () => Promise<void>,
+    options: PerformanceTestOptions = {}
+  ): Promise<PerformanceTestResult> {
     const {
       iterations = 100,
       warmupIterations = 10,
@@ -320,7 +468,7 @@ class TestRunner {
       await testFn();
     }
 
-    const results = [];
+    const results: number[] = [];
     const startTime = Date.now();
 
     for (let i = 0; i < iterations; i++) {
@@ -351,7 +499,7 @@ class TestRunner {
     return { name: testName, stats, results };
   }
 
-  calculatePerformanceStats(results) {
+  private calculatePerformanceStats(results: number[]): PerformanceStats {
     const sorted = [...results].sort((a, b) => a - b);
 
     return {
@@ -365,7 +513,10 @@ class TestRunner {
   }
 
   // Run tests in parallel
-  async runTestsInParallel(suiteNames, config) {
+  private async runTestsInParallel(
+    suiteNames: string[],
+    config: TestConfig
+  ): Promise<void> {
     const chunks = this.chunkArray(suiteNames, config.maxConcurrency);
 
     for (const chunk of chunks) {
@@ -377,21 +528,24 @@ class TestRunner {
   }
 
   // Run tests sequentially
-  async runTestsSequentially(suiteNames, config) {
+  private async runTestsSequentially(
+    suiteNames: string[],
+    config: TestConfig
+  ): Promise<void> {
     for (const suiteName of suiteNames) {
       await this.runSuite(suiteName, config);
     }
   }
 
-  chunkArray(array, chunkSize) {
-    const chunks = [];
+  private chunkArray<T>(array: T[], chunkSize: number): T[][] {
+    const chunks: T[][] = [];
     for (let i = 0; i < array.length; i += chunkSize) {
       chunks.push(array.slice(i, i + chunkSize));
     }
     return chunks;
   }
 
-  printSummary(duration) {
+  private printSummary(duration: number): void {
     const totalTests = this.results.reduce(
       (sum, suite) => sum + suite.tests.length,
       0
@@ -431,7 +585,7 @@ class TestRunner {
     }
   }
 
-  getTestResults() {
+  getTestResults(): TestResults {
     return {
       suites: this.results,
       summary: {
@@ -444,4 +598,4 @@ class TestRunner {
   }
 }
 
-module.exports = TestRunner;
+export default TestRunner;

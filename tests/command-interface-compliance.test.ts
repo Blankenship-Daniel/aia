@@ -1,9 +1,9 @@
 import { ICommand } from '../src/interfaces/ICommand.js';
 import { AskCommand } from '../src/commands/AskCommand.js';
 import { ExecuteCommand } from '../src/commands/ExecuteCommand.js';
-import { AgentCommand } from '../src/commands/AgentCommand.js';
+import { AgentCommandRefactored } from '../src/commands/AgentCommandRefactored.js';
 import { ConfigCommand } from '../src/commands/ConfigCommand.js';
-import { CommandFactory } from '../src/commands/CommandFactory.js';
+import { CommandFactoryV2 } from '../src/commands/CommandFactoryV2.js';
 
 // Mock services for testing
 const mockAIService = {} as any;
@@ -11,6 +11,11 @@ const mockMemoryService = {} as any;
 const mockContextService = {} as any;
 const mockCommandService = {} as any;
 const mockConfigurationService = {} as any;
+
+// Mock services for AgentCommandRefactored
+const mockAgentExecutionEngine = {} as any;
+const mockAgentPresenter = {} as any;
+const mockResilienceService = {} as any;
 
 describe('Command Interface Compliance', () => {
   test('AskCommand implements ICommand interface', () => {
@@ -69,11 +74,12 @@ describe('Command Interface Compliance', () => {
     expect(emptyValidation.errors.length).toBeGreaterThan(0);
   });
 
-  test('AgentCommand implements ICommand interface', () => {
-    const command = new AgentCommand(
-      mockAIService,
+  test('AgentCommandRefactored implements ICommand interface', () => {
+    const command = new AgentCommandRefactored(
+      mockAgentExecutionEngine,
+      mockAgentPresenter,
+      mockResilienceService,
       mockContextService,
-      mockCommandService,
       mockMemoryService
     );
 
@@ -118,13 +124,16 @@ describe('Command Interface Compliance', () => {
     expect(validation.errors).toEqual([]);
   });
 
-  test('CommandFactory creates valid ICommand instances', () => {
-    const factory = new CommandFactory(
+  test('CommandFactoryV2 creates valid ICommand instances', () => {
+    const factory = new CommandFactoryV2(
       mockAIService,
       mockMemoryService,
       mockContextService,
       mockCommandService,
-      mockConfigurationService
+      mockConfigurationService,
+      mockAgentExecutionEngine,
+      mockAgentPresenter,
+      mockResilienceService
     );
 
     const commands = ['ask', 'exec', 'agent', 'config'];
@@ -157,10 +166,11 @@ describe('Command Interface Compliance', () => {
         mockContextService,
         mockMemoryService
       ),
-      new AgentCommand(
-        mockAIService,
+      new AgentCommandRefactored(
+        mockAgentExecutionEngine,
+        mockAgentPresenter,
+        mockResilienceService,
         mockContextService,
-        mockCommandService,
         mockMemoryService
       ),
       new ConfigCommand(mockConfigurationService),

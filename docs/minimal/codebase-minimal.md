@@ -1,25 +1,12 @@
-# Node.js Project Context
+# TypeScript Project Project Context
 
-A javascript project with 103 files using Service-Component Architecture architecture.
+**Language**: TypeScript
+**Architecture**: Service-Oriented Architecture
+**Files**: 158
+
+## Entry Points
+- main.js
 
 ## Key Files
-- main.js
-- README.md
-- package.json
-- examples/sample-plugin/README.md
-- src/services/CodeIndexService.js
-- tests/test-service-architecture.js
-- .github/copilot-instructions.md
-- docs/comprehensive/codebase-comprehensive.md
+- **main.js**: Application entry point
 
-## Main Classes
-- HelloPlugin
-- module
-- IndexWatcher
-- AgenticReasoningEngine
-- AgenticSearchEngine
-- CLIFormatter
-- CodebaseSummarizer
-- const
-- CommandHandler
-- CommandIntelligence

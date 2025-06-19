@@ -127,6 +127,9 @@ describe('SOLID CommandFactory Refactoring', () => {
       contextService: any;
       commandService: any;
       configurationService: any;
+      agentExecutionEngine: any;
+      agentPresenter: any;
+      resilienceService: any;
     };
     let factory: CommandFactoryV2;
 
@@ -137,6 +140,9 @@ describe('SOLID CommandFactory Refactoring', () => {
         contextService: {},
         commandService: {},
         configurationService: {},
+        agentExecutionEngine: {},
+        agentPresenter: {},
+        resilienceService: {},
       };
 
       factory = new CommandFactoryV2(
@@ -144,7 +150,10 @@ describe('SOLID CommandFactory Refactoring', () => {
         mockServices.memoryService,
         mockServices.contextService,
         mockServices.commandService,
-        mockServices.configurationService
+        mockServices.configurationService,
+        mockServices.agentExecutionEngine,
+        mockServices.agentPresenter,
+        mockServices.resilienceService
       );
     });
 

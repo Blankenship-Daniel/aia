@@ -5,7 +5,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { ServiceFactory } from '../container/ServiceFactory.js';
-import { CommandFactory } from '../commands/CommandFactory.js';
 import { CommandRegistry } from '../services/CommandRegistry.js';
 import { ICommand } from '../interfaces/ICommand.js';
 import { ICommandService } from '../interfaces/ICommandService.js';
@@ -92,22 +91,8 @@ export default class CLIApplication {
       console.log(chalk.blue('Setting up commands...'));
 
       // Create command factory with required services
-      const aiService = this.container!.resolve('ai') as any;
-      const memoryService = this.container!.resolve('memory') as any;
-      const contextService = this.container!.resolve('context') as any;
-      const commandService = this.container!.resolve('command') as any;
-      const configurationService = this.container!.resolve(
-        'configuration'
-      ) as any;
-
-      const commandFactory = new CommandFactory(
-        aiService,
-        memoryService,
-        contextService,
-        commandService,
-        configurationService
-      );
-
+      // Get the command factory from the DI container
+      const commandFactory = this.container!.resolve('commandFactory') as any;
       const commands = commandFactory.getAllCommands();
 
       // Register commands with the registry
@@ -178,6 +163,22 @@ export default class CLIApplication {
       case 'index':
         cmd.option('--force', 'Force re-indexing');
         cmd.option('--watch', 'Watch for file changes');
+        cmd.option(
+          '--directory <dir>',
+          'Directory to index (default: current)'
+        );
+        cmd.option('--json', 'Output results as JSON');
+        cmd.option('--detailed', 'Show detailed information');
+        cmd.option('--output <file>', 'Output file path for export');
+        cmd.option(
+          '--format <format>',
+          'Export format: markdown, json, or text'
+        );
+        cmd.option('--code', 'Include code snippets in export');
+        cmd.option(
+          '--type <type>',
+          'Type of prompt to generate (copilot-instructions, comprehensive, minimal, architecture, dev-focused, all)'
+        );
         break;
 
       case 'agent':

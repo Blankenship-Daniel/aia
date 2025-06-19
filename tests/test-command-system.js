@@ -56,7 +56,7 @@ async function testServiceIntegration() {
 async function testCommandCreation() {
   console.log('🧪 Testing Command Creation...');
 
-  const { CommandFactory } = require('../dist/commands/CommandFactory');
+  const { CommandFactoryV2 } = require('../dist/commands/CommandFactoryV2');
   const { ServiceFactory } = require('../dist/container/ServiceFactory');
 
   const container = ServiceFactory.createContainer();
@@ -69,7 +69,7 @@ async function testCommandCreation() {
     logger: console,
   };
 
-  const commands = CommandFactory.createCommands(services);
+  const commands = CommandFactoryV2.createCommands(services);
   console.log('✅ Commands created:', commands.length);
 
   commands.forEach((cmd) => {

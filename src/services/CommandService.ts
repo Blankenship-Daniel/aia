@@ -34,7 +34,6 @@ export class CommandService implements ICommandService {
     }
 
     this.initialized = true;
-    console.log('CommandService initialized');
   }
 
   /**

@@ -5,6 +5,9 @@ import { IMemoryService } from '../interfaces/IMemoryService';
 import { IContextService } from '../interfaces/IContextService';
 import { ICommandService } from '../interfaces/ICommandService';
 import { IConfigurationService } from '../interfaces/IConfigurationService';
+import { IAgentExecutionEngine } from '../interfaces/IAgentExecutionEngine';
+import { IAgentPresenter } from '../interfaces/IAgentPresenter';
+import { IResilienceService } from '../interfaces/IResilienceService';
 import { CommandRegistrar } from '../services/CommandRegistrar';
 
 // Command Imports
@@ -13,7 +16,7 @@ import { ExecuteCommand } from './ExecuteCommand';
 import { ContextCommand } from './ContextCommand';
 import { MemoryCommand } from './MemoryCommand';
 import { ConfigCommand } from './ConfigCommand';
-import { AgentCommand } from './AgentCommand';
+import { AgentCommandRefactored } from './AgentCommandRefactored';
 import { IndexCommand } from './IndexCommand';
 
 /**
@@ -47,7 +50,10 @@ export class CommandFactoryV2 {
     private readonly memoryService: IMemoryService,
     private readonly contextService: IContextService,
     private readonly commandService: ICommandService,
-    private readonly configurationService: IConfigurationService
+    private readonly configurationService: IConfigurationService,
+    private readonly agentExecutionEngine: IAgentExecutionEngine,
+    private readonly agentPresenter: IAgentPresenter,
+    private readonly resilienceService: IResilienceService
   ) {
     this.registrar = new CommandRegistrar();
     this.setupCoreCommands();
@@ -99,15 +105,16 @@ export class CommandFactoryV2 {
       () => new ConfigCommand(this.configurationService)
     );
 
-    // Agent Command - Agentic reasoning and workflows
+    // Agent Command - Agentic reasoning and workflows (SOLID-compliant refactored version)
     this.registrar.register(
       'agent',
       ['a', 'agentic'],
       () =>
-        new AgentCommand(
-          this.aiService,
+        new AgentCommandRefactored(
+          this.agentExecutionEngine,
+          this.agentPresenter,
+          this.resilienceService,
           this.contextService,
-          this.commandService,
           this.memoryService
         )
     );
@@ -188,12 +195,20 @@ export class CommandFactoryV2 {
     commandRegistry: any, // ICommandRegistry
     services: any
   ): number {
+    // Provide default mock implementations for new services if not provided
+    const agentExecutionEngine = services.agentExecutionEngine || {};
+    const agentPresenter = services.agentPresenter || {};
+    const resilienceService = services.resilienceService || {};
+
     const factory = new CommandFactoryV2(
       services.aiService,
       services.memoryService,
       services.contextService,
       services.commandService,
-      services.configurationService
+      services.configurationService,
+      agentExecutionEngine,
+      agentPresenter,
+      resilienceService
     );
 
     let registeredCount = 0;
@@ -215,12 +230,20 @@ export class CommandFactoryV2 {
    * Maintains backward compatibility with tests
    */
   public static createCommands(services: any): any[] {
+    // Provide default mock implementations for new services if not provided
+    const agentExecutionEngine = services.agentExecutionEngine || {};
+    const agentPresenter = services.agentPresenter || {};
+    const resilienceService = services.resilienceService || {};
+
     const factory = new CommandFactoryV2(
       services.aiService,
       services.memoryService,
       services.contextService,
       services.commandService,
-      services.configurationService
+      services.configurationService,
+      agentExecutionEngine,
+      agentPresenter,
+      resilienceService
     );
 
     const commands = [];

@@ -53,7 +53,6 @@ export class WorkflowService implements IWorkflowService {
     }
 
     this.initialized = true;
-    console.log('WorkflowService initialized');
   }
 
   /**

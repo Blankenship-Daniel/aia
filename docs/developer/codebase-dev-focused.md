@@ -1,33 +1,54 @@
 # Developer Reference
 
-## Quick Start
-Main entry points:
-- main.js
+## Quick Reference for TypeScript Project
 
-## Development Environment
-- Primary language: javascript
-- Total files: 103
-- Architecture: Service-Component Architecture
+## Development Setup
 
-## Key Functions
-- **main** - tests/test-js-to-ts-transition.js
-- **update** - src/CLIFormatter.js
-- **for** - src/container/DIContainer.js
-- **async** - src/TestRunner.js
-- **to** - src/commands/IndexCommand.js
-- **mockFn** - src/TestRunner.js
-- **getOutputDir** - src/commands/IndexCommand.js
-- **if** - src/container/DIContainer.js
-- **visit** - src/container/DIContainer.js
-- **patterns** - src/services/CodeIndexService.js
-- **naming** - src/services/CodeIndexService.js
-- **handlers** - src/services/CodeIndexService.js
-- **getters** - src/services/CodeIndexService.js
-- **setters** - src/services/CodeIndexService.js
-- **reference** - src/services/CodeIndexService.js
+```bash
+npm install
+npm test
+npm start
+```
 
-## Current Tasks (TODOs)
-- [ ] --verbose is already added as common option above (src/cli/CLIApplication.js:157)
-- [ ] Interfaces are now in TypeScript files and not needed for runtime (src/container/ServiceFactory.js:7)
-- [ ] Implement feature flags system (src/services/ConfigurationService.ts:350)
-- [ ] This is a simplified method. In a real-world scenario, (src/services/PluginService.ts:258)
+## Important Files for Development
+
+- **package.json**: Configuration/entry file
+- **README.md**: Configuration/entry file
+- **tsconfig.json**: Configuration/entry file
+- **jest.config.ts**: Configuration/entry file
+- **main.js**: Configuration/entry file
+
+## Entry Points
+
+- **main.js**: Application main file
+
+## Main Classes
+
+- **HelloPlugin** (examples/simple-plugin/index.js)
+- **module** (examples/simple-plugin/index.js)
+- **AgenticReasoningEngine** (src/AgenticReasoningEngine.ts)
+- **AgenticSearchEngine** (src/AgenticSearchEngine.ts)
+- **CLIFormatter** (src/CLIFormatter.ts)
+- **CodebaseSummarizer** (src/CodebaseSummarizer.ts)
+- **import** (src/CommandHandler.ts)
+- **CommandHandler** (src/CommandHandler.ts)
+- **CommandIntelligence** (src/CommandIntelligence.ts)
+- **ConfigurationManager** (src/ConfigurationManager.ts)
+
+## Testing
+
+Found 30 test files:
+
+- tests/AgenticReasoningEngine.test.ts
+- tests/CommandHandler.test.ts
+- tests/ErrorHandler.test.js
+- tests/Integration.test.js
+- tests/MemoryManager.test.js
+
+## Development Patterns
+
+- Follow existing code structure when adding new features
+- Check test files for usage examples
+- Use existing error handling patterns
+- Follow naming conventions from existing code
+

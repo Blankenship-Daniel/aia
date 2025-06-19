@@ -55,7 +55,6 @@ export class AIService implements IAIService {
     }
 
     this.initialized = true;
-    console.log('AIService initialized with real API clients');
   }
 
   /**

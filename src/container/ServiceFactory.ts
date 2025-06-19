@@ -317,6 +317,41 @@ export class ServiceFactory {
         dependencies: ['memoryPersistence'],
       }
     );
+
+    // Agent Execution Engine (depends on ai, context, command)
+    container.registerFactory(
+      'agentExecutionEngine',
+      (container) => {
+        const {
+          AgentExecutionEngine,
+        } = require('../../dist/services/AgentExecutionEngine');
+        const aiService = container.resolve('ai');
+        const contextService = container.resolve('context');
+        const commandService = container.resolve('command');
+        return new AgentExecutionEngine(
+          aiService,
+          contextService,
+          commandService
+        );
+      },
+      {
+        dependencies: ['ai', 'context', 'command'],
+      }
+    );
+
+    // Agent Presenter (no dependencies - UI service)
+    container.registerFactory('agentPresenter', (container) => {
+      const { AgentPresenter } = require('../../dist/services/AgentPresenter');
+      return new AgentPresenter();
+    });
+
+    // Resilience Service (no dependencies - utility service)
+    container.registerFactory('resilienceService', (container) => {
+      const {
+        ResilienceService,
+      } = require('../../dist/services/ResilienceService');
+      return new ResilienceService();
+    });
   }
 
   /**

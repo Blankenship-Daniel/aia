@@ -1173,9 +1173,10 @@ export class IndexCommand implements ICommand {
 
       let configManager: any;
       if (await fs.pathExists(localConfigFile)) {
-        configManager = new ConfigurationManager();
-        await configManager.setConfigDirectory(localConfigDir);
+        // Use local config directory if it exists
+        configManager = new ConfigurationManager(localConfigDir);
       } else {
+        // Use default config directory (user's home/.aia)
         configManager = new ConfigurationManager();
       }
 
@@ -1243,7 +1244,10 @@ export class IndexCommand implements ICommand {
             Boolean(options.code)
           );
           const outputDir = getOutputDir(promptType);
-          const filename = `codebase-${promptType}.md`;
+          const filename =
+            promptType === 'copilot-instructions'
+              ? 'copilot-instructions.md'
+              : `codebase-${promptType}.md`;
           const fullPath = path.join(outputDir, filename);
 
           await fs.ensureDir(outputDir);
@@ -1263,7 +1267,10 @@ export class IndexCommand implements ICommand {
           Boolean(options.code)
         );
         const outputDir = getOutputDir(type);
-        const filename = `codebase-${type}.md`;
+        const filename =
+          type === 'copilot-instructions'
+            ? 'copilot-instructions.md'
+            : `codebase-${type}.md`;
         const fullPath = path.join(outputDir, filename);
 
         await fs.ensureDir(outputDir);
@@ -1471,6 +1478,13 @@ export class IndexCommand implements ICommand {
           name: 'code',
           description: 'Include code snippets in export',
           type: 'boolean',
+          required: false,
+        },
+        {
+          name: 'type',
+          description:
+            'Type of prompt to generate (copilot-instructions, comprehensive, minimal, architecture, dev-focused, all)',
+          type: 'string',
           required: false,
         },
       ],

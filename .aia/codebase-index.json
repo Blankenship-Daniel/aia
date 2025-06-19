@@ -1,27 +1,27 @@
 {
   "metadata": {
-    "totalFiles": 146,
-    "totalClasses": 79,
-    "totalFunctions": 51,
+    "totalFiles": 158,
+    "totalClasses": 85,
+    "totalFunctions": 56,
     "totalTodos": 4,
     "languages": {
-      "json": 14,
-      "markdown": 22,
-      "javascript": 17,
-      "typescript": 93
+      "json": 13,
+      "markdown": 27,
+      "javascript": 18,
+      "typescript": 100
     },
     "largestFiles": [
       {
         "path": ".aia/codebase-index.json",
-        "size": 355968
+        "size": 431811
       },
       {
         "path": "package-lock.json",
         "size": 288363
       },
       {
-        "path": ".github/copilot-instructions.json",
-        "size": 70583
+        "path": "src/services/CodeIndexService.ts",
+        "size": 97900
       },
       {
         "path": "src/AgenticReasoningEngine.ts",
@@ -29,15 +29,7 @@
       },
       {
         "path": "src/commands/IndexCommand.ts",
-        "size": 49411
-      },
-      {
-        "path": "src/services/CodeIndexService.ts",
-        "size": 37646
-      },
-      {
-        "path": "src/commands/AgentCommand.ts",
-        "size": 31993
+        "size": 49917
       },
       {
         "path": "docs/SOLID-Review-Report.md",
@@ -50,24 +42,27 @@
       {
         "path": "src/ContextAnalyzer.ts",
         "size": 24677
-      }
-    ],
-    "mostImported": [
+      },
       {
-        "file": "src/CodebaseSummarizer.ts",
-        "count": 2
+        "path": "docs/SOLID-Implementation-Guide.md",
+        "size": 21806
+      },
+      {
+        "path": "docs/SOLID-Refactoring-Templates.md",
+        "size": 21260
       }
     ],
-    "indexedAt": "2025-06-19T16:14:25.670Z"
+    "mostImported": [],
+    "indexedAt": "2025-06-19T18:26:02.790Z"
   },
   "files": [
     [
       ".aia/codebase-index.json",
       {
         "path": ".aia/codebase-index.json",
-        "size": 355968,
-        "hash": "db8c8a6112a7540b",
-        "lastModified": "2025-06-19T09:04:47.350Z",
+        "size": 431811,
+        "hash": "dbe559741ac753bc",
+        "lastModified": "2025-06-19T18:23:54.333Z",
         "type": "config",
         "language": "json",
         "symbols": [
@@ -147,268 +142,6 @@
         "type": "config",
         "language": "json",
         "symbols": [],
-        "imports": [],
-        "exports": [],
-        "dependencies": []
-      }
-    ],
-    [
-      ".github/copilot-instructions.json",
-      {
-        "path": ".github/copilot-instructions.json",
-        "size": 70583,
-        "hash": "c3bf2e3d3e61f8bf",
-        "lastModified": "2025-06-19T04:17:14.679Z",
-        "type": "config",
-        "language": "json",
-        "symbols": [
-          {
-            "type": "function",
-            "name": "role"
-          },
-          {
-            "type": "function",
-            "name": "context"
-          },
-          {
-            "type": "function",
-            "name": "guidelines"
-          },
-          {
-            "type": "function",
-            "name": "keyComponents"
-          },
-          {
-            "type": "function",
-            "name": "entryPoints"
-          },
-          {
-            "type": "function",
-            "name": "architecture"
-          },
-          {
-            "type": "function",
-            "name": "commonPatterns"
-          },
-          {
-            "type": "function",
-            "name": "apiPatterns"
-          },
-          {
-            "type": "function",
-            "name": "configPatterns"
-          },
-          {
-            "type": "function",
-            "name": "testPatterns"
-          },
-          {
-            "type": "function",
-            "name": "workflows"
-          },
-          {
-            "type": "function",
-            "name": "codebaseStructure"
-          },
-          {
-            "type": "function",
-            "name": "crossReferences"
-          },
-          {
-            "type": "function",
-            "name": "fileRelationships"
-          },
-          {
-            "type": "function",
-            "name": "contextualHints"
-          },
-          {
-            "type": "function",
-            "name": "recentChanges"
-          },
-          {
-            "type": "function",
-            "name": "hotspots"
-          }
-        ],
-        "imports": [],
-        "exports": [],
-        "dependencies": []
-      }
-    ],
-    [
-      ".github/copilot-instructions.md",
-      {
-        "path": ".github/copilot-instructions.md",
-        "size": 8106,
-        "hash": "6f4b8b5af82cfa7c",
-        "lastModified": "2025-06-19T04:17:14.667Z",
-        "type": "documentation",
-        "language": "markdown",
-        "symbols": [
-          {
-            "type": "header",
-            "level": 1,
-            "text": "Copilot Instructions for AI Assistant",
-            "name": "Copilot Instructions for AI Assistant"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Role",
-            "name": "Role"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Project Context",
-            "name": "Project Context"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Guidelines",
-            "name": "Guidelines"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Key Components",
-            "name": "Key Components"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Entry Points",
-            "name": "Entry Points"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Common Patterns",
-            "name": "Common Patterns"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "imports",
-            "name": "imports"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "inheritance",
-            "name": "inheritance"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "functions",
-            "name": "functions"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Codebase Structure",
-            "name": "Codebase Structure"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "API Patterns",
-            "name": "API Patterns"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Service Layer",
-            "name": "Service Layer"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Command Pattern",
-            "name": "Command Pattern"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Factory Pattern",
-            "name": "Factory Pattern"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Configuration Patterns",
-            "name": "Configuration Patterns"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Testing Patterns",
-            "name": "Testing Patterns"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Common Workflows",
-            "name": "Common Workflows"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Development Setup",
-            "name": "Development Setup"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Build Process",
-            "name": "Build Process"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Testing Workflow",
-            "name": "Testing Workflow"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Contextual Hints",
-            "name": "Contextual Hints"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "File Cross-References",
-            "name": "File Cross-References"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Code Hotspots",
-            "name": "Code Hotspots"
-          },
-          {
-            "type": "codeblock",
-            "language": "javascript",
-            "content": "src/interfaces/IAIService.ts\nsrc/interfaces/ICommandService.ts\nsrc/interfaces/IConfigurationService.ts",
-            "name": "CodeBlock_javascript"
-          },
-          {
-            "type": "codeblock",
-            "language": "javascript",
-            "content": "src/CommandHandler.js\nsrc/ErrorHandler.js\nsrc/commands/AgentCommand.ts",
-            "name": "CodeBlock_javascript"
-          },
-          {
-            "type": "codeblock",
-            "language": "javascript",
-            "content": "src/commands/CommandFactory.ts\nsrc/container/ServiceFactory.js",
-            "name": "CodeBlock_javascript"
-          }
-        ],
         "imports": [],
         "exports": [],
         "dependencies": []
@@ -659,6 +392,178 @@
       }
     ],
     [
+      ".github/prompts/copilot-instructions-enhancement.prompt.md",
+      {
+        "path": ".github/prompts/copilot-instructions-enhancement.prompt.md",
+        "size": 6480,
+        "hash": "9778b2b903c9620f",
+        "lastModified": "2025-06-19T17:00:26.965Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Prompt: Optimize Copilot Instructions for Enhanced AI Agent Context",
+            "name": "Prompt: Optimize Copilot Instructions for Enhanced AI Agent Context"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Objective",
+            "name": "Objective"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Background",
+            "name": "Background"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Task",
+            "name": "Task"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "1. Update CodeIndexService.generateCopilotInstructions()",
+            "name": "1. Update CodeIndexService.generateCopilotInstructions()"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "A. Enhanced Project Overview",
+            "name": "A. Enhanced Project Overview"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "B. Architecture Patterns Section",
+            "name": "B. Architecture Patterns Section"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "C. Directory Structure Map",
+            "name": "C. Directory Structure Map"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "D. Key Components & Relationships",
+            "name": "D. Key Components & Relationships"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "E. Code Navigation Guidelines",
+            "name": "E. Code Navigation Guidelines"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "F. Common Development Tasks",
+            "name": "F. Common Development Tasks"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "2. Enhance Index Utilization",
+            "name": "2. Enhance Index Utilization"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Using the Codebase Index",
+            "name": "Using the Codebase Index"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "3. Add Dynamic Content Generation",
+            "name": "3. Add Dynamic Content Generation"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "4. Include Quick Reference Sections",
+            "name": "4. Include Quick Reference Sections"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "5. Context-Aware Information",
+            "name": "5. Context-Aware Information"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Implementation Steps",
+            "name": "Implementation Steps"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Expected Outcome",
+            "name": "Expected Outcome"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Validation Criteria",
+            "name": "Validation Criteria"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Code Example",
+            "name": "Code Example"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Additional Considerations",
+            "name": "Additional Considerations"
+          },
+          {
+            "type": "codeblock",
+            "language": "markdown",
+            "content": "- **Project**: AIA CLI (AI Assistant Command Line Interface)\n- **Type**: TypeScript Node.js CLI Application\n- **Architecture**: Service-Oriented Architecture with Dependency Injection\n- **Purpose**: AI-powered development tool for code analysis, optimization, and assistance\n- **Scale**: [dynamic from index] files, classes, functions\n- **Test Coverage**: [dynamic] test files",
+            "name": "CodeBlock_markdown"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": "aia/\n├── src/\n│   ├── cli/              # CLI application layer\n│   ├── commands/         # Command implementations\n│   ├── container/        # Dependency injection system\n│   ├── interfaces/       # TypeScript interfaces\n│   ├── services/         # Core services\n│   └── utils/           # Utility functions",
+            "name": "CodeBlock_unknown"
+          },
+          {
+            "type": "codeblock",
+            "language": "markdown",
+            "content": "- **[`AIService`](src/services/AIService.ts)**: Manages AI model interactions\n  - Dependencies: ConfigurationService, ContextService\n  - Used by: AgentCommand, AskCommand",
+            "name": "CodeBlock_markdown"
+          },
+          {
+            "type": "codeblock",
+            "language": "markdown",
+            "content": "## Using the Codebase Index\n\nThe `.aia/codebase-index.json` file contains:\n- **metadata**: Project statistics, file counts, language distribution\n- **files**: Complete file listing with symbols, imports, exports\n- **classes**: All class definitions and their locations\n- **functions**: All function definitions\n- **todos**: Outstanding TODO items\n\nExample queries:\n- \"Find all classes that extend EventEmitter\"\n- \"Show all files importing chalk\"\n- \"List all test files for memory services\"",
+            "name": "CodeBlock_markdown"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "async generateCopilotInstructions(): Promise<string> {\n  const index = await this.loadCodebaseIndex();\n  const metadata = index.metadata;\n  \n  const sections = [\n    this.generateHeader(),\n    this.generateProjectOverview(metadata),\n    this.generateArchitectureSection(),\n    this.generateDirectoryStructure(),\n    this.generateKeyComponents(index),\n    this.generateNavigationGuide(),\n    this.generateCommonPatterns(index),\n    this.generateQuickReference(index),\n    this.generateDevelopmentWorkflow(),\n    this.generateTodos(index.todos)\n  ];\n  \n  return sections.join('\\n\\n');\n}",
+            "name": "CodeBlock_typescript"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
       ".github/prompts/js-to-ts.prompt.md",
       {
         "path": ".github/prompts/js-to-ts.prompt.md",
@@ -881,160 +786,6 @@
             "level": 2,
             "text": "Priority Order",
             "name": "Priority Order"
-          }
-        ],
-        "imports": [],
-        "exports": [],
-        "dependencies": []
-      }
-    ],
-    [
-      "GRACEFUL-ERROR-HANDLING-SUMMARY.md",
-      {
-        "path": "GRACEFUL-ERROR-HANDLING-SUMMARY.md",
-        "size": 5449,
-        "hash": "b4a4e0e9f617eadf",
-        "lastModified": "2025-06-19T16:12:59.592Z",
-        "type": "documentation",
-        "language": "markdown",
-        "symbols": [
-          {
-            "type": "header",
-            "level": 1,
-            "text": "Graceful Error Handling Implementation Summary",
-            "name": "Graceful Error Handling Implementation Summary"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "🎯 Task Completion Status: SUCCESSFUL",
-            "name": "🎯 Task Completion Status: SUCCESSFUL"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "✅ Implemented Features",
-            "name": "✅ Implemented Features"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "1. Circuit Breaker Pattern",
-            "name": "1. Circuit Breaker Pattern"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "2. Retry with Exponential Backoff",
-            "name": "2. Retry with Exponential Backoff"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "3. Alternative Command Suggestions",
-            "name": "3. Alternative Command Suggestions"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "4. Graceful Degradation",
-            "name": "4. Graceful Degradation"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "5. Enhanced Error Reporting",
-            "name": "5. Enhanced Error Reporting"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "6. Command Validation",
-            "name": "6. Command Validation"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "🧪 Testing Results",
-            "name": "🧪 Testing Results"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Direct Logic Testing (✅ PASSED)",
-            "name": "Direct Logic Testing (✅ PASSED)"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "CLI Integration Testing (⚠️ PARTIAL)",
-            "name": "CLI Integration Testing (⚠️ PARTIAL)"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "📊 Feature Coverage",
-            "name": "📊 Feature Coverage"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "🔧 Key Implementation Details",
-            "name": "🔧 Key Implementation Details"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Error Handling Pipeline",
-            "name": "Error Handling Pipeline"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Enhanced AgenticReasoningEngine Methods",
-            "name": "Enhanced AgenticReasoningEngine Methods"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Enhanced AgentCommand Integration",
-            "name": "Enhanced AgentCommand Integration"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "🎉 Success Metrics",
-            "name": "🎉 Success Metrics"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "🔍 Verification Evidence",
-            "name": "🔍 Verification Evidence"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "🚀 Task Achievement",
-            "name": "🚀 Task Achievement"
-          },
-          {
-            "type": "codeblock",
-            "language": "unknown",
-            "content": "📊 Test Results:\n- Circuit Breaker: ✅ Commands blocked after 3 failures\n- Alternative Suggestions: ✅ Intelligent alternatives provided\n- Retry Mechanism: ✅ Exponential backoff working\n- Graceful Degradation: ✅ Non-critical failures handled gracefully\n- Error Reporting: ✅ Comprehensive summaries generated\n- Command Validation: ✅ Dangerous commands detected",
-            "name": "CodeBlock_unknown"
-          },
-          {
-            "type": "codeblock",
-            "language": "typescript",
-            "content": "1. Command Validation → Block dangerous commands\n2. Circuit Breaker Check → Skip repeatedly failing commands\n3. Retry with Backoff → Attempt failed commands with delays\n4. Alternative Suggestion → Provide intelligent fallbacks\n5. Graceful Degradation → Continue workflow for non-critical failures\n6. Comprehensive Reporting → Detailed execution summaries",
-            "name": "CodeBlock_typescript"
-          },
-          {
-            "type": "codeblock",
-            "language": "unknown",
-            "content": "🎯 Circuit Breaker: Commands blocked after 3 failures\n🔄 Retry Mechanism: Exponential backoff (1s, 2s delays)\n💡 Alternative Suggestions: Intelligent fallbacks provided\n⚠️ Graceful Degradation: Non-critical failures continue workflow\n📊 Enhanced Reporting: Detailed execution summaries\n✅ Success Rate: 29% with graceful handling of all failures",
-            "name": "CodeBlock_unknown"
           }
         ],
         "imports": [],
@@ -1767,278 +1518,188 @@
       }
     ],
     [
-      "Week-3-Implementation-Report.md",
+      "docs/AgentCommand-Refactoring-Complete.md",
       {
-        "path": "Week-3-Implementation-Report.md",
-        "size": 11511,
-        "hash": "4914c43f9987336d",
-        "lastModified": "2025-06-19T08:55:31.072Z",
+        "path": "docs/AgentCommand-Refactoring-Complete.md",
+        "size": 7134,
+        "hash": "99d74e7fa007b606",
+        "lastModified": "2025-06-19T18:11:23.197Z",
         "type": "documentation",
         "language": "markdown",
         "symbols": [
           {
             "type": "header",
             "level": 1,
-            "text": "Week 3 Implementation Report",
-            "name": "Week 3 Implementation Report"
+            "text": "AgentCommand Refactoring Complete - SOLID Compliance Achievement",
+            "name": "AgentCommand Refactoring Complete - SOLID Compliance Achievement"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "SOLID Refactoring Initiative: Advanced Performance Optimizations",
-            "name": "SOLID Refactoring Initiative: Advanced Performance Optimizations"
+            "text": "Summary",
+            "name": "Summary"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "What Was Accomplished",
+            "name": "What Was Accomplished"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Executive Summary",
-            "name": "Executive Summary"
+            "text": "1. Service Decomposition ✅",
+            "name": "1. Service Decomposition ✅"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Implementation Overview",
-            "name": "Implementation Overview"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "🚀 Core Achievements",
-            "name": "🚀 Core Achievements"
+            "text": "2. New Interfaces Created ✅",
+            "name": "2. New Interfaces Created ✅"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Technical Implementation Details",
-            "name": "Technical Implementation Details"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "Caching Service Architecture",
-            "name": "Caching Service Architecture"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "Performance Monitoring System",
-            "name": "Performance Monitoring System"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "Enhanced Memory Services",
-            "name": "Enhanced Memory Services"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "Decorator Framework",
-            "name": "Decorator Framework"
+            "text": "3. Service Implementations ✅",
+            "name": "3. Service Implementations ✅"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Service Registration & Integration",
-            "name": "Service Registration & Integration"
+            "text": "4. Dependency Injection Integration ✅",
+            "name": "4. Dependency Injection Integration ✅"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Testing & Validation",
-            "name": "Testing & Validation"
+            "text": "5. Test Coverage ✅",
+            "name": "5. Test Coverage ✅"
           },
           {
             "type": "header",
-            "level": 4,
-            "text": "Comprehensive Test Suite",
-            "name": "Comprehensive Test Suite"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "Performance Benchmarks",
-            "name": "Performance Benchmarks"
+            "level": 2,
+            "text": "Architecture Improvements",
+            "name": "Architecture Improvements"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "SOLID Principles Compliance",
-            "name": "SOLID Principles Compliance"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "Single Responsibility Principle (SRP) ✅",
-            "name": "Single Responsibility Principle (SRP) ✅"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "Open/Closed Principle (OCP) ✅",
-            "name": "Open/Closed Principle (OCP) ✅"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "Liskov Substitution Principle (LSP) ✅",
-            "name": "Liskov Substitution Principle (LSP) ✅"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "Interface Segregation Principle (ISP) ✅",
-            "name": "Interface Segregation Principle (ISP) ✅"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "Dependency Inversion Principle (DIP) ✅",
-            "name": "Dependency Inversion Principle (DIP) ✅"
+            "text": "SOLID Compliance Enhancement",
+            "name": "SOLID Compliance Enhancement"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Performance Improvements",
-            "name": "Performance Improvements"
+            "text": "Code Quality Metrics",
+            "name": "Code Quality Metrics"
           },
           {
             "type": "header",
-            "level": 4,
-            "text": "Before vs After Comparison",
-            "name": "Before vs After Comparison"
+            "level": 2,
+            "text": "Benefits Achieved",
+            "name": "Benefits Achieved"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Integration with Existing Architecture",
-            "name": "Integration with Existing Architecture"
+            "text": "1. Maintainability ⬆️",
+            "name": "1. Maintainability ⬆️"
           },
           {
             "type": "header",
-            "level": 4,
-            "text": "Backward Compatibility ✅",
-            "name": "Backward Compatibility ✅"
+            "level": 3,
+            "text": "2. Testability ⬆️",
+            "name": "2. Testability ⬆️"
           },
           {
             "type": "header",
-            "level": 4,
+            "level": 3,
+            "text": "3. Extensibility ⬆️",
+            "name": "3. Extensibility ⬆️"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "4. Reusability ⬆️",
+            "name": "4. Reusability ⬆️"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Implementation Details",
+            "name": "Implementation Details"
+          },
+          {
+            "type": "header",
+            "level": 3,
             "text": "Service Dependencies",
             "name": "Service Dependencies"
           },
           {
             "type": "header",
-            "level": 4,
-            "text": "Error Handling",
-            "name": "Error Handling"
+            "level": 3,
+            "text": "Execution Flow",
+            "name": "Execution Flow"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Documentation & Type Safety",
-            "name": "Documentation & Type Safety"
+            "text": "Error Handling Strategy",
+            "name": "Error Handling Strategy"
           },
           {
             "type": "header",
-            "level": 4,
-            "text": "TypeScript Integration",
-            "name": "TypeScript Integration"
+            "level": 2,
+            "text": "Testing Results",
+            "name": "Testing Results"
           },
           {
             "type": "header",
-            "level": 4,
-            "text": "Interface Exports",
-            "name": "Interface Exports"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Future Enhancements Ready",
-            "name": "Future Enhancements Ready"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "Prepared for Week 4+",
-            "name": "Prepared for Week 4+"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "Scalability Considerations",
-            "name": "Scalability Considerations"
+            "level": 2,
+            "text": "Next Steps",
+            "name": "Next Steps"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Risk Mitigation & Production Readiness",
-            "name": "Risk Mitigation & Production Readiness"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "Memory Management",
-            "name": "Memory Management"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "Performance Impact",
-            "name": "Performance Impact"
-          },
-          {
-            "type": "header",
-            "level": 4,
-            "text": "Error Handling",
-            "name": "Error Handling"
+            "text": "Integration with Existing System",
+            "name": "Integration with Existing System"
           },
           {
             "type": "header",
             "level": 3,
+            "text": "Additional Enhancements",
+            "name": "Additional Enhancements"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Documentation Updates",
+            "name": "Documentation Updates"
+          },
+          {
+            "type": "header",
+            "level": 2,
             "text": "Conclusion",
             "name": "Conclusion"
           },
           {
             "type": "codeblock",
             "language": "typescript",
-            "content": "interface ICachingService {\n  // Core operations\n  set<T>(key: string, value: T, options?: CacheOptions): Promise<void>;\n  get<T>(key: string): Promise<T | null>;\n  has(key: string): Promise<boolean>;\n  delete(key: string): Promise<boolean>;\n\n  // Advanced operations\n  mget<T>(keys: string[]): Promise<(T | null)[]>;\n  mset<T>(\n    entries: Array<{ key: string; value: T; options?: CacheOptions }>\n  ): Promise<void>;\n  deletePattern(pattern: string): Promise<number>;\n  warm<T>(\n    key: string,\n    loader: () => Promise<T>,\n    options?: CacheOptions\n  ): Promise<T>;\n\n  // Management\n  getStatistics(): Promise<CacheStatistics>;\n  cleanup(): Promise<number>;\n}",
-            "name": "CodeBlock_typescript"
-          },
-          {
-            "type": "codeblock",
-            "language": "typescript",
-            "content": "interface IPerformanceMonitor {\n  recordMethodExecution(\n    className: string,\n    methodName: string,\n    executionTime: number,\n    success: boolean,\n    error?: Error\n  ): Promise<void>;\n  getMethodMetrics(\n    className: string,\n    methodName: string\n  ): Promise<MethodMetrics | null>;\n  getSystemMetrics(): Promise<SystemMetrics>;\n  getPerformanceReport(): Promise<PerformanceReport>;\n  setThresholds(thresholds: PerformanceThresholds): Promise<void>;\n  getAlerts(): Promise<PerformanceAlert[]>;\n}",
-            "name": "CodeBlock_typescript"
-          },
-          {
-            "type": "codeblock",
-            "language": "typescript",
-            "content": "// Search with caching\nasync searchConversations(query: string, limit: number = 10): Promise<MemoryEntry[]> {\n  const cacheKey = `conversation:search:${query}:${limit}`;\n\n  // Try cache first\n  if (this.cacheService) {\n    const cached = await this.cacheService.get<MemoryEntry[]>(cacheKey);\n    if (cached) return cached;\n  }\n\n  // Execute search and cache results\n  const results = await this.performSearch(query, limit);\n  if (this.cacheService) {\n    await this.cacheService.set(cacheKey, results, { ttl: 300000 });\n  }\n\n  return results;\n}",
-            "name": "CodeBlock_typescript"
-          },
-          {
-            "type": "codeblock",
-            "language": "typescript",
-            "content": "// Caching Service\ncontainer.registerFactory('caching', () => {\n  return new MemoryCacheService({\n    defaultTTL: 300000, // 5 minutes\n    maxItems: 1000,\n    cleanupIntervalMs: 60000, // 1 minute\n  });\n});\n\n// Performance Monitor Service\ncontainer.registerFactory('performanceMonitor', () => {\n  return new PerformanceMonitorService();\n});\n\n// Enhanced Conversation Memory (with caching)\ncontainer.registerFactory('conversationMemory', (container) => {\n  const memoryPersistence = container.resolve('memoryPersistence');\n  const caching = container.resolve('caching');\n  return new ConversationMemoryService(memoryPersistence, caching);\n});",
+            "content": "// Agent Execution Engine (depends on ai, context, command)\ncontainer.registerFactory('agentExecutionEngine', ...);\n\n// Agent Presenter (no dependencies - UI service)\ncontainer.registerFactory('agentPresenter', ...);\n\n// Resilience Service (no dependencies - utility service)\ncontainer.registerFactory('resilienceService', ...);",
             "name": "CodeBlock_typescript"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "Test Results: 15/15 tests passing\nExecution Time: ~1.3 seconds\nMemory Usage: Optimized with automatic cleanup\nCache Hit Rates: >90% for repeated operations",
+            "content": "AgentCommandRefactored\n├── IAgentExecutionEngine (execution logic)\n├── IAgentPresenter (UI concerns)\n├── IResilienceService (resilience patterns)\n├── IContextService (environment data)\n└── IMemoryService (history and storage)",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
-            "language": "unknown",
-            "content": "ConversationMemoryService → MemoryPersistenceService + CachingService\nCommandMemoryService → MemoryPersistenceService (unchanged)\nPerformanceMonitorService → Independent service\nCachingService → Independent service",
-            "name": "CodeBlock_unknown"
-          },
-          {
-            "type": "codeblock",
-            "language": "typescript",
-            "content": "export * from '../interfaces/ICachingService';\nexport * from '../interfaces/IPerformanceMonitor';",
-            "name": "CodeBlock_typescript"
+            "language": "bash",
+            "content": "✅ AgentCommandRefactored - SOLID Compliance\n  ✅ Single Responsibility Principle (SRP)\n    ✅ should delegate planning to execution engine\n    ✅ should implement all ICommand methods\n    ✅ should validate arguments correctly\n    ✅ should handle empty goal gracefully\n\nTest Suites: 1 passed, 1 total\nTests: 4 passed, 4 total",
+            "name": "CodeBlock_bash"
           }
         ],
         "imports": [],
@@ -2047,50 +1708,155 @@
       }
     ],
     [
-      "comprehensive-error-handling-test.js",
+      "docs/GRACEFUL-ERROR-HANDLING-SUMMARY.md",
       {
-        "path": "comprehensive-error-handling-test.js",
-        "size": 8456,
-        "hash": "a1a3288d1968cb83",
-        "lastModified": "2025-06-19T16:07:54.733Z",
-        "type": "source",
-        "language": "javascript",
+        "path": "docs/GRACEFUL-ERROR-HANDLING-SUMMARY.md",
+        "size": 5449,
+        "hash": "b4a4e0e9f617eadf",
+        "lastModified": "2025-06-19T16:12:59.592Z",
+        "type": "documentation",
+        "language": "markdown",
         "symbols": [
           {
-            "type": "class",
-            "name": "GracefulErrorHandlingTester"
-          }
-        ],
-        "imports": [
-          "child_process",
-          "path"
-        ],
-        "exports": [],
-        "dependencies": []
-      }
-    ],
-    [
-      "direct-error-handling-test.js",
-      {
-        "path": "direct-error-handling-test.js",
-        "size": 8365,
-        "hash": "8a4064c918327e29",
-        "lastModified": "2025-06-19T16:11:54.218Z",
-        "type": "source",
-        "language": "javascript",
-        "symbols": [
-          {
-            "type": "class",
-            "name": "MockAgenticReasoningEngine"
+            "type": "header",
+            "level": 1,
+            "text": "Graceful Error Handling Implementation Summary",
+            "name": "Graceful Error Handling Implementation Summary"
           },
           {
-            "type": "function",
-            "name": "runErrorHandlingDemo"
+            "type": "header",
+            "level": 2,
+            "text": "🎯 Task Completion Status: SUCCESSFUL",
+            "name": "🎯 Task Completion Status: SUCCESSFUL"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "✅ Implemented Features",
+            "name": "✅ Implemented Features"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "1. Circuit Breaker Pattern",
+            "name": "1. Circuit Breaker Pattern"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "2. Retry with Exponential Backoff",
+            "name": "2. Retry with Exponential Backoff"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "3. Alternative Command Suggestions",
+            "name": "3. Alternative Command Suggestions"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "4. Graceful Degradation",
+            "name": "4. Graceful Degradation"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "5. Enhanced Error Reporting",
+            "name": "5. Enhanced Error Reporting"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "6. Command Validation",
+            "name": "6. Command Validation"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🧪 Testing Results",
+            "name": "🧪 Testing Results"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Direct Logic Testing (✅ PASSED)",
+            "name": "Direct Logic Testing (✅ PASSED)"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "CLI Integration Testing (⚠️ PARTIAL)",
+            "name": "CLI Integration Testing (⚠️ PARTIAL)"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "📊 Feature Coverage",
+            "name": "📊 Feature Coverage"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🔧 Key Implementation Details",
+            "name": "🔧 Key Implementation Details"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Error Handling Pipeline",
+            "name": "Error Handling Pipeline"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Enhanced AgenticReasoningEngine Methods",
+            "name": "Enhanced AgenticReasoningEngine Methods"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Enhanced AgentCommand Integration",
+            "name": "Enhanced AgentCommand Integration"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🎉 Success Metrics",
+            "name": "🎉 Success Metrics"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🔍 Verification Evidence",
+            "name": "🔍 Verification Evidence"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🚀 Task Achievement",
+            "name": "🚀 Task Achievement"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": "📊 Test Results:\n- Circuit Breaker: ✅ Commands blocked after 3 failures\n- Alternative Suggestions: ✅ Intelligent alternatives provided\n- Retry Mechanism: ✅ Exponential backoff working\n- Graceful Degradation: ✅ Non-critical failures handled gracefully\n- Error Reporting: ✅ Comprehensive summaries generated\n- Command Validation: ✅ Dangerous commands detected",
+            "name": "CodeBlock_unknown"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "1. Command Validation → Block dangerous commands\n2. Circuit Breaker Check → Skip repeatedly failing commands\n3. Retry with Backoff → Attempt failed commands with delays\n4. Alternative Suggestion → Provide intelligent fallbacks\n5. Graceful Degradation → Continue workflow for non-critical failures\n6. Comprehensive Reporting → Detailed execution summaries",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": "🎯 Circuit Breaker: Commands blocked after 3 failures\n🔄 Retry Mechanism: Exponential backoff (1s, 2s delays)\n💡 Alternative Suggestions: Intelligent fallbacks provided\n⚠️ Graceful Degradation: Non-critical failures continue workflow\n📊 Enhanced Reporting: Detailed execution summaries\n✅ Success Rate: 29% with graceful handling of all failures",
+            "name": "CodeBlock_unknown"
           }
         ],
-        "imports": [
-          "path"
-        ],
+        "imports": [],
         "exports": [],
         "dependencies": []
       }
@@ -2944,6 +2710,502 @@
       }
     ],
     [
+      "docs/SOLID-Code-Review-Report.md",
+      {
+        "path": "docs/SOLID-Code-Review-Report.md",
+        "size": 18975,
+        "hash": "14bd3055cc245c12",
+        "lastModified": "2025-06-19T18:11:23.199Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "SOLID Principles Code Review Report - AIA Codebase",
+            "name": "SOLID Principles Code Review Report - AIA Codebase"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Executive Summary",
+            "name": "Executive Summary"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "**🎉 SOLID Compliance Achievement**",
+            "name": "**🎉 SOLID Compliance Achievement**"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Architecture Strengths",
+            "name": "Architecture Strengths"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "1. Exceptional Dependency Injection Implementation",
+            "name": "1. Exceptional Dependency Injection Implementation"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "2. Well-Designed Interface Segregation",
+            "name": "2. Well-Designed Interface Segregation"
+          },
+          {
+            "type": "header",
+            "level": 1,
+            "text": "SOLID Principle Analysis",
+            "name": "SOLID Principle Analysis"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "1. Single Responsibility Principle (SRP) - Score: 85/100",
+            "name": "1. Single Responsibility Principle (SRP) - Score: 85/100"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "✅ **Compliant Services**",
+            "name": "✅ **Compliant Services**"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "ConfigurationService",
+            "name": "ConfigurationService"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "AIService",
+            "name": "AIService"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "✅ **SRP Compliance Achieved**",
+            "name": "✅ **SRP Compliance Achieved**"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "1. AgentCommand - Successfully Refactored ✅",
+            "name": "1. AgentCommand - Successfully Refactored ✅"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "2. MemoryService - Legacy Monolithic Design ✅",
+            "name": "2. MemoryService - Legacy Monolithic Design ✅"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "2. Open/Closed Principle (OCP) - Score: 80/100",
+            "name": "2. Open/Closed Principle (OCP) - Score: 80/100"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "✅ **Excellent OCP Implementation**",
+            "name": "✅ **Excellent OCP Implementation**"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Command System Extensibility",
+            "name": "Command System Extensibility"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Plugin System",
+            "name": "Plugin System"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "⚠️ **OCP Improvement Opportunities**",
+            "name": "⚠️ **OCP Improvement Opportunities**"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "1. CommandFactory Switch Statement",
+            "name": "1. CommandFactory Switch Statement"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "2. AI Model Selection",
+            "name": "2. AI Model Selection"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "3. Liskov Substitution Principle (LSP) - Score: 75/100",
+            "name": "3. Liskov Substitution Principle (LSP) - Score: 75/100"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "✅ **LSP Compliant Implementations**",
+            "name": "✅ **LSP Compliant Implementations**"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Service Implementations",
+            "name": "Service Implementations"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "⚠️ **LSP Violations**",
+            "name": "⚠️ **LSP Violations**"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "1. Command Interface Implementation Inconsistencies",
+            "name": "1. Command Interface Implementation Inconsistencies"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "2. Error Handling Inconsistencies",
+            "name": "2. Error Handling Inconsistencies"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "4. Interface Segregation Principle (ISP) - Score: 90/100",
+            "name": "4. Interface Segregation Principle (ISP) - Score: 90/100"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "✅ **Excellent ISP Implementation**",
+            "name": "✅ **Excellent ISP Implementation**"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Focused Memory Interfaces",
+            "name": "Focused Memory Interfaces"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Command Interface Design",
+            "name": "Command Interface Design"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "⚠️ **Minor ISP Concerns**",
+            "name": "⚠️ **Minor ISP Concerns**"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "CommandDefinition Complexity",
+            "name": "CommandDefinition Complexity"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "5. Dependency Inversion Principle (DIP) - Score: 95/100",
+            "name": "5. Dependency Inversion Principle (DIP) - Score: 95/100"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "✅ **Outstanding DIP Implementation**",
+            "name": "✅ **Outstanding DIP Implementation**"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "High-Level Services Depend on Abstractions",
+            "name": "High-Level Services Depend on Abstractions"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Proper Abstraction Layers",
+            "name": "Proper Abstraction Layers"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "✅ **No DIP Violations Identified**",
+            "name": "✅ **No DIP Violations Identified**"
+          },
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Critical Issues & Recommendations",
+            "name": "Critical Issues & Recommendations"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "High Priority Issues",
+            "name": "High Priority Issues"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "1. AgentCommand Refactoring (SRP Violation)",
+            "name": "1. AgentCommand Refactoring (SRP Violation)"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "2. Command Registration Enhancement (OCP)",
+            "name": "2. Command Registration Enhancement (OCP)"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Medium Priority Issues",
+            "name": "Medium Priority Issues"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "3. Model Selection Strategy Pattern (OCP)",
+            "name": "3. Model Selection Strategy Pattern (OCP)"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "4. Error Handling Standardization (LSP)",
+            "name": "4. Error Handling Standardization (LSP)"
+          },
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Architecture Assessment",
+            "name": "Architecture Assessment"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Strengths",
+            "name": "Strengths"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Areas for Enhancement",
+            "name": "Areas for Enhancement"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Architecture Evolution Recommendations",
+            "name": "Architecture Evolution Recommendations"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Phase 1: Immediate Improvements (1-2 weeks)",
+            "name": "Phase 1: Immediate Improvements (1-2 weeks)"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Phase 2: Strategic Enhancements (3-4 weeks)",
+            "name": "Phase 2: Strategic Enhancements (3-4 weeks)"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Phase 3: Advanced Optimizations (1-2 months)",
+            "name": "Phase 3: Advanced Optimizations (1-2 months)"
+          },
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Success Metrics",
+            "name": "Success Metrics"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Current SOLID Compliance",
+            "name": "Current SOLID Compliance"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Target SOLID Compliance (Post-Refactoring)",
+            "name": "Target SOLID Compliance (Post-Refactoring)"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Validation Criteria",
+            "name": "Validation Criteria"
+          },
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Conclusion",
+            "name": "Conclusion"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// DIContainer.ts - Sophisticated service resolution\npublic resolve<T = unknown>(name: string): T {\n  const config = this.services.get(name);\n  if (!config) {\n    throw new Error(`Service '${name}' is not registered`);\n  }\n  // Proper singleton management and dependency resolution\n}\n\n// ServiceFactory.ts - Clean service composition\ncontainer.registerFactory('conversationMemory', (container) => {\n  const memoryPersistence = container.resolve('memoryPersistence');\n  const caching = container.resolve('caching');\n  return new ConversationMemoryService(memoryPersistence, caching);\n}, {\n  dependencies: ['memoryPersistence', 'caching'],\n});",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// IMemoryPersistence.ts - Focused on storage operations only\nexport interface IMemoryPersistence {\n  load(): Promise<MemoryData>;\n  save(data: MemoryData): Promise<void>;\n  backup(): Promise<string>;\n}\n\n// IConversationMemory.ts - Focused on conversation operations only\nexport interface IConversationMemory {\n  addConversation(entry: MemoryEntry): Promise<void>;\n  searchConversations(query: string): Promise<SearchResult[]>;\n  getRecentConversations(limit?: number): Promise<MemoryEntry[]>;\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "export class ConfigurationService implements IConfigurationService {\n  // SINGLE RESPONSIBILITY: Configuration management only\n  async loadConfiguration(): Promise<AIAConfig>;\n  async saveConfiguration(config: AIAConfig): Promise<void>;\n  getConfiguration(): AIAConfig;\n  // ... other config-related methods\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "export class AIService implements IAIService {\n  // SINGLE RESPONSIBILITY: AI model interactions only\n  async queryAI(prompt: string, context: ContextInfo): Promise<Response>;\n  selectModel(prompt: string, context: ContextInfo): AIModel;\n  // ... other AI-related methods\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "export class AgentCommand implements ICommand {\n  // VIOLATION: Multiple responsibilities (1200+ lines)\n  - Command execution logic\n  - Circuit breaker pattern implementation\n  - Timeout management\n  - User interface (spinner, colors)\n  - Error handling and recovery\n  - Execution step management\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// ✅ Focused responsibilities - single purpose each\nexport class AgentCommandRefactored implements ICommand {\n  /* Command orchestration and user interaction only */\n}\n\nexport class AgentExecutionEngine implements IAgentExecutionEngine {\n  /* Planning and execution logic only */\n}\n\nexport class AgentPresenter implements IAgentPresenter {\n  /* UI presentation concerns only */\n}\n\nexport class ResilienceService implements IResilienceService {\n  /* Timeout, circuit breaking, retry patterns only */\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// CommandFactory.ts - Extensible without modification\nexport class CommandFactory {\n  public createCommand(name: string): ICommand | null {\n    switch (name.toLowerCase()) {\n      case 'ask':\n        return new AskCommand(/* dependencies */);\n      case 'agent':\n        return new AgentCommand(/* dependencies */);\n      // New commands can be added here without modifying existing code\n    }\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Plugin registration is extensible\ncontainer.registerFactory('pluginService', (container) => {\n  const pluginService = new PluginService();\n  // Plugins can be loaded without core modifications\n  return pluginService;\n});",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Improved OCP compliance\nclass CommandRegistry {\n  private commands = new Map<string, () => ICommand>();\n\n  register(name: string, factory: () => ICommand): void {\n    this.commands.set(name, factory);\n  }\n\n  create(name: string): ICommand | null {\n    const factory = this.commands.get(name);\n    return factory ? factory() : null;\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "selectModel(prompt: string, context: ContextInfo): AIModel {\n  // Hardcoded selection logic\n  if (prompt.includes('code')) return 'claude-3-sonnet';\n  return 'gpt-4';\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "interface IModelSelector {\n  canHandle(prompt: string, context: ContextInfo): boolean;\n  selectModel(): AIModel;\n}\n\nclass CodeModelSelector implements IModelSelector {\n  /* ... */\n}\nclass GeneralModelSelector implements IModelSelector {\n  /* ... */\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// ConversationMemoryService correctly implements IConversationMemory\nclass ConversationMemoryService implements IConversationMemory {\n  async addConversation(entry: MemoryEntry): Promise<void> {\n    // Proper implementation - no contract violations\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// IndexCommand.ts - Potential LSP violation\nexport class IndexCommand implements ICommand {\n  async execute(context, args, options): Promise<CommandResult> {\n    // This command doesn't use the memory service like others\n    // Different execution patterns than other commands\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Small, focused interfaces\ninterface IMemoryPersistence {\n  /* only persistence methods */\n}\ninterface IConversationMemory {\n  /* only conversation methods */\n}\ninterface ICommandMemory {\n  /* only command history methods */\n}\ninterface IMemoryStatistics {\n  /* only statistics methods */\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// ICommand.ts - Clean, focused interface\nexport interface ICommand {\n  execute(context, args, options): Promise<CommandResult>;\n  getDefinition(): CommandDefinition;\n  getName(): string;\n  getAliases(): string[];\n  // No unused methods forced on implementations\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "export interface CommandDefinition {\n  name: string;\n  description: string;\n  usage?: string;        // Not all commands need usage\n  examples?: string[];   // Not all commands need examples\n  aliases?: string[];    // Not all commands need aliases\n  options?: Array<...>;  // Complex option definitions\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "interface CoreCommandDefinition {\n  name: string;\n  description: string;\n}\n\ninterface ExtendedCommandDefinition extends CoreCommandDefinition {\n  usage?: string;\n  examples?: string[];\n  aliases?: string[];\n  options?: Array<...>;\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// AIService.ts - Depends on interfaces, not implementations\nexport class AIService implements IAIService {\n  constructor(\n    private configService: IConfigurationService, // Interface\n    private conversationMemory: IConversationMemory // Interface\n  ) {}\n}\n\n// AgentCommand.ts - All dependencies are interfaces\nexport class AgentCommand implements ICommand {\n  constructor(\n    private aiService: IAIService, // Interface\n    private contextService: IContextService, // Interface\n    private commandService: ICommandService, // Interface\n    private memoryService: IMemoryService // Interface\n  ) {}\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// ServiceFactory.ts - Abstracts implementation details\ncontainer.registerFactory('aiService', (container) => {\n  const configService = container.resolve('configuration'); // Abstract\n  const conversationMemory = container.resolve('conversationMemory'); // Abstract\n  return new AIService(configService, conversationMemory);\n});",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Refactored architecture\nclass AgentCommand implements ICommand {\n  constructor(\n    private executionEngine: IAgentExecutionEngine,\n    private presenter: IAgentPresenter,\n    private resilience: IResilienceService\n  ) {}\n\n  async execute(context, args, options): Promise<CommandResult> {\n    const presentation = this.presenter.startExecution();\n    try {\n      return await this.resilience.executeWithFallback(() =>\n        this.executionEngine.execute(context, args, options)\n      );\n    } finally {\n      presentation.complete();\n    }\n  }\n}\n\ninterface IAgentExecutionEngine {\n  execute(context, args, options): Promise<CommandResult>;\n}\n\ninterface IAgentPresenter {\n  startExecution(): { complete(): void };\n  showProgress(step: string): void;\n}\n\ninterface IResilienceService {\n  executeWithFallback<T>(operation: () => Promise<T>): Promise<T>;\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Enhanced command registration\nclass AutoDiscoveryCommandRegistry implements ICommandRegistry {\n  private commandFactories = new Map<string, CommandFactory>();\n\n  discoverCommands(): void {\n    // Auto-discover command classes\n    // Register without modifying existing code\n  }\n\n  registerCommand(name: string, factory: CommandFactory): void {\n    this.commandFactories.set(name, factory);\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "interface IModelSelectionStrategy {\n  canHandle(prompt: string, context: ContextInfo): boolean;\n  selectModel(): AIModel;\n  priority: number;\n}\n\nclass ModelSelectionService {\n  private strategies: IModelSelectionStrategy[] = [];\n\n  addStrategy(strategy: IModelSelectionStrategy): void {\n    this.strategies.push(strategy);\n    this.strategies.sort((a, b) => b.priority - a.priority);\n  }\n\n  selectModel(prompt: string, context: ContextInfo): AIModel {\n    for (const strategy of this.strategies) {\n      if (strategy.canHandle(prompt, context)) {\n        return strategy.selectModel();\n      }\n    }\n    return this.getDefaultModel();\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "interface IErrorHandler {\n  handle(error: Error, context: ErrorContext): Promise<ErrorResult>;\n  canHandle(error: Error): boolean;\n}\n\nclass StandardizedErrorHandling {\n  private handlers: IErrorHandler[] = [];\n\n  async handleError(error: Error, context: ErrorContext): Promise<ErrorResult> {\n    const handler = this.handlers.find((h) => h.canHandle(error));\n    return handler\n      ? handler.handle(error, context)\n      : this.defaultHandler(error);\n  }\n}",
+            "name": "CodeBlock_typescript"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
       "docs/SOLID-Implementation-Guide.md",
       {
         "path": "docs/SOLID-Implementation-Guide.md",
@@ -3612,6 +3874,178 @@
       }
     ],
     [
+      "docs/SOLID-Refactoring-Implementation-Guide.md",
+      {
+        "path": "docs/SOLID-Refactoring-Implementation-Guide.md",
+        "size": 14450,
+        "hash": "eed2c0b604ecc8c4",
+        "lastModified": "2025-06-19T17:56:00.669Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "SOLID Refactoring Implementation Guide",
+            "name": "SOLID Refactoring Implementation Guide"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Quick Action Items",
+            "name": "Quick Action Items"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Immediate Priority (High Impact, Low Effort)",
+            "name": "Immediate Priority (High Impact, Low Effort)"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "1. AgentCommand Decomposition",
+            "name": "1. AgentCommand Decomposition"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "2. Command Registry Enhancement",
+            "name": "2. Command Registry Enhancement"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Medium Priority (Strategic Improvements)",
+            "name": "Medium Priority (Strategic Improvements)"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "3. Model Selection Strategy Pattern",
+            "name": "3. Model Selection Strategy Pattern"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "4. Error Handling Standardization",
+            "name": "4. Error Handling Standardization"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "ServiceFactory Registration Updates",
+            "name": "ServiceFactory Registration Updates"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Testing Requirements",
+            "name": "Testing Requirements"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Implementation Timeline",
+            "name": "Implementation Timeline"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Week 1",
+            "name": "Week 1"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Week 2",
+            "name": "Week 2"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Week 3",
+            "name": "Week 3"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Success Criteria",
+            "name": "Success Criteria"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Risk Mitigation",
+            "name": "Risk Mitigation"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// src/services/AgentExecutionEngine.ts\nexport interface IAgentExecutionEngine {\n  planExecution(goal: string, context: ContextInfo): Promise<ExecutionPlan>;\n  executeStep(step: ExecutionStep): Promise<StepResult>;\n  validateResult(result: StepResult): Promise<ValidationResult>;\n}\n\n// src/services/AgentPresenter.ts\nexport interface IAgentPresenter {\n  showPlanningPhase(): void;\n  showExecutionStep(step: ExecutionStep): void;\n  showResult(result: CommandResult): void;\n}\n\n// src/services/ResilienceService.ts\nexport interface IResilienceService {\n  executeWithCircuitBreaker<T>(operation: () => Promise<T>): Promise<T>;\n  executeWithTimeout<T>(\n    operation: () => Promise<T>,\n    timeoutMs: number\n  ): Promise<T>;\n  executeWithRetry<T>(\n    operation: () => Promise<T>,\n    maxRetries: number\n  ): Promise<T>;\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "export class AgentCommand implements ICommand {\n  constructor(\n    private executionEngine: IAgentExecutionEngine,\n    private presenter: IAgentPresenter,\n    private resilienceService: IResilienceService\n  ) {}\n\n  async execute(\n    context: Record<string, unknown>,\n    args: string[],\n    options: CommandOptions\n  ): Promise<CommandResult> {\n    const goal = args.join(' ');\n\n    try {\n      this.presenter.showPlanningPhase();\n      const plan = await this.executionEngine.planExecution(goal, context);\n\n      const results = [];\n      for (const step of plan.steps) {\n        this.presenter.showExecutionStep(step);\n        const result = await this.resilienceService.executeWithCircuitBreaker(\n          () => this.executionEngine.executeStep(step)\n        );\n        results.push(result);\n      }\n\n      const finalResult = { success: true, results };\n      this.presenter.showResult(finalResult);\n      return finalResult;\n    } catch (error) {\n      const errorResult = { success: false, error: error.message };\n      this.presenter.showResult(errorResult);\n      return errorResult;\n    }\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// src/services/CommandRegistry.ts\nexport interface ICommandRegistry {\n  register(definition: CommandRegistration): void;\n  resolve(name: string): ICommand | null;\n  getAll(): Map<string, ICommand>;\n  getAliases(): Map<string, string>;\n}\n\nexport interface CommandRegistration {\n  name: string;\n  aliases: string[];\n  factory: CommandFactory;\n  dependencies: string[];\n}\n\nexport type CommandFactory = (container: DIContainer) => ICommand;\n\nexport class CommandRegistry implements ICommandRegistry {\n  private registrations = new Map<string, CommandRegistration>();\n  private aliasMap = new Map<string, string>();\n\n  register(registration: CommandRegistration): void {\n    this.registrations.set(registration.name, registration);\n\n    // Register aliases\n    for (const alias of registration.aliases) {\n      this.aliasMap.set(alias, registration.name);\n    }\n  }\n\n  resolve(name: string): ICommand | null {\n    // Check if it's an alias\n    const actualName = this.aliasMap.get(name) || name;\n    const registration = this.registrations.get(actualName);\n\n    if (!registration) {\n      return null;\n    }\n\n    // Use factory to create command instance\n    return registration.factory(this.container);\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// src/commands/CommandFactory.ts - Refactored\nexport class CommandFactory {\n  static registerCommands(\n    registry: ICommandRegistry,\n    container: DIContainer\n  ): void {\n    // Ask Command\n    registry.register({\n      name: 'ask',\n      aliases: ['q', 'query'],\n      factory: (container) =>\n        new AskCommand(\n          container.resolve('aiService'),\n          container.resolve('contextService'),\n          container.resolve('memoryService')\n        ),\n      dependencies: ['aiService', 'contextService', 'memoryService'],\n    });\n\n    // Agent Command (with new architecture)\n    registry.register({\n      name: 'agent',\n      aliases: ['a', 'agentic'],\n      factory: (container) =>\n        new AgentCommand(\n          container.resolve('agentExecutionEngine'),\n          container.resolve('agentPresenter'),\n          container.resolve('resilienceService')\n        ),\n      dependencies: [\n        'agentExecutionEngine',\n        'agentPresenter',\n        'resilienceService',\n      ],\n    });\n\n    // Other commands...\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// src/services/ModelSelectionService.ts\nexport interface IModelSelectionStrategy {\n  canHandle(prompt: string, context: ContextInfo): boolean;\n  selectModel(prompt: string, context: ContextInfo): AIModel;\n  getPriority(): number;\n}\n\nexport class CodeModelSelectionStrategy implements IModelSelectionStrategy {\n  canHandle(prompt: string, context: ContextInfo): boolean {\n    return (\n      prompt.includes('code') ||\n      prompt.includes('programming') ||\n      context.projectType !== 'unknown'\n    );\n  }\n\n  selectModel(prompt: string, context: ContextInfo): AIModel {\n    return 'claude-3-sonnet'; // Best for code\n  }\n\n  getPriority(): number {\n    return 100; // High priority for code tasks\n  }\n}\n\nexport class GeneralModelSelectionStrategy implements IModelSelectionStrategy {\n  canHandle(prompt: string, context: ContextInfo): boolean {\n    return true; // Fallback for all prompts\n  }\n\n  selectModel(prompt: string, context: ContextInfo): AIModel {\n    return 'gpt-4'; // Good general model\n  }\n\n  getPriority(): number {\n    return 1; // Lowest priority (fallback)\n  }\n}\n\nexport class ModelSelectionService {\n  private strategies: IModelSelectionStrategy[] = [];\n\n  addStrategy(strategy: IModelSelectionStrategy): void {\n    this.strategies.push(strategy);\n    this.strategies.sort((a, b) => b.getPriority() - a.getPriority());\n  }\n\n  selectModel(prompt: string, context: ContextInfo): AIModel {\n    for (const strategy of this.strategies) {\n      if (strategy.canHandle(prompt, context)) {\n        return strategy.selectModel(prompt, context);\n      }\n    }\n    throw new Error('No model selection strategy available');\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// src/services/AIService.ts - Updated\nexport class AIService implements IAIService {\n  constructor(\n    private configService: IConfigurationService,\n    private conversationMemory: IConversationMemory,\n    private modelSelectionService: ModelSelectionService // New dependency\n  ) {}\n\n  private selectModel(prompt: string, context: ContextInfo): AIModel {\n    return this.modelSelectionService.selectModel(prompt, context);\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// src/services/ErrorHandlingService.ts\nexport interface IErrorHandler {\n  canHandle(error: Error): boolean;\n  handle(error: Error, context: ErrorContext): Promise<ErrorResult>;\n  getPriority(): number;\n}\n\nexport interface ErrorContext {\n  service: string;\n  method: string;\n  parameters: Record<string, unknown>;\n  timestamp: Date;\n}\n\nexport interface ErrorResult {\n  handled: boolean;\n  recovery?: () => Promise<unknown>;\n  userMessage?: string;\n  shouldRetry?: boolean;\n}\n\nexport class NetworkErrorHandler implements IErrorHandler {\n  canHandle(error: Error): boolean {\n    return (\n      error.name === 'NetworkError' ||\n      error.message.includes('ECONNREFUSED') ||\n      error.message.includes('timeout')\n    );\n  }\n\n  async handle(error: Error, context: ErrorContext): Promise<ErrorResult> {\n    return {\n      handled: true,\n      shouldRetry: true,\n      userMessage: 'Network connection issue. Will retry automatically.',\n      recovery: async () => {\n        // Wait and potentially switch to fallback endpoint\n        await new Promise((resolve) => setTimeout(resolve, 2000));\n      },\n    };\n  }\n\n  getPriority(): number {\n    return 100;\n  }\n}\n\nexport class ErrorHandlingService {\n  private handlers: IErrorHandler[] = [];\n\n  addHandler(handler: IErrorHandler): void {\n    this.handlers.push(handler);\n    this.handlers.sort((a, b) => b.getPriority() - a.getPriority());\n  }\n\n  async handleError(error: Error, context: ErrorContext): Promise<ErrorResult> {\n    for (const handler of this.handlers) {\n      if (handler.canHandle(error)) {\n        return await handler.handle(error, context);\n      }\n    }\n\n    // Default handling\n    return {\n      handled: false,\n      userMessage: `An unexpected error occurred: ${error.message}`,\n    };\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Pattern for all services\nexport class ExampleService {\n  constructor(\n    private errorHandler: ErrorHandlingService\n  ) // ... other dependencies\n  {}\n\n  async performOperation(params: unknown): Promise<Result> {\n    try {\n      return await this.doOperation(params);\n    } catch (error) {\n      const result = await this.errorHandler.handleError(error, {\n        service: 'ExampleService',\n        method: 'performOperation',\n        parameters: { params },\n        timestamp: new Date(),\n      });\n\n      if (result.recovery) {\n        await result.recovery();\n        return await this.doOperation(params); // Retry\n      }\n\n      throw error; // Re-throw if not handled\n    }\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Add to registerCoreServices method\nstatic registerCoreServices(container: DIContainer): void {\n  // ... existing registrations ...\n\n  // Agent Execution Engine\n  container.registerFactory('agentExecutionEngine', (container) => {\n    const { AgentExecutionEngine } = require('../../dist/services/AgentExecutionEngine');\n    const aiService = container.resolve('aiService');\n    const contextService = container.resolve('contextService');\n    return new AgentExecutionEngine(aiService, contextService);\n  }, {\n    dependencies: ['aiService', 'contextService']\n  });\n\n  // Agent Presenter\n  container.registerFactory('agentPresenter', (container) => {\n    const { AgentPresenter } = require('../../dist/services/AgentPresenter');\n    return new AgentPresenter();\n  });\n\n  // Resilience Service\n  container.registerFactory('resilienceService', (container) => {\n    const { ResilienceService } = require('../../dist/services/ResilienceService');\n    return new ResilienceService();\n  });\n\n  // Model Selection Service\n  container.registerFactory('modelSelectionService', (container) => {\n    const { ModelSelectionService, CodeModelSelectionStrategy, GeneralModelSelectionStrategy } = require('../../dist/services/ModelSelectionService');\n    const service = new ModelSelectionService();\n    service.addStrategy(new CodeModelSelectionStrategy());\n    service.addStrategy(new GeneralModelSelectionStrategy());\n    return service;\n  });\n\n  // Error Handling Service\n  container.registerFactory('errorHandlingService', (container) => {\n    const { ErrorHandlingService, NetworkErrorHandler } = require('../../dist/services/ErrorHandlingService');\n    const service = new ErrorHandlingService();\n    service.addHandler(new NetworkErrorHandler());\n    return service;\n  });\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// tests/agent-command-refactored.test.ts\ndescribe('Refactored AgentCommand', () => {\n  it('should separate concerns properly', async () => {\n    const mockExecutionEngine = createMock<IAgentExecutionEngine>();\n    const mockPresenter = createMock<IAgentPresenter>();\n    const mockResilience = createMock<IResilienceService>();\n\n    const command = new AgentCommand(\n      mockExecutionEngine,\n      mockPresenter,\n      mockResilience\n    );\n\n    await command.execute({}, ['test goal'], {});\n\n    expect(mockExecutionEngine.planExecution).toHaveBeenCalled();\n    expect(mockPresenter.showPlanningPhase).toHaveBeenCalled();\n    expect(mockResilience.executeWithCircuitBreaker).toHaveBeenCalled();\n  });\n});\n\n// tests/command-registry.test.ts\ndescribe('CommandRegistry', () => {\n  it('should support extensible command registration', () => {\n    const registry = new CommandRegistry();\n\n    registry.register({\n      name: 'test',\n      aliases: ['t'],\n      factory: () => new TestCommand(),\n      dependencies: [],\n    });\n\n    expect(registry.resolve('test')).toBeInstanceOf(TestCommand);\n    expect(registry.resolve('t')).toBeInstanceOf(TestCommand);\n  });\n});",
+            "name": "CodeBlock_typescript"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
       "docs/SOLID-Refactoring-Templates.md",
       {
         "path": "docs/SOLID-Refactoring-Templates.md",
@@ -4236,6 +4670,172 @@
             "language": "typescript",
             "content": "// LOW-LEVEL: Process Execution\ninterface IProcessExecutor {\n  execute(\n    command: string,\n    args: string[],\n    options: ProcessOptions\n  ): Promise<ProcessResult>;\n}\n\nclass ProcessExecutor implements IProcessExecutor {\n  async execute(\n    command: string,\n    args: string[],\n    options: ProcessOptions\n  ): Promise<ProcessResult> {\n    return new Promise((resolve, reject) => {\n      const child = spawn(command, args, {\n        cwd: options.workingDirectory,\n        stdio: ['inherit', 'pipe', 'pipe'],\n      });\n\n      // Low-level process handling logic\n    });\n  }\n}\n\n// MID-LEVEL: Command Safety and Optimization\ninterface ICommandValidator {\n  validateSafety(command: string): Promise<SafetyResult>;\n}\n\ninterface ICommandOptimizer {\n  optimize(command: string, context: ContextInfo): Promise<OptimizationResult>;\n}\n\nclass CommandValidator implements ICommandValidator {\n  async validateSafety(command: string): Promise<SafetyResult> {\n    // Focused on validation logic only\n  }\n}\n\nclass CommandOptimizer implements ICommandOptimizer {\n  async optimize(\n    command: string,\n    context: ContextInfo\n  ): Promise<OptimizationResult> {\n    // Focused on optimization logic only\n  }\n}\n\n// HIGH-LEVEL: Business Logic Orchestration\nclass CommandServiceV2 implements ICommandService {\n  constructor(\n    private executor: IProcessExecutor,\n    private validator: ICommandValidator,\n    private optimizer: ICommandOptimizer,\n    private memory: IMemoryCommands\n  ) {}\n\n  async executeCommand(\n    command: string,\n    options: ExecutionOptions\n  ): Promise<ExecutionResult> {\n    // High-level orchestration only\n    const safety = await this.validator.validateSafety(command);\n    if (!safety.safe) {\n      throw new Error(`Unsafe command: ${safety.warnings.join(', ')}`);\n    }\n\n    const optimization = await this.optimizer.optimize(\n      command,\n      options.context\n    );\n    const finalCommand = optimization.applied\n      ? optimization.optimized\n      : command;\n\n    const result = await this.executor.execute(finalCommand, [], {\n      workingDirectory: options.workingDirectory,\n      timeout: options.timeout,\n    });\n\n    await this.memory.addCommand(\n      command,\n      options.workingDirectory,\n      result.exitCode,\n      result.duration\n    );\n\n    return {\n      stdout: result.stdout,\n      stderr: result.stderr,\n      exitCode: result.exitCode,\n      duration: result.duration,\n      optimized: optimization.applied,\n    };\n  }\n}",
             "name": "CodeBlock_typescript"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      "docs/TIMEOUT-HANDLING-SUMMARY.md",
+      {
+        "path": "docs/TIMEOUT-HANDLING-SUMMARY.md",
+        "size": 4870,
+        "hash": "35b55497641d014b",
+        "lastModified": "2025-06-19T16:23:09.599Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Timeout Handling Implementation Summary",
+            "name": "Timeout Handling Implementation Summary"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🎯 Task: Add timeout handling to CLI integration to prevent hanging on AI API calls",
+            "name": "🎯 Task: Add timeout handling to CLI integration to prevent hanging on AI API calls"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "✅ **Implementation Complete**",
+            "name": "✅ **Implementation Complete**"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🔧 **Timeout Configuration Added**",
+            "name": "🔧 **Timeout Configuration Added**"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🛠️ **Key Implementations**",
+            "name": "🛠️ **Key Implementations**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "1. **Timeout Utility Function**",
+            "name": "1. **Timeout Utility Function**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "2. **Main Execute Method Timeout**",
+            "name": "2. **Main Execute Method Timeout**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "3. **AI API Call Timeouts**",
+            "name": "3. **AI API Call Timeouts**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "4. **Step Execution Timeouts**",
+            "name": "4. **Step Execution Timeouts**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "5. **Command Execution Timeouts**",
+            "name": "5. **Command Execution Timeouts**"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🎯 **Graceful Timeout Handling Features**",
+            "name": "🎯 **Graceful Timeout Handling Features**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "**Smart Timeout Recovery**",
+            "name": "**Smart Timeout Recovery**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "**Enhanced Reporting**",
+            "name": "**Enhanced Reporting**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "**Critical Step Handling**",
+            "name": "**Critical Step Handling**"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🧪 **Testing Results**",
+            "name": "🧪 **Testing Results**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "**Timeout Test Results:**",
+            "name": "**Timeout Test Results:**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "**Features Verified:**",
+            "name": "**Features Verified:**"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "📊 **Implementation Coverage**",
+            "name": "📊 **Implementation Coverage**"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🎉 **Benefits Achieved**",
+            "name": "🎉 **Benefits Achieved**"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🔍 **Key Files Modified**",
+            "name": "🔍 **Key Files Modified**"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "✅ **Task Status: COMPLETED**",
+            "name": "✅ **Task Status: COMPLETED**"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Timeout configuration in AgentCommand.ts\nprivate readonly AI_CALL_TIMEOUT_MS = 30000; // 30 seconds for AI calls\nprivate readonly EXECUTION_TIMEOUT_MS = 300000; // 5 minutes for full execution\nprivate readonly STEP_TIMEOUT_MS = 60000; // 1 minute per step",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "private async withTimeout<T>(\n  promise: Promise<T>,\n  timeoutMs: number,\n  timeoutMessage: string = 'Operation timed out'\n): Promise<T>",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// For timeout errors, return graceful degradation result\nreturn {\n  stepId: step.id,\n  success: false,\n  output: '',\n  error: `Command timed out: ${execError.message}`,\n  duration: this.STEP_TIMEOUT_MS,\n  timestamp: new Date().toISOString(),\n  timeoutOccurred: true,\n  recoveryAttempted: true,\n  fallbackStrategy: 'Timeout - continuing with degraded functionality',\n  continueWorkflow: !this.isStepCritical(step),\n};",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": "✅ Test 1: Simple command - 15s timeout working\n✅ Test 2: Long command - 20s timeout with graceful handling\n✅ Timeout indicators detected in output\n✅ Commands terminated cleanly without hanging",
+            "name": "CodeBlock_unknown"
           }
         ],
         "imports": [],
@@ -5340,12 +5940,292 @@
       }
     ],
     [
+      "docs/Week-3-Implementation-Report.md",
+      {
+        "path": "docs/Week-3-Implementation-Report.md",
+        "size": 11511,
+        "hash": "4914c43f9987336d",
+        "lastModified": "2025-06-19T08:55:31.072Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Week 3 Implementation Report",
+            "name": "Week 3 Implementation Report"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "SOLID Refactoring Initiative: Advanced Performance Optimizations",
+            "name": "SOLID Refactoring Initiative: Advanced Performance Optimizations"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Executive Summary",
+            "name": "Executive Summary"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Implementation Overview",
+            "name": "Implementation Overview"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "🚀 Core Achievements",
+            "name": "🚀 Core Achievements"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Technical Implementation Details",
+            "name": "Technical Implementation Details"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Caching Service Architecture",
+            "name": "Caching Service Architecture"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Performance Monitoring System",
+            "name": "Performance Monitoring System"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Enhanced Memory Services",
+            "name": "Enhanced Memory Services"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Decorator Framework",
+            "name": "Decorator Framework"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Service Registration & Integration",
+            "name": "Service Registration & Integration"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Testing & Validation",
+            "name": "Testing & Validation"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Comprehensive Test Suite",
+            "name": "Comprehensive Test Suite"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Performance Benchmarks",
+            "name": "Performance Benchmarks"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "SOLID Principles Compliance",
+            "name": "SOLID Principles Compliance"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Single Responsibility Principle (SRP) ✅",
+            "name": "Single Responsibility Principle (SRP) ✅"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Open/Closed Principle (OCP) ✅",
+            "name": "Open/Closed Principle (OCP) ✅"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Liskov Substitution Principle (LSP) ✅",
+            "name": "Liskov Substitution Principle (LSP) ✅"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Interface Segregation Principle (ISP) ✅",
+            "name": "Interface Segregation Principle (ISP) ✅"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Dependency Inversion Principle (DIP) ✅",
+            "name": "Dependency Inversion Principle (DIP) ✅"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Performance Improvements",
+            "name": "Performance Improvements"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Before vs After Comparison",
+            "name": "Before vs After Comparison"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Integration with Existing Architecture",
+            "name": "Integration with Existing Architecture"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Backward Compatibility ✅",
+            "name": "Backward Compatibility ✅"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Service Dependencies",
+            "name": "Service Dependencies"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Error Handling",
+            "name": "Error Handling"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Documentation & Type Safety",
+            "name": "Documentation & Type Safety"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "TypeScript Integration",
+            "name": "TypeScript Integration"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Interface Exports",
+            "name": "Interface Exports"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Future Enhancements Ready",
+            "name": "Future Enhancements Ready"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Prepared for Week 4+",
+            "name": "Prepared for Week 4+"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Scalability Considerations",
+            "name": "Scalability Considerations"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Risk Mitigation & Production Readiness",
+            "name": "Risk Mitigation & Production Readiness"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Memory Management",
+            "name": "Memory Management"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Performance Impact",
+            "name": "Performance Impact"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Error Handling",
+            "name": "Error Handling"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Conclusion",
+            "name": "Conclusion"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "interface ICachingService {\n  // Core operations\n  set<T>(key: string, value: T, options?: CacheOptions): Promise<void>;\n  get<T>(key: string): Promise<T | null>;\n  has(key: string): Promise<boolean>;\n  delete(key: string): Promise<boolean>;\n\n  // Advanced operations\n  mget<T>(keys: string[]): Promise<(T | null)[]>;\n  mset<T>(\n    entries: Array<{ key: string; value: T; options?: CacheOptions }>\n  ): Promise<void>;\n  deletePattern(pattern: string): Promise<number>;\n  warm<T>(\n    key: string,\n    loader: () => Promise<T>,\n    options?: CacheOptions\n  ): Promise<T>;\n\n  // Management\n  getStatistics(): Promise<CacheStatistics>;\n  cleanup(): Promise<number>;\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "interface IPerformanceMonitor {\n  recordMethodExecution(\n    className: string,\n    methodName: string,\n    executionTime: number,\n    success: boolean,\n    error?: Error\n  ): Promise<void>;\n  getMethodMetrics(\n    className: string,\n    methodName: string\n  ): Promise<MethodMetrics | null>;\n  getSystemMetrics(): Promise<SystemMetrics>;\n  getPerformanceReport(): Promise<PerformanceReport>;\n  setThresholds(thresholds: PerformanceThresholds): Promise<void>;\n  getAlerts(): Promise<PerformanceAlert[]>;\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Search with caching\nasync searchConversations(query: string, limit: number = 10): Promise<MemoryEntry[]> {\n  const cacheKey = `conversation:search:${query}:${limit}`;\n\n  // Try cache first\n  if (this.cacheService) {\n    const cached = await this.cacheService.get<MemoryEntry[]>(cacheKey);\n    if (cached) return cached;\n  }\n\n  // Execute search and cache results\n  const results = await this.performSearch(query, limit);\n  if (this.cacheService) {\n    await this.cacheService.set(cacheKey, results, { ttl: 300000 });\n  }\n\n  return results;\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Caching Service\ncontainer.registerFactory('caching', () => {\n  return new MemoryCacheService({\n    defaultTTL: 300000, // 5 minutes\n    maxItems: 1000,\n    cleanupIntervalMs: 60000, // 1 minute\n  });\n});\n\n// Performance Monitor Service\ncontainer.registerFactory('performanceMonitor', () => {\n  return new PerformanceMonitorService();\n});\n\n// Enhanced Conversation Memory (with caching)\ncontainer.registerFactory('conversationMemory', (container) => {\n  const memoryPersistence = container.resolve('memoryPersistence');\n  const caching = container.resolve('caching');\n  return new ConversationMemoryService(memoryPersistence, caching);\n});",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": "Test Results: 15/15 tests passing\nExecution Time: ~1.3 seconds\nMemory Usage: Optimized with automatic cleanup\nCache Hit Rates: >90% for repeated operations",
+            "name": "CodeBlock_unknown"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": "ConversationMemoryService → MemoryPersistenceService + CachingService\nCommandMemoryService → MemoryPersistenceService (unchanged)\nPerformanceMonitorService → Independent service\nCachingService → Independent service",
+            "name": "CodeBlock_unknown"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "export * from '../interfaces/ICachingService';\nexport * from '../interfaces/IPerformanceMonitor';",
+            "name": "CodeBlock_typescript"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
       "docs/architecture/codebase-architecture.md",
       {
         "path": "docs/architecture/codebase-architecture.md",
-        "size": 692,
-        "hash": "25de87151c80667c",
-        "lastModified": "2025-06-19T04:17:14.649Z",
+        "size": 361,
+        "hash": "2eed9747b4613c3a",
+        "lastModified": "2025-06-19T17:41:39.315Z",
         "type": "documentation",
         "language": "markdown",
         "symbols": [
@@ -5358,8 +6238,8 @@
           {
             "type": "header",
             "level": 2,
-            "text": "System Design",
-            "name": "System Design"
+            "text": "Project Architecture: Service-Oriented Architecture",
+            "name": "Project Architecture: Service-Oriented Architecture"
           },
           {
             "type": "header",
@@ -5370,8 +6250,14 @@
           {
             "type": "header",
             "level": 2,
-            "text": "Module Dependencies",
-            "name": "Module Dependencies"
+            "text": "Component Architecture",
+            "name": "Component Architecture"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "main.js",
+            "name": "main.js"
           }
         ],
         "imports": [],
@@ -5383,9 +6269,9 @@
       "docs/comprehensive/codebase-comprehensive.md",
       {
         "path": "docs/comprehensive/codebase-comprehensive.md",
-        "size": 6608,
-        "hash": "72c6c806639b8187",
-        "lastModified": "2025-06-19T04:17:14.645Z",
+        "size": 510,
+        "hash": "9ba5421a7cda48c1",
+        "lastModified": "2025-06-19T17:41:39.309Z",
         "type": "documentation",
         "language": "markdown",
         "symbols": [
@@ -5404,110 +6290,204 @@
           {
             "type": "header",
             "level": 2,
-            "text": "Key Statistics",
-            "name": "Key Statistics"
+            "text": "Project Statistics",
+            "name": "Project Statistics"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Language Distribution",
-            "name": "Language Distribution"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Directory Structure",
-            "name": "Directory Structure"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Core Components",
-            "name": "Core Components"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Classes",
-            "name": "Classes"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Key Functions",
-            "name": "Key Functions"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Most Referenced Components",
-            "name": "Most Referenced Components"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Architecture Patterns",
-            "name": "Architecture Patterns"
+            "text": "Key Components",
+            "name": "Key Components"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Service Layer",
-            "name": "Service Layer"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Command Pattern",
-            "name": "Command Pattern"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Factory Pattern",
-            "name": "Factory Pattern"
+            "text": "main.js",
+            "name": "main.js"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Configuration Files",
-            "name": "Configuration Files"
+            "text": "Entry Points",
+            "name": "Entry Points"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Testing Framework",
-            "name": "Testing Framework"
+            "text": "External Dependencies",
+            "name": "External Dependencies"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      "docs/copilot-instructions-implementation-summary.md",
+      {
+        "path": "docs/copilot-instructions-implementation-summary.md",
+        "size": 6219,
+        "hash": "6ed3d508e2c1bafe",
+        "lastModified": "2025-06-19T17:10:34.962Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Copilot Instructions Optimization - Implementation Summary",
+            "name": "Copilot Instructions Optimization - Implementation Summary"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Outstanding Tasks",
-            "name": "Outstanding Tasks"
+            "text": "Completed Tasks",
+            "name": "Completed Tasks"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "✅ Enhanced CodeIndexService.formatInstructionsAsMarkdown()",
+            "name": "✅ Enhanced CodeIndexService.formatInstructionsAsMarkdown()"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Dynamic Content Integration",
+            "name": "Dynamic Content Integration"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Architecture Documentation",
+            "name": "Architecture Documentation"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Navigation and Reference",
+            "name": "Navigation and Reference"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Development Workflow",
+            "name": "Development Workflow"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Contextual Help",
+            "name": "Contextual Help"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "✅ Enhanced Helper Methods",
+            "name": "✅ Enhanced Helper Methods"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "✅ Filename Consistency",
+            "name": "✅ Filename Consistency"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Common Development Workflows",
-            "name": "Common Development Workflows"
+            "text": "Implementation Quality",
+            "name": "Implementation Quality"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "undefined",
-            "name": "undefined"
+            "text": "File Size and Content",
+            "name": "File Size and Content"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "undefined",
-            "name": "undefined"
+            "text": "Dynamic Content Examples",
+            "name": "Dynamic Content Examples"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "undefined",
-            "name": "undefined"
+            "text": "Code Quality",
+            "name": "Code Quality"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Verification",
+            "name": "Verification"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "✅ Build Process",
+            "name": "✅ Build Process"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "✅ CLI Command Execution",
+            "name": "✅ CLI Command Execution"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "✅ Output Validation",
+            "name": "✅ Output Validation"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Files Modified",
+            "name": "Files Modified"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Benefits for AI Agents",
+            "name": "Benefits for AI Agents"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Enhanced Context Awareness",
+            "name": "Enhanced Context Awareness"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Better Code Assistance",
+            "name": "Better Code Assistance"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Improved Development Workflow",
+            "name": "Improved Development Workflow"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Dynamic Content Updates",
+            "name": "Dynamic Content Updates"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Conclusion",
+            "name": "Conclusion"
+          },
+          {
+            "type": "codeblock",
+            "language": "bash",
+            "content": "node main.js index prompts --type copilot-instructions",
+            "name": "CodeBlock_bash"
           }
         ],
         "imports": [],
@@ -5519,9 +6499,9 @@
       "docs/developer/codebase-dev-focused.md",
       {
         "path": "docs/developer/codebase-dev-focused.md",
-        "size": 1267,
-        "hash": "4122ad52bc9792eb",
-        "lastModified": "2025-06-19T04:17:14.651Z",
+        "size": 1365,
+        "hash": "3a3f637f9fcfc2c9",
+        "lastModified": "2025-06-19T17:41:39.317Z",
         "type": "documentation",
         "language": "markdown",
         "symbols": [
@@ -5534,26 +6514,50 @@
           {
             "type": "header",
             "level": 2,
-            "text": "Quick Start",
-            "name": "Quick Start"
+            "text": "Quick Reference for TypeScript Project",
+            "name": "Quick Reference for TypeScript Project"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Development Environment",
-            "name": "Development Environment"
+            "text": "Development Setup",
+            "name": "Development Setup"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Key Functions",
-            "name": "Key Functions"
+            "text": "Important Files for Development",
+            "name": "Important Files for Development"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Current Tasks (TODOs)",
-            "name": "Current Tasks (TODOs)"
+            "text": "Entry Points",
+            "name": "Entry Points"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Main Classes",
+            "name": "Main Classes"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Testing",
+            "name": "Testing"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Development Patterns",
+            "name": "Development Patterns"
+          },
+          {
+            "type": "codeblock",
+            "language": "bash",
+            "content": "npm install\nnpm test\nnpm start",
+            "name": "CodeBlock_bash"
           }
         ],
         "imports": [],
@@ -5565,29 +6569,29 @@
       "docs/minimal/codebase-minimal.md",
       {
         "path": "docs/minimal/codebase-minimal.md",
-        "size": 538,
-        "hash": "1592f6fd5e48b58e",
-        "lastModified": "2025-06-19T04:17:14.647Z",
+        "size": 207,
+        "hash": "c9dba21a9205301b",
+        "lastModified": "2025-06-19T17:41:39.311Z",
         "type": "documentation",
         "language": "markdown",
         "symbols": [
           {
             "type": "header",
             "level": 1,
-            "text": "Node.js Project Context",
-            "name": "Node.js Project Context"
+            "text": "TypeScript Project Project Context",
+            "name": "TypeScript Project Project Context"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Entry Points",
+            "name": "Entry Points"
           },
           {
             "type": "header",
             "level": 2,
             "text": "Key Files",
             "name": "Key Files"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Main Classes",
-            "name": "Main Classes"
           }
         ],
         "imports": [],
@@ -6128,52 +7132,6 @@
           }
         ],
         "imports": [],
-        "exports": [],
-        "dependencies": []
-      }
-    ],
-    [
-      "quick-error-test-fixed.js",
-      {
-        "path": "quick-error-test-fixed.js",
-        "size": 7165,
-        "hash": "cf9c50316563dc1f",
-        "lastModified": "2025-06-19T16:09:07.689Z",
-        "type": "source",
-        "language": "javascript",
-        "symbols": [
-          {
-            "type": "class",
-            "name": "QuickErrorTest"
-          }
-        ],
-        "imports": [
-          "child_process",
-          "path"
-        ],
-        "exports": [],
-        "dependencies": []
-      }
-    ],
-    [
-      "quick-error-test.js",
-      {
-        "path": "quick-error-test.js",
-        "size": 6350,
-        "hash": "005678d49b9df239",
-        "lastModified": "2025-06-19T16:09:07.646Z",
-        "type": "source",
-        "language": "javascript",
-        "symbols": [
-          {
-            "type": "class",
-            "name": "QuickErrorTest"
-          }
-        ],
-        "imports": [
-          "ch      const child = spawn(",
-          "path"
-        ],
         "exports": [],
         "dependencies": []
       }
@@ -6748,9 +7706,9 @@
       "src/cli/CLIApplication.ts",
       {
         "path": "src/cli/CLIApplication.ts",
-        "size": 13859,
-        "hash": "0f69ca5b2c333714",
-        "lastModified": "2025-06-19T09:20:50.363Z",
+        "size": 14029,
+        "hash": "76d18b7064e031b4",
+        "lastModified": "2025-06-19T18:14:50.347Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -6771,23 +7729,23 @@
       }
     ],
     [
-      "src/commands/AgentCommand.ts",
+      "src/commands/AgentCommandRefactored.ts",
       {
-        "path": "src/commands/AgentCommand.ts",
-        "size": 31993,
-        "hash": "879ae9d8de8e9259",
-        "lastModified": "2025-06-19T10:28:50.434Z",
+        "path": "src/commands/AgentCommandRefactored.ts",
+        "size": 10565,
+        "hash": "3d10ea4a209a8f52",
+        "lastModified": "2025-06-19T18:04:17.476Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
           {
             "type": "class",
-            "name": "AgentCommand"
+            "name": "AgentCommandRefactored"
           }
         ],
         "imports": [],
         "exports": [
-          "AgentCommand"
+          "AgentCommandRefactored"
         ],
         "dependencies": []
       }
@@ -6815,34 +7773,12 @@
       }
     ],
     [
-      "src/commands/CommandFactory.ts",
-      {
-        "path": "src/commands/CommandFactory.ts",
-        "size": 4314,
-        "hash": "4b8c4884b8dd97d3",
-        "lastModified": "2025-06-19T07:28:55.446Z",
-        "type": "source",
-        "language": "typescript",
-        "symbols": [
-          {
-            "type": "class",
-            "name": "CommandFactory"
-          }
-        ],
-        "imports": [],
-        "exports": [
-          "CommandFactory"
-        ],
-        "dependencies": []
-      }
-    ],
-    [
       "src/commands/CommandFactoryV2.ts",
       {
         "path": "src/commands/CommandFactoryV2.ts",
-        "size": 6896,
-        "hash": "9fd4c5b716e45ffc",
-        "lastModified": "2025-06-19T08:03:26.861Z",
+        "size": 8091,
+        "hash": "fb9c9849909d9345",
+        "lastModified": "2025-06-19T18:18:35.665Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -6935,9 +7871,9 @@
       "src/commands/IndexCommand.ts",
       {
         "path": "src/commands/IndexCommand.ts",
-        "size": 49411,
-        "hash": "1cc4d02abfcf6705",
-        "lastModified": "2025-06-19T07:35:51.244Z",
+        "size": 49917,
+        "hash": "20e2ccd16d66469c",
+        "lastModified": "2025-06-19T16:49:23.473Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -7036,9 +7972,9 @@
       "src/container/ServiceFactory.ts",
       {
         "path": "src/container/ServiceFactory.ts",
-        "size": 12916,
-        "hash": "95611b8102197c22",
-        "lastModified": "2025-06-19T08:52:56.671Z",
+        "size": 14080,
+        "hash": "8d558367521b0811",
+        "lastModified": "2025-06-19T18:04:17.468Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -7067,6 +8003,9 @@
           "../../dist/services/AgenticMemoryService",
           "../../dist/services/PreferencesService",
           "../../dist/services/WorkingDirectoryService",
+          "../../dist/services/AgentExecutionEngine",
+          "../../dist/services/AgentPresenter",
+          "../../dist/services/ResilienceService",
           "../../dist/ErrorHandler",
           "../../dist/SecurityValidator",
           "../../dist/CLIFormatter",
@@ -7085,6 +8024,40 @@
         "size": 1158,
         "hash": "703cb8a791916216",
         "lastModified": "2025-06-19T00:17:45.723Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [],
+        "imports": [],
+        "exports": [
+          "interface"
+        ],
+        "dependencies": []
+      }
+    ],
+    [
+      "src/interfaces/IAgentExecutionEngine.ts",
+      {
+        "path": "src/interfaces/IAgentExecutionEngine.ts",
+        "size": 1282,
+        "hash": "b53f510367f868fe",
+        "lastModified": "2025-06-19T18:04:17.423Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [],
+        "imports": [],
+        "exports": [
+          "interface"
+        ],
+        "dependencies": []
+      }
+    ],
+    [
+      "src/interfaces/IAgentPresenter.ts",
+      {
+        "path": "src/interfaces/IAgentPresenter.ts",
+        "size": 1432,
+        "hash": "7ab800675d685941",
+        "lastModified": "2025-06-19T18:04:17.430Z",
         "type": "source",
         "language": "typescript",
         "symbols": [],
@@ -7414,6 +8387,25 @@
       }
     ],
     [
+      "src/interfaces/IResilienceService.ts",
+      {
+        "path": "src/interfaces/IResilienceService.ts",
+        "size": 1753,
+        "hash": "ac5cee1f5b567ae4",
+        "lastModified": "2025-06-19T18:04:17.483Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [],
+        "imports": [],
+        "exports": [
+          "interface",
+          "interface",
+          "interface"
+        ],
+        "dependencies": []
+      }
+    ],
+    [
       "src/interfaces/IWorkflowService.ts",
       {
         "path": "src/interfaces/IWorkflowService.ts",
@@ -7479,6 +8471,50 @@
       }
     ],
     [
+      "src/services/AgentExecutionEngine.ts",
+      {
+        "path": "src/services/AgentExecutionEngine.ts",
+        "size": 9138,
+        "hash": "311d1a6996da5422",
+        "lastModified": "2025-06-19T18:04:17.430Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [
+          {
+            "type": "class",
+            "name": "AgentExecutionEngine"
+          }
+        ],
+        "imports": [],
+        "exports": [
+          "AgentExecutionEngine"
+        ],
+        "dependencies": []
+      }
+    ],
+    [
+      "src/services/AgentPresenter.ts",
+      {
+        "path": "src/services/AgentPresenter.ts",
+        "size": 5543,
+        "hash": "253ade472fd781be",
+        "lastModified": "2025-06-19T18:04:17.442Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [
+          {
+            "type": "class",
+            "name": "AgentPresenter"
+          }
+        ],
+        "imports": [],
+        "exports": [
+          "AgentPresenter"
+        ],
+        "dependencies": []
+      }
+    ],
+    [
       "src/services/AgenticMemoryService.ts",
       {
         "path": "src/services/AgenticMemoryService.ts",
@@ -7504,9 +8540,9 @@
       "src/services/CodeIndexService.ts",
       {
         "path": "src/services/CodeIndexService.ts",
-        "size": 37646,
-        "hash": "8831444249732252",
-        "lastModified": "2025-06-19T07:31:44.254Z",
+        "size": 97900,
+        "hash": "9b6f2d1d5c2156ce",
+        "lastModified": "2025-06-19T18:20:32.312Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -7517,6 +8553,22 @@
           {
             "type": "class",
             "name": "patterns"
+          },
+          {
+            "type": "class",
+            "name": "definitions"
+          },
+          {
+            "type": "class",
+            "name": "MyCommand"
+          },
+          {
+            "type": "class",
+            "name": "MyPlugin"
+          },
+          {
+            "type": "class",
+            "name": "MyCommand"
           },
           {
             "type": "function",
@@ -7545,14 +8597,21 @@
           {
             "type": "function",
             "name": "setters"
+          },
+          {
+            "type": "function",
+            "name": "definitions"
           }
         ],
         "imports": [
-          "../CodebaseSummarizer",
-          "../CodebaseSummarizer"
+          "../CodebaseSummarizer.js",
+          "../CodebaseSummarizer.js"
         ],
         "exports": [
-          "CodeIndexService"
+          "CodeIndexService",
+          "MyCommand",
+          "MyPlugin",
+          "MyCommand"
         ],
         "dependencies": []
       }
@@ -7949,6 +9008,32 @@
       }
     ],
     [
+      "src/services/ResilienceService.ts",
+      {
+        "path": "src/services/ResilienceService.ts",
+        "size": 5547,
+        "hash": "47528924a7df6790",
+        "lastModified": "2025-06-19T18:04:17.456Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [
+          {
+            "type": "class",
+            "name": "ResilienceService"
+          },
+          {
+            "type": "function",
+            "name": "wrappedOperation"
+          }
+        ],
+        "imports": [],
+        "exports": [
+          "ResilienceService"
+        ],
+        "dependencies": []
+      }
+    ],
+    [
       "src/services/WorkflowService.ts",
       {
         "path": "src/services/WorkflowService.ts",
@@ -8326,12 +9411,42 @@
       }
     ],
     [
+      "tests/agent-command-refactored-simple.test.ts",
+      {
+        "path": "tests/agent-command-refactored-simple.test.ts",
+        "size": 4075,
+        "hash": "7c03fbf90b21f4eb",
+        "lastModified": "2025-06-19T18:06:45.212Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      "tests/agent-command-refactored.test.ts",
+      {
+        "path": "tests/agent-command-refactored.test.ts",
+        "size": 12681,
+        "hash": "04bf9ed429f473fc",
+        "lastModified": "2025-06-19T18:04:17.416Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
       "tests/command-factory-solid.test.ts",
       {
         "path": "tests/command-factory-solid.test.ts",
-        "size": 10590,
-        "hash": "a7a2b669b7f8927c",
-        "lastModified": "2025-06-19T08:03:26.861Z",
+        "size": 10893,
+        "hash": "7d5ad63be12930df",
+        "lastModified": "2025-06-19T18:18:35.613Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -8397,13 +9512,62 @@
       "tests/command-interface-compliance.test.ts",
       {
         "path": "tests/command-interface-compliance.test.ts",
-        "size": 7052,
-        "hash": "98a47faf315834ca",
-        "lastModified": "2025-06-18T23:38:01.265Z",
+        "size": 7447,
+        "hash": "41a313b3945ee55a",
+        "lastModified": "2025-06-19T18:16:18.803Z",
         "type": "source",
         "language": "typescript",
         "symbols": [],
         "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      "tests/comprehensive-error-handling-test.js",
+      {
+        "path": "tests/comprehensive-error-handling-test.js",
+        "size": 8456,
+        "hash": "a1a3288d1968cb83",
+        "lastModified": "2025-06-19T16:07:54.733Z",
+        "type": "source",
+        "language": "javascript",
+        "symbols": [
+          {
+            "type": "class",
+            "name": "GracefulErrorHandlingTester"
+          }
+        ],
+        "imports": [
+          "child_process",
+          "path"
+        ],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      "tests/direct-error-handling-test.js",
+      {
+        "path": "tests/direct-error-handling-test.js",
+        "size": 8365,
+        "hash": "8a4064c918327e29",
+        "lastModified": "2025-06-19T16:11:54.218Z",
+        "type": "source",
+        "language": "javascript",
+        "symbols": [
+          {
+            "type": "class",
+            "name": "MockAgenticReasoningEngine"
+          },
+          {
+            "type": "function",
+            "name": "runErrorHandlingDemo"
+          }
+        ],
+        "imports": [
+          "path"
+        ],
         "exports": [],
         "dependencies": []
       }
@@ -8424,6 +9588,52 @@
           }
         ],
         "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      "tests/quick-error-test-fixed.js",
+      {
+        "path": "tests/quick-error-test-fixed.js",
+        "size": 7165,
+        "hash": "cf9c50316563dc1f",
+        "lastModified": "2025-06-19T16:09:07.689Z",
+        "type": "source",
+        "language": "javascript",
+        "symbols": [
+          {
+            "type": "class",
+            "name": "QuickErrorTest"
+          }
+        ],
+        "imports": [
+          "child_process",
+          "path"
+        ],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      "tests/quick-error-test.js",
+      {
+        "path": "tests/quick-error-test.js",
+        "size": 6350,
+        "hash": "005678d49b9df239",
+        "lastModified": "2025-06-19T16:09:07.646Z",
+        "type": "source",
+        "language": "javascript",
+        "symbols": [
+          {
+            "type": "class",
+            "name": "QuickErrorTest"
+          }
+        ],
+        "imports": [
+          "ch      const child = spawn(",
+          "path"
+        ],
         "exports": [],
         "dependencies": []
       }
@@ -8462,9 +9672,9 @@
       "tests/test-command-system.js",
       {
         "path": "tests/test-command-system.js",
-        "size": 2765,
-        "hash": "2aa7c97a5eeb0ef6",
-        "lastModified": "2025-06-19T04:52:51.938Z",
+        "size": 2771,
+        "hash": "fdaec88e1eb82054",
+        "lastModified": "2025-06-19T18:18:35.615Z",
         "type": "source",
         "language": "javascript",
         "symbols": [
@@ -8488,7 +9698,7 @@
         "imports": [
           "../dist/services/CommandRegistry",
           "../dist/container/ServiceFactory",
-          "../dist/commands/CommandFactory",
+          "../dist/commands/CommandFactoryV2",
           "../dist/container/ServiceFactory"
         ],
         "exports": [],
@@ -8638,6 +9848,36 @@
           "fs-extra",
           "path",
           "os"
+        ],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      "tests/timeout-handling-test.js",
+      {
+        "path": "tests/timeout-handling-test.js",
+        "size": 3483,
+        "hash": "bc23e92dda0ccdf2",
+        "lastModified": "2025-06-19T16:21:39.826Z",
+        "type": "source",
+        "language": "javascript",
+        "symbols": [
+          {
+            "type": "function",
+            "name": "testTimeoutHandling"
+          },
+          {
+            "type": "function",
+            "name": "runAIACommand"
+          },
+          {
+            "type": "function",
+            "name": "executeWithTimeout"
+          }
+        ],
+        "imports": [
+          "child_process"
         ],
         "exports": [],
         "dependencies": []
@@ -8798,40 +10038,6 @@
   ],
   "classes": [
     [
-      "GracefulErrorHandlingTester",
-      {
-        "file": "comprehensive-error-handling-test.js",
-        "methods": [
-          {
-            "name": "constructor",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          }
-        ]
-      }
-    ],
-    [
-      "MockAgenticReasoningEngine",
-      {
-        "file": "direct-error-handling-test.js",
-        "methods": [
-          {
-            "name": "constructor",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "Map",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          }
-        ]
-      }
-    ],
-    [
       "HelloPlugin",
       {
         "file": "examples/simple-plugin/index.js",
@@ -8850,20 +10056,6 @@
       {
         "file": "examples/simple-plugin/index.js",
         "methods": []
-      }
-    ],
-    [
-      "QuickErrorTest",
-      {
-        "file": "quick-error-test.js",
-        "methods": [
-          {
-            "name": "constructor",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          }
-        ]
       }
     ],
     [
@@ -9716,9 +10908,9 @@
       }
     ],
     [
-      "AgentCommand",
+      "AgentCommandRefactored",
       {
-        "file": "src/commands/AgentCommand.ts",
+        "file": "src/commands/AgentCommandRefactored.ts",
         "methods": [
           {
             "name": "constructor",
@@ -9736,152 +10928,6 @@
         "methods": [
           {
             "name": "constructor",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          }
-        ]
-      }
-    ],
-    [
-      "CommandFactory",
-      {
-        "file": "tests/typescript-command-structure.test.ts",
-        "methods": [
-          {
-            "name": "require",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "require",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "join",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "readFileSync",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "expect",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "toContain",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "expect",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "toContain",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "createCommand",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "expect",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "toContain",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "getAllCommands",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "expect",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "toContain",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "getCommandByAlias",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "expect",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "toContain",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "expect",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "toContain",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "expect",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "toContain",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "expect",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "toContain",
             "async": false,
             "static": false,
             "visibility": "public"
@@ -10082,6 +11128,46 @@
       }
     ],
     [
+      "AgentExecutionEngine",
+      {
+        "file": "src/services/AgentExecutionEngine.ts",
+        "methods": [
+          {
+            "name": "constructor",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          }
+        ]
+      }
+    ],
+    [
+      "AgentPresenter",
+      {
+        "file": "src/services/AgentPresenter.ts",
+        "methods": [
+          {
+            "name": "showPlanningPhase",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "log",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "cyan",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          }
+        ]
+      }
+    ],
+    [
       "AgenticMemoryService",
       {
         "file": "src/services/AgenticMemoryService.ts",
@@ -10176,6 +11262,41 @@
           },
           {
             "name": "push",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          }
+        ]
+      }
+    ],
+    [
+      "definitions",
+      {
+        "file": "src/services/CodeIndexService.ts",
+        "methods": []
+      }
+    ],
+    [
+      "MyCommand",
+      {
+        "file": "src/services/CodeIndexService.ts",
+        "methods": [
+          {
+            "name": "execute",
+            "async": true,
+            "static": false,
+            "visibility": "public"
+          }
+        ]
+      }
+    ],
+    [
+      "MyPlugin",
+      {
+        "file": "src/services/CodeIndexService.ts",
+        "methods": [
+          {
+            "name": "initialize",
             "async": false,
             "static": false,
             "visibility": "public"
@@ -10570,6 +11691,44 @@
       }
     ],
     [
+      "ResilienceService",
+      {
+        "file": "src/services/ResilienceService.ts",
+        "methods": [
+          {
+            "name": "getOrCreateCircuitBreakerState",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "if",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "if",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "now",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "Error",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          }
+        ]
+      }
+    ],
+    [
       "WorkflowService",
       {
         "file": "src/services/WorkflowService.ts",
@@ -10680,6 +11839,54 @@
       }
     ],
     [
+      "GracefulErrorHandlingTester",
+      {
+        "file": "tests/comprehensive-error-handling-test.js",
+        "methods": [
+          {
+            "name": "constructor",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          }
+        ]
+      }
+    ],
+    [
+      "MockAgenticReasoningEngine",
+      {
+        "file": "tests/direct-error-handling-test.js",
+        "methods": [
+          {
+            "name": "constructor",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "Map",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          }
+        ]
+      }
+    ],
+    [
+      "QuickErrorTest",
+      {
+        "file": "tests/quick-error-test.js",
+        "methods": [
+          {
+            "name": "constructor",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          }
+        ]
+      }
+    ],
+    [
       "syntax",
       {
         "file": "tests/test-final-comprehensive.js",
@@ -10776,6 +11983,152 @@
       }
     ],
     [
+      "CommandFactory",
+      {
+        "file": "tests/typescript-command-structure.test.ts",
+        "methods": [
+          {
+            "name": "require",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "require",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "join",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "readFileSync",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "expect",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "toContain",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "expect",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "toContain",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "createCommand",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "expect",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "toContain",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "getAllCommands",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "expect",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "toContain",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "getCommandByAlias",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "expect",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "toContain",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "expect",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "toContain",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "expect",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "toContain",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "expect",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "toContain",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          }
+        ]
+      }
+    ],
+    [
       "structure",
       {
         "file": "tests/typescript-command-structure.test.ts",
@@ -10822,13 +12175,6 @@
     ]
   ],
   "functions": [
-    [
-      "runErrorHandlingDemo",
-      {
-        "file": "direct-error-handling-test.js",
-        "async": false
-      }
-    ],
     [
       "main",
       {
@@ -10932,6 +12278,20 @@
       {
         "file": "src/services/CodeIndexService.ts",
         "async": false
+      }
+    ],
+    [
+      "definitions",
+      {
+        "file": "src/services/CodeIndexService.ts",
+        "async": false
+      }
+    ],
+    [
+      "wrappedOperation",
+      {
+        "file": "src/services/ResilienceService.ts",
+        "async": true
       }
     ],
     [
@@ -11089,6 +12449,13 @@
       }
     ],
     [
+      "runErrorHandlingDemo",
+      {
+        "file": "tests/direct-error-handling-test.js",
+        "async": false
+      }
+    ],
+    [
       "testBasicRegistry",
       {
         "file": "tests/test-command-system.js",
@@ -11169,6 +12536,27 @@
       "runAllTests",
       {
         "file": "tests/test-service-architecture.js",
+        "async": false
+      }
+    ],
+    [
+      "testTimeoutHandling",
+      {
+        "file": "tests/timeout-handling-test.js",
+        "async": false
+      }
+    ],
+    [
+      "runAIACommand",
+      {
+        "file": "tests/timeout-handling-test.js",
+        "async": false
+      }
+    ],
+    [
+      "executeWithTimeout",
+      {
+        "file": "tests/timeout-handling-test.js",
         "async": false
       }
     ],

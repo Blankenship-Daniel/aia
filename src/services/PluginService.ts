@@ -66,7 +66,6 @@ export class PluginService implements IPluginService {
       await this.loadInstalledPlugins();
 
       this.initialized = true;
-      console.log('Plugin service initialized');
     } catch (error) {
       console.error('Failed to initialize plugin service:', error);
       throw error;
@@ -188,7 +187,7 @@ export class PluginService implements IPluginService {
 
         // Optional: validate plugin module structure
         if (typeof pluginModule.initialize !== 'function') {
-          console.warn(`Plugin '${pluginName}' missing 'initialize' method`);
+          // Silently skip plugins without initialize method
         }
       } catch (loadError) {
         console.error(
@@ -219,9 +218,6 @@ export class PluginService implements IPluginService {
       };
 
       this.plugins.set(pluginName, pluginInfo);
-
-      // Optional: log successful plugin load
-      console.log(`Plugin '${pluginName}' loaded successfully`);
 
       return {
         success: true,

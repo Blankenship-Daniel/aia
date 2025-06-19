@@ -188,18 +188,104 @@ export class ConfigCommand implements ICommand {
             'Enable automatic command execution (no confirmation prompts)?',
           default: false,
         },
+        {
+          type: 'confirm',
+          name: 'configureOutputDirectories',
+          message: 'Configure output directories for AI prompt files?',
+          default: false,
+        },
       ];
 
-      const answers = await inquirer.prompt(questions);
+      let outputDirectoryQuestions: any[] = [];
+      const initialAnswers = await inquirer.prompt(questions);
 
-      // Save configuration
+      if (initialAnswers.configureOutputDirectories) {
+        outputDirectoryQuestions = [
+          {
+            type: 'input',
+            name: 'outputDirectories.prompts',
+            message: 'Directory for general prompt files:',
+            default: './prompts',
+          },
+          {
+            type: 'input',
+            name: 'outputDirectories.customInstructions',
+            message: 'Directory for custom instruction files:',
+            default: './custom-instructions',
+          },
+          {
+            type: 'input',
+            name: 'outputDirectories.context',
+            message: 'Directory for context files:',
+            default: './context',
+          },
+          {
+            type: 'input',
+            name: 'outputDirectories.architecture',
+            message: 'Directory for architecture analysis files:',
+            default: './architecture',
+          },
+          {
+            type: 'input',
+            name: 'outputDirectories.comprehensive',
+            message: 'Directory for comprehensive analysis files:',
+            default: './comprehensive',
+          },
+          {
+            type: 'input',
+            name: 'outputDirectories.minimal',
+            message: 'Directory for minimal context files:',
+            default: './minimal',
+          },
+          {
+            type: 'input',
+            name: 'outputDirectories.developer',
+            message: 'Directory for developer reference files:',
+            default: './developer',
+          },
+        ];
+      }
+
+      const outputAnswers =
+        outputDirectoryQuestions.length > 0
+          ? await inquirer.prompt(outputDirectoryQuestions)
+          : {};
+
+      const answers = { ...initialAnswers, ...outputAnswers };
+      delete answers.configureOutputDirectories;
+
+      // Handle nested output directory settings
+      const outputDirectories: any = {};
+      const regularSettings: any = {};
+
       for (const [key, value] of Object.entries(answers)) {
-        if (value !== '' && value !== undefined && value !== null) {
-          await this.configurationService.setSetting(
-            key as keyof AIAConfig,
-            value as any
-          );
+        if (key.startsWith('outputDirectories.')) {
+          const nestedKey = key.replace('outputDirectories.', '');
+          outputDirectories[nestedKey] = value;
+        } else if (value !== '' && value !== undefined && value !== null) {
+          regularSettings[key] = value;
         }
+      }
+
+      // Save regular configuration settings
+      for (const [key, value] of Object.entries(regularSettings)) {
+        await this.configurationService.setSetting(
+          key as keyof AIAConfig,
+          value as any
+        );
+      }
+
+      // Save output directories if any were configured
+      if (Object.keys(outputDirectories).length > 0) {
+        const currentConfig = this.configurationService.getConfiguration();
+        const updatedOutputDirectories = {
+          ...currentConfig.outputDirectories,
+          ...outputDirectories,
+        };
+        await this.configurationService.setSetting(
+          'outputDirectories',
+          updatedOutputDirectories
+        );
       }
 
       console.log(chalk.green('\n✓ Configuration saved successfully!'));

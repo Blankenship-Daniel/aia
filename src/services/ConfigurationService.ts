@@ -222,6 +222,15 @@ export class ConfigurationService implements IConfigurationService {
       autoExecute: false,
       plugins: {},
       profiles: {},
+      outputDirectories: {
+        prompts: './prompts',
+        customInstructions: './custom-instructions',
+        context: './context',
+        architecture: './architecture',
+        comprehensive: './comprehensive',
+        minimal: './minimal',
+        developer: './developer',
+      },
     };
   }
 
@@ -293,6 +302,10 @@ export class ConfigurationService implements IConfigurationService {
         return { success: false, error: 'profiles must be an object' };
       }
 
+      if (cfg.outputDirectories && typeof cfg.outputDirectories !== 'object') {
+        return { success: false, error: 'outputDirectories must be an object' };
+      }
+
       // Build validated configuration with defaults
       const validatedConfig: AIAConfig = {
         preferredModel: cfg.preferredModel || 'gpt-4',
@@ -301,6 +314,9 @@ export class ConfigurationService implements IConfigurationService {
         autoExecute: cfg.autoExecute || false,
         plugins: cfg.plugins || {},
         profiles: cfg.profiles || {},
+        outputDirectories:
+          cfg.outputDirectories ||
+          this.getDefaultConfiguration().outputDirectories,
       };
 
       return { success: true, data: validatedConfig };

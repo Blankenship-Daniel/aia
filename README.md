@@ -96,8 +96,36 @@ aia clear-memory  # Clear all stored memory
 ### Configuration
 
 ```bash
-aia config  # Configure API keys and preferences
+aia config         # Configure API keys and preferences
+aia config-outputs # Configure output directories for prompt and instruction files
 ```
+
+**Output Directory Configuration:**
+
+AIA generates various prompt and instruction files that can be configured to save to specific directories:
+
+```bash
+# Configure output directories interactively
+aia config-outputs
+
+# Available file types that can be configured:
+# - aia-context.txt
+# - aia-copilot-instructions.json
+# - codebase-architecture.md
+# - codebase-comprehensive.md
+# - codebase-context.md
+# - codebase-developer.md
+# - codebase-minimal.md
+# - codebase-prompt.md
+# - copilot-instructions.json
+# - copilot-instructions.md
+```
+
+Each output type can be configured to save to a different directory. By default, all files are saved to the current working directory. Common use cases:
+
+- Save prompts to a `prompts/` directory
+- Save instruction files to a `docs/` directory
+- Organize different file types in separate directories
 
 **Auto-Execute Configuration:**
 

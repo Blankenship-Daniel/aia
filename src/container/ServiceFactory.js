@@ -4,14 +4,8 @@
  */
 const DIContainer = require('./DIContainer');
 
-// Import service interfaces (for type checking)
-const IAIService = require('../interfaces/IAIService');
-const IMemoryService = require('../interfaces/IMemoryService');
-const IContextService = require('../interfaces/IContextService');
-const ICommandService = require('../interfaces/ICommandService');
-const IConfigurationService = require('../interfaces/IConfigurationService');
-const IPluginService = require('../interfaces/IPluginService');
-const IWorkflowService = require('../interfaces/IWorkflowService');
+// Note: Interfaces are now in TypeScript files and not needed for runtime
+// They provide type safety for the TypeScript services
 
 class ServiceFactory {
   /**
@@ -37,7 +31,9 @@ class ServiceFactory {
   static registerCoreServices(container) {
     // Configuration Service (no dependencies - foundational)
     container.registerFactory('configuration', (container) => {
-      const ConfigurationService = require('../services/ConfigurationService');
+      const {
+        ConfigurationService,
+      } = require('../../dist/services/ConfigurationService');
       return new ConfigurationService();
     });
 
@@ -45,7 +41,7 @@ class ServiceFactory {
     container.registerFactory(
       'memory',
       (container) => {
-        const MemoryService = require('../services/MemoryService');
+        const { MemoryService } = require('../../dist/services/MemoryService');
         const config = container.resolve('configuration');
         return new MemoryService(config);
       },
@@ -58,7 +54,9 @@ class ServiceFactory {
     container.registerFactory(
       'context',
       (container) => {
-        const ContextService = require('../services/ContextService');
+        const {
+          ContextService,
+        } = require('../../dist/services/ContextService');
         const config = container.resolve('configuration');
         return new ContextService(config);
       },
@@ -71,7 +69,9 @@ class ServiceFactory {
     container.registerFactory(
       'command',
       (container) => {
-        const CommandService = require('../services/CommandService');
+        const {
+          CommandService,
+        } = require('../../dist/services/CommandService');
         const config = container.resolve('configuration');
         const context = container.resolve('context');
         const memory = container.resolve('memory');
@@ -86,7 +86,7 @@ class ServiceFactory {
     container.registerFactory(
       'ai',
       (container) => {
-        const AIService = require('../services/AIService');
+        const { AIService } = require('../../dist/services/AIService');
         const config = container.resolve('configuration');
         const memory = container.resolve('memory');
         return new AIService(config, memory);
@@ -100,7 +100,7 @@ class ServiceFactory {
     container.registerFactory(
       'plugin',
       (container) => {
-        const PluginService = require('../services/PluginService');
+        const { PluginService } = require('../../dist/services/PluginService');
         const config = container.resolve('configuration');
         return new PluginService(config, container);
       },
@@ -113,7 +113,9 @@ class ServiceFactory {
     container.registerFactory(
       'workflow',
       (container) => {
-        const WorkflowService = require('../services/WorkflowService');
+        const {
+          WorkflowService,
+        } = require('../../dist/services/WorkflowService');
         const config = container.resolve('configuration');
         const command = container.resolve('command');
         const memory = container.resolve('memory');

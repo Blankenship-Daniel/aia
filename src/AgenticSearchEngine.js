@@ -817,6 +817,55 @@ class AgenticSearchEngine {
 
     return score;
   }
+
+  async searchCodebaseIndex(query, index) {
+    const results = {
+      files: [],
+      symbols: [],
+      patterns: [],
+      suggestions: []
+    };
+    
+    // Search through the index
+    const queryKeywords = this.extractKeywords(query.toLowerCase());
+    
+    // Search symbols
+    for (const keyword of queryKeywords) {
+      if (index.symbols.has(keyword)) {
+        results.symbols.push(...index.symbols.get(keyword));
+      }
+    }
+    
+    // Search file content
+    for (const [file, content] of index.content) {
+      const relevance = this.calculateRelevance(content.tokens, queryKeywords);
+      if (relevance > 0.5) {
+        results.files.push({
+          file,
+          relevance,
+          summary: content.summary
+        });
+      }
+    }
+    
+    // Sort by relevance
+    results.files.sort((a, b) => b.relevance - a.relevance);
+    results.symbols = this.deduplicateSymbols(results.symbols);
+    
+    return results;
+  }
+
+  async getCodebaseContext(goal, index) {
+    const context = {
+      relevantFiles: await this.findRelevantFilesFromIndex(goal, index),
+      relatedSymbols: await this.findRelatedSymbols(goal, index),
+      dependencies: await this.getRelevantDependencies(goal, index),
+      architecture: index.architecture || {},
+      suggestions: this.generateContextualSuggestions(goal, index)
+    };
+    
+    return context;
+  }
 }
 
 module.exports = AgenticSearchEngine;

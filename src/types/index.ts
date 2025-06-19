@@ -6,6 +6,16 @@ export interface AIAConfig {
   autoExecute: boolean;
   plugins: Record<string, PluginConfig>;
   profiles: Record<string, ConfigProfile>;
+  // Output directory settings for prompt generation
+  outputDirectories?: {
+    prompts?: string;
+    customInstructions?: string;
+    context?: string;
+    architecture?: string;
+    comprehensive?: string;
+    minimal?: string;
+    developer?: string;
+  };
 }
 
 export interface ConfigProfile {

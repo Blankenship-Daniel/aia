@@ -5,8 +5,8 @@
 const { Command } = require('commander');
 const chalk = require('chalk');
 const ServiceFactory = require('../container/ServiceFactory');
-const CommandFactory = require('../commands/CommandFactory');
-const CommandRegistry = require('../services/CommandRegistry');
+const { CommandFactory } = require('../../dist/commands/CommandFactory');
+const { CommandRegistry } = require('../../dist/services/CommandRegistry');
 
 class CLIApplication {
   constructor() {
@@ -120,6 +120,12 @@ class CLIApplication {
       // Add options based on command type
       this.addCommandOptions(cmd, commandInstance);
     }
+
+    // Add special index commands from the legacy system
+    this.addIndexCommands();
+
+    // Add other legacy commands
+    this.addLegacyCommands();
   }
   /**
    * Add command-specific options
@@ -445,6 +451,241 @@ class CLIApplication {
       console.error(chalk.red('CLI Application Error:'), error.message);
       process.exit(1);
     }
+  }
+
+  /**
+   * Add legacy index commands to the CLI
+   * These commands are from the original index.js and provide code indexing functionality
+   */
+  addIndexCommands() {
+    const { IndexCommand } = require('../commands/IndexCommand.js');
+    const indexCommand = new IndexCommand();
+
+    // Main index command with subcommands
+    this.program
+      .command('index [action]')
+      .alias('idx')
+      .description('Create and manage codebase index for AI analysis')
+      .option('--force', 'Force rebuild even if index exists')
+      .option('--directory <path>', 'Directory to index (default: current)')
+      .option('--verbose', 'Show detailed output')
+      .option('--json', 'Output results as JSON')
+      .option('--detailed', 'Show detailed information')
+      .action(async (action = 'build', options) => {
+        try {
+          const result = await indexCommand.execute({}, [action], options);
+          if (!result.success && !options.quiet) {
+            console.error(
+              chalk.red('Index command failed:', result.error || result.output)
+            );
+            process.exit(1);
+          }
+        } catch (error) {
+          console.error(chalk.red('Index command error:', error.message));
+          process.exit(1);
+        }
+      });
+
+    // index-build command
+    this.program
+      .command('index-build')
+      .description('Build codebase index')
+      .option('--force', 'Force rebuild even if index exists')
+      .option('--directory <path>', 'Directory to index (default: current)')
+      .option('--verbose', 'Show detailed output')
+      .action(async (options) => {
+        try {
+          const result = await indexCommand.execute({}, ['build'], options);
+          if (!result.success) {
+            console.error(
+              chalk.red('Failed to build index:', result.error || result.output)
+            );
+            process.exit(1);
+          }
+        } catch (error) {
+          console.error(chalk.red('Index build error:', error.message));
+          process.exit(1);
+        }
+      });
+
+    // index-search command
+    this.program
+      .command('index-search <query...>')
+      .description('Search the codebase index')
+      .option('--limit <number>', 'Maximum number of results', '10')
+      .option('--verbose', 'Show detailed results')
+      .action(async (query, options) => {
+        try {
+          const result = await indexCommand.execute(
+            {},
+            ['search', ...query],
+            options
+          );
+          if (!result.success) {
+            console.error(
+              chalk.red('Search failed:', result.error || result.output)
+            );
+            process.exit(1);
+          }
+        } catch (error) {
+          console.error(chalk.red('Search error:', error.message));
+          process.exit(1);
+        }
+      });
+
+    // index-stats command
+    this.program
+      .command('index-stats')
+      .description('Show codebase index statistics')
+      .option('--verbose', 'Show detailed statistics')
+      .action(async (options) => {
+        try {
+          const result = await indexCommand.execute({}, ['stats'], options);
+          if (!result.success) {
+            console.error(
+              chalk.red('Failed to show stats:', result.error || result.output)
+            );
+            process.exit(1);
+          }
+        } catch (error) {
+          console.error(chalk.red('Stats error:', error.message));
+          process.exit(1);
+        }
+      });
+
+    // index-summary command
+    this.program
+      .command('index-summary')
+      .description('Show AI-friendly codebase summary')
+      .option('--json', 'Output as JSON')
+      .option('--verbose', 'Show detailed summary')
+      .action(async (options) => {
+        try {
+          const result = await indexCommand.execute({}, ['summary'], options);
+          if (!result.success) {
+            console.error(
+              chalk.red(
+                'Failed to generate summary:',
+                result.error || result.output
+              )
+            );
+            process.exit(1);
+          }
+        } catch (error) {
+          console.error(chalk.red('Summary error:', error.message));
+          process.exit(1);
+        }
+      });
+
+    // index-analysis command
+    this.program
+      .command('index-analysis')
+      .description('Perform semantic code analysis')
+      .option('--json', 'Output as JSON')
+      .option('--verbose', 'Show detailed analysis')
+      .action(async (options) => {
+        try {
+          const result = await indexCommand.execute({}, ['analyze'], options);
+          if (!result.success) {
+            console.error(
+              chalk.red(
+                'Failed to perform analysis:',
+                result.error || result.output
+              )
+            );
+            process.exit(1);
+          }
+        } catch (error) {
+          console.error(chalk.red('Analysis error:', error.message));
+          process.exit(1);
+        }
+      });
+
+    // index-export command
+    this.program
+      .command('index-export [output]')
+      .description('Export codebase index to file for AI prompts')
+      .option(
+        '--format <type>',
+        'Export format: markdown, json, or text',
+        'markdown'
+      )
+      .option('--detailed', 'Include detailed information')
+      .option('--code', 'Include code snippets')
+      .option('--output <file>', 'Output file path')
+      .action(async (output, options) => {
+        try {
+          const args = output ? ['export', output] : ['export'];
+          const result = await indexCommand.execute({}, args, options);
+          if (!result.success) {
+            console.error(
+              chalk.red(
+                'Failed to export index:',
+                result.error || result.output
+              )
+            );
+            process.exit(1);
+          }
+        } catch (error) {
+          console.error(chalk.red('Export error:', error.message));
+          process.exit(1);
+        }
+      });
+
+    // index-prompts command
+    this.program
+      .command('index-prompts')
+      .description('Generate specialized AI prompt and instruction files')
+      .option(
+        '--type <type>',
+        'Prompt type: all, comprehensive, minimal, architecture, dev-focused, custom-instructions',
+        'all'
+      )
+      .option('--output <dir>', 'Output directory')
+      .option('--code', 'Include code snippets in prompts')
+      .action(async (options) => {
+        try {
+          const result = await indexCommand.execute({}, ['prompts'], options);
+          if (!result.success) {
+            console.error(
+              chalk.red(
+                'Failed to generate prompts:',
+                result.error || result.output
+              )
+            );
+            process.exit(1);
+          }
+        } catch (error) {
+          console.error(chalk.red('Prompt generation error:', error.message));
+          process.exit(1);
+        }
+      });
+  }
+
+  /**
+   * Add additional legacy commands that aren't part of the TypeScript system yet
+   */
+  addLegacyCommands() {
+    // config-outputs command
+    this.program
+      .command('config-outputs')
+      .alias('co')
+      .description(
+        'Configure output directories for prompt and instruction files'
+      )
+      .action(async () => {
+        try {
+          // Use the legacy ConfigurationManager for this functionality
+          const ConfigurationManager = require('../ConfigurationManager');
+          const configManager = new ConfigurationManager();
+          await configManager.configureOutputDirectories();
+        } catch (error) {
+          console.error(
+            chalk.red('Failed to configure outputs:', error.message)
+          );
+          process.exit(1);
+        }
+      });
   }
 
   /**

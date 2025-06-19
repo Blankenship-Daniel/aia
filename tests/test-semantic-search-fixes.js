@@ -3,7 +3,7 @@
  */
 
 const path = require('path');
-const MemoryService = require('../src/services/MemoryService');
+const { MemoryService } = require('../dist/services/MemoryService');
 const MemoryManager = require('../src/MemoryManager');
 
 async function testSemanticSearchFixes() {
@@ -12,7 +12,18 @@ async function testSemanticSearchFixes() {
 
   // Test MemoryService
   console.log('\n1. Testing MemoryService...');
-  const memoryService = new MemoryService();
+
+  // Create a mock configuration service
+  const mockConfigService = {
+    get: (key) => {
+      if (key === 'memory.directory')
+        return path.join(__dirname, '.test-memory');
+      return null;
+    },
+    getWorkingDirectory: () => __dirname,
+  };
+
+  const memoryService = new MemoryService(mockConfigService);
 
   // Initialize with test data
   memoryService.memory = {

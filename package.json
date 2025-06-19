@@ -8,9 +8,19 @@
   },
   "scripts": {
     "start": "node index.js",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "build:clean": "rimraf dist && npm run build",
+    "build:production": "npm run build:clean && npm run copy-assets",
+    "copy-assets": "shx cp -r examples dist/ 2>/dev/null || true",
+    "dev": "concurrently \"npm run build:watch\" \"nodemon dist/main.js\"",
+    "type-check": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "test:ts": "jest --config jest.config.ts",
+    "lint": "npx @typescript-eslint/eslint-plugin --help || echo 'ESLint not configured'",
+    "pretest": "npm run type-check"
   },
   "repository": {
     "type": "git",
@@ -34,6 +44,7 @@
     "@anthropic-ai/sdk": "^0.54.0",
     "axios": "^1.10.0",
     "chalk": "^4.1.2",
+    "chokidar": "^4.0.3",
     "commander": "^14.0.0",
     "dirty-json": "^0.9.2",
     "extract-first-json": "^2.0.2",
@@ -55,7 +66,12 @@
     "@types/ora": "^3.1.0",
     "@typescript-eslint/eslint-plugin": "^8.34.1",
     "@typescript-eslint/parser": "^8.34.1",
+    "@vercel/ncc": "^0.38.3",
+    "concurrently": "^9.1.2",
     "jest": "^30.0.0",
+    "nodemon": "^3.1.10",
+    "rimraf": "^6.0.1",
+    "shx": "^0.4.0",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"

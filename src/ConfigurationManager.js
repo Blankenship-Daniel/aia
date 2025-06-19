@@ -45,6 +45,16 @@ class ConfigurationManager {
       // Default to not automatically updating config file during tests
       // This can be overridden by specific test needs if file persistence is tested
       saveDefaultsInTest: false,
+      // Output directory settings for prompt generation
+      outputDirectories: {
+        prompts: './prompts',
+        customInstructions: './custom-instructions',
+        context: './context',
+        architecture: './architecture',
+        comprehensive: './comprehensive',
+        minimal: './minimal',
+        developer: './developer',
+      },
     };
     this.securityValidator = null; // Will be set by AIA if available
   }
@@ -68,7 +78,8 @@ class ConfigurationManager {
   async loadMainConfig() {
     try {
       const configData = await fs.readJson(this.configFile);
-      this.config = { ...this.defaultConfig, ...configData };
+      // Deep merge configuration to handle nested objects like outputDirectories
+      this.config = this.deepMerge(this.defaultConfig, configData);
     } catch (error) {
       console.error(
         `Error loading config file ${this.configFile}: ${error.message}. Using defaults.`
@@ -418,12 +429,140 @@ class ConfigurationManager {
         ],
         default: this.config.advanced?.enabledFeatures || [],
       },
+      {
+        type: 'confirm',
+        name: 'configureOutputDirectories',
+        message: 'Configure output directories for AI prompt files?',
+        default: false,
+      },
     ]);
+
+    // Handle output directory configuration
+    if (advancedConfig.configureOutputDirectories) {
+      const outputDirQuestions = [
+        {
+          type: 'input',
+          name: 'prompts',
+          message: 'Directory for general prompt files:',
+          default: this.config.outputDirectories?.prompts || './prompts',
+        },
+        {
+          type: 'input',
+          name: 'customInstructions',
+          message: 'Directory for custom instruction files:',
+          default:
+            this.config.outputDirectories?.customInstructions ||
+            './custom-instructions',
+        },
+        {
+          type: 'input',
+          name: 'context',
+          message: 'Directory for context files:',
+          default: this.config.outputDirectories?.context || './context',
+        },
+        {
+          type: 'input',
+          name: 'architecture',
+          message: 'Directory for architecture analysis files:',
+          default:
+            this.config.outputDirectories?.architecture || './architecture',
+        },
+        {
+          type: 'input',
+          name: 'comprehensive',
+          message: 'Directory for comprehensive analysis files:',
+          default:
+            this.config.outputDirectories?.comprehensive || './comprehensive',
+        },
+        {
+          type: 'input',
+          name: 'minimal',
+          message: 'Directory for minimal context files:',
+          default: this.config.outputDirectories?.minimal || './minimal',
+        },
+        {
+          type: 'input',
+          name: 'developer',
+          message: 'Directory for developer reference files:',
+          default: this.config.outputDirectories?.developer || './developer',
+        },
+      ];
+
+      const outputDirectories = await inquirer.prompt(outputDirQuestions);
+      this.config.outputDirectories = outputDirectories;
+    }
+
+    // Remove the configuration flag before saving
+    delete advancedConfig.configureOutputDirectories;
 
     this.config.advanced = { ...this.config.advanced, ...advancedConfig };
     await this.saveMainConfig();
 
     console.log(chalk.green('✅ Advanced configuration saved!'));
+  }
+
+  // Output directory configuration
+  async configureOutputDirectories() {
+    console.log(chalk.blue('\n📁 Configure Output Directories for AI Prompts'));
+
+    const outputDirQuestions = [
+      {
+        type: 'input',
+        name: 'prompts',
+        message: 'Directory for general prompt files:',
+        default: this.config.outputDirectories?.prompts || './prompts',
+      },
+      {
+        type: 'input',
+        name: 'customInstructions',
+        message: 'Directory for custom instruction files:',
+        default:
+          this.config.outputDirectories?.customInstructions ||
+          './custom-instructions',
+      },
+      {
+        type: 'input',
+        name: 'context',
+        message: 'Directory for context files:',
+        default: this.config.outputDirectories?.context || './context',
+      },
+      {
+        type: 'input',
+        name: 'architecture',
+        message: 'Directory for architecture analysis files:',
+        default:
+          this.config.outputDirectories?.architecture || './architecture',
+      },
+      {
+        type: 'input',
+        name: 'comprehensive',
+        message: 'Directory for comprehensive analysis files:',
+        default:
+          this.config.outputDirectories?.comprehensive || './comprehensive',
+      },
+      {
+        type: 'input',
+        name: 'minimal',
+        message: 'Directory for minimal context files:',
+        default: this.config.outputDirectories?.minimal || './minimal',
+      },
+      {
+        type: 'input',
+        name: 'developer',
+        message: 'Directory for developer reference files:',
+        default: this.config.outputDirectories?.developer || './developer',
+      },
+    ];
+
+    const outputDirectories = await inquirer.prompt(outputDirQuestions);
+    this.config.outputDirectories = outputDirectories;
+    await this.saveMainConfig();
+
+    console.log(chalk.green('✅ Output directories configured successfully!'));
+    console.log(chalk.gray('\nConfigured directories:'));
+    Object.entries(outputDirectories).forEach(([type, dir]) => {
+      console.log(chalk.gray(`   ${type}: ${dir}`));
+    });
   }
 
   // Configuration validation
@@ -739,6 +878,25 @@ class ConfigurationManager {
       console.error(`Unknown provider: ${provider}`);
       return null;
     }
+  }
+
+  // Helper method for deep merging configuration objects
+  deepMerge(target, source) {
+    const result = { ...target };
+
+    for (const key in source) {
+      if (
+        source[key] &&
+        typeof source[key] === 'object' &&
+        !Array.isArray(source[key])
+      ) {
+        result[key] = this.deepMerge(target[key] || {}, source[key]);
+      } else {
+        result[key] = source[key];
+      }
+    }
+
+    return result;
   }
 }
 

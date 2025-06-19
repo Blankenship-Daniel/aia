@@ -74,7 +74,15 @@ export class CommandFactory {
     const commands = new Map<string, ICommand>();
 
     // Register all commands with their primary names
-    const commandList = ['ask', 'exec', 'context', 'memory', 'config', 'agent'];
+    const commandList = [
+      'ask',
+      'exec',
+      'context',
+      'memory',
+      'config',
+      'agent',
+      'index',
+    ];
 
     for (const commandName of commandList) {
       const command = this.createCommand(commandName);
@@ -88,5 +96,75 @@ export class CommandFactory {
 
   public getCommandByAlias(alias: string): ICommand | null {
     return this.createCommand(alias);
+  }
+
+  /**
+   * Static method to register commands with a registry
+   * Used by the CLI application to register all commands
+   */
+  public static registerCommands(
+    commandRegistry: any, // ICommandRegistry
+    services: any
+  ): number {
+    const factory = new CommandFactory(
+      services.aiService,
+      services.memoryService,
+      services.contextService,
+      services.commandService,
+      services.configurationService
+    );
+
+    const commandNames = [
+      'ask',
+      'exec',
+      'context',
+      'memory',
+      'config',
+      'agent',
+    ];
+    let registeredCount = 0;
+
+    for (const commandName of commandNames) {
+      const command = factory.createCommand(commandName);
+      if (command) {
+        commandRegistry.register(command);
+        registeredCount++;
+      }
+    }
+
+    return registeredCount;
+  }
+
+  /**
+   * Static method to create all commands
+   * Used by tests
+   */
+  public static createCommands(services: any): any[] {
+    const factory = new CommandFactory(
+      services.aiService,
+      services.memoryService,
+      services.contextService,
+      services.commandService,
+      services.configurationService
+    );
+
+    const commandNames = [
+      'ask',
+      'exec',
+      'context',
+      'memory',
+      'config',
+      'agent',
+    ];
+    const commands = [];
+
+    for (const commandName of commandNames) {
+      const command = factory.createCommand(commandName);
+      if (command) {
+        commands.push(command);
+      }
+    }
+
+    return commands;
   }
 }

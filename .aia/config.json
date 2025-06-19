@@ -1,0 +1,10 @@
+{
+  "outputDirectories": {
+    "prompts": "./.github/prompts",
+    "customInstructions": "./.github",
+    "comprehensive": "./docs/comprehensive",
+    "minimal": "./docs/minimal",
+    "architecture": "./docs/architecture",
+    "developer": "./docs/developer"
+  }
+}

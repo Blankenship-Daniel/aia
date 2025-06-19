@@ -241,6 +241,115 @@ class ContextAnalyzer {
     return { totalCount: 0, recommendations: [] };
   }
 
+  async createCodebaseIndex(directory) {
+    const index = {
+      structure: await this.buildFileTree(directory),
+      dependencies: await this.analyzeDependencyGraph(directory),
+      apiSurface: await this.extractAPISurface(directory),
+      documentation: await this.extractDocumentation(directory),
+      testCoverage: await this.analyzeTestCoverage(directory),
+      complexity: await this.calculateComplexity(directory),
+      searchIndex: await this.buildSearchIndex(directory),
+    };
+
+    // Cache the index
+    await this.cacheIndex(index, directory);
+
+    return index;
+  }
+
+  async buildFileTree(directory) {
+    const tree = {
+      name: path.basename(directory),
+      type: 'directory',
+      children: [],
+      metadata: {},
+    };
+
+    const items = await fs.readdir(directory);
+
+    for (const item of items) {
+      const fullPath = path.join(directory, item);
+      const stat = await fs.stat(fullPath);
+
+      if (stat.isDirectory() && !this.shouldIgnoreDirectory(item)) {
+        tree.children.push(await this.buildFileTree(fullPath));
+      } else if (stat.isFile()) {
+        const fileInfo = {
+          name: item,
+          type: 'file',
+          size: stat.size,
+          modified: stat.mtime,
+          language: this.detectLanguage(item),
+          purpose: await this.detectFilePurpose(fullPath),
+        };
+        tree.children.push(fileInfo);
+      }
+    }
+
+    return tree;
+  }
+
+  async extractAPISurface(directory) {
+    const api = {
+      classes: [],
+      functions: [],
+      exports: [],
+      endpoints: [],
+    };
+
+    const files = await this.getCodeFiles(directory);
+
+    for (const file of files) {
+      const content = await fs.readFile(file, 'utf8');
+      const fileAPI = await this.parseFileAPI(content, file);
+
+      api.classes.push(...fileAPI.classes);
+      api.functions.push(...fileAPI.functions);
+      api.exports.push(...fileAPI.exports);
+      api.endpoints.push(...fileAPI.endpoints);
+    }
+
+    return api;
+  }
+
+  async buildSearchIndex(directory) {
+    const searchIndex = {
+      symbols: new Map(),
+      content: new Map(),
+      tags: new Map(),
+    };
+
+    const files = await this.getFileList(directory);
+
+    for (const file of files) {
+      const content = await fs.readFile(file, 'utf8');
+      const relativePath = path.relative(directory, file);
+
+      // Index file content
+      searchIndex.content.set(relativePath, {
+        content: content.toLowerCase(),
+        tokens: this.tokenize(content),
+        summary: this.summarizeFile(content),
+      });
+
+      // Extract and index symbols
+      const symbols = this.extractSymbols(content);
+      symbols.forEach((symbol) => {
+        if (!searchIndex.symbols.has(symbol.name)) {
+          searchIndex.symbols.set(symbol.name, []);
+        }
+        searchIndex.symbols.get(symbol.name).push({
+          file: relativePath,
+          type: symbol.type,
+          line: symbol.line,
+        });
+      });
+    }
+
+    return searchIndex;
+  }
+
   // Helper methods
   async getFileList(directory) {
     const files = [];

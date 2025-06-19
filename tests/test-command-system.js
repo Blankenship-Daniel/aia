@@ -6,13 +6,13 @@
 async function testBasicRegistry() {
   console.log('🧪 Testing Basic Command Registry...');
 
-  const CommandRegistry = require('../src/services/CommandRegistry');
+  const { CommandRegistry } = require('../dist/services/CommandRegistry');
   const registry = new CommandRegistry();
 
   // Test basic functionality
   console.log(
     '✅ Registry created, command count:',
-    registry.getCommandCount()
+    registry.getCommandNames().length
   );
 
   // Test with mock command
@@ -28,10 +28,13 @@ async function testBasicRegistry() {
   };
 
   registry.register(mockCommand);
-  console.log('✅ Command registered, new count:', registry.getCommandCount());
+  console.log(
+    '✅ Command registered, new count:',
+    registry.getCommandNames().length
+  );
 
   const retrieved = registry.getCommand('test');
-  console.log('✅ Command retrieved:', retrieved.getName());
+  console.log('✅ Command retrieved:', retrieved.getDefinition().name);
 
   return true;
 }
@@ -53,7 +56,7 @@ async function testServiceIntegration() {
 async function testCommandCreation() {
   console.log('🧪 Testing Command Creation...');
 
-  const CommandFactory = require('../src/commands/CommandFactory');
+  const { CommandFactory } = require('../dist/commands/CommandFactory');
   const ServiceFactory = require('../src/container/ServiceFactory');
 
   const container = ServiceFactory.createContainer();
@@ -70,7 +73,7 @@ async function testCommandCreation() {
   console.log('✅ Commands created:', commands.length);
 
   commands.forEach((cmd) => {
-    console.log('  - ' + cmd.getName() + ': ' + cmd.getDescription());
+    console.log('  - ' + cmd.name + ': ' + cmd.description);
   });
 
   return true;

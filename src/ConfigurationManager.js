@@ -48,7 +48,7 @@ class ConfigurationManager {
       // Output directory settings for prompt generation
       outputDirectories: {
         prompts: './prompts',
-        customInstructions: './custom-instructions',
+        copilotInstructions: './copilot-instructions',
         context: './context',
         architecture: './architecture',
         comprehensive: './comprehensive',
@@ -448,11 +448,11 @@ class ConfigurationManager {
         },
         {
           type: 'input',
-          name: 'customInstructions',
-          message: 'Directory for custom instruction files:',
+          name: 'copilotInstructions',
+          message: 'Directory for copilot instruction files:',
           default:
-            this.config.outputDirectories?.customInstructions ||
-            './custom-instructions',
+            this.config.outputDirectories?.copilotInstructions ||
+            './copilot-instructions',
         },
         {
           type: 'input',
@@ -514,11 +514,11 @@ class ConfigurationManager {
       },
       {
         type: 'input',
-        name: 'customInstructions',
-        message: 'Directory for custom instruction files:',
+        name: 'copilotInstructions',
+        message: 'Directory for copilot instruction files:',
         default:
-          this.config.outputDirectories?.customInstructions ||
-          './custom-instructions',
+          this.config.outputDirectories?.copilotInstructions ||
+          './copilot-instructions',
       },
       {
         type: 'input',

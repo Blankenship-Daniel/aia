@@ -1,16 +1,58 @@
-const chalk = require('chalk');
+// @ts-ignore - chalk doesn't have types available
+import chalk from 'chalk';
+
+interface Correction {
+  original: string;
+  corrected: string;
+  confidence: number;
+}
+
+interface AbbreviationExpansion {
+  abbreviation: string;
+  expansion: string;
+}
+
+interface QueryExpansion {
+  original: string;
+  expanded: string;
+}
+
+interface QueryEnhancements {
+  originalQuery: string;
+  corrections: Correction[];
+  expansions: QueryExpansion[];
+  abbreviationsExpanded: AbbreviationExpansion[];
+  suggestions: string[];
+}
+
+interface AmbiguityAnalysis {
+  level: 'low' | 'medium' | 'high';
+  reasons: string[];
+  clarificationQuestions: string[];
+}
+
+interface QueryProcessingResult {
+  processedQuery: string;
+  enhancements: QueryEnhancements;
+  ambiguityAnalysis: AmbiguityAnalysis;
+  confidence: number;
+}
 
 /**
  * Query Processor for expanding, correcting, and enhancing user queries
  */
 class QueryProcessor {
+  private abbreviations: Map<string, string>;
+  private corrections: Map<string, string>;
+  private expansions: Map<string, string>;
+
   constructor() {
     this.abbreviations = this.initializeAbbreviations();
     this.corrections = this.initializeCommonCorrections();
     this.expansions = this.initializeQueryExpansions();
   }
 
-  initializeAbbreviations() {
+  private initializeAbbreviations(): Map<string, string> {
     return new Map([
       // Development abbreviations
       ['js', 'javascript'],
@@ -44,7 +86,7 @@ class QueryProcessor {
     ]);
   }
 
-  initializeCommonCorrections() {
+  private initializeCommonCorrections(): Map<string, string> {
     return new Map([
       // Common typos
       ['createt', 'create'],
@@ -70,7 +112,7 @@ class QueryProcessor {
     ]);
   }
 
-  initializeQueryExpansions() {
+  private initializeQueryExpansions(): Map<string, string> {
     return new Map([
       // Expand vague queries
       ['make it better', 'optimize and improve the current implementation'],
@@ -91,11 +133,11 @@ class QueryProcessor {
   /**
    * Process and enhance user query
    */
-  async processQuery(query) {
+  async processQuery(query: string): Promise<QueryProcessingResult> {
     console.log(chalk.blue('🔍 Processing query for enhancements...'));
 
     let processedQuery = query;
-    const enhancements = {
+    const enhancements: QueryEnhancements = {
       originalQuery: query,
       corrections: [],
       expansions: [],
@@ -132,7 +174,10 @@ class QueryProcessor {
   /**
    * Apply spell corrections
    */
-  applySpellCorrections(query, enhancements) {
+  private applySpellCorrections(
+    query: string,
+    enhancements: QueryEnhancements
+  ): string {
     let correctedQuery = query;
 
     for (const [typo, correction] of this.corrections) {
@@ -153,7 +198,10 @@ class QueryProcessor {
   /**
    * Expand abbreviations
    */
-  expandAbbreviations(query, enhancements) {
+  private expandAbbreviations(
+    query: string,
+    enhancements: QueryEnhancements
+  ): string {
     let expandedQuery = query;
 
     for (const [abbrev, expansion] of this.abbreviations) {
@@ -176,7 +224,7 @@ class QueryProcessor {
   /**
    * Expand vague or incomplete queries
    */
-  expandQuery(query, enhancements) {
+  private expandQuery(query: string, enhancements: QueryEnhancements): string {
     let expandedQuery = query;
 
     for (const [vague, expansion] of this.expansions) {
@@ -196,7 +244,10 @@ class QueryProcessor {
   /**
    * Add contextual suggestions
    */
-  addContextSuggestions(query, enhancements) {
+  private addContextSuggestions(
+    query: string,
+    enhancements: QueryEnhancements
+  ): void {
     const words = query.toLowerCase().split(/\s+/);
 
     // Suggest adding technology context
@@ -237,8 +288,8 @@ class QueryProcessor {
   /**
    * Analyze query for ambiguity
    */
-  analyzeAmbiguity(query) {
-    const ambiguity = {
+  private analyzeAmbiguity(query: string): AmbiguityAnalysis {
+    const ambiguity: AmbiguityAnalysis = {
       level: 'low',
       reasons: [],
       clarificationQuestions: [],
@@ -285,16 +336,19 @@ class QueryProcessor {
   /**
    * Check if abbreviation is part of a command
    */
-  isPartOfCommand(query, abbrev) {
+  private isPartOfCommand(query: string, abbrev: string): boolean {
     const commandPatterns = /(?:^|\s)(npm|yarn|pip|git|docker|kubectl)\s+/gi;
     const match = commandPatterns.exec(query);
-    return match && query.indexOf(abbrev) > match.index;
+    return match !== null && query.indexOf(abbrev) > match.index;
   }
 
   /**
    * Calculate confidence in query processing
    */
-  calculateProcessingConfidence(enhancements, ambiguityAnalysis) {
+  private calculateProcessingConfidence(
+    enhancements: QueryEnhancements,
+    ambiguityAnalysis: AmbiguityAnalysis
+  ): number {
     let confidence = 0.7; // Base confidence
 
     // Boost confidence for corrections and expansions
@@ -320,7 +374,7 @@ class QueryProcessor {
   /**
    * Display query processing results
    */
-  displayProcessingResults(result) {
+  displayProcessingResults(result: QueryProcessingResult): void {
     if (result.enhancements.corrections.length > 0) {
       console.log(chalk.yellow('📝 Spell corrections applied:'));
       result.enhancements.corrections.forEach((c) => {
@@ -353,4 +407,4 @@ class QueryProcessor {
   }
 }
 
-module.exports = QueryProcessor;
+export default QueryProcessor;

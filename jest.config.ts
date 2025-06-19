@@ -16,6 +16,8 @@ const config: Config = {
     '^@interfaces/(.*)$': '<rootDir>/src/interfaces/$1',
     '^@utils/(.*)$': '<rootDir>/src/utils/$1',
     '^@types/(.*)$': '<rootDir>/src/types/$1',
+    // Map .js imports to .ts files for TypeScript modules
+    '(.+)\\.js$': '$1',
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   testTimeout: 30000,

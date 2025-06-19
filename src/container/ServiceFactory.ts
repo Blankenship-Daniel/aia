@@ -2,17 +2,23 @@
  * Service Factory
  * Configures and registers all services with the DI container
  */
-const DIContainer = require('./DIContainer');
+import { DIContainer } from './DIContainer.js';
 
 // Note: Interfaces are now in TypeScript files and not needed for runtime
 // They provide type safety for the TypeScript services
 
-class ServiceFactory {
+interface ValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+export class ServiceFactory {
   /**
    * Create and configure DI container with all services
-   * @returns {DIContainer} Configured container
+   * @returns Configured container
    */
-  static createContainer() {
+  public static createContainer(): DIContainer {
     const container = new DIContainer();
 
     // Register core services
@@ -26,9 +32,9 @@ class ServiceFactory {
 
   /**
    * Register core business logic services
-   * @param {DIContainer} container - DI container
+   * @param container - DI container
    */
-  static registerCoreServices(container) {
+  public static registerCoreServices(container: DIContainer): void {
     // Configuration Service (no dependencies - foundational)
     container.registerFactory('configuration', (container) => {
       const {
@@ -129,9 +135,9 @@ class ServiceFactory {
 
   /**
    * Register utility and helper services
-   * @param {DIContainer} container - DI container
+   * @param container - DI container
    */
-  static registerUtilityServices(container) {
+  public static registerUtilityServices(container: DIContainer): void {
     // Error Handler
     container.registerFactory('errorHandler', (container) => {
       const ErrorHandler = require('../ErrorHandler');
@@ -159,10 +165,12 @@ class ServiceFactory {
 
   /**
    * Create configured container for testing
-   * @param {Object} mockServices - Mock services to override
-   * @returns {DIContainer} Test container
+   * @param mockServices - Mock services to override
+   * @returns Test container
    */
-  static createTestContainer(mockServices = {}) {
+  public static createTestContainer(
+    mockServices: Record<string, unknown> = {}
+  ): DIContainer {
     const container = new DIContainer();
 
     // Register mock services first
@@ -179,12 +187,12 @@ class ServiceFactory {
 
   /**
    * Validate container configuration
-   * @param {DIContainer} container - Container to validate
-   * @returns {Object} Validation result
+   * @param container - Container to validate
+   * @returns Validation result
    */
-  static validateContainer(container) {
-    const errors = [];
-    const warnings = [];
+  public static validateContainer(container: DIContainer): ValidationResult {
+    const errors: string[] = [];
+    const warnings: string[] = [];
 
     const requiredServices = [
       'configuration',
@@ -207,8 +215,10 @@ class ServiceFactory {
     try {
       container.getInitializationOrder();
     } catch (error) {
-      if (error.message.includes('Circular dependency')) {
-        errors.push(error.message);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      if (errorMessage.includes('Circular dependency')) {
+        errors.push(errorMessage);
       }
     }
 
@@ -219,5 +229,3 @@ class ServiceFactory {
     };
   }
 }
-
-module.exports = ServiceFactory;

@@ -27,7 +27,6 @@ export class ContextService implements IContextService {
     }
 
     this.initialized = true;
-    console.log('ContextService initialized');
   }
 
   /**

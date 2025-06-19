@@ -1,22 +1,122 @@
+// Use require for chalk to match existing codebase patterns
 const chalk = require('chalk');
+import * as fs from 'fs-extra';
+import * as path from 'path';
+
+// Use require for inquirer to avoid module import issues
 const inquirer = require('inquirer');
 
-const CodeIndexService = require('../services/CodeIndexService');
-const CodebaseSummarizer = require('../CodebaseSummarizer');
-const SemanticCodeAnalyzer = require('../SemanticCodeAnalyzer');
+import { ICommand, CommandDefinition } from '../interfaces/ICommand.js';
+import { CommandResult, CommandOptions, AsyncResult } from '../types/index.js';
 
-class IndexCommand {
+// Import JavaScript modules with explicit types
+const CodeIndexService =
+  require('../../dist/services/CodeIndexService.js').CodeIndexService;
+const CodebaseSummarizer = require('../../src/CodebaseSummarizer.js');
+const SemanticCodeAnalyzer = require('../../src/SemanticCodeAnalyzer.js');
+const ConfigurationManager = require('../../src/ConfigurationManager.js');
+
+interface IndexStats {
+  totalFiles: number;
+  totalClasses: number;
+  totalFunctions: number;
+  totalTodos: number;
+  languages: Record<string, number>;
+  lastIndexed?: string;
+  largestFiles?: Array<{ file: string; size: number }>;
+}
+
+interface SearchResult {
+  type: 'class' | 'function';
+  name: string;
+  file: string;
+  relevance: number;
+}
+
+interface FileResult {
+  type: string;
+  name: string;
+  file: string;
+  relevance: number;
+}
+
+interface TodoItem {
+  file: string;
+  line: number;
+  text: string;
+}
+
+interface IndexData {
+  files: Map<string, unknown>;
+  classes: Map<string, unknown>;
+  functions: Map<string, unknown>;
+  todos: TodoItem[];
+  metadata: {
+    totalFiles: number;
+    totalClasses: number;
+    totalFunctions: number;
+    totalTodos: number;
+    languages: Record<string, number>;
+    lastIndexed?: string;
+  };
+}
+
+interface ExportResult {
+  file: string;
+  format: string;
+  size: number;
+}
+
+interface ComponentInfo {
+  file: string;
+  purpose?: string;
+  exports?: string[];
+  importance?: number;
+}
+
+interface EntryPoint {
+  file: string;
+  purpose: string;
+}
+
+interface AnalysisResult {
+  architecture: Array<{
+    name: string;
+    confidence: number;
+    evidence: string[];
+  }>;
+  patterns: Array<{
+    name: string;
+    confidence: number;
+    description: string;
+  }>;
+  quality: {
+    score: number;
+    factors: string[];
+    suggestions: string[];
+  };
+}
+
+export class IndexCommand implements ICommand {
+  private name = 'index';
+  private description = 'Create and manage codebase index for AI analysis';
+  private aliases = ['idx', 'scan'];
+
+  private codeIndexService: any;
+  private codebaseSummarizer: any;
+  private semanticAnalyzer: any;
+
   constructor() {
-    this.name = 'index';
-    this.description = 'Create and manage codebase index for AI analysis';
-    this.aliases = ['idx', 'scan'];
-
     this.codeIndexService = new CodeIndexService();
     this.codebaseSummarizer = new CodebaseSummarizer();
     this.semanticAnalyzer = new SemanticCodeAnalyzer();
   }
 
-  async execute(context, args, options) {
+  public async execute(
+    context: Record<string, unknown>,
+    args: string[],
+    options: CommandOptions
+  ): Promise<CommandResult> {
     try {
       const action = args[0] || 'build';
 
@@ -76,12 +176,14 @@ class IndexCommand {
           return { success: false, error: 'Invalid action' };
       }
     } catch (error) {
-      console.error(chalk.red('Index command error:'), error.message);
-      return { success: false, error: error.message };
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error(chalk.red('Index command error:'), errorMessage);
+      return { success: false, error: errorMessage };
     }
   }
 
-  async buildIndex(options) {
+  private async buildIndex(options: CommandOptions): Promise<CommandResult> {
     const startTime = Date.now();
 
     console.log(chalk.blue('🔍 Building codebase index...'));
@@ -101,12 +203,14 @@ class IndexCommand {
         ]);
 
         if (!shouldRebuild) {
-          console.log(chalk.yellow('Index build cancelled.'));
-          return { success: false, error: 'Build cancelled' };
+          return {
+            success: true,
+            output: 'Index rebuild cancelled',
+          };
         }
       }
 
-      const directory = options.directory || process.cwd();
+      const directory = (options.directory as string) || process.cwd();
       const index = await this.codeIndexService.indexCodebase(directory);
 
       const duration = Date.now() - startTime;
@@ -132,12 +236,17 @@ class IndexCommand {
         data: { stats, duration },
       };
     } catch (error) {
-      console.error(chalk.red('Failed to build index:'), error.message);
-      return { success: false, error: error.message };
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error(chalk.red('Failed to build index:'), errorMessage);
+      return { success: false, error: errorMessage };
     }
   }
 
-  async searchIndex(query, options) {
+  private async searchIndex(
+    query: string[],
+    options: CommandOptions
+  ): Promise<CommandResult> {
     if (query.length === 0) {
       console.log(chalk.yellow('Please provide a search query.'));
       console.log(chalk.blue('Usage: aia index search <query>'));
@@ -159,19 +268,20 @@ class IndexCommand {
       console.log(chalk.blue(`🔍 Searching for: "${searchTerm}"`));
 
       // Search symbols
-      const symbolResults = this.codeIndexService.searchSymbols(searchTerm);
+      const symbolResults: SearchResult[] =
+        this.codeIndexService.searchSymbols(searchTerm);
 
       // Search files
-      const fileResults = this.codeIndexService.searchFiles(searchTerm);
+      const fileResults: FileResult[] =
+        this.codeIndexService.searchFiles(searchTerm);
 
       // Display results
       if (symbolResults.length > 0) {
         console.log(chalk.green('\n📁 Symbol Results:'));
         symbolResults.slice(0, 10).forEach((result) => {
-          console.log(chalk.white(`  ${result.type}: ${result.name}`));
-          console.log(chalk.gray(`    File: ${result.file}`));
           console.log(
-            chalk.gray(`    Relevance: ${(result.relevance * 100).toFixed(1)}%`)
+            chalk.white(`  ${result.type}: ${result.name}`),
+            chalk.gray(`(${result.file})`)
           );
         });
       }
@@ -179,12 +289,9 @@ class IndexCommand {
       if (fileResults.length > 0) {
         console.log(chalk.green('\n📄 File Results:'));
         fileResults.slice(0, 10).forEach((result) => {
-          console.log(chalk.white(`  ${result.path}`));
           console.log(
-            chalk.gray(`    Type: ${result.type}, Language: ${result.language}`)
-          );
-          console.log(
-            chalk.gray(`    Relevance: ${(result.relevance * 100).toFixed(1)}%`)
+            chalk.white(`  ${result.name}`),
+            chalk.gray(`(${result.file})`)
           );
         });
       }
@@ -199,12 +306,14 @@ class IndexCommand {
         data: { symbols: symbolResults, files: fileResults },
       };
     } catch (error) {
-      console.error(chalk.red('Search failed:'), error.message);
-      return { success: false, error: error.message };
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error(chalk.red('Search failed:'), errorMessage);
+      return { success: false, error: errorMessage };
     }
   }
 
-  async showStats(options) {
+  private async showStats(options: CommandOptions): Promise<CommandResult> {
     try {
       const index = await this.codeIndexService.loadIndex();
       if (!index) {
@@ -214,7 +323,7 @@ class IndexCommand {
         return { success: false, output: 'No index found' };
       }
 
-      const stats = this.codeIndexService.getIndexStats();
+      const stats: IndexStats = this.codeIndexService.getIndexStats();
 
       console.log(chalk.blue.bold('\n📊 Codebase Index Statistics'));
       console.log(chalk.white(`Total Files: ${stats.totalFiles}`));
@@ -228,16 +337,14 @@ class IndexCommand {
       if (options.verbose || options.detailed) {
         console.log(chalk.blue('\n🌍 Language Distribution:'));
         Object.entries(stats.languages).forEach(([lang, count]) => {
-          console.log(chalk.white(`  ${lang}: ${count} files`));
+          console.log(chalk.gray(`  ${lang}: ${count} files`));
         });
 
-        if (stats.largestFiles?.length > 0) {
-          console.log(chalk.blue('\n📏 Largest Files:'));
+        if (stats.largestFiles?.length) {
+          console.log(chalk.blue('\n📁 Largest Files:'));
           stats.largestFiles.slice(0, 5).forEach((file) => {
             console.log(
-              chalk.white(
-                `  ${file.path} (${(file.size / 1024).toFixed(1)} KB)`
-              )
+              chalk.gray(`  ${file.file}: ${(file.size / 1024).toFixed(1)} KB`)
             );
           });
         }
@@ -249,12 +356,14 @@ class IndexCommand {
         data: stats,
       };
     } catch (error) {
-      console.error(chalk.red('Failed to show stats:'), error.message);
-      return { success: false, error: error.message };
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error(chalk.red('Failed to show stats:'), errorMessage);
+      return { success: false, error: errorMessage };
     }
   }
 
-  async showSummary(options) {
+  private async showSummary(options: CommandOptions): Promise<CommandResult> {
     try {
       const index = await this.codeIndexService.loadIndex();
       if (!index) {
@@ -289,16 +398,18 @@ class IndexCommand {
 
       if (summary.summary.entryPoints.length > 0) {
         console.log(chalk.blue('\n🚪 Entry Points:'));
-        summary.summary.entryPoints.forEach((entry) => {
-          console.log(chalk.white(`  ${entry.file} (${entry.type})`));
+        summary.summary.entryPoints.forEach((entry: EntryPoint) => {
+          console.log(chalk.gray(`  ${entry.file}: ${entry.purpose}`));
         });
       }
 
       if (summary.summary.keyComponents.length > 0) {
         console.log(chalk.blue('\n🔧 Key Components:'));
-        summary.summary.keyComponents.slice(0, 5).forEach((comp) => {
-          console.log(chalk.white(`  ${comp.file} - ${comp.purpose}`));
-        });
+        summary.summary.keyComponents
+          .slice(0, 5)
+          .forEach((comp: ComponentInfo) => {
+            console.log(chalk.gray(`  ${comp.file}: ${comp.purpose}`));
+          });
       }
 
       if (options.verbose) {
@@ -306,9 +417,9 @@ class IndexCommand {
         console.log(chalk.gray('  ' + summary.summary.aiContext.prompt));
 
         if (summary.summary.aiContext.keyInsights.length > 0) {
-          console.log(chalk.blue('\n🎯 Key Insights:'));
-          summary.summary.aiContext.keyInsights.forEach((insight) => {
-            console.log(chalk.gray(`  • ${insight}`));
+          console.log(chalk.blue('\n🔍 Key Insights:'));
+          summary.summary.aiContext.keyInsights.forEach((insight: string) => {
+            console.log(chalk.gray(`  - ${insight}`));
           });
         }
       }
@@ -319,12 +430,17 @@ class IndexCommand {
         data: summary,
       };
     } catch (error) {
-      console.error(chalk.red('Failed to generate summary:'), error.message);
-      return { success: false, error: error.message };
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error(chalk.red('Failed to generate summary:'), errorMessage);
+      return { success: false, error: errorMessage };
     }
   }
 
-  async listFiles(patterns, options) {
+  private async listFiles(
+    patterns: string[],
+    options: CommandOptions
+  ): Promise<CommandResult> {
     try {
       const index = await this.codeIndexService.loadIndex();
       if (!index) {
@@ -334,13 +450,13 @@ class IndexCommand {
         return { success: false, output: 'No index found' };
       }
 
-      let files = Array.from(index.files.entries());
+      let files = Array.from((index as IndexData).files.entries());
 
       // Filter by patterns if provided
       if (patterns.length > 0) {
         const pattern = patterns.join(' ').toLowerCase();
         files = files.filter(
-          ([path, info]) =>
+          ([path, info]: [string, any]) =>
             path.toLowerCase().includes(pattern) ||
             info.type.toLowerCase().includes(pattern) ||
             info.language.toLowerCase().includes(pattern)
@@ -351,31 +467,30 @@ class IndexCommand {
 
       // Group by type if verbose
       if (options.verbose) {
-        const byType = new Map();
-        files.forEach(([path, info]) => {
-          if (!byType.has(info.type)) byType.set(info.type, []);
-          byType.get(info.type).push(path);
+        const byType = new Map<string, string[]>();
+        files.forEach(([path, info]: [string, any]) => {
+          const type = info.type || 'unknown';
+          if (!byType.has(type)) {
+            byType.set(type, []);
+          }
+          byType.get(type)!.push(path);
         });
 
-        for (const [type, filePaths] of byType) {
-          console.log(chalk.green(`\n${type.toUpperCase()}:`));
-          filePaths.slice(0, 20).forEach((path) => {
-            console.log(chalk.white(`  ${path}`));
+        for (const [type, filePaths] of Array.from(byType)) {
+          console.log(chalk.blue(`\n${type} (${filePaths.length}):`));
+          filePaths.slice(0, 10).forEach((filePath) => {
+            console.log(chalk.gray(`  ${filePath}`));
           });
-          if (filePaths.length > 20) {
-            console.log(chalk.gray(`  ... and ${filePaths.length - 20} more`));
+          if (filePaths.length > 10) {
+            console.log(chalk.gray(`  ... and ${filePaths.length - 10} more`));
           }
         }
       } else {
-        files.slice(0, 50).forEach(([path, info]) => {
-          console.log(chalk.white(`  ${path}`));
-          if (options.detailed) {
-            console.log(
-              chalk.gray(
-                `    ${info.language} | ${info.type} | ${info.size} bytes`
-              )
-            );
-          }
+        files.slice(0, 50).forEach(([path, info]: [string, any]) => {
+          console.log(
+            chalk.white(`  ${path}`),
+            chalk.gray(`(${info.type || 'unknown'})`)
+          );
         });
 
         if (files.length > 50) {
@@ -389,12 +504,17 @@ class IndexCommand {
         data: { files },
       };
     } catch (error) {
-      console.error(chalk.red('Failed to list files:'), error.message);
-      return { success: false, error: error.message };
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error(chalk.red('Failed to list files:'), errorMessage);
+      return { success: false, error: errorMessage };
     }
   }
 
-  async listSymbols(filters, options) {
+  private async listSymbols(
+    filters: string[],
+    options: CommandOptions
+  ): Promise<CommandResult> {
     try {
       const index = await this.codeIndexService.loadIndex();
       if (!index) {
@@ -407,7 +527,7 @@ class IndexCommand {
       const filter = filters.join(' ').toLowerCase();
 
       // Get classes
-      let classes = Array.from(index.classes.entries());
+      let classes = Array.from((index as IndexData).classes.entries());
       if (filter) {
         classes = classes.filter(([name]) =>
           name.toLowerCase().includes(filter)
@@ -415,7 +535,7 @@ class IndexCommand {
       }
 
       // Get functions
-      let functions = Array.from(index.functions.entries());
+      let functions = Array.from((index as IndexData).functions.entries());
       if (filter) {
         functions = functions.filter(([name]) =>
           name.toLowerCase().includes(filter)
@@ -424,23 +544,8 @@ class IndexCommand {
 
       if (classes.length > 0) {
         console.log(chalk.blue(`\n🏗️  Classes (${classes.length}):`));
-        classes.slice(0, 20).forEach(([name, info]) => {
-          console.log(chalk.white(`  ${name}`));
-          if (options.verbose) {
-            console.log(chalk.gray(`    File: ${info.file}`));
-            if (info.extends) {
-              console.log(chalk.gray(`    Extends: ${info.extends}`));
-            }
-            if (info.methods && info.methods.length > 0) {
-              console.log(
-                chalk.gray(
-                  `    Methods: ${info.methods.slice(0, 3).join(', ')}${
-                    info.methods.length > 3 ? '...' : ''
-                  }`
-                )
-              );
-            }
-          }
+        classes.slice(0, 20).forEach(([name, info]: [string, any]) => {
+          console.log(chalk.white(`  ${name}`), chalk.gray(`(${info.file})`));
         });
 
         if (classes.length > 20) {
@@ -452,11 +557,8 @@ class IndexCommand {
 
       if (functions.length > 0) {
         console.log(chalk.blue(`\n⚡ Functions (${functions.length}):`));
-        functions.slice(0, 20).forEach(([name, info]) => {
-          console.log(chalk.white(`  ${name}${info.async ? ' (async)' : ''}`));
-          if (options.verbose) {
-            console.log(chalk.gray(`    File: ${info.file}`));
-          }
+        functions.slice(0, 20).forEach(([name, info]: [string, any]) => {
+          console.log(chalk.white(`  ${name}`), chalk.gray(`(${info.file})`));
         });
 
         if (functions.length > 20) {
@@ -476,12 +578,17 @@ class IndexCommand {
         data: { classes, functions },
       };
     } catch (error) {
-      console.error(chalk.red('Failed to list symbols:'), error.message);
-      return { success: false, error: error.message };
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error(chalk.red('Failed to list symbols:'), errorMessage);
+      return { success: false, error: errorMessage };
     }
   }
 
-  async showTodos(filters, options) {
+  private async showTodos(
+    filters: string[],
+    options: CommandOptions
+  ): Promise<CommandResult> {
     try {
       const index = await this.codeIndexService.loadIndex();
       if (!index) {
@@ -491,7 +598,9 @@ class IndexCommand {
         return { success: false, output: 'No index found' };
       }
 
-      const todos = this.codeIndexService.searchTodos(filters.join(' '));
+      const todos: TodoItem[] = this.codeIndexService.searchTodos(
+        filters.join(' ')
+      );
 
       if (todos.length === 0) {
         console.log(chalk.green('🎉 No TODO items found!'));
@@ -515,20 +624,22 @@ class IndexCommand {
         data: { todos },
       };
     } catch (error) {
-      console.error(chalk.red('Failed to show TODOs:'), error.message);
-      return { success: false, error: error.message };
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error(chalk.red('Failed to show TODOs:'), errorMessage);
+      return { success: false, error: errorMessage };
     }
   }
 
-  async refreshIndex(options) {
+  private async refreshIndex(options: CommandOptions): Promise<CommandResult> {
     console.log(chalk.blue('🔄 Refreshing codebase index...'));
 
     // Force rebuild
-    options.force = true;
-    return await this.buildIndex(options);
+    const refreshOptions = { ...options, force: true };
+    return await this.buildIndex(refreshOptions);
   }
 
-  async analyzeCode(options) {
+  private async analyzeCode(options: CommandOptions): Promise<CommandResult> {
     try {
       const index = await this.codeIndexService.loadIndex();
       if (!index) {
@@ -540,27 +651,22 @@ class IndexCommand {
 
       console.log(chalk.blue('🧠 Performing semantic code analysis...'));
 
-      const analysis = await this.semanticAnalyzer.analyzeCodebaseSemantics(
-        index
-      );
+      const analysis: AnalysisResult =
+        await this.semanticAnalyzer.analyzeCodebaseSemantics(index);
 
       console.log(chalk.blue.bold('\n🏗️  Architecture Analysis'));
       if (analysis.architecture.length > 0) {
         analysis.architecture.forEach((arch) => {
           console.log(
             chalk.white(
-              `  ${arch.name} (${(arch.confidence * 100).toFixed(
+              `  ${arch.name}: ${(arch.confidence * 100).toFixed(
                 1
-              )}% confidence)`
+              )}% confidence`
             )
           );
-          if (options.verbose && arch.evidence.length > 0) {
-            arch.evidence.forEach((evidence) => {
-              console.log(
-                chalk.gray(`    ${evidence.type}: ${evidence.indicator}`)
-              );
-            });
-          }
+          arch.evidence.forEach((evidence) => {
+            console.log(chalk.gray(`    - ${evidence}`));
+          });
         });
       } else {
         console.log(chalk.gray('  No clear architectural patterns detected'));
@@ -569,13 +675,14 @@ class IndexCommand {
       console.log(chalk.blue.bold('\n🎨 Design Patterns'));
       if (analysis.patterns.length > 0) {
         analysis.patterns.forEach((pattern) => {
-          console.log(chalk.white(`  ${pattern.name}: ${pattern.description}`));
           console.log(
-            chalk.gray(
-              `    Confidence: ${(pattern.confidence * 100).toFixed(1)}%`
+            chalk.white(
+              `  ${pattern.name}: ${(pattern.confidence * 100).toFixed(
+                1
+              )}% confidence`
             )
           );
-          console.log(chalk.gray(`    Matches: ${pattern.matches.length}`));
+          console.log(chalk.gray(`    ${pattern.description}`));
         });
       } else {
         console.log(chalk.gray('  No design patterns detected'));
@@ -591,7 +698,7 @@ class IndexCommand {
       if (analysis.quality.factors.length > 0) {
         console.log(chalk.blue('\n📈 Quality Factors:'));
         analysis.quality.factors.forEach((factor) => {
-          console.log(chalk.gray(`  • ${factor}`));
+          console.log(chalk.gray(`  ✓ ${factor}`));
         });
       }
 
@@ -608,39 +715,45 @@ class IndexCommand {
         data: analysis,
       };
     } catch (error) {
-      console.error(chalk.red('Failed to analyze code:'), error.message);
-      return { success: false, error: error.message };
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error(chalk.red('Failed to analyze code:'), errorMessage);
+      return { success: false, error: errorMessage };
     }
   }
 
-  async exportIndex(args, options) {
+  private async exportIndex(
+    args: string[],
+    options: CommandOptions
+  ): Promise<CommandResult> {
     try {
       const index = await this.codeIndexService.loadIndex();
       if (!index) {
         console.log(
           chalk.yellow('No index found. Build one first with: aia index build')
         );
-        return { success: false, output: 'No index found' };
+        return { success: false, error: 'No index found' };
       }
 
       // Determine output file
-      const outputFile = args[0] || options.output || 'codebase-prompt.md';
-      const format = options.format || 'markdown';
-      const includeCode = options.code || false;
-      const includeDetails = options.detailed || false;
+      const outputFile =
+        args[0] || (options.output as string) || 'codebase-prompt.md';
+      const format = (options.format as string) || 'markdown';
+      const includeCode = Boolean(options.code);
+      const includeDetails = Boolean(options.detailed);
 
       console.log(chalk.blue('📤 Exporting codebase index...'));
 
       let content = '';
 
       if (format === 'markdown') {
-        content = await this.generateMarkdownPrompt(index, {
+        content = await this.generateMarkdownPrompt(index as IndexData, {
           includeCode,
           includeDetails,
         });
       } else if (format === 'json') {
         content = JSON.stringify(
-          await this.generateStructuredPrompt(index, {
+          await this.generateStructuredPrompt(index as IndexData, {
             includeCode,
             includeDetails,
           }),
@@ -648,20 +761,15 @@ class IndexCommand {
           2
         );
       } else if (format === 'text') {
-        content = await this.generateTextPrompt(index, {
+        content = await this.generateTextPrompt(index as IndexData, {
           includeCode,
           includeDetails,
         });
       } else {
-        return {
-          success: false,
-          error: 'Invalid format. Use: markdown, json, or text',
-        };
+        return { success: false, error: `Unsupported format: ${format}` };
       }
 
       // Write to file
-      const fs = require('fs-extra');
-      const path = require('path');
       const fullPath = path.resolve(outputFile);
       await fs.writeFile(fullPath, content, 'utf8');
 
@@ -677,12 +785,17 @@ class IndexCommand {
         data: { file: fullPath, format, size: content.length },
       };
     } catch (error) {
-      console.error(chalk.red('Failed to export index:'), error.message);
-      return { success: false, error: error.message };
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error(chalk.red('Failed to export index:'), errorMessage);
+      return { success: false, error: errorMessage };
     }
   }
 
-  async generateMarkdownPrompt(index, options = {}) {
+  private async generateMarkdownPrompt(
+    index: IndexData,
+    options: { includeCode?: boolean; includeDetails?: boolean } = {}
+  ): Promise<string> {
     const { includeCode, includeDetails } = options;
     let content = '';
 
@@ -729,9 +842,7 @@ class IndexCommand {
     if (entryPoints && entryPoints.length > 0) {
       content += '## Entry Points\n\n';
       for (const entry of entryPoints) {
-        const entryName =
-          typeof entry === 'string' ? entry : entry.file || entry;
-        content += `- **${entryName}** (main)\n`;
+        content += `- **${entry.file}** - ${entry.purpose}\n`;
       }
       content += '\n';
     }
@@ -742,12 +853,7 @@ class IndexCommand {
     if (keyComponents && keyComponents.length > 0) {
       content += '## Key Components\n\n';
       for (const component of keyComponents.slice(0, 10)) {
-        const file = component.file || component;
-        const purpose = component.purpose || 'Core module';
-        content += `- **${file}** - ${purpose}\n`;
-        if (includeDetails && component.symbols) {
-          content += `  - Symbols: ${component.symbols} items\n`;
-        }
+        content += `- **${component.file}** - ${component.purpose}\n`;
       }
       content += '\n';
     }
@@ -761,25 +867,25 @@ class IndexCommand {
       if (analysis.architecture.length > 0) {
         content += '## Architecture Patterns\n\n';
         for (const arch of analysis.architecture) {
-          content += `- **${arch.pattern}** (${(arch.confidence * 100).toFixed(
-            1
-          )}% confidence)\n`;
-          if (arch.description) {
-            content += `  - ${arch.description}\n`;
+          content += `### ${arch.name}\n`;
+          content += `Confidence: ${(arch.confidence * 100).toFixed(1)}%\n\n`;
+          content += 'Evidence:\n';
+          for (const evidence of arch.evidence) {
+            content += `- ${evidence}\n`;
           }
+          content += '\n';
         }
-        content += '\n';
       }
 
       if (analysis.patterns.length > 0) {
         content += '## Design Patterns\n\n';
         for (const pattern of analysis.patterns) {
-          content += `- **${pattern.name}** in ${pattern.file}\n`;
-          if (pattern.description) {
-            content += `  - ${pattern.description}\n`;
-          }
+          content += `### ${pattern.name}\n`;
+          content += `${pattern.description}\n`;
+          content += `Confidence: ${(pattern.confidence * 100).toFixed(
+            1
+          )}%\n\n`;
         }
-        content += '\n';
       }
     }
 
@@ -787,37 +893,36 @@ class IndexCommand {
     if (index.classes.size > 0) {
       content += '## Classes\n\n';
       let classCount = 0;
-      for (const [className, classInfo] of index.classes) {
+      for (const [className, classInfo] of Array.from(index.classes)) {
         if (classCount >= 20 && !includeDetails) break;
-        content += `### ${className}\n\n`;
-        content += `- **File**: ${classInfo.file}\n`;
-        if (classInfo.extends) {
-          content += `- **Extends**: ${classInfo.extends}\n`;
-        }
-        if (classInfo.methods && classInfo.methods.length > 0) {
-          content += `- **Methods**: ${classInfo.methods.join(', ')}\n`;
+        content += `- **${className}** (${(classInfo as any).file})`;
+        if ((classInfo as any).extends) {
+          content += ` extends ${(classInfo as any).extends}`;
         }
         content += '\n';
         classCount++;
       }
       if (index.classes.size > 20 && !includeDetails) {
-        content += `*... and ${index.classes.size - 20} more classes*\n\n`;
+        content += `... and ${index.classes.size - 20} more classes\n`;
       }
+      content += '\n';
     }
 
     // Functions
     if (index.functions.size > 0) {
       content += '## Functions\n\n';
       let funcCount = 0;
-      for (const [funcName, funcInfo] of index.functions) {
+      for (const [funcName, funcInfo] of Array.from(index.functions)) {
         if (funcCount >= 30 && !includeDetails) break;
-        content += `- **${funcName}**${funcInfo.async ? ' (async)' : ''} - ${
-          funcInfo.file
-        }\n`;
+        content += `- **${funcName}** (${(funcInfo as any).file})`;
+        if ((funcInfo as any).async) {
+          content += ' - async';
+        }
+        content += '\n';
         funcCount++;
       }
       if (index.functions.size > 30 && !includeDetails) {
-        content += `*... and ${index.functions.size - 30} more functions*\n\n`;
+        content += `... and ${index.functions.size - 30} more functions\n`;
       } else {
         content += '\n';
       }
@@ -830,7 +935,7 @@ class IndexCommand {
         content += `- **${todo.file}:${todo.line}** - ${todo.text}\n`;
       }
       if (index.todos.length > 10) {
-        content += `*... and ${index.todos.length - 10} more TODOs*\n`;
+        content += `... and ${index.todos.length - 10} more TODOs\n`;
       }
       content += '\n';
     }
@@ -842,7 +947,7 @@ class IndexCommand {
     content +=
       'It provides a comprehensive overview of the project structure, ';
     content += 'key components, and architectural patterns.\n\n';
-    content += '### For Custom Instructions:\n';
+    content += '### For Copilot Instructions:\n';
     content += '- Use the project overview and architecture information\n';
     content += '- Reference key components when making suggestions\n';
     content += '- Consider the primary language and frameworks\n\n';
@@ -854,7 +959,10 @@ class IndexCommand {
     return content;
   }
 
-  async generateStructuredPrompt(index, options = {}) {
+  private async generateStructuredPrompt(
+    index: IndexData,
+    options: { includeCode?: boolean; includeDetails?: boolean } = {}
+  ): Promise<Record<string, unknown>> {
     const { includeCode, includeDetails } = options;
     const summary = await this.codebaseSummarizer.generateAISummary(index);
 
@@ -877,7 +985,7 @@ class IndexCommand {
       keyComponents: (summary.keyComponents || []).slice(0, 10),
       classes: Array.from(index.classes.entries())
         .slice(0, includeDetails ? -1 : 20)
-        .map(([name, info]) => ({
+        .map(([name, info]: [string, any]) => ({
           name,
           file: info.file,
           extends: info.extends,
@@ -885,7 +993,7 @@ class IndexCommand {
         })),
       functions: Array.from(index.functions.entries())
         .slice(0, includeDetails ? -1 : 30)
-        .map(([name, info]) => ({
+        .map(([name, info]: [string, any]) => ({
           name,
           file: info.file,
           async: info.async || false,
@@ -897,7 +1005,7 @@ class IndexCommand {
       const analysis = await this.semanticAnalyzer.analyzeCodebaseSemantics(
         index
       );
-      structured.analysis = {
+      (structured as any).analysis = {
         architecture: analysis.architecture,
         patterns: analysis.patterns,
         quality: analysis.quality,
@@ -907,7 +1015,10 @@ class IndexCommand {
     return structured;
   }
 
-  async generateTextPrompt(index, options = {}) {
+  private async generateTextPrompt(
+    index: IndexData,
+    options: { includeCode?: boolean; includeDetails?: boolean } = {}
+  ): Promise<string> {
     const { includeCode, includeDetails } = options;
     let content = '';
 
@@ -937,7 +1048,7 @@ class IndexCommand {
     if (summary.entryPoints && summary.entryPoints.length > 0) {
       content += 'Entry Points:\n';
       for (const entry of summary.entryPoints) {
-        content += `- ${entry}\n`;
+        content += `- ${entry.file}: ${entry.purpose}\n`;
       }
       content += '\n';
     }
@@ -945,9 +1056,9 @@ class IndexCommand {
     if (index.classes.size > 0) {
       content += 'Key Classes:\n';
       let count = 0;
-      for (const [name, info] of index.classes) {
-        if (count >= 10 && !includeDetails) break;
-        content += `- ${name} (${info.file})\n`;
+      for (const [name, info] of Array.from(index.classes)) {
+        if (count >= 15) break;
+        content += `- ${name} (${(info as any).file})\n`;
         count++;
       }
       content += '\n';
@@ -956,28 +1067,27 @@ class IndexCommand {
     return content;
   }
 
-  async generatePrompts(args, options) {
+  private async generatePrompts(
+    args: string[],
+    options: CommandOptions
+  ): Promise<CommandResult> {
     try {
       const index = await this.codeIndexService.loadIndex();
       if (!index) {
         console.log(
           chalk.yellow('No index found. Build one first with: aia index build')
         );
-        return { success: false, output: 'No index found' };
+        return { success: false, error: 'No index found' };
       }
 
       // Load configuration to get output directories
-      const ConfigurationManager = require('../ConfigurationManager');
-      const path = require('path');
-      const fs = require('fs-extra');
-
-      // Check for local project config first, then fall back to global config
-      let configManager;
       const localConfigDir = path.join(process.cwd(), '.aia');
       const localConfigFile = path.join(localConfigDir, 'config.json');
 
+      let configManager: any;
       if (await fs.pathExists(localConfigFile)) {
-        configManager = new ConfigurationManager(localConfigDir);
+        configManager = new ConfigurationManager();
+        await configManager.setConfigDirectory(localConfigDir);
       } else {
         configManager = new ConfigurationManager();
       }
@@ -985,11 +1095,11 @@ class IndexCommand {
       await configManager.initialize();
       const config = await configManager.getConfig();
 
-      const type = options.type || 'all';
-      const explicitOutputDir = options.output; // Keep track of whether user provided explicit output
+      const type = (options.type as string) || 'all';
+      const explicitOutputDir = options.output as string; // Keep track of whether user provided explicit output
 
       // Helper function to get the output directory for a file type
-      const getOutputDir = (fileType) => {
+      const getOutputDir = (fileType: string): string => {
         // If user provided explicit output directory, use it
         if (explicitOutputDir) {
           console.log(
@@ -1003,9 +1113,9 @@ class IndexCommand {
         if (config.outputDirectories) {
           let configuredDir = '.';
           switch (fileType) {
-            case 'custom-instructions':
+            case 'copilot-instructions':
               configuredDir =
-                config.outputDirectories.customInstructions || '.';
+                config.outputDirectories.copilotInstructions || '.';
               break;
             case 'comprehensive':
               configuredDir = config.outputDirectories.comprehensive || '.';
@@ -1025,114 +1135,63 @@ class IndexCommand {
           return configuredDir;
         }
 
-        return '.'; // Default fallback
+        return '.';
       };
 
       console.log(chalk.blue('📝 Generating AI prompt files...'));
 
-      let results = [];
+      const results: ExportResult[] = [];
 
       if (type === 'all') {
-        // Generate all types with their configured directories
         const types = [
-          {
-            type: 'comprehensive',
-            dir: getOutputDir('comprehensive'),
-          },
-          {
-            type: 'minimal',
-            dir: getOutputDir('minimal'),
-          },
-          {
-            type: 'architecture',
-            dir: getOutputDir('architecture'),
-          },
-          {
-            type: 'dev-focused',
-            dir: getOutputDir('dev-focused'),
-          },
-          {
-            type: 'copilot-instructions',
-            dir: getOutputDir('copilot-instructions'),
-          },
+          'copilot-instructions',
+          'comprehensive',
+          'minimal',
+          'architecture',
+          'dev-focused',
         ];
+        for (const promptType of types) {
+          const content = await this.codeIndexService.generatePromptFile(
+            promptType,
+            Boolean(options.code)
+          );
+          const outputDir = getOutputDir(promptType);
+          const filename = `codebase-${promptType}.md`;
+          const fullPath = path.join(outputDir, filename);
 
-        for (const { type: promptType, dir } of types) {
-          if (promptType === 'copilot-instructions') {
-            const file = await this.codeIndexService.saveCustomInstructions(
-              'copilot-instructions.md',
-              dir
-            );
-            const fileJSON = await this.codeIndexService.savePromptFile(
-              await this.codeIndexService.generateCustomInstructions('json'),
-              'copilot-instructions.json',
-              dir
-            );
-            results.push(file, fileJSON);
-          } else {
-            const content = await this.codeIndexService.generatePromptFile(
-              promptType,
-              options.code
-            );
-            const filename = `codebase-${promptType}.md`;
-            const file = await this.codeIndexService.savePromptFile(
-              content,
-              filename,
-              dir
-            );
-            results.push(file);
-          }
+          await fs.ensureDir(outputDir);
+          await fs.writeFile(fullPath, content, 'utf8');
+
+          results.push({
+            file: fullPath,
+            format: 'markdown',
+            size: content.length,
+          });
+
+          console.log(chalk.green(`✅ Generated: ${fullPath}`));
         }
-
-        console.log(
-          chalk.green(`✅ Generated ${results.length} prompt files:`)
-        );
-        results.forEach((file) => {
-          console.log(chalk.gray(`   ${file}`));
-        });
-      } else if (type === 'custom-instructions') {
-        const typeOutputDir = getOutputDir('custom-instructions');
-        const file = await this.codeIndexService.saveCustomInstructions(
-          'copilot-instructions.md',
-          typeOutputDir
-        );
-        const fileJSON = await this.codeIndexService.savePromptFile(
-          await this.codeIndexService.generateCustomInstructions('json'),
-          'custom-instructions.json',
-          typeOutputDir
-        );
-
-        results = [file, fileJSON];
-        console.log(chalk.green('✅ Generated custom instructions:'));
-        console.log(chalk.gray(`   ${file}`));
-        console.log(chalk.gray(`   ${fileJSON}`));
       } else {
-        // Generate specific type
-        const typeOutputDir = getOutputDir(type);
         const content = await this.codeIndexService.generatePromptFile(
           type,
-          options.code
+          Boolean(options.code)
         );
+        const outputDir = getOutputDir(type);
         const filename = `codebase-${type}.md`;
-        const file = await this.codeIndexService.savePromptFile(
-          content,
-          filename,
-          typeOutputDir
-        );
+        const fullPath = path.join(outputDir, filename);
 
-        results = [file];
-        console.log(chalk.green(`✅ Generated ${type} prompt:`));
-        console.log(chalk.gray(`   ${file}`));
+        await fs.ensureDir(outputDir);
+        await fs.writeFile(fullPath, content, 'utf8');
+
+        results.push({
+          file: fullPath,
+          format: 'markdown',
+          size: content.length,
+        });
+
+        console.log(chalk.green(`✅ Generated: ${fullPath}`));
       }
 
-      const totalSize = results.reduce((sum, file) => {
-        try {
-          const fs = require('fs');
-          return sum + fs.statSync(file).size;
-        } catch (error) {
-          return sum;
-        }
-      }, 0);
+      const totalSize = results.reduce((sum, file) => sum + file.size, 0);
 
       console.log(
         chalk.gray(`   Total size: ${(totalSize / 1024).toFixed(1)} KB`)
@@ -1144,24 +1203,70 @@ class IndexCommand {
         data: { files: results, totalSize },
       };
     } catch (error) {
-      console.error(chalk.red('Failed to generate prompts:'), error.message);
-      return { success: false, error: error.message };
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error(chalk.red('Failed to generate prompts:'), errorMessage);
+      return { success: false, error: errorMessage };
     }
   }
 
-  getName() {
+  private findEntryPoints(index: IndexData): EntryPoint[] {
+    const entryPoints: EntryPoint[] = [];
+    const entryFiles = ['main.js', 'index.js', 'app.js', 'server.js'];
+
+    for (const entry of entryFiles) {
+      if (index.files.has(entry)) {
+        entryPoints.push({
+          file: entry,
+          purpose: 'Application entry point',
+        });
+      }
+    }
+
+    return entryPoints;
+  }
+
+  private findKeyComponents(index: IndexData): ComponentInfo[] {
+    const components: ComponentInfo[] = [];
+
+    // Find files with many symbols or dependencies
+    for (const [filePath, fileInfo] of Array.from(index.files)) {
+      const symbolCount = (fileInfo as any).symbols
+        ? (fileInfo as any).symbols.length
+        : 0;
+      const depCount = (fileInfo as any).dependencies
+        ? (fileInfo as any).dependencies.length
+        : 0;
+
+      if (symbolCount > 3 || depCount > 2) {
+        components.push({
+          file: filePath,
+          purpose: `Core module with ${symbolCount} symbols`,
+          exports: (fileInfo as any).exports || [],
+          importance: symbolCount + depCount,
+        });
+      }
+    }
+
+    // Sort by importance and return top modules
+    return components
+      .sort((a, b) => (b.importance || 0) - (a.importance || 0))
+      .slice(0, 10);
+  }
+
+  public getName(): string {
     return this.name;
   }
 
-  getDescription() {
+  public getDescription(): string {
     return this.description;
   }
 
-  getAliases() {
+  public getAliases(): string[] {
     return this.aliases;
   }
 
-  getDefinition() {
+  public getDefinition(): CommandDefinition {
     return {
       name: this.name,
       description: this.description,
@@ -1233,7 +1338,46 @@ class IndexCommand {
     };
   }
 
-  getHelp() {
+  public validateArgs(args: string[]): { valid: boolean; errors: string[] } {
+    const validActions = [
+      'build',
+      'create',
+      'search',
+      'stats',
+      'status',
+      'summary',
+      'files',
+      'symbols',
+      'todos',
+      'refresh',
+      'rebuild',
+      'analyze',
+      'export',
+      'prompts',
+      'generate-prompts',
+    ];
+
+    if (args.length === 0) {
+      // Default to 'build' action
+      return { valid: true, errors: [] };
+    }
+
+    const action = args[0].toLowerCase();
+    if (!validActions.includes(action)) {
+      return {
+        valid: false,
+        errors: [
+          `Unknown action: ${action}. Valid actions: ${validActions.join(
+            ', '
+          )}`,
+        ],
+      };
+    }
+
+    return { valid: true, errors: [] };
+  }
+
+  public getHelp(): string {
     return `
 ${chalk.bold(
   'Index Command'
@@ -1261,7 +1405,7 @@ ${chalk.blue('OPTIONS:')}
   --verbose     Show detailed output
   --json        Output results as JSON
   --detailed    Show detailed information
-  --type        Type of prompt to generate (all, custom-instructions, comprehensive, minimal, architecture, dev-focused)
+  --type        Type of prompt to generate (all, copilot-instructions, comprehensive, minimal, architecture, dev-focused)
   --output      Output directory for generated files
   --code        Include code snippets in prompts
 
@@ -1276,9 +1420,7 @@ ${chalk.blue('EXAMPLES:')}
   aia index analyze
   aia index export codebase.md --format markdown --detailed
   aia index prompts --type all --output ./prompts
-  aia index prompts --type custom-instructions
+  aia index prompts --type copilot-instructions
     `;
   }
 }
-
-module.exports = { IndexCommand };

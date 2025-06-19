@@ -4,7 +4,7 @@
  */
 const { Command } = require('commander');
 const chalk = require('chalk');
-const ServiceFactory = require('../container/ServiceFactory');
+const { ServiceFactory } = require('../../dist/container/ServiceFactory');
 const { CommandFactory } = require('../../dist/commands/CommandFactory');
 const { CommandRegistry } = require('../../dist/services/CommandRegistry');
 
@@ -102,8 +102,13 @@ class CLIApplication {
         .description(definition.description || 'No description available');
 
       // Handle specific command arguments
-      if (name === 'ask' || name === 'exec' || name === 'agent') {
-        cmd = cmd.argument('[input...]', 'Command or query input');
+      if (name === 'index') {
+        cmd = cmd.argument(
+          '<args...>',
+          'Action and parameters (e.g., search "term")'
+        );
+      } else if (name === 'ask' || name === 'exec' || name === 'agent') {
+        cmd = cmd.argument('<input...>', 'Command or query input');
       }
 
       cmd.action(async (...args) => {
@@ -458,12 +463,12 @@ class CLIApplication {
    * These commands are from the original index.js and provide code indexing functionality
    */
   addIndexCommands() {
-    const { IndexCommand } = require('../commands/IndexCommand.js');
+    const { IndexCommand } = require('../../dist/commands/IndexCommand');
     const indexCommand = new IndexCommand();
 
     // Main index command with subcommands
     this.program
-      .command('index [action]')
+      .command('index [args...]')
       .alias('idx')
       .description('Create and manage codebase index for AI analysis')
       .option('--force', 'Force rebuild even if index exists')
@@ -471,9 +476,11 @@ class CLIApplication {
       .option('--verbose', 'Show detailed output')
       .option('--json', 'Output results as JSON')
       .option('--detailed', 'Show detailed information')
-      .action(async (action = 'build', options) => {
+      .action(async (args, options) => {
         try {
-          const result = await indexCommand.execute({}, [action], options);
+          // Default to 'build' if no arguments provided
+          const argsArray = args && args.length > 0 ? args : ['build'];
+          const result = await indexCommand.execute({}, argsArray, options);
           if (!result.success && !options.quiet) {
             console.error(
               chalk.red('Index command failed:', result.error || result.output)
@@ -486,180 +493,8 @@ class CLIApplication {
         }
       });
 
-    // index-build command
-    this.program
-      .command('index-build')
-      .description('Build codebase index')
-      .option('--force', 'Force rebuild even if index exists')
-      .option('--directory <path>', 'Directory to index (default: current)')
-      .option('--verbose', 'Show detailed output')
-      .action(async (options) => {
-        try {
-          const result = await indexCommand.execute({}, ['build'], options);
-          if (!result.success) {
-            console.error(
-              chalk.red('Failed to build index:', result.error || result.output)
-            );
-            process.exit(1);
-          }
-        } catch (error) {
-          console.error(chalk.red('Index build error:', error.message));
-          process.exit(1);
-        }
-      });
-
-    // index-search command
-    this.program
-      .command('index-search <query...>')
-      .description('Search the codebase index')
-      .option('--limit <number>', 'Maximum number of results', '10')
-      .option('--verbose', 'Show detailed results')
-      .action(async (query, options) => {
-        try {
-          const result = await indexCommand.execute(
-            {},
-            ['search', ...query],
-            options
-          );
-          if (!result.success) {
-            console.error(
-              chalk.red('Search failed:', result.error || result.output)
-            );
-            process.exit(1);
-          }
-        } catch (error) {
-          console.error(chalk.red('Search error:', error.message));
-          process.exit(1);
-        }
-      });
-
-    // index-stats command
-    this.program
-      .command('index-stats')
-      .description('Show codebase index statistics')
-      .option('--verbose', 'Show detailed statistics')
-      .action(async (options) => {
-        try {
-          const result = await indexCommand.execute({}, ['stats'], options);
-          if (!result.success) {
-            console.error(
-              chalk.red('Failed to show stats:', result.error || result.output)
-            );
-            process.exit(1);
-          }
-        } catch (error) {
-          console.error(chalk.red('Stats error:', error.message));
-          process.exit(1);
-        }
-      });
-
-    // index-summary command
-    this.program
-      .command('index-summary')
-      .description('Show AI-friendly codebase summary')
-      .option('--json', 'Output as JSON')
-      .option('--verbose', 'Show detailed summary')
-      .action(async (options) => {
-        try {
-          const result = await indexCommand.execute({}, ['summary'], options);
-          if (!result.success) {
-            console.error(
-              chalk.red(
-                'Failed to generate summary:',
-                result.error || result.output
-              )
-            );
-            process.exit(1);
-          }
-        } catch (error) {
-          console.error(chalk.red('Summary error:', error.message));
-          process.exit(1);
-        }
-      });
-
-    // index-analysis command
-    this.program
-      .command('index-analysis')
-      .description('Perform semantic code analysis')
-      .option('--json', 'Output as JSON')
-      .option('--verbose', 'Show detailed analysis')
-      .action(async (options) => {
-        try {
-          const result = await indexCommand.execute({}, ['analyze'], options);
-          if (!result.success) {
-            console.error(
-              chalk.red(
-                'Failed to perform analysis:',
-                result.error || result.output
-              )
-            );
-            process.exit(1);
-          }
-        } catch (error) {
-          console.error(chalk.red('Analysis error:', error.message));
-          process.exit(1);
-        }
-      });
-
-    // index-export command
-    this.program
-      .command('index-export [output]')
-      .description('Export codebase index to file for AI prompts')
-      .option(
-        '--format <type>',
-        'Export format: markdown, json, or text',
-        'markdown'
-      )
-      .option('--detailed', 'Include detailed information')
-      .option('--code', 'Include code snippets')
-      .option('--output <file>', 'Output file path')
-      .action(async (output, options) => {
-        try {
-          const args = output ? ['export', output] : ['export'];
-          const result = await indexCommand.execute({}, args, options);
-          if (!result.success) {
-            console.error(
-              chalk.red(
-                'Failed to export index:',
-                result.error || result.output
-              )
-            );
-            process.exit(1);
-          }
-        } catch (error) {
-          console.error(chalk.red('Export error:', error.message));
-          process.exit(1);
-        }
-      });
-
-    // index-prompts command
-    this.program
-      .command('index-prompts')
-      .description('Generate specialized AI prompt and instruction files')
-      .option(
-        '--type <type>',
-        'Prompt type: all, comprehensive, minimal, architecture, dev-focused, custom-instructions',
-        'all'
-      )
-      .option('--output <dir>', 'Output directory')
-      .option('--code', 'Include code snippets in prompts')
-      .action(async (options) => {
-        try {
-          const result = await indexCommand.execute({}, ['prompts'], options);
-          if (!result.success) {
-            console.error(
-              chalk.red(
-                'Failed to generate prompts:',
-                result.error || result.output
-              )
-            );
-            process.exit(1);
-          }
-        } catch (error) {
-          console.error(chalk.red('Prompt generation error:', error.message));
-          process.exit(1);
-        }
-      });
+    // Note: Individual index commands (index-build, index-search, etc.) have been removed
+    // in favor of using the main 'index' command with subcommands (e.g., 'aia index search "term"')
   }
 
   /**

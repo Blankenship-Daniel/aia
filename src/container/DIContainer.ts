@@ -2,7 +2,37 @@
  * Dependency Injection Container
  * Manages service registration, resolution, and lifecycle
  */
-class DIContainer {
+
+// Type definitions for DI Container
+interface ServiceConfig<T = unknown> {
+  implementation: (new (...args: unknown[]) => T) | null;
+  singleton: boolean;
+  dependencies: string[];
+  factory: ServiceFactory<T> | null;
+  instance: T | null;
+  initialized: boolean;
+}
+
+interface RegistrationOptions {
+  singleton?: boolean;
+  dependencies?: string[];
+  factory?: ServiceFactory<unknown>;
+}
+
+type ServiceFactory<T = unknown> = (container: DIContainer) => T;
+
+interface ValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+export class DIContainer {
+  private services: Map<string, ServiceConfig>;
+  private singletons: Map<string, unknown>;
+  private factories: Map<string, ServiceFactory>;
+  private initialized: boolean;
+
   constructor() {
     this.services = new Map();
     this.singletons = new Map();
@@ -12,19 +42,20 @@ class DIContainer {
 
   /**
    * Register a service with the container
-   * @param {string} name - Service name/identifier
-   * @param {Function|Object} implementation - Service implementation (class constructor or instance)
-   * @param {Object} [options] - Registration options
-   * @param {boolean} [options.singleton=true] - Whether to create as singleton
-   * @param {Array<string>} [options.dependencies] - Service dependencies
-   * @param {Function} [options.factory] - Custom factory function
+   * @param name - Service name/identifier
+   * @param implementation - Service implementation (class constructor or instance)
+   * @param options - Registration options
    */
-  register(name, implementation, options = {}) {
-    const config = {
+  public register<T = unknown>(
+    name: string,
+    implementation: (new (...args: unknown[]) => T) | null,
+    options: RegistrationOptions = {}
+  ): void {
+    const config: ServiceConfig<T> = {
       implementation,
       singleton: options.singleton !== false, // Default to singleton
       dependencies: options.dependencies || [],
-      factory: options.factory || null,
+      factory: (options.factory as ServiceFactory<T>) || null,
       instance: null,
       initialized: false,
     };
@@ -34,12 +65,16 @@ class DIContainer {
 
   /**
    * Register a factory function for a service
-   * @param {string} name - Service name
-   * @param {Function} factory - Factory function
-   * @param {Object} [options] - Registration options
+   * @param name - Service name
+   * @param factory - Factory function
+   * @param options - Registration options
    */
-  registerFactory(name, factory, options = {}) {
-    this.register(name, null, {
+  public registerFactory<T = unknown>(
+    name: string,
+    factory: ServiceFactory<T>,
+    options: RegistrationOptions = {}
+  ): void {
+    this.register<T>(name, null, {
       ...options,
       factory,
     });
@@ -47,11 +82,11 @@ class DIContainer {
 
   /**
    * Register a singleton instance
-   * @param {string} name - Service name
-   * @param {Object} instance - Service instance
+   * @param name - Service name
+   * @param instance - Service instance
    */
-  registerInstance(name, instance) {
-    const config = {
+  public registerInstance<T = unknown>(name: string, instance: T): void {
+    const config: ServiceConfig<T> = {
       implementation: null,
       singleton: true,
       dependencies: [],
@@ -65,10 +100,10 @@ class DIContainer {
 
   /**
    * Resolve a service by name
-   * @param {string} name - Service name to resolve
-   * @returns {Object} Service instance
+   * @param name - Service name to resolve
+   * @returns Service instance
    */
-  resolve(name) {
+  public resolve<T = unknown>(name: string): T {
     const config = this.services.get(name);
     if (!config) {
       throw new Error(`Service '${name}' is not registered`);
@@ -76,11 +111,11 @@ class DIContainer {
 
     // Return existing singleton instance
     if (config.singleton && config.instance) {
-      return config.instance;
+      return config.instance as T;
     }
 
     // Create new instance
-    const instance = this.createInstance(config);
+    const instance = this.createInstance<T>(config);
 
     // Store singleton instance
     if (config.singleton) {
@@ -92,19 +127,19 @@ class DIContainer {
 
   /**
    * Create service instance
-   * @param {Object} config - Service configuration
-   * @returns {Object} Service instance
+   * @param config - Service configuration
+   * @returns Service instance
    */
-  createInstance(config) {
+  private createInstance<T = unknown>(config: ServiceConfig): T {
     try {
       // Use factory function if provided
       if (config.factory) {
-        return config.factory(this);
+        return config.factory(this) as T;
       }
 
       // Use existing instance if available
       if (config.instance) {
-        return config.instance;
+        return config.instance as T;
       }
 
       // Create instance from constructor
@@ -115,20 +150,21 @@ class DIContainer {
         );
 
         // Create instance with dependencies
-        return new config.implementation(...dependencies);
+        return new config.implementation(...dependencies) as T;
       }
 
       throw new Error('No implementation or factory provided');
     } catch (error) {
-      throw new Error(`Failed to create instance: ${error.message}`);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to create instance: ${errorMessage}`);
     }
   }
 
   /**
    * Initialize all registered services
-   * @returns {Promise<void>}
    */
-  async initialize() {
+  public async initialize(): Promise<void> {
     if (this.initialized) {
       return;
     }
@@ -145,10 +181,9 @@ class DIContainer {
 
   /**
    * Initialize a specific service
-   * @param {string} name - Service name to initialize
-   * @returns {Promise<void>}
+   * @param name - Service name to initialize
    */
-  async initializeService(name) {
+  public async initializeService(name: string): Promise<void> {
     const config = this.services.get(name);
     if (!config || config.initialized) {
       return;
@@ -158,8 +193,8 @@ class DIContainer {
     const instance = this.resolve(name);
 
     // Call initialize method if it exists
-    if (instance && typeof instance.initialize === 'function') {
-      await instance.initialize();
+    if (instance && typeof (instance as any).initialize === 'function') {
+      await (instance as any).initialize();
     }
 
     config.initialized = true;
@@ -167,14 +202,14 @@ class DIContainer {
 
   /**
    * Get service initialization order based on dependencies
-   * @returns {Array<string>} Ordered array of service names
+   * @returns Ordered array of service names
    */
-  getInitializationOrder() {
-    const visited = new Set();
-    const visiting = new Set();
-    const order = [];
+  public getInitializationOrder(): string[] {
+    const visited = new Set<string>();
+    const visiting = new Set<string>();
+    const order: string[] = [];
 
-    const visit = (name) => {
+    const visit = (name: string): void => {
       if (visited.has(name)) {
         return;
       }
@@ -198,7 +233,7 @@ class DIContainer {
     };
 
     // Visit all services
-    for (const serviceName of this.services.keys()) {
+    for (const serviceName of Array.from(this.services.keys())) {
       visit(serviceName);
     }
 
@@ -207,26 +242,26 @@ class DIContainer {
 
   /**
    * Check if service is registered
-   * @param {string} name - Service name
-   * @returns {boolean} True if service is registered
+   * @param name - Service name
+   * @returns True if service is registered
    */
-  has(name) {
+  public has(name: string): boolean {
     return this.services.has(name);
   }
 
   /**
    * Get all registered service names
-   * @returns {Array<string>} Array of service names
+   * @returns Array of service names
    */
-  getServiceNames() {
+  public getServiceNames(): string[] {
     return Array.from(this.services.keys());
   }
 
   /**
    * Unregister a service
-   * @param {string} name - Service name to unregister
+   * @param name - Service name to unregister
    */
-  unregister(name) {
+  public unregister(name: string): void {
     this.services.delete(name);
     this.singletons.delete(name);
   }
@@ -234,7 +269,7 @@ class DIContainer {
   /**
    * Clear all registered services
    */
-  clear() {
+  public clear(): void {
     this.services.clear();
     this.singletons.clear();
     this.factories.clear();
@@ -243,13 +278,13 @@ class DIContainer {
 
   /**
    * Create a child container with inherited services
-   * @returns {DIContainer} Child container
+   * @returns Child container
    */
-  createChild() {
+  public createChild(): DIContainer {
     const child = new DIContainer();
 
     // Copy service registrations
-    for (const [name, config] of this.services) {
+    for (const [name, config] of Array.from(this.services.entries())) {
       child.services.set(name, { ...config });
     }
 
@@ -258,9 +293,8 @@ class DIContainer {
 
   /**
    * Dispose of all services and cleanup resources
-   * @returns {Promise<void>}
    */
-  async dispose() {
+  public async dispose(): Promise<void> {
     // Dispose services in reverse initialization order
     const disposeOrder = this.getInitializationOrder().reverse();
 
@@ -273,18 +307,17 @@ class DIContainer {
 
   /**
    * Dispose of a specific service
-   * @param {string} name - Service name to dispose
-   * @returns {Promise<void>}
+   * @param name - Service name to dispose
    */
-  async disposeService(name) {
+  public async disposeService(name: string): Promise<void> {
     const config = this.services.get(name);
     if (!config || !config.instance) {
       return;
     }
 
     // Call dispose method if it exists
-    if (typeof config.instance.dispose === 'function') {
-      await config.instance.dispose();
+    if (typeof (config.instance as any).dispose === 'function') {
+      await (config.instance as any).dispose();
     }
 
     config.instance = null;
@@ -292,4 +325,4 @@ class DIContainer {
   }
 }
 
-module.exports = DIContainer;
+export { ServiceFactory, RegistrationOptions, ValidationResult };

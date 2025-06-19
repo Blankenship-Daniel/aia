@@ -1,17 +1,79 @@
 // Command Handler Module
 // Separates command execution logic from main AIA class
 
-const { spawn } = require('child_process');
-const chalk = require('chalk');
-const inquirer = require('inquirer');
+import { spawn, ChildProcess } from 'child_process';
+// @ts-ignore - chalk doesn't have types available
+import chalk from 'chalk';
+// @ts-ignore - inquirer doesn't have types available
+import inquirer from 'inquirer';
+
+interface ExecuteCommandOptions {
+  autoOptimize?: boolean;
+  useShell?: boolean;
+  timeout?: number;
+  captureOutput?: boolean;
+}
+
+interface SpawnCommandOptions {
+  useShell?: boolean;
+  timeout?: number;
+  captureOutput?: boolean;
+}
+
+interface CommandResult {
+  success: boolean;
+  code: number;
+  stdout: string;
+  stderr: string;
+  duration: number;
+  command: string;
+}
+
+interface CommandRecord {
+  command: string;
+  timestamp: string;
+  workingDirectory: string;
+}
+
+interface AIAInstance {
+  memory: {
+    commands?: CommandRecord[];
+    [key: string]: unknown;
+  };
+  context: {
+    workingDirectory: string;
+    [key: string]: unknown;
+  };
+  memoryManager?: {
+    memory: unknown;
+    [key: string]: unknown;
+  };
+  commandIntelligence?: {
+    suggestCommandOptimization: (
+      command: string,
+      context: unknown
+    ) => {
+      suggestion: string;
+      reason: string;
+    };
+  };
+  saveMemory?: () => Promise<void>;
+}
 
 class CommandHandler {
-  constructor(aia) {
+  private aia: AIAInstance;
+  private activeProcesses: Map<string, ChildProcess>;
+
+  constructor(aia: AIAInstance) {
     this.aia = aia;
     this.activeProcesses = new Map();
   }
 
-  async executeCommand(command, args = [], options = {}) {
+  async executeCommand(
+    command: string,
+    args: string[] = [],
+    options: ExecuteCommandOptions = {}
+  ): Promise<CommandResult> {
     let {
       autoOptimize = true,
       useShell = false,
@@ -36,7 +98,7 @@ class CommandHandler {
       if (false && autoOptimize && this.aia.commandIntelligence) {
         // Temporarily disabled
         const optimization =
-          this.aia.commandIntelligence.suggestCommandOptimization(
+          this.aia.commandIntelligence!.suggestCommandOptimization(
             fullCommand,
             this.aia.context
           );
@@ -80,12 +142,19 @@ class CommandHandler {
         captureOutput,
       });
     } catch (error) {
-      console.error(chalk.red('Command execution failed:'), error.message);
+      console.error(
+        chalk.red('Command execution failed:'),
+        (error as Error).message
+      );
       throw error;
     }
   }
 
-  async spawnCommand(command, args, options = {}) {
+  async spawnCommand(
+    command: string,
+    args: string[],
+    options: SpawnCommandOptions = {}
+  ): Promise<CommandResult> {
     const {
       useShell = false,
       timeout = 300000,
@@ -94,12 +163,12 @@ class CommandHandler {
 
     return new Promise((resolve, reject) => {
       const processOptions = {
-        stdio: captureOutput ? 'pipe' : 'inherit',
+        stdio: captureOutput ? ('pipe' as const) : ('inherit' as const),
         shell: useShell,
         cwd: this.aia.context.workingDirectory,
       };
 
-      let child;
+      let child: ChildProcess;
 
       if (useShell) {
         // For shell commands, use the command as-is (already parsed)
@@ -128,7 +197,7 @@ class CommandHandler {
 
       // Handle stdout
       if (child.stdout) {
-        child.stdout.on('data', (data) => {
+        child.stdout.on('data', (data: Buffer) => {
           const output = data.toString();
           if (!captureOutput) {
             process.stdout.write(output);
@@ -139,7 +208,7 @@ class CommandHandler {
 
       // Handle stderr
       if (child.stderr) {
-        child.stderr.on('data', (data) => {
+        child.stderr.on('data', (data: Buffer) => {
           const output = data.toString();
           if (!captureOutput) {
             process.stderr.write(output);
@@ -149,14 +218,14 @@ class CommandHandler {
       }
 
       // Handle process completion
-      child.on('close', (code) => {
+      child.on('close', (code: number | null) => {
         clearTimeout(timeoutId);
         this.activeProcesses.delete(processId);
 
         const duration = Date.now() - startTime;
-        const result = {
+        const result: CommandResult = {
           success: code === 0,
-          code,
+          code: code || -1,
           stdout,
           stderr,
           duration,
@@ -166,14 +235,16 @@ class CommandHandler {
         if (code === 0) {
           resolve(result);
         } else {
-          const error = new Error(`Command failed with exit code ${code}`);
+          const error = new Error(
+            `Command failed with exit code ${code}`
+          ) as Error & { result: CommandResult };
           error.result = result;
           reject(error);
         }
       });
 
       // Handle process errors
-      child.on('error', (error) => {
+      child.on('error', (error: Error) => {
         clearTimeout(timeoutId);
         this.activeProcesses.delete(processId);
         reject(error);
@@ -181,7 +252,7 @@ class CommandHandler {
     });
   }
 
-  async recordCommand(command) {
+  async recordCommand(command: string): Promise<void> {
     if (!this.aia.memory.commands) {
       this.aia.memory.commands = [];
     }
@@ -198,27 +269,29 @@ class CommandHandler {
     }
 
     // Update memory manager
-    if (this.aia.memoryManager) {
+    if (this.aia.memoryManager && this.aia.saveMemory) {
       this.aia.memoryManager.memory = this.aia.memory;
       await this.aia.saveMemory();
     }
   }
 
-  killActiveProcesses() {
+  killActiveProcesses(): void {
     for (const [id, process] of this.activeProcesses) {
       try {
         process.kill('SIGTERM');
         console.log(chalk.yellow(`Killed process ${id}`));
       } catch (error) {
-        console.warn(chalk.red(`Failed to kill process ${id}:`, error.message));
+        console.warn(
+          chalk.red(`Failed to kill process ${id}:`, (error as Error).message)
+        );
       }
     }
     this.activeProcesses.clear();
   }
 
-  getActiveProcesses() {
+  getActiveProcesses(): string[] {
     return Array.from(this.activeProcesses.keys());
   }
 }
 
-module.exports = CommandHandler;
+export default CommandHandler;

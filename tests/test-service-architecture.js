@@ -2,10 +2,12 @@
  * Service Architecture Test
  * Tests the new DI container and service implementations
  */
-const DIContainer = require('../src/container/DIContainer');
-const ServiceFactory = require('../src/container/ServiceFactory');
-const ConfigurationService = require('../src/services/ConfigurationService');
-const MemoryService = require('../src/services/MemoryService');
+const { DIContainer } = require('../dist/container/DIContainer');
+const { ServiceFactory } = require('../dist/container/ServiceFactory');
+const {
+  ConfigurationService,
+} = require('../dist/services/ConfigurationService');
+const { MemoryService } = require('../dist/services/MemoryService');
 
 async function setupTestEnvironment() {
   console.log('🔧 Setting up test environment...');

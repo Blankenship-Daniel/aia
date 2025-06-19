@@ -1,0 +1,2726 @@
+{
+  "role": "You are an AI assistant with deep knowledge of this codebase",
+  "context": {
+    "projectType": "Node.js",
+    "primaryLanguage": "javascript",
+    "architecture": "Service-Component Architecture",
+    "purpose": "Application Development",
+    "totalFiles": 103,
+    "totalClasses": 59,
+    "totalFunctions": 44
+  },
+  "guidelines": [
+    "Always reference specific files, classes, and functions when making suggestions",
+    "Consider the existing architecture patterns when proposing changes",
+    "Be aware of the project's primary language and coding conventions",
+    "Reference the TODO items for areas needing attention",
+    "Understand the entry points and key components structure",
+    "Follow established error handling patterns in the codebase",
+    "Maintain consistency with existing API design patterns",
+    "Consider performance implications based on the project scale",
+    "Use the established testing patterns when adding new tests",
+    "Reference related files and components when making suggestions",
+    "Consider the dependency relationships between modules",
+    "Maintain backward compatibility with existing interfaces"
+  ],
+  "keyComponents": [
+    {
+      "file": "main.js",
+      "purpose": "Application entry point",
+      "description": "Entry point",
+      "relatedFiles": [
+        "README.md",
+        "indexWatcher.ts",
+        "jest.config.ts",
+        "package-lock.json",
+        "package.json"
+      ],
+      "dependencies": [
+        "src/cli/CLIApplication.js"
+      ],
+      "exports": []
+    },
+    {
+      "file": "README.md",
+      "purpose": "Core module with 118 symbols",
+      "description": "Documentation",
+      "relatedFiles": [
+        "indexWatcher.ts",
+        "jest.config.ts",
+        "main.js",
+        "package-lock.json",
+        "package.json"
+      ],
+      "dependencies": [],
+      "exports": []
+    },
+    {
+      "file": "package.json",
+      "purpose": "Core module with 0 symbols",
+      "description": "Configuration file",
+      "relatedFiles": [
+        "README.md",
+        "indexWatcher.ts",
+        "jest.config.ts",
+        "main.js",
+        "package-lock.json"
+      ],
+      "dependencies": [
+        "@anthropic-ai/sdk",
+        "axios",
+        "chalk",
+        "chokidar",
+        "commander"
+      ],
+      "exports": []
+    },
+    {
+      "file": "examples/sample-plugin/README.md",
+      "purpose": "Core module with 20 symbols",
+      "description": "Documentation",
+      "relatedFiles": [
+        "examples/sample-plugin/index.js",
+        "examples/sample-plugin/package-lock.json",
+        "examples/sample-plugin/package.json",
+        "examples/sample-plugin/plugin.json",
+        "README.md"
+      ],
+      "dependencies": [],
+      "exports": []
+    },
+    {
+      "file": "src/services/CodeIndexService.js",
+      "purpose": "Core module with 10 symbols",
+      "description": "Service component",
+      "relatedFiles": [
+        "src/services/AIService.ts",
+        "src/services/CommandRegistry.ts",
+        "src/services/CommandService.ts",
+        "src/services/ConfigurationService.ts",
+        "src/services/ContextService.ts"
+      ],
+      "dependencies": [
+        "src/CodebaseSummarizer.js",
+        "src/CodebaseSummarizer.js"
+      ],
+      "exports": []
+    },
+    {
+      "file": "tests/test-service-architecture.js",
+      "purpose": "Core module with 7 symbols",
+      "description": "Source module",
+      "relatedFiles": [
+        "tests/AgenticReasoningEngine.test.js",
+        "tests/CommandHandler.test.js",
+        "tests/ErrorHandler.test.js",
+        "tests/Integration.test.js",
+        "tests/MemoryManager.test.js"
+      ],
+      "dependencies": [
+        "src/container/DIContainer.js",
+        "src/container/ServiceFactory.js",
+        "src/services/ConfigurationService.ts",
+        "src/services/MemoryService.ts"
+      ],
+      "exports": []
+    },
+    {
+      "file": ".github/copilot-instructions.md",
+      "purpose": "Core module with 9 symbols",
+      "description": "Documentation",
+      "relatedFiles": [
+        ".github/copilot-instructions.json",
+        ".github/copilot-instructions.md"
+      ],
+      "dependencies": [],
+      "exports": []
+    },
+    {
+      "file": "docs/comprehensive/codebase-comprehensive.md",
+      "purpose": "Core module with 7 symbols",
+      "description": "Documentation",
+      "relatedFiles": [
+        "docs/comprehensive/codebase-comprehensive.md"
+      ],
+      "dependencies": [],
+      "exports": []
+    },
+    {
+      "file": "src/commands/IndexCommand.js",
+      "purpose": "Core module with 3 symbols",
+      "description": "Command implementation",
+      "relatedFiles": [
+        "src/commands/AgentCommand.ts",
+        "src/commands/AskCommand.ts",
+        "src/commands/CommandFactory.ts",
+        "src/commands/ConfigCommand.ts",
+        "src/commands/ContextCommand.ts"
+      ],
+      "dependencies": [
+        "src/services/CodeIndexService.js",
+        "src/CodebaseSummarizer.js",
+        "src/SemanticCodeAnalyzer.js",
+        "src/ConfigurationManager.js"
+      ],
+      "exports": [
+        "index",
+        "codebase",
+        "prompt",
+        "Export",
+        "codebase"
+      ]
+    },
+    {
+      "file": "src/utils/RobustJSONParser.js",
+      "purpose": "Core module with 7 symbols",
+      "description": "Parser component",
+      "relatedFiles": [],
+      "dependencies": [],
+      "exports": []
+    },
+    {
+      "file": "src/AgenticReasoningEngine.js",
+      "purpose": "Core module with 1 symbols",
+      "description": "Processing engine",
+      "relatedFiles": [
+        "src/AgenticSearchEngine.js",
+        "src/CLIFormatter.js",
+        "src/CodebaseSummarizer.js",
+        "src/CommandHandler.js",
+        "src/CommandIntelligence.js"
+      ],
+      "dependencies": [
+        "src/AgenticSearchEngine.js",
+        "src/NLPEngine.js",
+        "src/ConversationContextManager.js",
+        "src/ResponseGenerator.js",
+        "src/utils/RobustJSONParser.js"
+      ],
+      "exports": []
+    }
+  ],
+  "entryPoints": [
+    {
+      "file": "main.js",
+      "type": "main",
+      "purpose": "Application entry point"
+    }
+  ],
+  "architecture": "Service-Component Architecture",
+  "commonPatterns": [
+    {
+      "type": "imports",
+      "description": "Most commonly imported modules",
+      "items": [
+        "chalk",
+        "path",
+        "fs-extra",
+        "child_process",
+        "os",
+        "inquirer",
+        "fs",
+        "../index.js",
+        "../CodebaseSummarizer",
+        "../src/container/ServiceFactory",
+        "chokidar",
+        "./SemanticAnalyzer",
+        "crypto",
+        "../ConfigurationManager",
+        "../src/MemoryManager"
+      ]
+    },
+    {
+      "type": "inheritance",
+      "description": "Class inheritance patterns",
+      "items": [
+        "PerformanceOptimizer extends EventEmitter",
+        "SemanticCodeAnalyzer extends SemanticAnalyzer"
+      ]
+    },
+    {
+      "type": "functions",
+      "description": "Common function patterns",
+      "items": [
+        "1 functions follow handler pattern",
+        "2 getter functions",
+        "2 setter functions"
+      ]
+    }
+  ],
+  "apiPatterns": [
+    {
+      "type": "Service Layer",
+      "description": "Service-oriented architecture with dedicated service classes",
+      "examples": [
+        "src/interfaces/IAIService.ts",
+        "src/interfaces/ICommandService.ts",
+        "src/interfaces/IConfigurationService.ts"
+      ]
+    },
+    {
+      "type": "Command Pattern",
+      "description": "Command-based architecture for operations",
+      "examples": [
+        "src/CommandHandler.js",
+        "src/ErrorHandler.js",
+        "src/commands/AgentCommand.ts"
+      ]
+    },
+    {
+      "type": "Factory Pattern",
+      "description": "Factory pattern for object creation",
+      "examples": [
+        "src/commands/CommandFactory.ts",
+        "src/container/ServiceFactory.js"
+      ]
+    }
+  ],
+  "configPatterns": [
+    {
+      "type": "Configuration Files",
+      "description": "Application configuration management",
+      "examples": [
+        ".aia/codebase-index.json",
+        ".aia/config.json",
+        ".aia/profiles.json",
+        ".aia/user.json",
+        ".github/copilot-instructions.json"
+      ]
+    }
+  ],
+  "testPatterns": [
+    {
+      "type": "Unit Tests",
+      "description": "24 test files using various testing frameworks",
+      "location": "tests/ directory and co-located test files"
+    },
+    {
+      "type": "Jest Testing",
+      "description": "Jest-based unit testing framework",
+      "location": "Configured in jest.config.js"
+    }
+  ],
+  "workflows": [
+    {
+      "type": "Development Setup",
+      "description": "Setting up the development environment",
+      "steps": [
+        "Clone the repository",
+        "Install dependencies with npm install",
+        "Run tests with npm test",
+        "Start development server if applicable"
+      ]
+    },
+    {
+      "type": "Build Process",
+      "description": "Standard Node.js build and deployment workflow",
+      "steps": [
+        "Install dependencies: npm install",
+        "Run tests: npm test",
+        "Build application if needed",
+        "Deploy using configured scripts"
+      ]
+    },
+    {
+      "type": "Testing Workflow",
+      "description": "Running and maintaining tests",
+      "steps": [
+        "Run all tests: npm test",
+        "Run specific test files",
+        "Add new tests for new features",
+        "Maintain test coverage"
+      ]
+    }
+  ],
+  "codebaseStructure": {
+    ".aia": {
+      "codebase-index.json": {
+        "type": "config",
+        "language": "json",
+        "symbolCount": 0
+      },
+      "config.json": {
+        "type": "config",
+        "language": "json",
+        "symbolCount": 0
+      },
+      "profiles.json": {
+        "type": "config",
+        "language": "json",
+        "symbolCount": 0
+      },
+      "user.json": {
+        "type": "config",
+        "language": "json",
+        "symbolCount": 0
+      }
+    },
+    ".github": {
+      "copilot-instructions.json": {
+        "type": "config",
+        "language": "json",
+        "symbolCount": 0
+      },
+      "copilot-instructions.md": {
+        "type": "documentation",
+        "language": "markdown",
+        "symbolCount": 9
+      }
+    },
+    "README.md": {
+      "type": "documentation",
+      "language": "markdown",
+      "symbolCount": 118
+    },
+    "docs": {
+      "architecture": {
+        "codebase-architecture.md": {
+          "type": "documentation",
+          "language": "markdown",
+          "symbolCount": 4
+        }
+      },
+      "comprehensive": {
+        "codebase-comprehensive.md": {
+          "type": "documentation",
+          "language": "markdown",
+          "symbolCount": 7
+        }
+      },
+      "developer": {
+        "codebase-dev-focused.md": {
+          "type": "documentation",
+          "language": "markdown",
+          "symbolCount": 5
+        }
+      },
+      "minimal": {
+        "codebase-minimal.md": {
+          "type": "documentation",
+          "language": "markdown",
+          "symbolCount": 3
+        }
+      }
+    },
+    "examples": {
+      "sample-plugin": {
+        "README.md": {
+          "type": "documentation",
+          "language": "markdown",
+          "symbolCount": 20
+        },
+        "index.js": {
+          "type": "source",
+          "language": "javascript",
+          "symbolCount": 2
+        },
+        "package-lock.json": {
+          "type": "config",
+          "language": "json",
+          "symbolCount": 0
+        },
+        "package.json": {
+          "type": "config",
+          "language": "json",
+          "symbolCount": 0
+        },
+        "plugin.json": {
+          "type": "config",
+          "language": "json",
+          "symbolCount": 0
+        }
+      },
+      "simple-plugin": {
+        "index.js": {
+          "type": "source",
+          "language": "javascript",
+          "symbolCount": 2
+        },
+        "plugin.json": {
+          "type": "config",
+          "language": "json",
+          "symbolCount": 0
+        }
+      }
+    },
+    "indexWatcher.ts": {
+      "type": "source",
+      "language": "typescript",
+      "symbolCount": 1
+    },
+    "jest.config.ts": {
+      "type": "source",
+      "language": "typescript",
+      "symbolCount": 0
+    },
+    "main.js": {
+      "type": "source",
+      "language": "javascript",
+      "symbolCount": 1
+    },
+    "package-lock.json": {
+      "type": "config",
+      "language": "json",
+      "symbolCount": 0
+    },
+    "package.json": {
+      "type": "config",
+      "language": "json",
+      "symbolCount": 0
+    },
+    "src": {
+      "AgenticReasoningEngine.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "AgenticSearchEngine.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "CLIFormatter.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 2
+      },
+      "CodebaseSummarizer.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "CommandHandler.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 2
+      },
+      "CommandIntelligence.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "ConfigurationManager.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "ContextAnalyzer.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "ConversationContextManager.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 2
+      },
+      "DomainSpecialist.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "ErrorHandler.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "IndexWatcher.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "MemoryManager.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "ModelSelector.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "NLPEngine.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "PerformanceOptimizer.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "PluginManager.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 3
+      },
+      "QueryProcessor.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "ResponseGenerator.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 2
+      },
+      "SecurityValidator.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "SemanticAnalyzer.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "SemanticCodeAnalyzer.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 5
+      },
+      "TestRunner.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 4
+      },
+      "WorkflowManager.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "cli": {
+        "CLIApplication.js": {
+          "type": "source",
+          "language": "javascript",
+          "symbolCount": 1
+        }
+      },
+      "commands": {
+        "AgentCommand.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 1
+        },
+        "AskCommand.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 1
+        },
+        "CommandFactory.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 1
+        },
+        "ConfigCommand.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 1
+        },
+        "ContextCommand.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 1
+        },
+        "ExecuteCommand.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 1
+        },
+        "IndexCommand.js": {
+          "type": "source",
+          "language": "javascript",
+          "symbolCount": 3
+        },
+        "MemoryCommand.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 1
+        }
+      },
+      "container": {
+        "DIContainer.js": {
+          "type": "source",
+          "language": "javascript",
+          "symbolCount": 5
+        },
+        "ServiceFactory.js": {
+          "type": "source",
+          "language": "javascript",
+          "symbolCount": 1
+        }
+      },
+      "interfaces": {
+        "IAIService.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 0
+        },
+        "ICommand.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 0
+        },
+        "ICommandRegistry.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 0
+        },
+        "ICommandService.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 0
+        },
+        "IConfigurationService.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 0
+        },
+        "IContextService.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 0
+        },
+        "IMemoryService.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 0
+        },
+        "IPluginService.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 0
+        },
+        "IWorkflowService.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 0
+        }
+      },
+      "services": {
+        "AIService.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 1
+        },
+        "CodeIndexService.js": {
+          "type": "source",
+          "language": "javascript",
+          "symbolCount": 10
+        },
+        "CommandRegistry.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 1
+        },
+        "CommandService.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 1
+        },
+        "ConfigurationService.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 1
+        },
+        "ContextService.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 1
+        },
+        "MemoryService.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 1
+        },
+        "PluginService.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 1
+        },
+        "WorkflowService.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 1
+        }
+      },
+      "types": {
+        "index.ts": {
+          "type": "source",
+          "language": "typescript",
+          "symbolCount": 0
+        }
+      },
+      "utils": {
+        "RobustJSONParser.js": {
+          "type": "source",
+          "language": "javascript",
+          "symbolCount": 7
+        }
+      }
+    },
+    "tests": {
+      "AgenticReasoningEngine.test.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 0
+      },
+      "CommandHandler.test.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 0
+      },
+      "ErrorHandler.test.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 0
+      },
+      "Integration.test.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 0
+      },
+      "MemoryManager.test.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 0
+      },
+      "SecurityValidator.test.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 0
+      },
+      "command-interface-compliance.test.ts": {
+        "type": "source",
+        "language": "typescript",
+        "symbolCount": 0
+      },
+      "profiles.json": {
+        "type": "config",
+        "language": "json",
+        "symbolCount": 0
+      },
+      "setup.ts": {
+        "type": "source",
+        "language": "typescript",
+        "symbolCount": 0
+      },
+      "test-agentic-fixes.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 5
+      },
+      "test-agentic-goal.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "test-api-key.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "test-command-system.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 4
+      },
+      "test-complete-integration.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 0
+      },
+      "test-components-fixed.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "test-file.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 0
+      },
+      "test-final-comprehensive.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 2
+      },
+      "test-full-aia.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 2
+      },
+      "test-js-to-ts-transition.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 2
+      },
+      "test-quick.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 1
+      },
+      "test-semantic-search-fixes.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 2
+      },
+      "test-service-architecture.js": {
+        "type": "source",
+        "language": "javascript",
+        "symbolCount": 7
+      },
+      "typescript-command-structure.test.ts": {
+        "type": "source",
+        "language": "typescript",
+        "symbolCount": 2
+      },
+      "user.json": {
+        "type": "config",
+        "language": "json",
+        "symbolCount": 0
+      }
+    },
+    "tsconfig.json": {
+      "type": "config",
+      "language": "json",
+      "symbolCount": 0
+    }
+  },
+  "crossReferences": {
+    ".aia/codebase-index.json": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    ".aia/config.json": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    ".aia/profiles.json": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    ".aia/user.json": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    ".github/copilot-instructions.json": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    ".github/copilot-instructions.md": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "README.md": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "docs/architecture/codebase-architecture.md": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "docs/comprehensive/codebase-comprehensive.md": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "docs/developer/codebase-dev-focused.md": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "docs/minimal/codebase-minimal.md": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "examples/sample-plugin/README.md": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "examples/sample-plugin/index.js": {
+      "imports": [
+        "chalk"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "examples/sample-plugin/package-lock.json": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "examples/sample-plugin/package.json": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "examples/sample-plugin/plugin.json": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "examples/simple-plugin/index.js": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "examples/simple-plugin/plugin.json": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "indexWatcher.ts": {
+      "imports": [
+        "chokidar"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "jest.config.ts": {
+      "imports": [],
+      "exports": [
+        "config"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "main.js": {
+      "imports": [
+        "./src/cli/CLIApplication"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "package-lock.json": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "package.json": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/AgenticReasoningEngine.js": {
+      "imports": [
+        "chalk",
+        "inquirer",
+        "./AgenticSearchEngine",
+        "./NLPEngine",
+        "./ConversationContextManager",
+        "./ResponseGenerator",
+        "./utils/RobustJSONParser"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/AgenticSearchEngine.js": {
+      "imports": [
+        "chalk",
+        "fs-extra",
+        "path"
+      ],
+      "exports": [],
+      "importedBy": [
+        "src/AgenticReasoningEngine.js"
+      ],
+      "references": 1
+    },
+    "src/CLIFormatter.js": {
+      "imports": [
+        "chalk",
+        "ora"
+      ],
+      "exports": [],
+      "importedBy": [
+        "src/container/ServiceFactory.js"
+      ],
+      "references": 1
+    },
+    "src/CodebaseSummarizer.js": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [
+        "src/commands/IndexCommand.js",
+        "src/services/CodeIndexService.js",
+        "src/services/CodeIndexService.js"
+      ],
+      "references": 3
+    },
+    "src/CommandHandler.js": {
+      "imports": [
+        "child_process",
+        "chalk",
+        "inquirer"
+      ],
+      "exports": [],
+      "importedBy": [
+        "tests/CommandHandler.test.js"
+      ],
+      "references": 1
+    },
+    "src/CommandIntelligence.js": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/ConfigurationManager.js": {
+      "imports": [
+        "fs-extra",
+        "path",
+        "os",
+        "chalk",
+        "inquirer"
+      ],
+      "exports": [],
+      "importedBy": [
+        "src/cli/CLIApplication.js",
+        "src/commands/IndexCommand.js"
+      ],
+      "references": 2
+    },
+    "src/ContextAnalyzer.js": {
+      "imports": [
+        "fs-extra",
+        "path",
+        "child_process"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/ConversationContextManager.js": {
+      "imports": [
+        "chalk"
+      ],
+      "exports": [],
+      "importedBy": [
+        "src/AgenticReasoningEngine.js"
+      ],
+      "references": 1
+    },
+    "src/DomainSpecialist.js": {
+      "imports": [
+        "chalk"
+      ],
+      "exports": [],
+      "importedBy": [
+        "src/NLPEngine.js"
+      ],
+      "references": 1
+    },
+    "src/ErrorHandler.js": {
+      "imports": [
+        "chalk"
+      ],
+      "exports": [],
+      "importedBy": [
+        "src/container/ServiceFactory.js",
+        "tests/ErrorHandler.test.js"
+      ],
+      "references": 2
+    },
+    "src/IndexWatcher.js": {
+      "imports": [
+        "chokidar"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/MemoryManager.js": {
+      "imports": [
+        "fs-extra",
+        "path"
+      ],
+      "exports": [
+        "format",
+        "failed",
+        "for"
+      ],
+      "importedBy": [
+        "tests/MemoryManager.test.js",
+        "tests/test-semantic-search-fixes.js"
+      ],
+      "references": 2
+    },
+    "src/ModelSelector.js": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/NLPEngine.js": {
+      "imports": [
+        "chalk",
+        "./SemanticAnalyzer",
+        "./QueryProcessor",
+        "./DomainSpecialist"
+      ],
+      "exports": [],
+      "importedBy": [
+        "src/AgenticReasoningEngine.js"
+      ],
+      "references": 1
+    },
+    "src/PerformanceOptimizer.js": {
+      "imports": [
+        "events"
+      ],
+      "exports": [],
+      "importedBy": [
+        "src/container/ServiceFactory.js"
+      ],
+      "references": 1
+    },
+    "src/PluginManager.js": {
+      "imports": [
+        "fs-extra",
+        "path",
+        "child_process",
+        "chalk",
+        "],\n      timeoutMs: 30000, // 30 second timeout for plugin operations\n      memoryLimitMB: 100, // 100MB memory limit per plugin\n    };\n  }\n\n  // Initialize plugin hook system\n  initializeHooks() {\n    const hookTypes = [\n      ",
+        "chalk"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/QueryProcessor.js": {
+      "imports": [
+        "chalk"
+      ],
+      "exports": [],
+      "importedBy": [
+        "src/NLPEngine.js"
+      ],
+      "references": 1
+    },
+    "src/ResponseGenerator.js": {
+      "imports": [
+        "chalk"
+      ],
+      "exports": [],
+      "importedBy": [
+        "src/AgenticReasoningEngine.js"
+      ],
+      "references": 1
+    },
+    "src/SecurityValidator.js": {
+      "imports": [
+        "chalk",
+        "path",
+        "crypto",
+        "axios"
+      ],
+      "exports": [],
+      "importedBy": [
+        "src/container/ServiceFactory.js",
+        "tests/SecurityValidator.test.js"
+      ],
+      "references": 2
+    },
+    "src/SemanticAnalyzer.js": {
+      "imports": [
+        "chalk"
+      ],
+      "exports": [],
+      "importedBy": [
+        "src/NLPEngine.js",
+        "src/SemanticCodeAnalyzer.js"
+      ],
+      "references": 2
+    },
+    "src/SemanticCodeAnalyzer.js": {
+      "imports": [
+        "./SemanticAnalyzer",
+        ",\n        });\n      }\n    }\n\n    // Analyze class inheritance\n    for (const [className, classInfo] of index.classes || []) {\n      if (classInfo.extends) {\n        relationships.inheritance.push({\n          child: className,\n          parent: classInfo.extends,\n          file: classInfo.file,\n        });\n      }\n    }\n\n    return relationships;\n  }\n\n  classifyConceptFromName(name) {\n    const businessKeywords = [\n      "
+      ],
+      "exports": [],
+      "importedBy": [
+        "src/commands/IndexCommand.js"
+      ],
+      "references": 1
+    },
+    "src/TestRunner.js": {
+      "imports": [
+        "child_process",
+        "fs-extra",
+        "path",
+        "chalk",
+        "os",
+        "os",
+        "os"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/WorkflowManager.js": {
+      "imports": [
+        "fs-extra",
+        "path",
+        "chalk",
+        "child_process",
+        "child_process"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/cli/CLIApplication.js": {
+      "imports": [
+        "commander",
+        "chalk",
+        "../container/ServiceFactory",
+        "../../dist/commands/CommandFactory",
+        "../../dist/services/CommandRegistry",
+        "inquirer",
+        "../commands/IndexCommand.js",
+        "../ConfigurationManager"
+      ],
+      "exports": [
+        "command",
+        "index"
+      ],
+      "importedBy": [
+        "main.js"
+      ],
+      "references": 1
+    },
+    "src/commands/AgentCommand.ts": {
+      "imports": [],
+      "exports": [
+        "AgentCommand"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/commands/AskCommand.ts": {
+      "imports": [],
+      "exports": [
+        "AskCommand"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/commands/CommandFactory.ts": {
+      "imports": [],
+      "exports": [
+        "CommandFactory"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/commands/ConfigCommand.ts": {
+      "imports": [],
+      "exports": [
+        "ConfigCommand"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/commands/ContextCommand.ts": {
+      "imports": [
+        "chalk",
+        "chalk"
+      ],
+      "exports": [
+        "ContextCommand"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/commands/ExecuteCommand.ts": {
+      "imports": [],
+      "exports": [
+        "ExecuteCommand"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/commands/IndexCommand.js": {
+      "imports": [
+        "chalk",
+        "inquirer",
+        "../services/CodeIndexService",
+        "../CodebaseSummarizer",
+        "../SemanticCodeAnalyzer",
+        "fs-extra",
+        "path",
+        "../ConfigurationManager",
+        "path",
+        "fs-extra",
+        "fs"
+      ],
+      "exports": [
+        "index",
+        "codebase",
+        "prompt",
+        "Export",
+        "codebase"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/commands/MemoryCommand.ts": {
+      "imports": [
+        "chalk",
+        "chalk",
+        "chalk",
+        "inquirer",
+        "fs-extra",
+        "chalk"
+      ],
+      "exports": [
+        "MemoryCommand",
+        "backup",
+        "backup",
+        "operation",
+        "as"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/container/DIContainer.js": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [
+        "src/container/ServiceFactory.js",
+        "tests/test-service-architecture.js"
+      ],
+      "references": 2
+    },
+    "src/container/ServiceFactory.js": {
+      "imports": [
+        "./DIContainer",
+        "../../dist/services/ConfigurationService",
+        "../../dist/services/MemoryService",
+        "../../dist/services/ContextService",
+        "../../dist/services/CommandService",
+        "../../dist/services/AIService",
+        "../../dist/services/PluginService",
+        "../../dist/services/WorkflowService",
+        "../ErrorHandler",
+        "../SecurityValidator",
+        "../CLIFormatter",
+        "../PerformanceOptimizer"
+      ],
+      "exports": [],
+      "importedBy": [
+        "src/cli/CLIApplication.js",
+        "tests/test-command-system.js",
+        "tests/test-command-system.js",
+        "tests/test-service-architecture.js"
+      ],
+      "references": 4
+    },
+    "src/interfaces/IAIService.ts": {
+      "imports": [],
+      "exports": [
+        "interface"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/interfaces/ICommand.ts": {
+      "imports": [],
+      "exports": [
+        "interface",
+        "interface"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/interfaces/ICommandRegistry.ts": {
+      "imports": [],
+      "exports": [
+        "interface"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/interfaces/ICommandService.ts": {
+      "imports": [],
+      "exports": [
+        "interface"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/interfaces/IConfigurationService.ts": {
+      "imports": [],
+      "exports": [
+        "interface"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/interfaces/IContextService.ts": {
+      "imports": [],
+      "exports": [
+        "interface"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/interfaces/IMemoryService.ts": {
+      "imports": [],
+      "exports": [
+        "interface"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/interfaces/IPluginService.ts": {
+      "imports": [],
+      "exports": [
+        "type",
+        "type",
+        "type",
+        "type",
+        "type",
+        "type",
+        "type",
+        "type",
+        "type",
+        "type",
+        "type",
+        "type",
+        "type",
+        "type",
+        "type",
+        "type",
+        "type",
+        "type",
+        "type",
+        "type",
+        "interface"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/interfaces/IWorkflowService.ts": {
+      "imports": [],
+      "exports": [
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/services/AIService.ts": {
+      "imports": [],
+      "exports": [
+        "AIService"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/services/CodeIndexService.js": {
+      "imports": [
+        "fs-extra",
+        "path",
+        "crypto",
+        "../CodebaseSummarizer",
+        "../CodebaseSummarizer"
+      ],
+      "exports": [],
+      "importedBy": [
+        "src/commands/IndexCommand.js"
+      ],
+      "references": 1
+    },
+    "src/services/CommandRegistry.ts": {
+      "imports": [],
+      "exports": [
+        "CommandRegistry"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/services/CommandService.ts": {
+      "imports": [],
+      "exports": [
+        "CommandService"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/services/ConfigurationService.ts": {
+      "imports": [],
+      "exports": [
+        "ConfigurationService"
+      ],
+      "importedBy": [
+        "tests/test-service-architecture.js"
+      ],
+      "references": 1
+    },
+    "src/services/ContextService.ts": {
+      "imports": [
+        "child_process"
+      ],
+      "exports": [
+        "ContextService"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/services/MemoryService.ts": {
+      "imports": [],
+      "exports": [
+        "MemoryService",
+        "memory"
+      ],
+      "importedBy": [
+        "tests/test-service-architecture.js"
+      ],
+      "references": 1
+    },
+    "src/services/PluginService.ts": {
+      "imports": [
+        "os",
+        "https",
+        "http",
+        "url",
+        "child_process",
+        "os",
+        "child_process",
+        "os",
+        "child_process"
+      ],
+      "exports": [
+        "PluginService"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/services/WorkflowService.ts": {
+      "imports": [],
+      "exports": [
+        "WorkflowService"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/types/index.ts": {
+      "imports": [],
+      "exports": [
+        "interface",
+        "interface",
+        "interface",
+        "type",
+        "interface",
+        "interface",
+        "interface",
+        "type",
+        "type",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface",
+        "interface"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "src/utils/RobustJSONParser.js": {
+      "imports": [
+        "chalk",
+        "extract-first-json",
+        "dirty-json",
+        "jsonic",
+        "json5"
+      ],
+      "exports": [],
+      "importedBy": [
+        "src/AgenticReasoningEngine.js"
+      ],
+      "references": 1
+    },
+    "tests/AgenticReasoningEngine.test.js": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/CommandHandler.test.js": {
+      "imports": [
+        "../src/CommandHandler"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/ErrorHandler.test.js": {
+      "imports": [
+        "../src/ErrorHandler"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/Integration.test.js": {
+      "imports": [
+        "../index",
+        "path",
+        "fs-extra"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/MemoryManager.test.js": {
+      "imports": [
+        "@jest/globals",
+        "fs-extra",
+        "path",
+        "os",
+        "../src/MemoryManager"
+      ],
+      "exports": [
+        "test",
+        "response",
+        "memory"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/SecurityValidator.test.js": {
+      "imports": [
+        "../src/SecurityValidator"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/command-interface-compliance.test.ts": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/profiles.json": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/setup.ts": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/test-agentic-fixes.js": {
+      "imports": [
+        "chalk",
+        "../index.js"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/test-agentic-goal.js": {
+      "imports": [
+        "../index.js"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/test-api-key.js": {
+      "imports": [
+        "chalk",
+        "../index.js"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/test-command-system.js": {
+      "imports": [
+        "../dist/services/CommandRegistry",
+        "../src/container/ServiceFactory",
+        "../dist/commands/CommandFactory",
+        "../src/container/ServiceFactory"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/test-complete-integration.js": {
+      "imports": [
+        "path",
+        "fs",
+        "../tests/test-semantic-search-fixes.js"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/test-components-fixed.js": {
+      "imports": [
+        "../src/AgenticReasoningEngine.js",
+        "../src/CommandHandler.js"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/test-file.js": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/test-final-comprehensive.js": {
+      "imports": [
+        "../src/services/MemoryService.ts",
+        "fs",
+        "path"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/test-full-aia.js": {
+      "imports": [
+        "../index.js"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/test-js-to-ts-transition.js": {
+      "imports": [
+        "child_process",
+        "path"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/test-quick.js": {
+      "imports": [
+        "../index.js"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/test-semantic-search-fixes.js": {
+      "imports": [
+        "path",
+        "../dist/services/MemoryService",
+        "../src/MemoryManager"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/test-service-architecture.js": {
+      "imports": [
+        "../src/container/DIContainer",
+        "../src/container/ServiceFactory",
+        "../src/services/ConfigurationService",
+        "../src/services/MemoryService",
+        "fs-extra",
+        "path",
+        "os"
+      ],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/typescript-command-structure.test.ts": {
+      "imports": [
+        "../src/interfaces/ICommand.js",
+        "fs",
+        "path",
+        "fs",
+        "path",
+        "fs",
+        "path"
+      ],
+      "exports": [
+        "CommandFactory"
+      ],
+      "importedBy": [],
+      "references": 0
+    },
+    "tests/user.json": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    },
+    "tsconfig.json": {
+      "imports": [],
+      "exports": [],
+      "importedBy": [],
+      "references": 0
+    }
+  },
+  "fileRelationships": {
+    ".aia/codebase-index.json": [
+      ".aia/config.json",
+      ".aia/profiles.json",
+      ".aia/user.json",
+      ".aia/codebase-index.json"
+    ],
+    ".aia/config.json": [
+      ".aia/codebase-index.json",
+      ".aia/profiles.json",
+      ".aia/user.json",
+      ".aia/config.json"
+    ],
+    ".aia/profiles.json": [
+      ".aia/codebase-index.json",
+      ".aia/config.json",
+      ".aia/user.json",
+      "tests/profiles.json",
+      ".aia/profiles.json"
+    ],
+    ".aia/user.json": [
+      ".aia/codebase-index.json",
+      ".aia/config.json",
+      ".aia/profiles.json",
+      "tests/user.json",
+      ".aia/user.json"
+    ],
+    ".github/copilot-instructions.json": [
+      ".github/copilot-instructions.md",
+      ".github/copilot-instructions.json"
+    ],
+    ".github/copilot-instructions.md": [
+      ".github/copilot-instructions.json",
+      ".github/copilot-instructions.md"
+    ],
+    "README.md": [
+      "indexWatcher.ts",
+      "jest.config.ts",
+      "main.js",
+      "package-lock.json",
+      "package.json"
+    ],
+    "docs/architecture/codebase-architecture.md": [
+      "docs/architecture/codebase-architecture.md"
+    ],
+    "docs/comprehensive/codebase-comprehensive.md": [
+      "docs/comprehensive/codebase-comprehensive.md"
+    ],
+    "docs/developer/codebase-dev-focused.md": [
+      "docs/developer/codebase-dev-focused.md"
+    ],
+    "docs/minimal/codebase-minimal.md": [
+      "docs/minimal/codebase-minimal.md"
+    ],
+    "examples/sample-plugin/README.md": [
+      "examples/sample-plugin/index.js",
+      "examples/sample-plugin/package-lock.json",
+      "examples/sample-plugin/package.json",
+      "examples/sample-plugin/plugin.json",
+      "README.md"
+    ],
+    "examples/sample-plugin/index.js": [
+      "examples/sample-plugin/README.md",
+      "examples/sample-plugin/package-lock.json",
+      "examples/sample-plugin/package.json",
+      "examples/sample-plugin/plugin.json",
+      "examples/simple-plugin/index.js"
+    ],
+    "examples/sample-plugin/package-lock.json": [
+      "examples/sample-plugin/README.md",
+      "examples/sample-plugin/index.js",
+      "examples/sample-plugin/package.json",
+      "examples/sample-plugin/plugin.json",
+      "package-lock.json"
+    ],
+    "examples/sample-plugin/package.json": [
+      "examples/sample-plugin/README.md",
+      "examples/sample-plugin/index.js",
+      "examples/sample-plugin/package-lock.json",
+      "examples/sample-plugin/plugin.json",
+      "package.json"
+    ],
+    "examples/sample-plugin/plugin.json": [
+      "examples/sample-plugin/README.md",
+      "examples/sample-plugin/index.js",
+      "examples/sample-plugin/package-lock.json",
+      "examples/sample-plugin/package.json",
+      "examples/simple-plugin/plugin.json"
+    ],
+    "examples/simple-plugin/index.js": [
+      "examples/simple-plugin/plugin.json",
+      "examples/sample-plugin/index.js",
+      "src/types/index.ts"
+    ],
+    "examples/simple-plugin/plugin.json": [
+      "examples/simple-plugin/index.js",
+      "examples/sample-plugin/plugin.json",
+      "examples/simple-plugin/plugin.json"
+    ],
+    "indexWatcher.ts": [
+      "README.md",
+      "jest.config.ts",
+      "main.js",
+      "package-lock.json",
+      "package.json"
+    ],
+    "jest.config.ts": [
+      "README.md",
+      "indexWatcher.ts",
+      "main.js",
+      "package-lock.json",
+      "package.json"
+    ],
+    "main.js": [
+      "README.md",
+      "indexWatcher.ts",
+      "jest.config.ts",
+      "package-lock.json",
+      "package.json"
+    ],
+    "package-lock.json": [
+      "README.md",
+      "indexWatcher.ts",
+      "jest.config.ts",
+      "main.js",
+      "package.json"
+    ],
+    "package.json": [
+      "README.md",
+      "indexWatcher.ts",
+      "jest.config.ts",
+      "main.js",
+      "package-lock.json"
+    ],
+    "src/AgenticReasoningEngine.js": [
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js",
+      "src/CommandIntelligence.js"
+    ],
+    "src/AgenticSearchEngine.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js",
+      "src/CommandIntelligence.js"
+    ],
+    "src/CLIFormatter.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js",
+      "src/CommandIntelligence.js"
+    ],
+    "src/CodebaseSummarizer.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CommandHandler.js",
+      "src/CommandIntelligence.js"
+    ],
+    "src/CommandHandler.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandIntelligence.js"
+    ],
+    "src/CommandIntelligence.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/ConfigurationManager.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/ContextAnalyzer.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/ConversationContextManager.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/DomainSpecialist.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/ErrorHandler.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/IndexWatcher.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/MemoryManager.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/ModelSelector.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/NLPEngine.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/PerformanceOptimizer.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/PluginManager.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/QueryProcessor.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/ResponseGenerator.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/SecurityValidator.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/SemanticAnalyzer.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/SemanticCodeAnalyzer.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/TestRunner.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/WorkflowManager.js": [
+      "src/AgenticReasoningEngine.js",
+      "src/AgenticSearchEngine.js",
+      "src/CLIFormatter.js",
+      "src/CodebaseSummarizer.js",
+      "src/CommandHandler.js"
+    ],
+    "src/cli/CLIApplication.js": [],
+    "src/commands/AgentCommand.ts": [
+      "src/commands/AskCommand.ts",
+      "src/commands/CommandFactory.ts",
+      "src/commands/ConfigCommand.ts",
+      "src/commands/ContextCommand.ts",
+      "src/commands/ExecuteCommand.ts"
+    ],
+    "src/commands/AskCommand.ts": [
+      "src/commands/AgentCommand.ts",
+      "src/commands/CommandFactory.ts",
+      "src/commands/ConfigCommand.ts",
+      "src/commands/ContextCommand.ts",
+      "src/commands/ExecuteCommand.ts"
+    ],
+    "src/commands/CommandFactory.ts": [
+      "src/commands/AgentCommand.ts",
+      "src/commands/AskCommand.ts",
+      "src/commands/ConfigCommand.ts",
+      "src/commands/ContextCommand.ts",
+      "src/commands/ExecuteCommand.ts"
+    ],
+    "src/commands/ConfigCommand.ts": [
+      "src/commands/AgentCommand.ts",
+      "src/commands/AskCommand.ts",
+      "src/commands/CommandFactory.ts",
+      "src/commands/ContextCommand.ts",
+      "src/commands/ExecuteCommand.ts"
+    ],
+    "src/commands/ContextCommand.ts": [
+      "src/commands/AgentCommand.ts",
+      "src/commands/AskCommand.ts",
+      "src/commands/CommandFactory.ts",
+      "src/commands/ConfigCommand.ts",
+      "src/commands/ExecuteCommand.ts"
+    ],
+    "src/commands/ExecuteCommand.ts": [
+      "src/commands/AgentCommand.ts",
+      "src/commands/AskCommand.ts",
+      "src/commands/CommandFactory.ts",
+      "src/commands/ConfigCommand.ts",
+      "src/commands/ContextCommand.ts"
+    ],
+    "src/commands/IndexCommand.js": [
+      "src/commands/AgentCommand.ts",
+      "src/commands/AskCommand.ts",
+      "src/commands/CommandFactory.ts",
+      "src/commands/ConfigCommand.ts",
+      "src/commands/ContextCommand.ts"
+    ],
+    "src/commands/MemoryCommand.ts": [
+      "src/commands/AgentCommand.ts",
+      "src/commands/AskCommand.ts",
+      "src/commands/CommandFactory.ts",
+      "src/commands/ConfigCommand.ts",
+      "src/commands/ContextCommand.ts"
+    ],
+    "src/container/DIContainer.js": [
+      "src/container/ServiceFactory.js"
+    ],
+    "src/container/ServiceFactory.js": [
+      "src/container/DIContainer.js"
+    ],
+    "src/interfaces/IAIService.ts": [
+      "src/interfaces/ICommand.ts",
+      "src/interfaces/ICommandRegistry.ts",
+      "src/interfaces/ICommandService.ts",
+      "src/interfaces/IConfigurationService.ts",
+      "src/interfaces/IContextService.ts"
+    ],
+    "src/interfaces/ICommand.ts": [
+      "src/interfaces/IAIService.ts",
+      "src/interfaces/ICommandRegistry.ts",
+      "src/interfaces/ICommandService.ts",
+      "src/interfaces/IConfigurationService.ts",
+      "src/interfaces/IContextService.ts"
+    ],
+    "src/interfaces/ICommandRegistry.ts": [
+      "src/interfaces/IAIService.ts",
+      "src/interfaces/ICommand.ts",
+      "src/interfaces/ICommandService.ts",
+      "src/interfaces/IConfigurationService.ts",
+      "src/interfaces/IContextService.ts"
+    ],
+    "src/interfaces/ICommandService.ts": [
+      "src/interfaces/IAIService.ts",
+      "src/interfaces/ICommand.ts",
+      "src/interfaces/ICommandRegistry.ts",
+      "src/interfaces/IConfigurationService.ts",
+      "src/interfaces/IContextService.ts"
+    ],
+    "src/interfaces/IConfigurationService.ts": [
+      "src/interfaces/IAIService.ts",
+      "src/interfaces/ICommand.ts",
+      "src/interfaces/ICommandRegistry.ts",
+      "src/interfaces/ICommandService.ts",
+      "src/interfaces/IContextService.ts"
+    ],
+    "src/interfaces/IContextService.ts": [
+      "src/interfaces/IAIService.ts",
+      "src/interfaces/ICommand.ts",
+      "src/interfaces/ICommandRegistry.ts",
+      "src/interfaces/ICommandService.ts",
+      "src/interfaces/IConfigurationService.ts"
+    ],
+    "src/interfaces/IMemoryService.ts": [
+      "src/interfaces/IAIService.ts",
+      "src/interfaces/ICommand.ts",
+      "src/interfaces/ICommandRegistry.ts",
+      "src/interfaces/ICommandService.ts",
+      "src/interfaces/IConfigurationService.ts"
+    ],
+    "src/interfaces/IPluginService.ts": [
+      "src/interfaces/IAIService.ts",
+      "src/interfaces/ICommand.ts",
+      "src/interfaces/ICommandRegistry.ts",
+      "src/interfaces/ICommandService.ts",
+      "src/interfaces/IConfigurationService.ts"
+    ],
+    "src/interfaces/IWorkflowService.ts": [
+      "src/interfaces/IAIService.ts",
+      "src/interfaces/ICommand.ts",
+      "src/interfaces/ICommandRegistry.ts",
+      "src/interfaces/ICommandService.ts",
+      "src/interfaces/IConfigurationService.ts"
+    ],
+    "src/services/AIService.ts": [
+      "src/services/CodeIndexService.js",
+      "src/services/CommandRegistry.ts",
+      "src/services/CommandService.ts",
+      "src/services/ConfigurationService.ts",
+      "src/services/ContextService.ts"
+    ],
+    "src/services/CodeIndexService.js": [
+      "src/services/AIService.ts",
+      "src/services/CommandRegistry.ts",
+      "src/services/CommandService.ts",
+      "src/services/ConfigurationService.ts",
+      "src/services/ContextService.ts"
+    ],
+    "src/services/CommandRegistry.ts": [
+      "src/services/AIService.ts",
+      "src/services/CodeIndexService.js",
+      "src/services/CommandService.ts",
+      "src/services/ConfigurationService.ts",
+      "src/services/ContextService.ts"
+    ],
+    "src/services/CommandService.ts": [
+      "src/services/AIService.ts",
+      "src/services/CodeIndexService.js",
+      "src/services/CommandRegistry.ts",
+      "src/services/ConfigurationService.ts",
+      "src/services/ContextService.ts"
+    ],
+    "src/services/ConfigurationService.ts": [
+      "src/services/AIService.ts",
+      "src/services/CodeIndexService.js",
+      "src/services/CommandRegistry.ts",
+      "src/services/CommandService.ts",
+      "src/services/ContextService.ts"
+    ],
+    "src/services/ContextService.ts": [
+      "src/services/AIService.ts",
+      "src/services/CodeIndexService.js",
+      "src/services/CommandRegistry.ts",
+      "src/services/CommandService.ts",
+      "src/services/ConfigurationService.ts"
+    ],
+    "src/services/MemoryService.ts": [
+      "src/services/AIService.ts",
+      "src/services/CodeIndexService.js",
+      "src/services/CommandRegistry.ts",
+      "src/services/CommandService.ts",
+      "src/services/ConfigurationService.ts"
+    ],
+    "src/services/PluginService.ts": [
+      "src/services/AIService.ts",
+      "src/services/CodeIndexService.js",
+      "src/services/CommandRegistry.ts",
+      "src/services/CommandService.ts",
+      "src/services/ConfigurationService.ts"
+    ],
+    "src/services/WorkflowService.ts": [
+      "src/services/AIService.ts",
+      "src/services/CodeIndexService.js",
+      "src/services/CommandRegistry.ts",
+      "src/services/CommandService.ts",
+      "src/services/ConfigurationService.ts"
+    ],
+    "src/types/index.ts": [
+      "examples/sample-plugin/index.js",
+      "examples/simple-plugin/index.js",
+      "src/types/index.ts"
+    ],
+    "src/utils/RobustJSONParser.js": [],
+    "tests/AgenticReasoningEngine.test.js": [
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js",
+      "tests/SecurityValidator.test.js"
+    ],
+    "tests/CommandHandler.test.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js",
+      "tests/SecurityValidator.test.js"
+    ],
+    "tests/ErrorHandler.test.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js",
+      "tests/SecurityValidator.test.js"
+    ],
+    "tests/Integration.test.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/MemoryManager.test.js",
+      "tests/SecurityValidator.test.js"
+    ],
+    "tests/MemoryManager.test.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/SecurityValidator.test.js"
+    ],
+    "tests/SecurityValidator.test.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/command-interface-compliance.test.ts": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/profiles.json": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/setup.ts": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/test-agentic-fixes.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/test-agentic-goal.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/test-api-key.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/test-command-system.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/test-complete-integration.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/test-components-fixed.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/test-file.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/test-final-comprehensive.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/test-full-aia.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/test-js-to-ts-transition.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/test-quick.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/test-semantic-search-fixes.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/test-service-architecture.js": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/typescript-command-structure.test.ts": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tests/user.json": [
+      "tests/AgenticReasoningEngine.test.js",
+      "tests/CommandHandler.test.js",
+      "tests/ErrorHandler.test.js",
+      "tests/Integration.test.js",
+      "tests/MemoryManager.test.js"
+    ],
+    "tsconfig.json": [
+      "README.md",
+      "indexWatcher.ts",
+      "jest.config.ts",
+      "main.js",
+      "package-lock.json"
+    ]
+  },
+  "contextualHints": [
+    {
+      "context": "Service Architecture",
+      "description": "Service classes handle business logic and are injected via DI container",
+      "examples": [
+        "src/container/ServiceFactory.js",
+        "src/interfaces/IAIService.ts",
+        "src/interfaces/ICommandService.ts"
+      ]
+    },
+    {
+      "context": "Command Pattern",
+      "description": "Commands handle CLI operations and implement the ICommand interface",
+      "examples": [
+        "src/CommandHandler.js",
+        "src/CommandIntelligence.js",
+        "src/commands/AgentCommand.ts"
+      ]
+    },
+    {
+      "context": "Configuration",
+      "description": "Configuration files define application settings and output directories",
+      "examples": [
+        ".aia/config.json",
+        "jest.config.ts",
+        "src/ConfigurationManager.js"
+      ]
+    },
+    {
+      "context": "Testing Strategy",
+      "description": "Tests are organized in the tests/ directory with corresponding source files",
+      "examples": [
+        "tests/AgenticReasoningEngine.test.js",
+        "tests/CommandHandler.test.js",
+        "tests/ErrorHandler.test.js"
+      ]
+    }
+  ],
+  "recentChanges": [
+    {
+      "file": "src/services/CodeIndexService.js",
+      "lastModified": "2025-06-19T03:52:34.701Z",
+      "type": "source"
+    },
+    {
+      "file": ".github/copilot-instructions.json",
+      "lastModified": "2025-06-19T03:18:15.645Z",
+      "type": "config"
+    },
+    {
+      "file": ".github/copilot-instructions.md",
+      "lastModified": "2025-06-19T03:18:15.643Z",
+      "type": "documentation"
+    },
+    {
+      "file": "docs/developer/codebase-dev-focused.md",
+      "lastModified": "2025-06-19T03:18:15.642Z",
+      "type": "documentation"
+    },
+    {
+      "file": "docs/architecture/codebase-architecture.md",
+      "lastModified": "2025-06-19T03:18:15.641Z",
+      "type": "documentation"
+    }
+  ],
+  "hotspots": [
+    {
+      "file": "src/container/ServiceFactory.js",
+      "reason": "Highly imported (4 references)",
+      "metrics": "4 imports"
+    },
+    {
+      "file": "src/CodebaseSummarizer.js",
+      "reason": "Highly imported (3 references)",
+      "metrics": "3 imports"
+    },
+    {
+      "file": "src/SemanticAnalyzer.js",
+      "reason": "Highly imported (2 references)",
+      "metrics": "2 imports"
+    },
+    {
+      "file": "src/ConfigurationManager.js",
+      "reason": "Highly imported (2 references)",
+      "metrics": "2 imports"
+    },
+    {
+      "file": "src/container/DIContainer.js",
+      "reason": "Highly imported (2 references)",
+      "metrics": "2 imports"
+    },
+    {
+      "file": "README.md",
+      "reason": "High complexity (118 symbols)",
+      "metrics": "118 symbols"
+    },
+    {
+      "file": "examples/sample-plugin/README.md",
+      "reason": "High complexity (20 symbols)",
+      "metrics": "20 symbols"
+    },
+    {
+      "file": "src/services/CodeIndexService.js",
+      "reason": "High complexity (10 symbols)",
+      "metrics": "10 symbols"
+    }
+  ]
+}

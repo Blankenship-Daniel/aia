@@ -1,7 +1,38 @@
+import { AIModel } from './types/index.js';
+
+interface ModelPerformanceStats {
+  totalQueries: number;
+  category: string;
+}
+
+interface QueryClassification {
+  [key: string]: number;
+}
+
+interface ContextWeights {
+  projectType: number;
+  gitStatus: number;
+  workingDirectory: number;
+  recentCommands: number;
+}
+
+interface ModelContext {
+  projectType?: string;
+  gitStatus?: string;
+  workingDirectory: string;
+  recentCommands?: string[];
+}
+
+interface UserPreferences {
+  preferredModel: AIModel;
+}
+
 // AI Model Selection Enhancement
 // This module will contain advanced heuristics for selecting the optimal AI model
-
 class ModelSelector {
+  private modelPerformance: Map<string, ModelPerformanceStats>;
+  private queryPatterns: Record<string, RegExp>;
+
   constructor() {
     this.modelPerformance = new Map();
     this.queryPatterns = {
@@ -18,14 +49,19 @@ class ModelSelector {
   }
 
   // Enhanced model selection based on multiple factors
-  selectOptimalModel(query, context, userPreferences, availableModels) {
+  selectOptimalModel(
+    query: string,
+    context: ModelContext,
+    userPreferences: UserPreferences,
+    availableModels: AIModel[]
+  ): AIModel {
     try {
       const queryType = this.classifyQuery(query);
       const contextWeight = this.analyzeContext(context);
 
       // Start with user's preferred model if available
       const preferredModel = userPreferences.preferredModel || 'gpt-4';
-      let bestModel = preferredModel;
+      let bestModel: AIModel = preferredModel;
       let bestScore = 0;
 
       // Give the preferred model a base score so it has a chance to win
@@ -84,8 +120,8 @@ class ModelSelector {
     }
   }
 
-  classifyQuery(query) {
-    const classifications = {};
+  private classifyQuery(query: string): QueryClassification {
+    const classifications: QueryClassification = {};
 
     for (const [type, pattern] of Object.entries(this.queryPatterns)) {
       const matches = query.match(pattern);
@@ -95,8 +131,8 @@ class ModelSelector {
     return classifications;
   }
 
-  analyzeContext(context) {
-    const weights = {
+  private analyzeContext(context: ModelContext): ContextWeights {
+    const weights: ContextWeights = {
       projectType: this.getProjectTypeWeight(context.projectType),
       gitStatus: this.getGitStatusWeight(context.gitStatus),
       workingDirectory: this.getDirectoryWeight(context.workingDirectory),
@@ -107,7 +143,7 @@ class ModelSelector {
   }
 
   // Performance tracking for model selection optimization
-  trackModelUsage(model, query) {
+  trackModelUsage(model: AIModel, query: string): void {
     const key = `${model}-${this.getQueryCategory(query)}`;
 
     if (!this.modelPerformance.has(key)) {
@@ -117,40 +153,40 @@ class ModelSelector {
       });
     }
 
-    const stats = this.modelPerformance.get(key);
+    const stats = this.modelPerformance.get(key)!;
     stats.totalQueries++;
     this.modelPerformance.set(key, stats);
   }
 
   // Helper methods
-  getProjectTypeWeight(projectType) {
-    const weights = {
+  private getProjectTypeWeight(projectType?: string): number {
+    const weights: Record<string, number> = {
       'package.json': 0.8, // Node.js project
       'requirements.txt': 0.7, // Python project
       'Cargo.toml': 0.6, // Rust project
       'go.mod': 0.6, // Go project
     };
-    return weights[projectType] || 0.5;
+    return weights[projectType || ''] || 0.5;
   }
 
-  getGitStatusWeight(gitStatus) {
+  private getGitStatusWeight(gitStatus?: string): number {
     if (!gitStatus) return 0.5;
     const modifiedFiles = gitStatus.split('\n').length;
     return Math.min(modifiedFiles / 10, 1.0);
   }
 
-  getDirectoryWeight(workingDirectory) {
+  private getDirectoryWeight(workingDirectory: string): number {
     // Simple scoring based on directory depth
     const depth = workingDirectory.split('/').length;
     return Math.min(depth / 10, 1.0);
   }
 
-  getCommandHistoryWeight(commands) {
+  private getCommandHistoryWeight(commands?: string[]): number {
     if (!commands || !Array.isArray(commands)) return 0.5;
     return Math.min(commands.length / 20, 1.0);
   }
 
-  getQueryCategory(query) {
+  private getQueryCategory(query: string): string {
     const queryLower = query.toLowerCase();
     if (queryLower.includes('code') || queryLower.includes('debug'))
       return 'coding';
@@ -162,4 +198,4 @@ class ModelSelector {
   }
 }
 
-module.exports = ModelSelector;
+export default ModelSelector;

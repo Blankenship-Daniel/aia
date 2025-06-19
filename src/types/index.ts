@@ -9,7 +9,7 @@ export interface AIAConfig {
   // Output directory settings for prompt generation
   outputDirectories?: {
     prompts?: string;
-    customInstructions?: string;
+    copilotInstructions?: string;
     context?: string;
     architecture?: string;
     comprehensive?: string;

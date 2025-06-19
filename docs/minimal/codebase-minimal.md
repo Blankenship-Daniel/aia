@@ -1,21 +1,20 @@
 # Node.js Project Context
 
-A javascript project with 96 files using Service-Component Architecture architecture.
+A javascript project with 103 files using Service-Component Architecture architecture.
 
 ## Key Files
-- index.js
 - main.js
 - README.md
 - package.json
-- docs/IMPLEMENTATION_SUMMARY.md
-- index.js
 - examples/sample-plugin/README.md
+- src/services/CodeIndexService.js
 - tests/test-service-architecture.js
+- .github/copilot-instructions.md
+- docs/comprehensive/codebase-comprehensive.md
 
 ## Main Classes
 - HelloPlugin
 - module
-- AIA
 - IndexWatcher
 - AgenticReasoningEngine
 - AgenticSearchEngine
@@ -23,3 +22,4 @@ A javascript project with 96 files using Service-Component Architecture architec
 - CodebaseSummarizer
 - const
 - CommandHandler
+- CommandIntelligence

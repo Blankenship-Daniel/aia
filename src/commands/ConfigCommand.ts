@@ -209,9 +209,9 @@ export class ConfigCommand implements ICommand {
           },
           {
             type: 'input',
-            name: 'outputDirectories.customInstructions',
-            message: 'Directory for custom instruction files:',
-            default: './custom-instructions',
+            name: 'outputDirectories.copilotInstructions',
+            message: 'Directory for copilot instruction files:',
+            default: './copilot-instructions',
           },
           {
             type: 'input',

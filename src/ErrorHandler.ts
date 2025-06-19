@@ -1,9 +1,111 @@
 // Enhanced Error Handling and Resilience Module
 // Provides consistent error handling, retry logic, and circuit breaker patterns
 
-const chalk = require('chalk');
+// @ts-ignore - chalk doesn't have types available
+import chalk from 'chalk';
+
+interface RetryConfig {
+  maxRetries: number;
+  baseDelay: number;
+  maxDelay: number;
+  backoffFactor: number;
+}
+
+interface ErrorPattern {
+  regex: RegExp;
+  type: string;
+  severity: string;
+  recoverable: boolean;
+}
+
+interface ErrorMetrics {
+  total: number;
+  byType: Record<string, number>;
+  bySeverity: Record<string, number>;
+  recentErrors: ErrorRecord[];
+  maxRecentErrors: number;
+}
+
+interface ErrorRecord {
+  errorId: string;
+  message: string;
+  type: string;
+  severity: string;
+  timestamp: string;
+  context: Record<string, unknown>;
+}
+
+interface CircuitBreaker {
+  state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+  failures: number;
+  lastFailureTime: number | null;
+  successes: number;
+  requests: Array<{ timestamp: number; success: boolean }>;
+  failureThreshold: number;
+  recoveryTimeout: number;
+  monitoringWindow: number;
+}
+
+interface EnhancedError {
+  message: string;
+  name: string;
+  stack?: string;
+  originalError: Error;
+  context: Record<string, unknown>;
+  timestamp: string;
+  errorId: string;
+  category: string;
+  type: string;
+  severity: string;
+  recoverable: boolean;
+}
+
+interface ErrorClassification {
+  type: string;
+  severity: string;
+  recoverable: boolean;
+  message: string;
+}
+
+interface RecoveryAction {
+  action: 'retry' | 'ignore' | 'escalate' | 'user_action';
+  delay?: number;
+  maxRetries?: number;
+  suggestion?: string;
+}
+
+interface RecordedErrorPattern {
+  count: number;
+  firstSeen: string;
+  lastSeen: string;
+  examples: Array<{
+    message: string;
+    timestamp: string;
+    context: Record<string, unknown>;
+  }>;
+  regex: RegExp | null;
+}
+
+interface CircuitBreakerOptions {
+  failureThreshold?: number;
+  recoveryTimeout?: number;
+  monitoringWindow?: number;
+}
+
+interface RetryContext {
+  maxRetries?: number;
+  baseDelay?: number;
+  retryCondition?: (error: Error) => boolean;
+}
 
 class ErrorHandler {
+  private retryConfig: RetryConfig;
+  private circuitBreakers: Map<string, CircuitBreaker>;
+  private errorPatterns: Map<string, ErrorPattern>;
+  private errorMetrics: ErrorMetrics;
+  private recordedErrorPatterns: Map<string, RecordedErrorPattern>;
+  private retryCounts: Record<string, number>;
+
   constructor() {
     this.retryConfig = {
       maxRetries: 3,
@@ -83,16 +185,20 @@ class ErrorHandler {
       maxRecentErrors: 50,
     };
     this.recordedErrorPatterns = new Map(); // Separate map for dynamic pattern recording
+    this.retryCounts = {};
   }
 
-  async withRetry(operation, context = {}) {
+  async withRetry<T>(
+    operation: (attempt: number) => Promise<T>,
+    context: RetryContext = {}
+  ): Promise<T> {
     const {
       maxRetries = this.retryConfig.maxRetries,
       baseDelay = this.retryConfig.baseDelay,
-      retryCondition = (error) => this.shouldRetry(error),
+      retryCondition = (error: Error) => this.shouldRetry(error),
     } = context;
 
-    let lastError;
+    let lastError: Error;
     let attempt = 0;
 
     // Initial attempt + retries
@@ -100,10 +206,10 @@ class ErrorHandler {
       try {
         return await operation(attempt);
       } catch (error) {
-        lastError = error;
+        lastError = error as Error;
 
-        if (attempt >= maxRetries || !retryCondition(error)) {
-          throw this.enhanceError(error, { attempt, maxRetries });
+        if (attempt >= maxRetries || !retryCondition(lastError)) {
+          throw this.enhanceError(lastError, { attempt, maxRetries });
         }
 
         const delay = Math.min(
@@ -121,10 +227,14 @@ class ErrorHandler {
       }
     }
 
-    throw this.enhanceError(lastError, { attempt: maxRetries, maxRetries });
+    throw this.enhanceError(lastError!, { attempt: maxRetries, maxRetries });
   }
 
-  async withCircuitBreaker(serviceId, operation, options = {}) {
+  async withCircuitBreaker<T>(
+    serviceId: string,
+    operation: () => Promise<T>,
+    options: CircuitBreakerOptions = {}
+  ): Promise<T> {
     const {
       failureThreshold = 5,
       recoveryTimeout = 30000,
@@ -155,7 +265,10 @@ class ErrorHandler {
 
     // Check circuit breaker state
     if (breaker.state === 'OPEN') {
-      if (now - breaker.lastFailureTime > recoveryTimeout) {
+      if (
+        breaker.lastFailureTime &&
+        now - breaker.lastFailureTime > recoveryTimeout
+      ) {
         breaker.state = 'HALF_OPEN';
         console.log(
           chalk.blue(
@@ -205,14 +318,14 @@ class ErrorHandler {
         );
       }
 
-      throw this.enhanceError(error, {
+      throw this.enhanceError(error as Error, {
         serviceId,
         circuitBreakerState: breaker.state,
       });
     }
   }
 
-  shouldRetry(error) {
+  shouldRetry(error: Error): boolean {
     // Don't retry for these error types
     const nonRetryableErrors = [
       'authentication',
@@ -223,7 +336,7 @@ class ErrorHandler {
     ];
 
     const errorMessage = error.message?.toLowerCase() || '';
-    const errorCode = error.code || error.status;
+    const errorCode = (error as any).code || (error as any).status;
 
     // Don't retry 4xx errors (except rate limiting 429 and specific API errors deemed retryable by patterns)
     const classification = this.categorizeError(error);
@@ -251,30 +364,33 @@ class ErrorHandler {
     );
   }
 
-  enhanceError(error, context = {}) {
+  enhanceError(
+    error: Error,
+    context: Record<string, unknown> = {}
+  ): EnhancedError {
     const enhanced = new Error(error.message);
     enhanced.name = error.name;
     enhanced.stack = error.stack;
-    enhanced.originalError = error;
-    enhanced.context = context;
-    enhanced.timestamp = new Date().toISOString();
-    enhanced.errorId = this.generateErrorId();
+    (enhanced as any).originalError = error;
+    (enhanced as any).context = context;
+    (enhanced as any).timestamp = new Date().toISOString();
+    (enhanced as any).errorId = this.generateErrorId();
 
     const classification = this.categorizeError(error);
-    enhanced.category = classification.type; // Retain 'category' for compatibility if used elsewhere
-    enhanced.type = classification.type; // Add 'type' for clarity
-    enhanced.severity = classification.severity.toUpperCase();
-    enhanced.recoverable = classification.recoverable;
+    (enhanced as any).category = classification.type; // Retain 'category' for compatibility if used elsewhere
+    (enhanced as any).type = classification.type; // Add 'type' for clarity
+    (enhanced as any).severity = classification.severity.toUpperCase();
+    (enhanced as any).recoverable = classification.recoverable;
 
     // Return a plain object for consistency, especially for logging and metrics
     return {
       message: enhanced.message,
       name: enhanced.name,
       stack: enhanced.stack,
-      originalError: enhanced.originalError,
-      context: enhanced.context,
-      timestamp: enhanced.timestamp,
-      errorId: enhanced.errorId,
+      originalError: (enhanced as any).originalError,
+      context: (enhanced as any).context,
+      timestamp: (enhanced as any).timestamp,
+      errorId: (enhanced as any).errorId,
       category: classification.type, // Keep category for compatibility
       type: classification.type,
       severity: classification.severity.toUpperCase(),
@@ -282,7 +398,7 @@ class ErrorHandler {
     };
   }
 
-  categorizeError(error) {
+  categorizeError(error: Error): ErrorClassification {
     const errorMessage = error.message || String(error);
     let type = 'unknown';
     let severity = 'LOW';
@@ -323,7 +439,7 @@ class ErrorHandler {
     return { type, severity, recoverable, message: errorMessage };
   }
 
-  suggestRecovery(error) {
+  suggestRecovery(error: Error): RecoveryAction {
     const { type, recoverable, message = '' } = this.categorizeError(error);
 
     // Prioritize API key error for 401 specifically
@@ -348,8 +464,6 @@ class ErrorHandler {
       };
     }
 
-    // Default retryCounts to an empty object if not initialized
-    this.retryCounts = this.retryCounts || {};
     const retryDelay =
       this.retryConfig.baseDelay * Math.pow(2, this.retryCounts[type] || 0);
 
@@ -376,17 +490,18 @@ class ErrorHandler {
   }
 
   // Get error metrics
-  getErrorMetrics() {
+  getErrorMetrics(): ErrorMetrics {
     return {
       total: this.errorMetrics.total, // Changed from totalErrors to total
       byType: this.errorMetrics.byType,
       bySeverity: this.errorMetrics.bySeverity,
       recentErrors: this.errorMetrics.recentErrors,
+      maxRecentErrors: this.errorMetrics.maxRecentErrors,
     };
   }
 
   // Reset error metrics
-  resetErrorMetrics() {
+  resetErrorMetrics(): void {
     this.errorMetrics = {
       total: 0,
       byType: {},
@@ -396,8 +511,8 @@ class ErrorHandler {
     };
   }
 
-  getCircuitBreakerStatusSummary() {
-    const summary = {};
+  getCircuitBreakerStatusSummary(): Record<string, Partial<CircuitBreaker>> {
+    const summary: Record<string, Partial<CircuitBreaker>> = {};
     for (const [serviceId, breaker] of this.circuitBreakers.entries()) {
       summary[serviceId] = {
         state: breaker.state,
@@ -409,25 +524,25 @@ class ErrorHandler {
     return summary;
   }
 
-  assessSeverity(error) {
+  assessSeverity(error: Error): string {
     const category = this.categorizeError(error);
     return category.severity.toUpperCase();
   }
 
-  isRecoverable(error) {
+  isRecoverable(error: Error): boolean {
     const category = this.categorizeError(error);
     return category.recoverable;
   }
 
-  generateErrorId() {
+  generateErrorId(): string {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
 
-  async sleep(ms) {
+  async sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  logError(error, context = {}) {
+  logError(error: Error, context: Record<string, unknown> = {}): EnhancedError {
     const enhanced = this.enhanceError(error, context);
 
     this.errorMetrics.total++;
@@ -475,7 +590,7 @@ class ErrorHandler {
     return enhanced;
   }
 
-  recordErrorPattern(error) {
+  recordErrorPattern(error: EnhancedError): void {
     // This method now records to a separate map to avoid corrupting predefined errorPatterns
     const patternKey = error.type || 'unknown'; // Use 'type' as the key
 
@@ -490,7 +605,7 @@ class ErrorHandler {
       });
     }
 
-    const patternData = this.recordedErrorPatterns.get(patternKey);
+    const patternData = this.recordedErrorPatterns.get(patternKey)!;
     patternData.count++;
     patternData.lastSeen = error.timestamp;
 
@@ -505,7 +620,7 @@ class ErrorHandler {
     }
   }
 
-  getErrorStatistics() {
+  getErrorStatistics(): Record<string, unknown> {
     // Return statistics from the recordedErrorPatterns, not the predefined ones
     return {
       patterns: Object.fromEntries(this.recordedErrorPatterns),
@@ -524,4 +639,4 @@ class ErrorHandler {
   }
 }
 
-module.exports = ErrorHandler;
+export default ErrorHandler;

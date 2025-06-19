@@ -1,7 +1,7 @@
 {
   "outputDirectories": {
     "prompts": "./.github/prompts",
-    "customInstructions": "./.github",
+    "copilotInstructions": "./.github",
     "comprehensive": "./docs/comprehensive",
     "minimal": "./docs/minimal",
     "architecture": "./docs/architecture",

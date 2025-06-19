@@ -224,7 +224,7 @@ export class ConfigurationService implements IConfigurationService {
       profiles: {},
       outputDirectories: {
         prompts: './prompts',
-        customInstructions: './custom-instructions',
+        copilotInstructions: './copilot-instructions',
         context: './context',
         architecture: './architecture',
         comprehensive: './comprehensive',

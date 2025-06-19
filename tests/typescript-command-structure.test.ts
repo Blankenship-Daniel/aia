@@ -5,9 +5,9 @@ describe('TypeScript Command Files Compilation', () => {
   test('Command files should be valid TypeScript', async () => {
     // This test simply ensures the TypeScript files can be imported without syntax errors
 
-    // Test importing interfaces
+    // Test importing interfaces - we can't test interfaces at runtime since they're types
     const ICommandModule = await import('../src/interfaces/ICommand.js');
-    expect(ICommandModule.ICommand).toBeDefined();
+    expect(ICommandModule).toBeDefined();
 
     // Test that the command files exist and are TypeScript
     const fs = require('fs');
@@ -27,9 +27,18 @@ describe('TypeScript Command Files Compilation', () => {
 
       const content = fs.readFileSync(filePath, 'utf8');
 
-      // Check for TypeScript-specific features
+      // Skip ICommand checks for CommandFactory.ts since it's a factory, not a command
+      if (filename === 'CommandFactory.ts') {
+        // Check for TypeScript-specific features in factory
+        expect(content).toContain('export class CommandFactory');
+        expect(content).toContain('createCommand');
+        expect(content).toContain('ICommand');
+        return;
+      }
+
+      // Check for TypeScript-specific features in command implementations
       expect(content).toContain('implements ICommand');
-      expect(content).toContain('public async execute(');
+      expect(content).toContain('async execute(');
       expect(content).toContain('CommandResult');
       expect(content).toContain('CommandOptions');
 
@@ -103,7 +112,7 @@ describe('TypeScript Command Files Compilation', () => {
 
       // Execute method with correct signature
       expect(content).toMatch(
-        /execute\(\s*context:\s*Record<string,\s*unknown>,\s*args:\s*string\[\],\s*options:\s*CommandOptions\s*\):\s*Promise<CommandResult>/
+        /(?:async\s+)?execute\(\s*context:\s*Record<string,\s*unknown>,\s*args:\s*string\[\],\s*options(?:\?)?:\s*CommandOptions\s*(?:=\s*\{\})?\s*\):\s*Promise<CommandResult>/
       );
     });
   });

@@ -35,8 +35,6 @@ export class CommandRegistry implements ICommandRegistry {
         this.registerAlias(alias, definition.name);
       }
     }
-
-    console.log(`Command registered: ${definition.name}`);
   }
 
   /**

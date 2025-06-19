@@ -42,7 +42,7 @@ async function testBasicRegistry() {
 async function testServiceIntegration() {
   console.log('🧪 Testing Service Integration...');
 
-  const ServiceFactory = require('../src/container/ServiceFactory');
+  const { ServiceFactory } = require('../dist/container/ServiceFactory');
   const container = ServiceFactory.createContainer();
 
   // Test service resolution
@@ -57,7 +57,7 @@ async function testCommandCreation() {
   console.log('🧪 Testing Command Creation...');
 
   const { CommandFactory } = require('../dist/commands/CommandFactory');
-  const ServiceFactory = require('../src/container/ServiceFactory');
+  const { ServiceFactory } = require('../dist/container/ServiceFactory');
 
   const container = ServiceFactory.createContainer();
   const services = {

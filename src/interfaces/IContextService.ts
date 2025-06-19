@@ -1,4 +1,4 @@
-import { ContextInfo } from '../types/index.js';
+import { ContextInfo } from '../types/index';
 
 /**
  * Context Service Interface

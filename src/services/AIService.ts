@@ -2,10 +2,10 @@
  * AI Service Implementation
  * Manages AI model interactions and query processing
  */
-import { IAIService } from '../interfaces/IAIService.js';
-import { IConfigurationService } from '../interfaces/IConfigurationService.js';
-import { IMemoryService } from '../interfaces/IMemoryService.js';
-import { AIAConfig, ContextInfo, AIModel } from '../types/index.js';
+import { IAIService } from '../interfaces/IAIService';
+import { IConfigurationService } from '../interfaces/IConfigurationService';
+import { IMemoryService } from '../interfaces/IMemoryService';
+import { AIAConfig, ContextInfo, AIModel } from '../types/index';
 
 export class AIService implements IAIService {
   private configService: IConfigurationService;

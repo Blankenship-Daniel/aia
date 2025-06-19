@@ -1,4 +1,4 @@
-import { ContextInfo, CommandResult } from '../types/index.js';
+import { ContextInfo, CommandResult } from '../types/index';
 
 /**
  * Command Service Interface
@@ -88,4 +88,14 @@ export interface ICommandService {
       duration: number;
     }>
   >;
+
+  /**
+   * Validate command and check for issues
+   */
+  validateCommand(command: string): Promise<{
+    valid: boolean;
+    safe: boolean;
+    warnings: string[];
+    suggestions: string[];
+  }>;
 }

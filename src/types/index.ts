@@ -130,9 +130,11 @@ export interface AgenticGoal {
 
 export interface AgenticStep {
   description: string;
-  command?: string;
+  command: string; // Make required to match ExecutionStep
   expectedOutcome: string;
   reasoning: string;
+  risks: string[]; // Make required to match ExecutionStep
+  dependencies: string[]; // Make required to match ExecutionStep
 }
 
 export interface AgenticExecutionResult {
@@ -141,6 +143,23 @@ export interface AgenticExecutionResult {
   output: string;
   error?: string;
   confidence: number;
+}
+
+export interface AgenticExecution {
+  id: string;
+  goal: string;
+  plan: AgenticStep[];
+  results: AgenticExecutionResult[];
+  executionResults: AgenticExecutionResult[]; // Alias for backward compatibility
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  iterations: number;
+  startTime: string;
+  endTime?: string;
+  learnings: string[];
+  context: ContextInfo;
+  success?: boolean; // Computed based on results
+  confidence?: number; // Computed confidence score
+  timestamp?: string; // Alias for startTime
 }
 
 export interface PluginManifest {
@@ -338,11 +357,14 @@ export interface WorkflowExecutionResult {
 
 // Agentic reasoning types
 export interface ExecutionStep {
-  description: string;
+  id?: string;
   command: string;
+  description: string;
   expectedOutcome: string;
-  reasoning: string;
-  priority: number;
+  reasoning?: string; // Make reasoning optional to be compatible with AgenticStep
+  risks: string[];
+  dependencies: string[];
+  timeout?: number; // Add timeout support
 }
 
 export interface ExecutionResult {

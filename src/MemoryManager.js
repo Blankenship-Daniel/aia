@@ -71,15 +71,29 @@ class MemoryManager {
   }
 
   // Semantic search implementation
-  async semanticSearch(query, limit = 10) {
+  async semanticSearch(query, options = {}) {
     try {
+      // Support both legacy and new calling patterns
+      let limit, threshold;
+      if (typeof options === 'number') {
+        // Legacy pattern: semanticSearch(query, limit)
+        limit = options;
+        threshold = 0.1;
+      } else {
+        // New pattern: semanticSearch(query, { limit, threshold })
+        limit = options.limit || 10;
+        threshold = options.threshold || 0.1;
+      }
+
       const queryTerms = this.extractKeywords(query.toLowerCase());
       const results = [];
 
       // Search conversations
       for (const conv of this.memory.conversations) {
+        if (!conv || !conv.query) continue; // Skip invalid entries
+
         const score = this.calculateRelevanceScore(conv, queryTerms);
-        if (score > 0.1) {
+        if (score > threshold) {
           results.push({
             type: 'conversation',
             content: conv,
@@ -91,8 +105,10 @@ class MemoryManager {
 
       // Search commands
       for (const cmd of this.memory.commands) {
+        if (!cmd || !cmd.command) continue; // Skip invalid entries
+
         const score = this.calculateCommandRelevanceScore(cmd, queryTerms);
-        if (score > 0.1) {
+        if (score > threshold) {
           results.push({
             type: 'command',
             content: cmd,
@@ -383,16 +399,37 @@ class MemoryManager {
   }
 
   calculateRelevanceScore(conversation, queryTerms) {
-    const text = `${conversation.query} ${conversation.response}`.toLowerCase();
+    // Validate inputs
+    if (!conversation || !queryTerms || !Array.isArray(queryTerms)) {
+      return 0;
+    }
+
+    const queryText = String(conversation.query || '');
+    const responseText = String(conversation.response || '');
+    const text = `${queryText} ${responseText}`.toLowerCase();
+
     let score = 0;
     let matches = 0;
 
     queryTerms.forEach((term) => {
-      const regex = new RegExp(term, 'gi');
-      const termMatches = (text.match(regex) || []).length;
-      if (termMatches > 0) {
-        matches++;
-        score += termMatches * 0.1;
+      if (!term || typeof term !== 'string') return;
+
+      try {
+        const regex = new RegExp(
+          term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+          'gi'
+        ); // Escape special chars
+        const termMatches = (text.match(regex) || []).length;
+        if (termMatches > 0) {
+          matches++;
+          score += termMatches * 0.1;
+        }
+      } catch (regexError) {
+        // Fallback to simple string search if regex fails
+        if (text.includes(term.toLowerCase())) {
+          matches++;
+          score += 0.1;
+        }
       }
     });
 
@@ -405,11 +442,23 @@ class MemoryManager {
   }
 
   calculateCommandRelevanceScore(command, queryTerms) {
-    const text = command.command.toLowerCase();
+    // Validate inputs
+    if (
+      !command ||
+      !command.command ||
+      !queryTerms ||
+      !Array.isArray(queryTerms)
+    ) {
+      return 0;
+    }
+
+    const text = String(command.command).toLowerCase();
     let score = 0;
 
     queryTerms.forEach((term) => {
-      if (text.includes(term)) {
+      if (!term || typeof term !== 'string') return;
+
+      if (text.includes(term.toLowerCase())) {
         score += 0.3;
       }
     });

@@ -561,4 +561,130 @@ export class MemoryService implements IMemoryService {
       typeof memory.workingDirectories === 'object'
     );
   }
+
+  /**
+   * Get recent conversations
+   */
+  async getRecentConversations(limit: number = 10): Promise<MemoryEntry[]> {
+    const memory = await this.loadMemory();
+    return memory.conversations.slice(-limit);
+  }
+
+  /**
+   * Get recent commands
+   */
+  async getRecentCommands(limit: number = 10): Promise<CommandHistoryEntry[]> {
+    const memory = await this.loadMemory();
+    return memory.commands.slice(-limit);
+  }
+
+  /**
+   * Get agentic execution history
+   */
+  async getAgenticHistory(goal?: string): Promise<any[]> {
+    const memory = await this.loadMemory();
+    const agenticHistory = (memory as any).agenticHistory || [];
+
+    if (goal) {
+      return agenticHistory.filter(
+        (entry: any) =>
+          entry.goal && entry.goal.toLowerCase().includes(goal.toLowerCase())
+      );
+    }
+
+    return agenticHistory;
+  }
+
+  /**
+   * Store agentic execution result
+   */
+  async storeAgenticExecution(execution: any): Promise<void> {
+    const memory = await this.loadMemory();
+    const memoryWithAgentic = memory as any;
+
+    if (!memoryWithAgentic.agenticHistory) {
+      memoryWithAgentic.agenticHistory = [];
+    }
+
+    memoryWithAgentic.agenticHistory.push({
+      ...execution,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Keep only last 50 executions
+    if (memoryWithAgentic.agenticHistory.length > 50) {
+      memoryWithAgentic.agenticHistory =
+        memoryWithAgentic.agenticHistory.slice(-50);
+    }
+
+    await this.saveMemory(memoryWithAgentic);
+  }
+
+  /**
+   * Semantic search across memory
+   */
+  async searchMemory(
+    query: string,
+    limit: number = 10,
+    type?: 'conversation' | 'command'
+  ): Promise<
+    Array<{
+      type: 'conversation' | 'command';
+      content: MemoryEntry | CommandHistoryEntry;
+      relevance: number;
+    }>
+  > {
+    const results: Array<{
+      type: 'conversation' | 'command';
+      content: MemoryEntry | CommandHistoryEntry;
+      relevance: number;
+    }> = [];
+
+    if (!type || type === 'conversation') {
+      const conversations = await this.searchConversations(query, limit);
+      conversations.forEach((conv) => {
+        results.push({
+          type: 'conversation',
+          content: conv,
+          relevance: this.calculateSemanticSimilarity(
+            query,
+            conv.query + ' ' + conv.response
+          ),
+        });
+      });
+    }
+
+    if (!type || type === 'command') {
+      const commands = await this.searchCommands(query, limit);
+      commands.forEach((cmd) => {
+        results.push({
+          type: 'command',
+          content: cmd,
+          relevance: this.calculateSemanticSimilarity(query, cmd.command),
+        });
+      });
+    }
+
+    // Sort by relevance and limit results
+    return results.sort((a, b) => b.relevance - a.relevance).slice(0, limit);
+  }
+
+  /**
+   * Calculate semantic similarity between two text strings
+   */
+  private calculateSemanticSimilarity(text1: string, text2: string): number {
+    if (!text1 || !text2) return 0;
+
+    // Simple similarity calculation based on common words
+    const words1 = text1.toLowerCase().split(/\s+/);
+    const words2 = text2.toLowerCase().split(/\s+/);
+
+    const set1 = new Set(words1);
+    const set2 = new Set(words2);
+
+    const intersection = new Set([...set1].filter((x) => set2.has(x)));
+    const union = new Set([...set1, ...set2]);
+
+    return intersection.size / union.size;
+  }
 }

@@ -1,9 +1,4 @@
-import {
-  AIAConfig,
-  ContextInfo,
-  AIModel,
-  CommandResult,
-} from '../types/index.js';
+import { AIAConfig, ContextInfo, AIModel, CommandResult } from '../types/index';
 
 /**
  * AI Service Interface

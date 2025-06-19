@@ -3,7 +3,7 @@ import {
   CommandHistoryEntry,
   ContextInfo,
   AIModel,
-} from '../types/index.js';
+} from '../types/index';
 
 /**
  * Memory Service Interface
@@ -102,4 +102,39 @@ export interface IMemoryService {
    * Compress memory by removing old entries
    */
   compressMemory(): Promise<void>;
+
+  /**
+   * Get recent conversations
+   */
+  getRecentConversations(limit?: number): Promise<MemoryEntry[]>;
+
+  /**
+   * Get recent commands
+   */
+  getRecentCommands(limit?: number): Promise<CommandHistoryEntry[]>;
+
+  /**
+   * Get agentic execution history
+   */
+  getAgenticHistory(goal?: string): Promise<any[]>;
+
+  /**
+   * Store agentic execution result
+   */
+  storeAgenticExecution(execution: any): Promise<void>;
+
+  /**
+   * Semantic search across memory
+   */
+  searchMemory(
+    query: string,
+    limit?: number,
+    type?: 'conversation' | 'command'
+  ): Promise<
+    Array<{
+      type: 'conversation' | 'command';
+      content: MemoryEntry | CommandHistoryEntry;
+      relevance: number;
+    }>
+  >;
 }

@@ -2,9 +2,9 @@
  * Context Service Implementation
  * Manages context analysis and environment awareness
  */
-import { IContextService } from '../interfaces/IContextService.js';
-import { IConfigurationService } from '../interfaces/IConfigurationService.js';
-import { ContextInfo } from '../types/index.js';
+import { IContextService } from '../interfaces/IContextService';
+import { IConfigurationService } from '../interfaces/IConfigurationService';
+import { ContextInfo } from '../types/index';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as os from 'os';

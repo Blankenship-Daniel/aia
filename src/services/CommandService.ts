@@ -2,11 +2,11 @@
  * Command Service Implementation
  * Manages command execution and optimization
  */
-import { ICommandService } from '../interfaces/ICommandService.js';
-import { IConfigurationService } from '../interfaces/IConfigurationService.js';
-import { IContextService } from '../interfaces/IContextService.js';
-import { IMemoryService } from '../interfaces/IMemoryService.js';
-import { ContextInfo, CommandResult } from '../types/index.js';
+import { ICommandService } from '../interfaces/ICommandService';
+import { IConfigurationService } from '../interfaces/IConfigurationService';
+import { IContextService } from '../interfaces/IContextService';
+import { IMemoryService } from '../interfaces/IMemoryService';
+import { ContextInfo, CommandResult } from '../types/index';
 import { spawn } from 'child_process';
 
 export class CommandService implements ICommandService {
@@ -164,6 +164,53 @@ export class CommandService implements ICommandService {
     return {
       safe: level === 'safe',
       level,
+      warnings,
+      suggestions,
+    };
+  }
+
+  /**
+   * Validate command and check for issues
+   */
+  async validateCommand(command: string): Promise<{
+    valid: boolean;
+    safe: boolean;
+    warnings: string[];
+    suggestions: string[];
+  }> {
+    const warnings: string[] = [];
+    const suggestions: string[] = [];
+    let safe = true;
+
+    // Check for dangerous commands
+    const dangerousCommands = ['rm -rf', 'format', 'fdisk', 'dd if='];
+    const isDangerous = dangerousCommands.some((dangerous) =>
+      command.toLowerCase().includes(dangerous.toLowerCase())
+    );
+
+    if (isDangerous) {
+      safe = false;
+      warnings.push('This command appears to be potentially destructive');
+      suggestions.push(
+        'Consider using safer alternatives or review the command carefully'
+      );
+    }
+
+    // Check for common issues
+    if (command.includes('sudo') && !command.includes('-S')) {
+      warnings.push('Command requires sudo privileges');
+      suggestions.push('Ensure you have the necessary permissions');
+    }
+
+    // Check for network commands
+    if (command.includes('curl') || command.includes('wget')) {
+      warnings.push('Command makes network requests');
+      suggestions.push('Ensure network connectivity and validate URLs');
+    }
+
+    return {
+      valid: true, // Command syntax is valid (we don't do deep syntax validation)
+      safe,
       warnings,
       suggestions,
     };

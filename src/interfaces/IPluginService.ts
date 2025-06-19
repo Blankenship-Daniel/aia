@@ -9,7 +9,7 @@ import {
   PluginListFilters,
   PluginSearchOptions,
   PluginUninstallOptions,
-} from '../types/index.js';
+} from '../types/index';
 
 export type {
   PluginManifest,

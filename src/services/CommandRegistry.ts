@@ -2,8 +2,8 @@
  * Command Registry Implementation
  * Manages command registration and resolution
  */
-import { ICommandRegistry } from '../interfaces/ICommandRegistry.js';
-import { ICommand } from '../interfaces/ICommand.js';
+import { ICommandRegistry } from '../interfaces/ICommandRegistry';
+import { ICommand } from '../interfaces/ICommand';
 
 export class CommandRegistry implements ICommandRegistry {
   private commands: Map<string, ICommand> = new Map();

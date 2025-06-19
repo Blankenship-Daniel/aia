@@ -1,4 +1,4 @@
-import { ICommand } from './ICommand.js';
+import { ICommand } from './ICommand';
 
 /**
  * Command Registry Interface

@@ -67,24 +67,45 @@ class AgenticSearchEngine {
       // Search conversations for similar goals or related content
       let relatedConversations = [];
       try {
-        if (this.aia.memoryManager && this.aia.memoryManager.semanticSearch) {
-          relatedConversations = await this.aia.memoryManager.semanticSearch(
+        // Try new service-based search first
+        if (this.aia.memoryService && this.aia.memoryService.searchMemory) {
+          const searchResults = await this.aia.memoryService.searchMemory(
             goal,
-            {
-              limit: 5,
-              threshold: 0.5,
-            }
+            5,
+            'conversation'
           );
+          relatedConversations = searchResults.map((result) => result.content);
+        } else if (
+          this.aia.memoryManager &&
+          this.aia.memoryManager.semanticSearch
+        ) {
+          // Fallback to legacy semantic search
+          const searchResults = await this.aia.memoryManager.semanticSearch(
+            goal,
+            5
+          );
+          relatedConversations = searchResults
+            .filter((result) => result.type === 'conversation')
+            .map((result) => result.content);
         } else {
           // Fallback to simple text search
           relatedConversations = memory.conversations
-            .filter((conv) => this.calculateRelevance(conv.query, goal) > 0)
+            .filter((conv) => {
+              if (!conv || !conv.query) return false;
+              return this.calculateRelevance(conv.query, goal) > 0;
+            })
             .slice(-5);
         }
       } catch (error) {
+        console.log(
+          chalk.yellow(`⚠️ Conversation search failed: ${error.message}`)
+        );
         // Fallback to simple text search if semantic search fails
         relatedConversations = memory.conversations
-          .filter((conv) => this.calculateRelevance(conv.query, goal) > 0)
+          .filter((conv) => {
+            if (!conv || !conv.query) return false;
+            return this.calculateRelevance(conv.query, goal) > 0;
+          })
           .slice(-5);
       }
 

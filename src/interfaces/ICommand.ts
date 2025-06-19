@@ -1,4 +1,4 @@
-import { CommandResult, CommandOptions } from '../types/index.js';
+import { CommandResult, CommandOptions } from '../types/index';
 
 /**
  * Command Definition Interface

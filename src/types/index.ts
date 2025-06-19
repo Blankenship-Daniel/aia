@@ -36,8 +36,19 @@ export interface PluginConfig {
 }
 
 export type AIModel =
+  // OpenAI models
   | 'gpt-4'
   | 'gpt-3.5-turbo'
+  // Claude 4 series (latest)
+  | 'claude-opus-4-20250514'
+  | 'claude-sonnet-4-20250514'
+  // Claude 3.5 series
+  | 'claude-3-5-sonnet-20241022'
+  | 'claude-3-5-haiku-20241022'
+  // Claude 3 series (legacy)
+  | 'claude-3-opus-20240229'
+  | 'claude-3-haiku-20240307'
+  // Legacy aliases (for backward compatibility)
   | 'claude-3.5-sonnet'
   | 'claude-3-haiku';
 

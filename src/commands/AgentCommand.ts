@@ -298,6 +298,15 @@ export class AgentCommand implements ICommand {
 
           if (result.success) {
             spinner.succeed(chalk.green(`✓ ${step.description}`));
+            // Display command output if available
+            if (result.output && result.output.trim()) {
+              console.log(chalk.dim('Output:'));
+              const lines = result.output.trim().split('\n');
+              lines.forEach((line: string) => {
+                console.log(chalk.dim(`  ${line}`));
+              });
+              console.log(); // Add spacing
+            }
           } else {
             spinner.fail(chalk.red(`✗ ${step.description}`));
             allStepsSuccessful = false;
@@ -437,6 +446,13 @@ export class AgentCommand implements ICommand {
       );
       if (result.error) {
         output += chalk.red(`     Error: ${result.error}\n`);
+      }
+      if (result.success && result.output && result.output.trim()) {
+        output += chalk.dim(`     Output:\n`);
+        const lines = result.output.trim().split('\n');
+        lines.forEach((line: string) => {
+          output += chalk.dim(`       ${line}\n`);
+        });
       }
     });
 

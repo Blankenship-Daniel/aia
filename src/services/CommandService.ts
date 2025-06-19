@@ -58,17 +58,14 @@ export class CommandService implements ICommandService {
     const startTime = Date.now();
 
     return new Promise((resolve, reject) => {
-      // Parse command and arguments
-      const parts = command.split(' ');
-      const cmd = parts[0];
-      const args = parts.slice(1);
-
       let stdout = '';
       let stderr = '';
 
-      const child = spawn(cmd, args, {
+      // Use shell: true to properly handle shell commands with pipes and operators
+      const child = spawn(command, {
         cwd: options.workingDirectory || process.cwd(),
         stdio: ['inherit', 'pipe', 'pipe'],
+        shell: true,
       });
 
       child.stdout?.on('data', (data: Buffer) => {

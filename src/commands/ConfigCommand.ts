@@ -152,7 +152,7 @@ export class ConfigCommand implements ICommand {
             },
             {
               name: 'Claude-3.5 Sonnet (Anthropic) - Great for analysis',
-              value: 'claude-3.5-sonnet',
+              value: 'claude-3-5-sonnet-20241022',
             },
             {
               name: 'Claude-3 Haiku (Anthropic) - Fast responses',

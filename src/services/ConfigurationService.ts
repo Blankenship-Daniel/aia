@@ -46,11 +46,22 @@ export class ConfigurationService implements IConfigurationService {
    */
   async loadConfiguration(): Promise<AIAConfig> {
     try {
+      let config = this.getDefaultConfiguration();
+
       if (await fs.pathExists(this.configPath)) {
         const configData = await fs.readJson(this.configPath);
-        return { ...this.getDefaultConfiguration(), ...configData };
+        config = { ...config, ...configData };
       }
-      return this.getDefaultConfiguration();
+
+      // Environment variables take precedence over config file
+      if (process.env.OPENAI_API_KEY) {
+        config.openaiApiKey = process.env.OPENAI_API_KEY;
+      }
+      if (process.env.ANTHROPIC_API_KEY) {
+        config.anthropicApiKey = process.env.ANTHROPIC_API_KEY;
+      }
+
+      return config;
     } catch (error) {
       console.warn(
         'Failed to load configuration, using defaults:',
@@ -218,7 +229,10 @@ export class ConfigurationService implements IConfigurationService {
    */
   getDefaultConfiguration(): AIAConfig {
     return {
-      preferredModel: 'gpt-4',
+      preferredModel: 'claude-3-5-sonnet-20241022', // Use Claude 3.5 Sonnet as default
+      // Check environment variables for API keys
+      openaiApiKey: process.env.OPENAI_API_KEY,
+      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
       autoExecute: false,
       plugins: {},
       profiles: {},
@@ -329,7 +343,20 @@ export class ConfigurationService implements IConfigurationService {
    * Get available AI models
    */
   getAvailableModels(): string[] {
-    return ['gpt-4', 'gpt-3.5-turbo', 'claude-3.5-sonnet', 'claude-3-haiku'];
+    return [
+      // OpenAI models
+      'gpt-4',
+      'gpt-3.5-turbo',
+      // Claude 4 series (latest)
+      'claude-opus-4-20250514',
+      'claude-sonnet-4-20250514',
+      // Claude 3.5 series
+      'claude-3-5-sonnet-20241022',
+      'claude-3-5-haiku-20241022',
+      // Claude 3 series (legacy)
+      'claude-3-opus-20240229',
+      'claude-3-haiku-20240307',
+    ];
   }
 
   /**

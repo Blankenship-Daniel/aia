@@ -9,12 +9,11 @@ const inquirer = require('inquirer');
 import { ICommand, CommandDefinition } from '../interfaces/ICommand.js';
 import { CommandResult, CommandOptions, AsyncResult } from '../types/index.js';
 
-// Import JavaScript modules with explicit types
-const CodeIndexService =
-  require('../../dist/services/CodeIndexService.js').CodeIndexService;
+// Import TypeScript modules
+import { CodeIndexService } from '../services/CodeIndexService.js';
 import CodebaseSummarizer from '../CodebaseSummarizer.js';
-const SemanticCodeAnalyzer = require('../../src/SemanticCodeAnalyzer.js');
-const ConfigurationManager = require('../../src/ConfigurationManager.js');
+import SemanticCodeAnalyzer from '../SemanticCodeAnalyzer.js';
+import ConfigurationManager from '../ConfigurationManager.js';
 
 interface IndexStats {
   totalFiles: number;
@@ -127,9 +126,9 @@ export class IndexCommand implements ICommand {
   private description = 'Create and manage codebase index for AI analysis';
   private aliases = ['idx', 'scan'];
 
-  private codeIndexService: any;
+  private codeIndexService: CodeIndexService;
   private codebaseSummarizer: CodebaseSummarizer;
-  private semanticAnalyzer: any;
+  private semanticAnalyzer: SemanticCodeAnalyzer;
 
   constructor() {
     this.codeIndexService = new CodeIndexService();
@@ -297,8 +296,13 @@ export class IndexCommand implements ICommand {
         this.codeIndexService.searchSymbols(searchTerm);
 
       // Search files
-      const fileResults: FileResult[] =
-        this.codeIndexService.searchFiles(searchTerm);
+      const fileSearchResults = this.codeIndexService.searchFiles(searchTerm);
+      const fileResults: FileResult[] = fileSearchResults.map((result) => ({
+        type: 'file',
+        name: path.basename(result.path),
+        file: result.path,
+        relevance: result.relevance,
+      }));
 
       // Display results
       if (symbolResults.length > 0) {
@@ -695,8 +699,33 @@ export class IndexCommand implements ICommand {
 
       console.log(chalk.blue('🧠 Performing semantic code analysis...'));
 
-      const analysis: AnalysisResult =
+      const semanticAnalysis =
         await this.semanticAnalyzer.analyzeCodebaseSemantics(index);
+
+      // Convert to expected format
+      const analysis: AnalysisResult = {
+        architecture: semanticAnalysis.architecture.map((pattern) => ({
+          name: pattern.name,
+          confidence: pattern.confidence,
+          evidence: pattern.evidence.map((e) => e.indicator),
+        })),
+        patterns: semanticAnalysis.patterns.map((pattern) => ({
+          name: pattern.name,
+          confidence: pattern.confidence,
+          description: pattern.name, // Using name as description for now
+        })),
+        quality: {
+          score: semanticAnalysis.quality.maintainability / 100, // Normalize to 0-1
+          factors: [
+            `Complexity: ${semanticAnalysis.quality.complexity}`,
+            `Maintainability: ${semanticAnalysis.quality.maintainability}%`,
+            `Documentation: ${semanticAnalysis.quality.documentation}%`,
+          ],
+          suggestions: semanticAnalysis.quality.issues.map(
+            (issue) => `${issue.severity.toUpperCase()}: ${issue.type} issue`
+          ),
+        },
+      };
 
       console.log(chalk.blue.bold('\n🏗️  Architecture Analysis'));
       if (analysis.architecture.length > 0) {
@@ -910,28 +939,27 @@ export class IndexCommand implements ICommand {
 
     // Architecture Analysis
     if (includeDetails) {
-      const analysis = await this.semanticAnalyzer.analyzeCodebaseSemantics(
-        index
-      );
+      const semanticAnalysis =
+        await this.semanticAnalyzer.analyzeCodebaseSemantics(index);
 
-      if (analysis.architecture.length > 0) {
+      if (semanticAnalysis.architecture.length > 0) {
         content += '## Architecture Patterns\n\n';
-        for (const arch of analysis.architecture) {
+        for (const arch of semanticAnalysis.architecture) {
           content += `### ${arch.name}\n`;
           content += `Confidence: ${(arch.confidence * 100).toFixed(1)}%\n\n`;
           content += 'Evidence:\n';
           for (const evidence of arch.evidence) {
-            content += `- ${evidence}\n`;
+            content += `- ${evidence.indicator}\n`;
           }
           content += '\n';
         }
       }
 
-      if (analysis.patterns.length > 0) {
+      if (semanticAnalysis.patterns.length > 0) {
         content += '## Design Patterns\n\n';
-        for (const pattern of analysis.patterns) {
+        for (const pattern of semanticAnalysis.patterns) {
           content += `### ${pattern.name}\n`;
-          content += `${pattern.description}\n`;
+          content += `${pattern.name}\n`; // Using name as description
           content += `Confidence: ${(pattern.confidence * 100).toFixed(
             1
           )}%\n\n`;

@@ -1,3 +1,7 @@
+// Export new SOLID interfaces for Week 3 optimizations
+export * from '../interfaces/ICachingService';
+export * from '../interfaces/IPerformanceMonitor';
+
 // Core application types
 export interface AIAConfig {
   preferredModel: string;
@@ -515,3 +519,13 @@ export interface StepResult {
   error?: string;
   timestamp: string;
 }
+
+// SOLID-compliant Memory Service Interfaces
+export { IMemoryPersistence } from '../interfaces/IMemoryPersistence';
+export { IConversationMemory } from '../interfaces/IConversationMemory';
+export { ICommandMemory } from '../interfaces/ICommandMemory';
+export { IMemoryStatistics } from '../interfaces/IMemoryStatistics';
+export { IMemoryImportExport } from '../interfaces/IMemoryImportExport';
+export { IAgenticMemory } from '../interfaces/IAgenticMemory';
+export { IPreferences } from '../interfaces/IPreferences';
+export { IWorkingDirectory } from '../interfaces/IWorkingDirectory';

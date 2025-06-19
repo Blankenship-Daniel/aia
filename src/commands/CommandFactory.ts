@@ -10,6 +10,7 @@ import { ContextCommand } from './ContextCommand';
 import { MemoryCommand } from './MemoryCommand';
 import { ConfigCommand } from './ConfigCommand';
 import { AgentCommand } from './AgentCommand';
+import { IndexCommand } from './IndexCommand';
 
 export class CommandFactory {
   constructor(
@@ -64,6 +65,11 @@ export class CommandFactory {
           this.commandService,
           this.memoryService
         );
+
+      case 'index':
+      case 'idx':
+      case 'build':
+        return new IndexCommand();
 
       default:
         return null;
@@ -121,6 +127,7 @@ export class CommandFactory {
       'memory',
       'config',
       'agent',
+      'index',
     ];
     let registeredCount = 0;
 

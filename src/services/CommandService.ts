@@ -5,24 +5,24 @@
 import { ICommandService } from '../interfaces/ICommandService';
 import { IConfigurationService } from '../interfaces/IConfigurationService';
 import { IContextService } from '../interfaces/IContextService';
-import { IMemoryService } from '../interfaces/IMemoryService';
+import { ICommandMemory } from '../interfaces/ICommandMemory';
 import { ContextInfo, CommandResult } from '../types/index';
 import { spawn } from 'child_process';
 
 export class CommandService implements ICommandService {
   private configService: IConfigurationService;
   private contextService: IContextService;
-  private memoryService: IMemoryService;
+  private commandMemory: ICommandMemory;
   private initialized: boolean = false;
 
   constructor(
     configurationService: IConfigurationService,
     contextService: IContextService,
-    memoryService: IMemoryService
+    commandMemory: ICommandMemory
   ) {
     this.configService = configurationService;
     this.contextService = contextService;
-    this.memoryService = memoryService;
+    this.commandMemory = commandMemory;
   }
 
   /**
@@ -85,7 +85,7 @@ export class CommandService implements ICommandService {
         const optimized = options.optimize || false;
 
         // Add command to memory
-        this.memoryService.addCommand(
+        this.commandMemory.addCommand(
           command,
           options.workingDirectory || process.cwd(),
           exitCode,

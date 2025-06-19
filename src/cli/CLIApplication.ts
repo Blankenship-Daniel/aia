@@ -289,8 +289,14 @@ export default class CLIApplication {
       // Prepare options from CLI
       const options = this.extractOptionsFromArgs(args);
 
+      // Extract clean arguments - commander.js passes variadic args as first element
+      let cleanArgs: string[] = [];
+      if (args.length > 0 && Array.isArray(args[0])) {
+        cleanArgs = args[0]; // First element is the array of actual arguments
+      }
+
       // Execute the command with correct signature
-      const result = await commandInstance.execute({}, args, options);
+      const result = await commandInstance.execute({}, cleanArgs, options);
 
       if (result && !result.success && result.error) {
         console.error(chalk.red('Command failed:'), result.error);

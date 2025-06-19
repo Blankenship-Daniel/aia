@@ -618,7 +618,7 @@ export class CodeIndexService {
     return null;
   }
 
-  private getLanguageDistribution(): Record<string, number> {
+  public getLanguageDistribution(): Record<string, number> {
     const distribution: Record<string, number> = {};
     for (const [, fileInfo] of Array.from(this.index.files.entries())) {
       distribution[fileInfo.language] =

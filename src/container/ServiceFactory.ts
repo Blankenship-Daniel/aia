@@ -47,14 +47,128 @@ export class ServiceFactory {
     container.registerFactory(
       'memory',
       (container) => {
-        const { MemoryService } = require('../../dist/services/MemoryService');
+        const {
+          CompositeMemoryService,
+        } = require('../../dist/services/CompositeMemoryService');
+        const memoryPersistence = container.resolve('memoryPersistence');
+        const conversationMemory = container.resolve('conversationMemory');
+        const commandMemory = container.resolve('commandMemory');
+        const memoryStatistics = container.resolve('memoryStatistics');
+        const memoryImportExport = container.resolve('memoryImportExport');
+        return new CompositeMemoryService(
+          memoryPersistence,
+          conversationMemory,
+          commandMemory,
+          memoryStatistics,
+          memoryImportExport
+        );
+      },
+      {
+        dependencies: [
+          'memoryPersistence',
+          'conversationMemory',
+          'commandMemory',
+          'memoryStatistics',
+          'memoryImportExport',
+        ],
+      }
+    );
+
+    // Memory Persistence Service (depends on configuration)
+    container.registerFactory(
+      'memoryPersistence',
+      (container) => {
+        const {
+          MemoryPersistenceService,
+        } = require('../../dist/services/MemoryPersistenceService');
         const config = container.resolve('configuration');
-        return new MemoryService(config);
+        return new MemoryPersistenceService(config);
       },
       {
         dependencies: ['configuration'],
       }
     );
+
+    // Conversation Memory Service (depends on memoryPersistence and caching)
+    container.registerFactory(
+      'conversationMemory',
+      (container) => {
+        const {
+          ConversationMemoryService,
+        } = require('../../dist/services/ConversationMemoryService');
+        const memoryPersistence = container.resolve('memoryPersistence');
+        const caching = container.resolve('caching');
+        return new ConversationMemoryService(memoryPersistence, caching);
+      },
+      {
+        dependencies: ['memoryPersistence', 'caching'],
+      }
+    );
+
+    // Command Memory Service (depends on memoryPersistence)
+    container.registerFactory(
+      'commandMemory',
+      (container) => {
+        const {
+          CommandMemoryService,
+        } = require('../../dist/services/CommandMemoryService');
+        const memoryPersistence = container.resolve('memoryPersistence');
+        return new CommandMemoryService(memoryPersistence);
+      },
+      {
+        dependencies: ['memoryPersistence'],
+      }
+    );
+
+    // Memory Statistics Service (depends on memoryPersistence)
+    container.registerFactory(
+      'memoryStatistics',
+      (container) => {
+        const {
+          MemoryStatisticsService,
+        } = require('../../dist/services/MemoryStatisticsService');
+        const memoryPersistence = container.resolve('memoryPersistence');
+        return new MemoryStatisticsService(memoryPersistence);
+      },
+      {
+        dependencies: ['memoryPersistence'],
+      }
+    );
+
+    // Memory Import/Export Service (depends on memoryPersistence)
+    container.registerFactory(
+      'memoryImportExport',
+      (container) => {
+        const {
+          MemoryImportExportService,
+        } = require('../../dist/services/MemoryImportExportService');
+        const memoryPersistence = container.resolve('memoryPersistence');
+        return new MemoryImportExportService(memoryPersistence);
+      },
+      {
+        dependencies: ['memoryPersistence'],
+      }
+    );
+
+    // Caching Service (no dependencies - foundational)
+    container.registerFactory('caching', (container) => {
+      const {
+        MemoryCacheService,
+      } = require('../../dist/services/MemoryCacheService');
+      return new MemoryCacheService({
+        defaultTTL: 300000, // 5 minutes
+        maxItems: 1000,
+        cleanupIntervalMs: 60000, // 1 minute
+      });
+    });
+
+    // Performance Monitor Service (no dependencies - foundational)
+    container.registerFactory('performanceMonitor', (container) => {
+      const {
+        PerformanceMonitorService,
+      } = require('../../dist/services/PerformanceMonitorService');
+      return new PerformanceMonitorService();
+    });
 
     // Context Service (depends on configuration)
     container.registerFactory(
@@ -71,7 +185,7 @@ export class ServiceFactory {
       }
     );
 
-    // Command Service (depends on configuration and context)
+    // Command Service (depends on configuration, context, and commandMemory)
     container.registerFactory(
       'command',
       (container) => {
@@ -80,25 +194,25 @@ export class ServiceFactory {
         } = require('../../dist/services/CommandService');
         const config = container.resolve('configuration');
         const context = container.resolve('context');
-        const memory = container.resolve('memory');
-        return new CommandService(config, context, memory);
+        const commandMemory = container.resolve('commandMemory');
+        return new CommandService(config, context, commandMemory);
       },
       {
-        dependencies: ['configuration', 'context', 'memory'],
+        dependencies: ['configuration', 'context', 'commandMemory'],
       }
     );
 
-    // AI Service (depends on configuration and memory)
+    // AI Service (depends on configuration and conversationMemory)
     container.registerFactory(
       'ai',
       (container) => {
         const { AIService } = require('../../dist/services/AIService');
         const config = container.resolve('configuration');
-        const memory = container.resolve('memory');
-        return new AIService(config, memory);
+        const conversationMemory = container.resolve('conversationMemory');
+        return new AIService(config, conversationMemory);
       },
       {
-        dependencies: ['configuration', 'memory'],
+        dependencies: ['configuration', 'conversationMemory'],
       }
     );
 
@@ -129,6 +243,78 @@ export class ServiceFactory {
       },
       {
         dependencies: ['configuration', 'command', 'memory'],
+      }
+    );
+
+    // Command Registrar Service (no dependencies - utility service)
+    container.registerFactory('commandRegistrar', (container) => {
+      const {
+        CommandRegistrar,
+      } = require('../../dist/services/CommandRegistrar');
+      return new CommandRegistrar();
+    });
+
+    // Command Factory V2 (depends on all service interfaces)
+    container.registerFactory(
+      'commandFactory',
+      (container) => {
+        const {
+          CommandFactoryV2,
+        } = require('../../dist/commands/CommandFactoryV2');
+        const ai = container.resolve('ai');
+        const memory = container.resolve('memory');
+        const context = container.resolve('context');
+        const command = container.resolve('command');
+        const config = container.resolve('configuration');
+        return new CommandFactoryV2(ai, memory, context, command, config);
+      },
+      {
+        dependencies: ['ai', 'memory', 'context', 'command', 'configuration'],
+      }
+    );
+
+    // Agentic Memory Service (depends on memoryPersistence)
+    container.registerFactory(
+      'agenticMemory',
+      (container) => {
+        const {
+          AgenticMemoryService,
+        } = require('../../dist/services/AgenticMemoryService');
+        const memoryPersistence = container.resolve('memoryPersistence');
+        return new AgenticMemoryService(memoryPersistence);
+      },
+      {
+        dependencies: ['memoryPersistence'],
+      }
+    );
+
+    // Preferences Service (depends on memoryPersistence)
+    container.registerFactory(
+      'preferences',
+      (container) => {
+        const {
+          PreferencesService,
+        } = require('../../dist/services/PreferencesService');
+        const memoryPersistence = container.resolve('memoryPersistence');
+        return new PreferencesService(memoryPersistence);
+      },
+      {
+        dependencies: ['memoryPersistence'],
+      }
+    );
+
+    // Working Directory Service (depends on memoryPersistence)
+    container.registerFactory(
+      'workingDirectory',
+      (container) => {
+        const {
+          WorkingDirectoryService,
+        } = require('../../dist/services/WorkingDirectoryService');
+        const memoryPersistence = container.resolve('memoryPersistence');
+        return new WorkingDirectoryService(memoryPersistence);
+      },
+      {
+        dependencies: ['memoryPersistence'],
       }
     );
   }
@@ -204,6 +390,8 @@ export class ServiceFactory {
       'ai',
       'plugin',
       'workflow',
+      'commandRegistrar',
+      'commandFactory',
     ];
 
     // Check required services are registered

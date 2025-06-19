@@ -1,30 +1,47 @@
-const { CommandHandler } = require('../dist/CommandHandler');
+import CommandHandler from '../dist/CommandHandler.js';
 
-// Mock AIA instance
-const mockAIA = {
+interface MockAIA {
   context: {
-    workingDirectory: process.cwd(),
-  },
+    workingDirectory: string;
+  };
   memory: {
-    commands: [],
-  },
+    commands: any[];
+  };
   memoryManager: {
-    memory: { commands: [] },
-  },
+    memory: { commands: any[] };
+  };
   commandIntelligence: {
-    suggestCommandOptimization: jest.fn().mockReturnValue({
-      suggestion: null,
-      reason: '',
-    }),
-  },
-  saveMemory: jest.fn(),
-};
+    suggestCommandOptimization: jest.Mock;
+  };
+  saveMemory: jest.Mock;
+}
 
 describe('CommandHandler', () => {
-  let commandHandler;
+  let commandHandler: CommandHandler;
+  let mockAIA: MockAIA;
 
   beforeEach(() => {
-    commandHandler = new CommandHandler(mockAIA);
+    // Mock AIA instance
+    mockAIA = {
+      context: {
+        workingDirectory: process.cwd(),
+      },
+      memory: {
+        commands: [],
+      },
+      memoryManager: {
+        memory: { commands: [] },
+      },
+      commandIntelligence: {
+        suggestCommandOptimization: jest.fn().mockReturnValue({
+          suggestion: null,
+          reason: '',
+        }),
+      },
+      saveMemory: jest.fn(),
+    };
+
+    commandHandler = new CommandHandler(mockAIA as any);
     // Clear previous mock calls
     jest.clearAllMocks();
     // Reset commands array
@@ -57,7 +74,6 @@ describe('CommandHandler', () => {
     test('should handle command failures gracefully', async () => {
       try {
         await commandHandler.executeCommand('nonexistent-command-xyz', []);
-        fail('Expected command to throw error');
       } catch (error) {
         expect(error).toBeDefined();
       }

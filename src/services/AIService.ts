@@ -4,21 +4,21 @@
  */
 import { IAIService } from '../interfaces/IAIService';
 import { IConfigurationService } from '../interfaces/IConfigurationService';
-import { IMemoryService } from '../interfaces/IMemoryService';
+import { IConversationMemory } from '../interfaces/IConversationMemory';
 import { AIAConfig, ContextInfo, AIModel } from '../types/index';
 
 export class AIService implements IAIService {
   private configService: IConfigurationService;
-  private memoryService: IMemoryService;
+  private conversationMemory: IConversationMemory;
   private initialized: boolean = false;
   private clients: Record<string, unknown> = {};
 
   constructor(
     configurationService: IConfigurationService,
-    memoryService: IMemoryService
+    conversationMemory: IConversationMemory
   ) {
     this.configService = configurationService;
-    this.memoryService = memoryService;
+    this.conversationMemory = conversationMemory;
   }
 
   /**
@@ -65,7 +65,7 @@ export class AIService implements IAIService {
     };
 
     // Store conversation in memory
-    await this.memoryService.addConversation(
+    await this.conversationMemory.addConversation(
       prompt,
       response.content,
       context,

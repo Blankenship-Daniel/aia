@@ -1,23 +1,23 @@
 {
   "metadata": {
-    "totalFiles": 131,
-    "totalClasses": 73,
-    "totalFunctions": 36,
+    "totalFiles": 140,
+    "totalClasses": 75,
+    "totalFunctions": 50,
     "totalTodos": 4,
     "languages": {
       "json": 14,
-      "markdown": 19,
+      "markdown": 21,
       "javascript": 13,
-      "typescript": 85
+      "typescript": 92
     },
     "largestFiles": [
       {
-        "path": "package-lock.json",
-        "size": 288363
+        "path": ".aia/codebase-index.json",
+        "size": 355968
       },
       {
-        "path": ".aia/codebase-index.json",
-        "size": 150854
+        "path": "package-lock.json",
+        "size": 288363
       },
       {
         "path": ".github/copilot-instructions.json",
@@ -32,7 +32,7 @@
         "size": 37646
       },
       {
-        "path": "SOLID-Review-Report.md",
+        "path": "docs/SOLID-Review-Report.md",
         "size": 30081
       },
       {
@@ -48,7 +48,7 @@
         "size": 23903
       },
       {
-        "path": "SOLID-Implementation-Guide.md",
+        "path": "docs/SOLID-Implementation-Guide.md",
         "size": 21806
       }
     ],
@@ -58,16 +58,16 @@
         "count": 2
       }
     ],
-    "indexedAt": "2025-06-19T08:38:06.173Z"
+    "indexedAt": "2025-06-19T09:04:47.346Z"
   },
   "files": [
     [
       ".aia/codebase-index.json",
       {
         "path": ".aia/codebase-index.json",
-        "size": 150854,
-        "hash": "3db3188254abd4d4",
-        "lastModified": "2025-06-19T07:37:59.488Z",
+        "size": 355968,
+        "hash": "1be0d43b3bf25d28",
+        "lastModified": "2025-06-19T09:03:45.990Z",
         "type": "config",
         "language": "json",
         "symbols": [
@@ -1613,9 +1613,289 @@
       }
     ],
     [
-      "SOLID-Action-Plan.md",
+      "Week-3-Implementation-Report.md",
       {
-        "path": "SOLID-Action-Plan.md",
+        "path": "Week-3-Implementation-Report.md",
+        "size": 11511,
+        "hash": "4914c43f9987336d",
+        "lastModified": "2025-06-19T08:55:31.072Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Week 3 Implementation Report",
+            "name": "Week 3 Implementation Report"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "SOLID Refactoring Initiative: Advanced Performance Optimizations",
+            "name": "SOLID Refactoring Initiative: Advanced Performance Optimizations"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Executive Summary",
+            "name": "Executive Summary"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Implementation Overview",
+            "name": "Implementation Overview"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "🚀 Core Achievements",
+            "name": "🚀 Core Achievements"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Technical Implementation Details",
+            "name": "Technical Implementation Details"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Caching Service Architecture",
+            "name": "Caching Service Architecture"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Performance Monitoring System",
+            "name": "Performance Monitoring System"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Enhanced Memory Services",
+            "name": "Enhanced Memory Services"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Decorator Framework",
+            "name": "Decorator Framework"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Service Registration & Integration",
+            "name": "Service Registration & Integration"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Testing & Validation",
+            "name": "Testing & Validation"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Comprehensive Test Suite",
+            "name": "Comprehensive Test Suite"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Performance Benchmarks",
+            "name": "Performance Benchmarks"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "SOLID Principles Compliance",
+            "name": "SOLID Principles Compliance"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Single Responsibility Principle (SRP) ✅",
+            "name": "Single Responsibility Principle (SRP) ✅"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Open/Closed Principle (OCP) ✅",
+            "name": "Open/Closed Principle (OCP) ✅"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Liskov Substitution Principle (LSP) ✅",
+            "name": "Liskov Substitution Principle (LSP) ✅"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Interface Segregation Principle (ISP) ✅",
+            "name": "Interface Segregation Principle (ISP) ✅"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Dependency Inversion Principle (DIP) ✅",
+            "name": "Dependency Inversion Principle (DIP) ✅"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Performance Improvements",
+            "name": "Performance Improvements"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Before vs After Comparison",
+            "name": "Before vs After Comparison"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Integration with Existing Architecture",
+            "name": "Integration with Existing Architecture"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Backward Compatibility ✅",
+            "name": "Backward Compatibility ✅"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Service Dependencies",
+            "name": "Service Dependencies"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Error Handling",
+            "name": "Error Handling"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Documentation & Type Safety",
+            "name": "Documentation & Type Safety"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "TypeScript Integration",
+            "name": "TypeScript Integration"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Interface Exports",
+            "name": "Interface Exports"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Future Enhancements Ready",
+            "name": "Future Enhancements Ready"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Prepared for Week 4+",
+            "name": "Prepared for Week 4+"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Scalability Considerations",
+            "name": "Scalability Considerations"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Risk Mitigation & Production Readiness",
+            "name": "Risk Mitigation & Production Readiness"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Memory Management",
+            "name": "Memory Management"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Performance Impact",
+            "name": "Performance Impact"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Error Handling",
+            "name": "Error Handling"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Conclusion",
+            "name": "Conclusion"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "interface ICachingService {\n  // Core operations\n  set<T>(key: string, value: T, options?: CacheOptions): Promise<void>;\n  get<T>(key: string): Promise<T | null>;\n  has(key: string): Promise<boolean>;\n  delete(key: string): Promise<boolean>;\n\n  // Advanced operations\n  mget<T>(keys: string[]): Promise<(T | null)[]>;\n  mset<T>(\n    entries: Array<{ key: string; value: T; options?: CacheOptions }>\n  ): Promise<void>;\n  deletePattern(pattern: string): Promise<number>;\n  warm<T>(\n    key: string,\n    loader: () => Promise<T>,\n    options?: CacheOptions\n  ): Promise<T>;\n\n  // Management\n  getStatistics(): Promise<CacheStatistics>;\n  cleanup(): Promise<number>;\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "interface IPerformanceMonitor {\n  recordMethodExecution(\n    className: string,\n    methodName: string,\n    executionTime: number,\n    success: boolean,\n    error?: Error\n  ): Promise<void>;\n  getMethodMetrics(\n    className: string,\n    methodName: string\n  ): Promise<MethodMetrics | null>;\n  getSystemMetrics(): Promise<SystemMetrics>;\n  getPerformanceReport(): Promise<PerformanceReport>;\n  setThresholds(thresholds: PerformanceThresholds): Promise<void>;\n  getAlerts(): Promise<PerformanceAlert[]>;\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Search with caching\nasync searchConversations(query: string, limit: number = 10): Promise<MemoryEntry[]> {\n  const cacheKey = `conversation:search:${query}:${limit}`;\n\n  // Try cache first\n  if (this.cacheService) {\n    const cached = await this.cacheService.get<MemoryEntry[]>(cacheKey);\n    if (cached) return cached;\n  }\n\n  // Execute search and cache results\n  const results = await this.performSearch(query, limit);\n  if (this.cacheService) {\n    await this.cacheService.set(cacheKey, results, { ttl: 300000 });\n  }\n\n  return results;\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Caching Service\ncontainer.registerFactory('caching', () => {\n  return new MemoryCacheService({\n    defaultTTL: 300000, // 5 minutes\n    maxItems: 1000,\n    cleanupIntervalMs: 60000, // 1 minute\n  });\n});\n\n// Performance Monitor Service\ncontainer.registerFactory('performanceMonitor', () => {\n  return new PerformanceMonitorService();\n});\n\n// Enhanced Conversation Memory (with caching)\ncontainer.registerFactory('conversationMemory', (container) => {\n  const memoryPersistence = container.resolve('memoryPersistence');\n  const caching = container.resolve('caching');\n  return new ConversationMemoryService(memoryPersistence, caching);\n});",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": "Test Results: 15/15 tests passing\nExecution Time: ~1.3 seconds\nMemory Usage: Optimized with automatic cleanup\nCache Hit Rates: >90% for repeated operations",
+            "name": "CodeBlock_unknown"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": "ConversationMemoryService → MemoryPersistenceService + CachingService\nCommandMemoryService → MemoryPersistenceService (unchanged)\nPerformanceMonitorService → Independent service\nCachingService → Independent service",
+            "name": "CodeBlock_unknown"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "export * from '../interfaces/ICachingService';\nexport * from '../interfaces/IPerformanceMonitor';",
+            "name": "CodeBlock_typescript"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      "docs/SOLID-Action-Plan.md",
+      {
+        "path": "docs/SOLID-Action-Plan.md",
         "size": 12360,
         "hash": "9970fdd6a2c26213",
         "lastModified": "2025-06-19T07:50:39.641Z",
@@ -2055,9 +2335,9 @@
       }
     ],
     [
-      "SOLID-Analysis-Report.md",
+      "docs/SOLID-Analysis-Report.md",
       {
-        "path": "SOLID-Analysis-Report.md",
+        "path": "docs/SOLID-Analysis-Report.md",
         "size": 16806,
         "hash": "ee63f41b02b41f30",
         "lastModified": "2025-06-19T08:08:05.494Z",
@@ -2461,9 +2741,9 @@
       }
     ],
     [
-      "SOLID-Implementation-Guide.md",
+      "docs/SOLID-Implementation-Guide.md",
       {
-        "path": "SOLID-Implementation-Guide.md",
+        "path": "docs/SOLID-Implementation-Guide.md",
         "size": 21806,
         "hash": "da7a8d2d5b4c93b6",
         "lastModified": "2025-06-19T08:08:05.535Z",
@@ -2717,9 +2997,9 @@
       }
     ],
     [
-      "SOLID-Implementation-Roadmap.md",
+      "docs/SOLID-Implementation-Roadmap.md",
       {
-        "path": "SOLID-Implementation-Roadmap.md",
+        "path": "docs/SOLID-Implementation-Roadmap.md",
         "size": 10506,
         "hash": "a7f95a7e44e29775",
         "lastModified": "2025-06-19T08:03:26.751Z",
@@ -3129,9 +3409,9 @@
       }
     ],
     [
-      "SOLID-Refactoring-Templates.md",
+      "docs/SOLID-Refactoring-Templates.md",
       {
-        "path": "SOLID-Refactoring-Templates.md",
+        "path": "docs/SOLID-Refactoring-Templates.md",
         "size": 21260,
         "hash": "a80ba89632862bbd",
         "lastModified": "2025-06-19T08:03:26.742Z",
@@ -3343,9 +3623,9 @@
       }
     ],
     [
-      "SOLID-Review-Report.md",
+      "docs/SOLID-Review-Report.md",
       {
-        "path": "SOLID-Review-Report.md",
+        "path": "docs/SOLID-Review-Report.md",
         "size": 30081,
         "hash": "b2f35499178137bd",
         "lastModified": "2025-06-19T08:03:26.750Z",
@@ -3761,9 +4041,9 @@
       }
     ],
     [
-      "Week-1-Implementation-Report.md",
+      "docs/Week-1-Implementation-Report.md",
       {
-        "path": "Week-1-Implementation-Report.md",
+        "path": "docs/Week-1-Implementation-Report.md",
         "size": 5919,
         "hash": "e5192b5b05e7aea4",
         "lastModified": "2025-06-19T08:20:09.871Z",
@@ -3945,9 +4225,9 @@
       }
     ],
     [
-      "Week-2-Implementation-Plan.md",
+      "docs/Week-2-Implementation-Plan.md",
       {
-        "path": "Week-2-Implementation-Plan.md",
+        "path": "docs/Week-2-Implementation-Plan.md",
         "size": 8075,
         "hash": "ebd553bfe3dad9d7",
         "lastModified": "2025-06-19T08:25:55.395Z",
@@ -4261,9 +4541,9 @@
       }
     ],
     [
-      "Week-2-Implementation-Report.md",
+      "docs/Week-2-Implementation-Report.md",
       {
-        "path": "Week-2-Implementation-Report.md",
+        "path": "docs/Week-2-Implementation-Report.md",
         "size": 10932,
         "hash": "5597ba7ff4195a6a",
         "lastModified": "2025-06-19T08:37:11.510Z",
@@ -4533,6 +4813,322 @@
             "language": "typescript",
             "content": "// Before\nconstructor(config: IConfigurationService, context: IContextService, memoryService: IMemoryService)\n\n// After\nconstructor(config: IConfigurationService, context: IContextService, commandMemory: ICommandMemory)",
             "name": "CodeBlock_typescript"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      "docs/Week-3-Implementation-Plan.md",
+      {
+        "path": "docs/Week-3-Implementation-Plan.md",
+        "size": 13267,
+        "hash": "bbccd60ca4979e50",
+        "lastModified": "2025-06-19T08:41:08.639Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "SOLID Week 3 Implementation Plan",
+            "name": "SOLID Week 3 Implementation Plan"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Overview",
+            "name": "Overview"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Phase 1: Performance Optimizations (Days 1-3)",
+            "name": "Phase 1: Performance Optimizations (Days 1-3)"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "1.1 Caching Layer Implementation",
+            "name": "1.1 Caching Layer Implementation"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Implementation Strategy:",
+            "name": "Implementation Strategy:"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Target Operations for Caching:",
+            "name": "Target Operations for Caching:"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "1.2 Lazy Loading Implementation",
+            "name": "1.2 Lazy Loading Implementation"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Implementation Strategy:",
+            "name": "Implementation Strategy:"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "1.3 Performance Monitoring",
+            "name": "1.3 Performance Monitoring"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Implementation Strategy:",
+            "name": "Implementation Strategy:"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Phase 2: Advanced Service Composition (Days 4-5)",
+            "name": "Phase 2: Advanced Service Composition (Days 4-5)"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "2.1 Service Orchestration",
+            "name": "2.1 Service Orchestration"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Implementation Strategy:",
+            "name": "Implementation Strategy:"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "2.2 Enhanced MemoryCommand",
+            "name": "2.2 Enhanced MemoryCommand"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Current State Analysis:",
+            "name": "Current State Analysis:"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Implementation Steps:",
+            "name": "Implementation Steps:"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "2.3 Event-Driven Architecture",
+            "name": "2.3 Event-Driven Architecture"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Implementation Strategy:",
+            "name": "Implementation Strategy:"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Phase 3: Final Architectural Refinements (Day 6)",
+            "name": "Phase 3: Final Architectural Refinements (Day 6)"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "3.1 Advanced Error Handling",
+            "name": "3.1 Advanced Error Handling"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Implementation Strategy:",
+            "name": "Implementation Strategy:"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "3.2 Configuration Management Enhancement",
+            "name": "3.2 Configuration Management Enhancement"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Implementation Strategy:",
+            "name": "Implementation Strategy:"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "3.3 Security Enhancements",
+            "name": "3.3 Security Enhancements"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Implementation Strategy:",
+            "name": "Implementation Strategy:"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Phase 4: Comprehensive Testing and Validation (Day 7)",
+            "name": "Phase 4: Comprehensive Testing and Validation (Day 7)"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "4.1 Performance Testing",
+            "name": "4.1 Performance Testing"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Test Strategy:",
+            "name": "Test Strategy:"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "4.2 Integration Testing",
+            "name": "4.2 Integration Testing"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Test Strategy:",
+            "name": "Test Strategy:"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "4.3 SOLID Compliance Final Validation",
+            "name": "4.3 SOLID Compliance Final Validation"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Validation Checklist:",
+            "name": "Validation Checklist:"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Success Metrics",
+            "name": "Success Metrics"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Quantitative Goals:",
+            "name": "Quantitative Goals:"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Qualitative Goals:",
+            "name": "Qualitative Goals:"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Risk Mitigation",
+            "name": "Risk Mitigation"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "High-Risk Areas:",
+            "name": "High-Risk Areas:"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Mitigation Strategies:",
+            "name": "Mitigation Strategies:"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Files to Create/Modify",
+            "name": "Files to Create/Modify"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "New Files (15):",
+            "name": "New Files (15):"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Modified Files (8):",
+            "name": "Modified Files (8):"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Timeline",
+            "name": "Timeline"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Day 1: Caching Implementation",
+            "name": "Day 1: Caching Implementation"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Day 2: Performance Monitoring",
+            "name": "Day 2: Performance Monitoring"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Day 3: Lazy Loading and Optimization",
+            "name": "Day 3: Lazy Loading and Optimization"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Day 4: Service Orchestration",
+            "name": "Day 4: Service Orchestration"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Day 5: Enhanced MemoryCommand",
+            "name": "Day 5: Enhanced MemoryCommand"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Day 6: Final Refinements",
+            "name": "Day 6: Final Refinements"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Day 7: Comprehensive Testing",
+            "name": "Day 7: Comprehensive Testing"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Expected Outcomes",
+            "name": "Expected Outcomes"
           }
         ],
         "imports": [],
@@ -5203,9 +5799,9 @@
       "main.js",
       {
         "path": "main.js",
-        "size": 916,
-        "hash": "2a5e4d491828d38e",
-        "lastModified": "2025-06-19T06:54:53.904Z",
+        "size": 1172,
+        "hash": "f88400278e77c887",
+        "lastModified": "2025-06-19T09:02:33.732Z",
         "type": "source",
         "language": "javascript",
         "symbols": [
@@ -5381,9 +5977,9 @@
       "src/CLIFormatter.ts",
       {
         "path": "src/CLIFormatter.ts",
-        "size": 9822,
-        "hash": "3b6e9902212c54fd",
-        "lastModified": "2025-06-19T05:42:53.695Z",
+        "size": 9924,
+        "hash": "82cd345ef63e2f94",
+        "lastModified": "2025-06-19T09:02:33.796Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -5660,9 +6256,9 @@
       "src/PerformanceOptimizer.ts",
       {
         "path": "src/PerformanceOptimizer.ts",
-        "size": 15927,
-        "hash": "f6fb4326006a9fcb",
-        "lastModified": "2025-06-19T06:27:55.192Z",
+        "size": 16029,
+        "hash": "be32e4ae2be673dc",
+        "lastModified": "2025-06-19T09:02:33.732Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -5903,9 +6499,9 @@
       "src/cli/CLIApplication.ts",
       {
         "path": "src/cli/CLIApplication.ts",
-        "size": 11941,
-        "hash": "2cfdb3250a8708d4",
-        "lastModified": "2025-06-19T07:35:51.193Z",
+        "size": 13701,
+        "hash": "7fe4f1be792dd1ca",
+        "lastModified": "2025-06-19T09:02:33.796Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -6191,9 +6787,9 @@
       "src/container/ServiceFactory.ts",
       {
         "path": "src/container/ServiceFactory.ts",
-        "size": 12136,
-        "hash": "f0fc2ac6bd9772ad",
-        "lastModified": "2025-06-19T08:33:28.012Z",
+        "size": 12916,
+        "hash": "95611b8102197c22",
+        "lastModified": "2025-06-19T08:52:56.671Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -6210,6 +6806,8 @@
           "../../dist/services/CommandMemoryService",
           "../../dist/services/MemoryStatisticsService",
           "../../dist/services/MemoryImportExportService",
+          "../../dist/services/MemoryCacheService",
+          "../../dist/services/PerformanceMonitorService",
           "../../dist/services/ContextService",
           "../../dist/services/CommandService",
           "../../dist/services/AIService",
@@ -6260,6 +6858,26 @@
         "symbols": [],
         "imports": [],
         "exports": [
+          "interface"
+        ],
+        "dependencies": []
+      }
+    ],
+    [
+      "src/interfaces/ICachingService.ts",
+      {
+        "path": "src/interfaces/ICachingService.ts",
+        "size": 2582,
+        "hash": "03dabe1936b1989e",
+        "lastModified": "2025-06-19T08:41:08.655Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [],
+        "imports": [],
+        "exports": [
+          "interface",
+          "interface",
+          "interface",
           "interface"
         ],
         "dependencies": []
@@ -6466,6 +7084,27 @@
         "symbols": [],
         "imports": [],
         "exports": [
+          "interface"
+        ],
+        "dependencies": []
+      }
+    ],
+    [
+      "src/interfaces/IPerformanceMonitor.ts",
+      {
+        "path": "src/interfaces/IPerformanceMonitor.ts",
+        "size": 2463,
+        "hash": "6c7c967d42eec74a",
+        "lastModified": "2025-06-19T08:48:44.467Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [],
+        "imports": [],
+        "exports": [
+          "interface",
+          "interface",
+          "interface",
+          "interface",
           "interface"
         ],
         "dependencies": []
@@ -6829,9 +7468,9 @@
       "src/services/ConversationMemoryService.ts",
       {
         "path": "src/services/ConversationMemoryService.ts",
-        "size": 3767,
-        "hash": "724f02f3b0d98f64",
-        "lastModified": "2025-06-19T08:14:46.546Z",
+        "size": 5104,
+        "hash": "0262347eda91e03e",
+        "lastModified": "2025-06-19T08:48:44.467Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -6843,6 +7482,28 @@
         "imports": [],
         "exports": [
           "ConversationMemoryService"
+        ],
+        "dependencies": []
+      }
+    ],
+    [
+      "src/services/MemoryCacheService.ts",
+      {
+        "path": "src/services/MemoryCacheService.ts",
+        "size": 7804,
+        "hash": "b58bc6edc65c72c0",
+        "lastModified": "2025-06-19T09:02:33.796Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [
+          {
+            "type": "class",
+            "name": "MemoryCacheService"
+          }
+        ],
+        "imports": [],
+        "exports": [
+          "MemoryCacheService"
         ],
         "dependencies": []
       }
@@ -6934,6 +7595,28 @@
         "imports": [],
         "exports": [
           "MemoryStatisticsService"
+        ],
+        "dependencies": []
+      }
+    ],
+    [
+      "src/services/PerformanceMonitorService.ts",
+      {
+        "path": "src/services/PerformanceMonitorService.ts",
+        "size": 7466,
+        "hash": "bbeb462ec2e71a28",
+        "lastModified": "2025-06-19T08:48:44.462Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [
+          {
+            "type": "class",
+            "name": "PerformanceMonitorService"
+          }
+        ],
+        "imports": [],
+        "exports": [
+          "PerformanceMonitorService"
         ],
         "dependencies": []
       }
@@ -7040,9 +7723,9 @@
       "src/types/index.ts",
       {
         "path": "src/types/index.ts",
-        "size": 11509,
-        "hash": "6fbc045bf3596e17",
-        "lastModified": "2025-06-19T08:33:28.012Z",
+        "size": 11664,
+        "hash": "4491ba995274a98f",
+        "lastModified": "2025-06-19T08:52:56.675Z",
         "type": "source",
         "language": "typescript",
         "symbols": [],
@@ -7107,6 +7790,104 @@
           "interface",
           "interface",
           "interface"
+        ],
+        "dependencies": []
+      }
+    ],
+    [
+      "src/utils/CachingDecorators.ts",
+      {
+        "path": "src/utils/CachingDecorators.ts",
+        "size": 6482,
+        "hash": "d7d66120cb00eb5f",
+        "lastModified": "2025-06-19T08:48:44.430Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [
+          {
+            "type": "function",
+            "name": "results"
+          },
+          {
+            "type": "function",
+            "name": "CacheResult"
+          },
+          {
+            "type": "function",
+            "name": "InvalidateCache"
+          },
+          {
+            "type": "function",
+            "name": "WarmCache"
+          },
+          {
+            "type": "function",
+            "name": "Memoize"
+          },
+          {
+            "type": "function",
+            "name": "BatchCache"
+          },
+          {
+            "type": "function",
+            "name": "CacheStats"
+          }
+        ],
+        "imports": [],
+        "exports": [
+          "CacheResult",
+          "InvalidateCache",
+          "WarmCache",
+          "Memoize",
+          "BatchCache",
+          "CacheStats"
+        ],
+        "dependencies": []
+      }
+    ],
+    [
+      "src/utils/PerformanceDecorators.ts",
+      {
+        "path": "src/utils/PerformanceDecorators.ts",
+        "size": 8306,
+        "hash": "75ad0474f349a5b5",
+        "lastModified": "2025-06-19T08:48:44.467Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [
+          {
+            "type": "function",
+            "name": "MonitorPerformance"
+          },
+          {
+            "type": "function",
+            "name": "Benchmark"
+          },
+          {
+            "type": "function",
+            "name": "Throttle"
+          },
+          {
+            "type": "function",
+            "name": "Retry"
+          },
+          {
+            "type": "function",
+            "name": "Timeout"
+          },
+          {
+            "type": "function",
+            "name": "CircuitBreaker"
+          }
+        ],
+        "imports": [],
+        "exports": [
+          "MonitorPerformance",
+          "Benchmark",
+          "Throttle",
+          "Retry",
+          "Timeout",
+          "CircuitBreaker"
         ],
         "dependencies": []
       }
@@ -7686,6 +8467,26 @@
           {
             "type": "class",
             "name": "names"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      "tests/week3-advanced-optimizations.test.ts",
+      {
+        "path": "tests/week3-advanced-optimizations.test.ts",
+        "size": 13890,
+        "hash": "bc0e41f9460787cb",
+        "lastModified": "2025-06-19T08:52:56.640Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [
+          {
+            "type": "function",
+            "name": "loader"
           }
         ],
         "imports": [],
@@ -9258,6 +10059,13 @@
       }
     ],
     [
+      "MemoryCacheService",
+      {
+        "file": "src/services/MemoryCacheService.ts",
+        "methods": []
+      }
+    ],
+    [
       "MemoryImportExportService",
       {
         "file": "src/services/MemoryImportExportService.ts",
@@ -9347,6 +10155,13 @@
             "visibility": "public"
           }
         ]
+      }
+    ],
+    [
+      "PerformanceMonitorService",
+      {
+        "file": "src/services/PerformanceMonitorService.ts",
+        "methods": []
       }
     ],
     [
@@ -9748,6 +10563,97 @@
       }
     ],
     [
+      "results",
+      {
+        "file": "src/utils/CachingDecorators.ts",
+        "async": false
+      }
+    ],
+    [
+      "CacheResult",
+      {
+        "file": "src/utils/CachingDecorators.ts",
+        "async": false
+      }
+    ],
+    [
+      "InvalidateCache",
+      {
+        "file": "src/utils/CachingDecorators.ts",
+        "async": false
+      }
+    ],
+    [
+      "WarmCache",
+      {
+        "file": "src/utils/CachingDecorators.ts",
+        "async": false
+      }
+    ],
+    [
+      "Memoize",
+      {
+        "file": "src/utils/CachingDecorators.ts",
+        "async": false
+      }
+    ],
+    [
+      "BatchCache",
+      {
+        "file": "src/utils/CachingDecorators.ts",
+        "async": false
+      }
+    ],
+    [
+      "CacheStats",
+      {
+        "file": "src/utils/CachingDecorators.ts",
+        "async": false
+      }
+    ],
+    [
+      "MonitorPerformance",
+      {
+        "file": "src/utils/PerformanceDecorators.ts",
+        "async": false
+      }
+    ],
+    [
+      "Benchmark",
+      {
+        "file": "src/utils/PerformanceDecorators.ts",
+        "async": false
+      }
+    ],
+    [
+      "Throttle",
+      {
+        "file": "src/utils/PerformanceDecorators.ts",
+        "async": false
+      }
+    ],
+    [
+      "Retry",
+      {
+        "file": "src/utils/PerformanceDecorators.ts",
+        "async": false
+      }
+    ],
+    [
+      "Timeout",
+      {
+        "file": "src/utils/PerformanceDecorators.ts",
+        "async": false
+      }
+    ],
+    [
+      "CircuitBreaker",
+      {
+        "file": "src/utils/PerformanceDecorators.ts",
+        "async": false
+      }
+    ],
+    [
       "parseAgenticPlan",
       {
         "file": "src/utils/RobustJSONParser.ts",
@@ -9892,6 +10798,13 @@
       {
         "file": "tests/test-service-architecture.js",
         "async": false
+      }
+    ],
+    [
+      "loader",
+      {
+        "file": "tests/week3-advanced-optimizations.test.ts",
+        "async": true
       }
     ]
   ],

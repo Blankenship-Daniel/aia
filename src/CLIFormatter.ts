@@ -290,6 +290,11 @@ export class CLIFormatter {
     }
   }
 
+  // Dispose method for DIContainer compatibility
+  public dispose(): void {
+    this.cleanup();
+  }
+
   // Display progress bar
   public displayProgress(
     current: number,

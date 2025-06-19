@@ -348,15 +348,20 @@ export default class CLIApplication {
       } else {
         await this.program.parseAsync();
       }
+
+      // Successful execution - cleanup and exit
+      await this.shutdown();
     } catch (error: any) {
       if (error.code === 'commander.help') {
         // Help was displayed, exit gracefully
+        await this.shutdown();
         return;
       }
 
       if (error.code === 'commander.unknownCommand') {
         console.error(chalk.red('Unknown command:'), error.message);
         console.log(chalk.yellow('Run "aia --help" to see available commands'));
+        await this.shutdown();
         process.exit(1);
       }
 
@@ -366,6 +371,7 @@ export default class CLIApplication {
         console.error(chalk.gray('Stack trace:'), error.stack);
       }
 
+      await this.shutdown();
       process.exit(1);
     }
   }
@@ -412,13 +418,57 @@ export default class CLIApplication {
     try {
       console.log(chalk.blue('Shutting down CLI application...'));
 
-      // Cleanup services if needed
+      // Cleanup services in order
+      const cleanupTasks: Promise<void>[] = [];
+
+      if (this.container) {
+        // Get services that need cleanup based on ServiceFactory registrations
+        const performanceOptimizer = this.container.resolve(
+          'performance'
+        ) as any;
+        const memoryCacheService = this.container.resolve('caching') as any;
+        const cliFormatter = this.container.resolve('formatter') as any;
+
+        // Cleanup performance optimizer intervals
+        if (
+          performanceOptimizer &&
+          typeof performanceOptimizer.cleanup === 'function'
+        ) {
+          cleanupTasks.push(Promise.resolve(performanceOptimizer.cleanup()));
+        }
+
+        // Cleanup memory cache service intervals
+        if (
+          memoryCacheService &&
+          typeof memoryCacheService.destroy === 'function'
+        ) {
+          cleanupTasks.push(Promise.resolve(memoryCacheService.destroy()));
+        }
+
+        // Cleanup CLI formatter spinners
+        if (cliFormatter && typeof cliFormatter.cleanup === 'function') {
+          cleanupTasks.push(Promise.resolve(cliFormatter.cleanup()));
+        }
+
+        // Dispose of the entire container
+        if (typeof this.container.dispose === 'function') {
+          cleanupTasks.push(this.container.dispose());
+        }
+      }
+
+      // Cleanup configuration service if it exists
       if (
         this.services.configuration &&
         typeof this.services.configuration.cleanup === 'function'
       ) {
-        await this.services.configuration.cleanup();
+        cleanupTasks.push(this.services.configuration.cleanup());
       }
+
+      // Wait for all cleanup tasks to complete with timeout
+      await Promise.race([
+        Promise.allSettled(cleanupTasks),
+        new Promise<void>((resolve) => setTimeout(resolve, 5000)), // 5 second timeout
+      ]);
 
       console.log(chalk.green('✅ CLI application shutdown complete'));
     } catch (error: any) {

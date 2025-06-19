@@ -25,11 +25,22 @@ const CLIApplication = require('./dist/cli/CLIApplication').default;
  * Main entry point for AIA CLI
  */
 async function main() {
+  let app;
   try {
-    const app = new CLIApplication();
+    app = new CLIApplication();
     await app.run();
   } catch (error) {
     console.error('Failed to start AIA:', error.message);
+
+    // Attempt cleanup if app was created
+    if (app && typeof app.shutdown === 'function') {
+      try {
+        await app.shutdown();
+      } catch (cleanupError) {
+        console.error('Failed to cleanup:', cleanupError.message);
+      }
+    }
+
     process.exit(1);
   }
 }

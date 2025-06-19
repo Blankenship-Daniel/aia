@@ -313,4 +313,11 @@ export class MemoryCacheService implements ICachingService {
       memoryUsage: 0,
     };
   }
+
+  /**
+   * Dispose method for DIContainer compatibility
+   */
+  dispose(): void {
+    this.destroy();
+  }
 }

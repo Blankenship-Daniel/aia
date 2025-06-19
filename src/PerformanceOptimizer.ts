@@ -605,4 +605,9 @@ export class PerformanceOptimizer extends EventEmitter {
     this.indexCache.clear();
     this.performanceMetrics.clear();
   }
+
+  // Dispose method for DIContainer compatibility
+  public dispose(): void {
+    this.cleanup();
+  }
 }

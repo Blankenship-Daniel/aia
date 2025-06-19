@@ -68,7 +68,10 @@ export default class CLIApplication {
       // Create service factory and initialize services
       this.container = ServiceFactory.createContainer();
 
-      // Initialize all core services
+      // Initialize all services (this will call initialize() on each service)
+      await this.container.initialize();
+
+      // Store references to commonly used services
       this.services.configuration =
         this.container.resolve<IConfigurationService>('configuration');
       this.services.command =
@@ -351,6 +354,7 @@ export default class CLIApplication {
 
       // Successful execution - cleanup and exit
       await this.shutdown();
+      process.exit(0);
     } catch (error: any) {
       if (error.code === 'commander.help') {
         // Help was displayed, exit gracefully

@@ -11,12 +11,9 @@ import {
   AgenticStep,
   ExecutionStep,
 } from '../types/index.js';
-import * as chalk from 'chalk';
-import * as ora from 'ora';
+import chalk from 'chalk';
+import ora from 'ora';
 import inquirer from 'inquirer';
-
-// Type assertion to handle module import issues
-const oraInstance = (ora as any).default || ora;
 
 export class AgentCommand implements ICommand {
   public readonly name = 'agent';
@@ -57,7 +54,7 @@ export class AgentCommand implements ICommand {
         : [];
 
       // Generate execution plan
-      const spinner = oraInstance(
+      const spinner = ora(
         'Analyzing goal and creating execution plan...'
       ).start();
 
@@ -167,7 +164,7 @@ export class AgentCommand implements ICommand {
         previousExecutions
       );
 
-      const response = await this.aiService.queryAI(prompt, context, 'gpt-4');
+      const response = await this.aiService.queryAI(prompt, context);
 
       if (!response || !response.content) {
         return {
@@ -292,7 +289,7 @@ export class AgentCommand implements ICommand {
       allStepsSuccessful = true;
 
       for (const step of execution.plan) {
-        const spinner = oraInstance(`Executing: ${step.description}`).start();
+        const spinner = ora(`Executing: ${step.description}`).start();
 
         try {
           const result = await this.executeStep(step, options.autoExecute);

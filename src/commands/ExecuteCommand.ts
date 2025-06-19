@@ -3,7 +3,7 @@ import { ICommandService } from '../interfaces/ICommandService';
 import { IContextService } from '../interfaces/IContextService';
 import { IMemoryService } from '../interfaces/IMemoryService';
 import { CommandResult, CommandOptions, CommandOption } from '../types/index';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 import { spawn } from 'child_process';
 
 export class ExecuteCommand implements ICommand {

@@ -8,11 +8,8 @@ import {
   CommandOption,
   AIModel,
 } from '../types/index.js';
-import * as chalk from 'chalk';
-import * as ora from 'ora';
-
-// Type assertion to handle module import issues
-const oraInstance = (ora as any).default || ora;
+import chalk from 'chalk';
+import ora from 'ora';
 
 export class AskCommand implements ICommand {
   public readonly name = 'ask';
@@ -67,7 +64,7 @@ export class AskCommand implements ICommand {
         };
       }
 
-      const spinner = oraInstance('Thinking...').start();
+      const spinner = ora('Thinking...').start();
 
       try {
         // Gather context

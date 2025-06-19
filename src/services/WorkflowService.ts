@@ -110,7 +110,7 @@ export class WorkflowService implements IWorkflowService {
   }
 
   /**
-   * Execute a saved workflow
+   * Execute a saved workflow with enhanced error handling
    */
   async executeWorkflow(
     workflowName: string,
@@ -130,20 +130,39 @@ export class WorkflowService implements IWorkflowService {
 
       console.log(`Executing workflow: ${workflowName}`);
 
-      for (const step of workflow.steps) {
+      // Enhanced execution with better error handling
+      for (const [index, step] of workflow.steps.entries()) {
+        console.log(
+          `Executing step ${index + 1}/${workflow.steps.length}: ${
+            step.description || step.command
+          }`
+        );
+
         try {
-          // Execute step using command service
-          const result = await this.commandService.executeCommand(
-            step.command,
-            step.options || {}
-          );
+          // Execute step with retry and timeout
+          const result = await this.executeStepWithRetry(step, options);
           results.push({ step, result, success: true });
+
+          console.log(`✅ Step ${index + 1} completed successfully`);
         } catch (error) {
           const errorMessage =
             error instanceof Error ? error.message : 'Unknown error';
+          console.log(`❌ Step ${index + 1} failed: ${errorMessage}`);
+
           results.push({ step, error: errorMessage, success: false });
+
+          // Enhanced error handling decision
           if (!options.continueOnError) {
-            break;
+            // Check if this is a recoverable error
+            const isRecoverable = this.isRecoverableError(errorMessage);
+            if (!isRecoverable) {
+              console.log(
+                `🛑 Non-recoverable error, stopping workflow execution`
+              );
+              break;
+            } else {
+              console.log(`⚠️  Recoverable error, attempting to continue...`);
+            }
           }
         }
       }
@@ -154,7 +173,7 @@ export class WorkflowService implements IWorkflowService {
 
       const executionResult: WorkflowExecutionResult = {
         workflow: workflowName,
-        success: results.every((r) => r.success),
+        success: this.calculateWorkflowSuccess(results),
         steps: results,
         duration,
         startTime,
@@ -171,6 +190,9 @@ export class WorkflowService implements IWorkflowService {
         stepCount: workflow.steps.length,
         failedSteps: results.filter((r) => !r.success).length,
       });
+
+      // Log execution summary
+      this.logExecutionSummary(executionResult);
 
       return {
         success: true,
@@ -532,5 +554,151 @@ export class WorkflowService implements IWorkflowService {
    */
   private generateId(): string {
     return `workflow_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * Execute a workflow step with retry logic
+   */
+  private async executeStepWithRetry(
+    step: WorkflowStep,
+    options: WorkflowExecutionOptions
+  ): Promise<unknown> {
+    const maxRetries = 3;
+    let lastError: Error;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        // Execute step using command service
+        const result = await this.commandService.executeCommand(
+          step.command,
+          step.options || {}
+        );
+        return result;
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+
+        // Don't retry certain types of errors
+        if (this.shouldNotRetry(lastError.message)) {
+          throw lastError;
+        }
+
+        if (attempt === maxRetries) {
+          throw lastError;
+        }
+
+        // Wait before retry with exponential backoff
+        const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+        console.log(
+          `⏳ Step failed, retrying in ${delay}ms (attempt ${attempt}/${maxRetries})`
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+
+    throw lastError!;
+  }
+
+  /**
+   * Determine if an error should not be retried
+   */
+  private shouldNotRetry(errorMessage: string): boolean {
+    const nonRetryableErrors = [
+      'command not found',
+      'permission denied',
+      'user declined',
+      'file not found',
+      'directory not found',
+      'syntax error',
+      'invalid argument',
+    ];
+
+    return nonRetryableErrors.some((error) =>
+      errorMessage.toLowerCase().includes(error)
+    );
+  }
+
+  /**
+   * Determine if an error is recoverable
+   */
+  private isRecoverableError(errorMessage: string): boolean {
+    const recoverableErrors = [
+      'timeout',
+      'network',
+      'connection',
+      'temporary',
+      'busy',
+      'locked',
+    ];
+
+    return recoverableErrors.some((error) =>
+      errorMessage.toLowerCase().includes(error)
+    );
+  }
+
+  /**
+   * Calculate overall workflow success based on step results
+   */
+  private calculateWorkflowSuccess(
+    results: WorkflowExecutionStepResult[]
+  ): boolean {
+    if (results.length === 0) return false;
+
+    const successfulSteps = results.filter((r) => r.success).length;
+    const successRate = successfulSteps / results.length;
+
+    // Consider workflow successful if at least 70% of steps succeed
+    // and no critical failures occurred
+    return successRate >= 0.7 && !this.hasCriticalFailures(results);
+  }
+
+  /**
+   * Check if there are critical failures in the results
+   */
+  private hasCriticalFailures(results: WorkflowExecutionStepResult[]): boolean {
+    return results.some(
+      (r) => !r.success && this.isCriticalFailure(r.error || '')
+    );
+  }
+
+  /**
+   * Determine if a failure is critical
+   */
+  private isCriticalFailure(errorMessage: string): boolean {
+    const criticalErrors = [
+      'permission denied',
+      'access denied',
+      'authentication failed',
+      'authorization failed',
+      'security violation',
+    ];
+
+    return criticalErrors.some((error) =>
+      errorMessage.toLowerCase().includes(error)
+    );
+  }
+
+  /**
+   * Log execution summary with enhanced details
+   */
+  private logExecutionSummary(result: WorkflowExecutionResult): void {
+    const { workflow, success, steps, duration } = result;
+    const successfulSteps = steps.filter((s) => s.success).length;
+    const successRate = Math.round((successfulSteps / steps.length) * 100);
+
+    console.log('\n📊 Workflow Execution Summary:');
+    console.log(`   Workflow: ${workflow}`);
+    console.log(`   Overall Status: ${success ? '✅ Success' : '❌ Failed'}`);
+    console.log(
+      `   Steps Completed: ${successfulSteps}/${steps.length} (${successRate}%)`
+    );
+    console.log(`   Duration: ${duration}ms`);
+
+    if (!success) {
+      const failedSteps = steps.filter((s) => !s.success);
+      console.log(`   Failed Steps: ${failedSteps.length}`);
+      failedSteps.forEach((step, index) => {
+        console.log(`     ${index + 1}. ${step.step.command}: ${step.error}`);
+      });
+    }
   }
 }

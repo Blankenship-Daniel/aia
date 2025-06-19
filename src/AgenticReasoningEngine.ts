@@ -4,6 +4,7 @@ import AgenticSearchEngine from './AgenticSearchEngine.js';
 import NLPEngine from './NLPEngine.js';
 import { ConversationContextManager } from './ConversationContextManager.js';
 import { ResponseGenerator } from './ResponseGenerator.js';
+import ErrorHandler from './ErrorHandler.js';
 import {
   parseAgenticPlan,
   parseEvaluationResult,
@@ -23,6 +24,55 @@ import {
   CommandResult,
   StepResult,
 } from './types/index.js';
+
+/**
+ * Command failure tracking for circuit breaker pattern
+ */
+interface CommandFailureInfo {
+  command: string;
+  failureCount: number;
+  lastFailure: string;
+  consecutiveFailures: number;
+  isBlocked: boolean;
+  blockUntil: number;
+  alternativeSuggested?: string;
+}
+
+/**
+ * Enhanced execution options for better error handling
+ */
+interface EnhancedExecutionOptions {
+  maxRetries?: number;
+  failureThreshold?: number;
+  skipNonCritical?: boolean;
+  suggestAlternatives?: boolean;
+  timeoutMs?: number;
+  continueOnFailure?: boolean;
+  gracefulDegradation?: boolean;
+  allowFallbackExecution?: boolean;
+}
+
+/**
+ * Workflow recovery strategy
+ */
+interface WorkflowRecoveryStrategy {
+  skipFailedStep: boolean;
+  useAlternativeCommand: boolean;
+  continueWithLimitedCapabilities: boolean;
+  suggestManualIntervention: boolean;
+  provideFallbackSolution: boolean;
+}
+
+/**
+ * Enhanced step result with recovery information
+ */
+interface EnhancedStepResult extends StepResult {
+  recoveryAttempted?: boolean;
+  alternativeUsed?: string;
+  fallbackStrategy?: string;
+  skipReason?: string;
+  continueWorkflow?: boolean;
+}
 
 /**
  * Execution context for agentic reasoning
@@ -59,7 +109,7 @@ interface AgenticQueryOptions {
 }
 
 /**
- * Enhanced Agentic Reasoning System with Advanced NLP
+ * Enhanced Agentic Reasoning System with Advanced NLP and Error Handling
  */
 export class AgenticReasoningEngine {
   private aia: any;
@@ -70,6 +120,10 @@ export class AgenticReasoningEngine {
   private nlpEngine: any; // NLPEngine
   private conversationManager: ConversationContextManager;
   private responseGenerator: ResponseGenerator;
+  private errorHandler: ErrorHandler;
+  private commandFailures: Map<string, CommandFailureInfo>;
+  private circuitBreakerThreshold: number;
+  private circuitBreakerResetTimeMs: number;
 
   constructor(aia: any) {
     this.aia = aia;
@@ -80,6 +134,10 @@ export class AgenticReasoningEngine {
     this.nlpEngine = new NLPEngine(aia);
     this.conversationManager = new ConversationContextManager(aia);
     this.responseGenerator = new ResponseGenerator(aia);
+    this.errorHandler = new ErrorHandler();
+    this.commandFailures = new Map();
+    this.circuitBreakerThreshold = 3; // Block after 3 consecutive failures
+    this.circuitBreakerResetTimeMs = 300000; // Reset after 5 minutes
   }
 
   async executeAgenticQuery(
@@ -312,25 +370,62 @@ export class AgenticReasoningEngine {
       steps: [],
     };
 
+    let criticalStepsFailed = 0;
+    let totalSteps = plan.steps.length;
+    let successfulSteps = 0;
+
     for (const [index, step] of plan.steps.entries()) {
-      console.log(chalk.blue(`\n   Step ${index + 1}: ${step.description}`));
+      console.log(
+        chalk.blue(`\n   Step ${index + 1}/${totalSteps}: ${step.description}`)
+      );
 
       try {
         const stepResult = await this.executeStep(step, context);
         executionResult.steps!.push(stepResult);
 
-        if (!stepResult.success && step.critical) {
-          console.log(
-            chalk.red(`❌ Critical step failed: ${step.description}`)
-          );
-          executionResult.success = false;
-          executionResult.error = stepResult.error;
-          break;
-        }
+        if (stepResult.success) {
+          successfulSteps++;
+          console.log(chalk.green(`   ✅ Step completed successfully`));
+        } else {
+          console.log(chalk.red(`   ❌ Step failed: ${stepResult.error}`));
 
-        console.log(chalk.green(`   ✅ Step completed`));
+          if (step.critical) {
+            criticalStepsFailed++;
+            console.log(
+              chalk.red(`⚠️  Critical step failed: ${step.description}`)
+            );
+
+            // Try to suggest recovery for critical steps
+            const recovery = await this.suggestStepRecovery(
+              step,
+              stepResult.error
+            );
+            if (recovery && recovery.canRecover) {
+              console.log(
+                chalk.blue(`🔄 Attempting recovery: ${recovery.strategy}`)
+              );
+              // Could implement recovery execution here
+            } else {
+              // Stop execution for critical failures unless context allows continuation
+              if (criticalStepsFailed >= 2) {
+                console.log(
+                  chalk.red(
+                    `🛑 Too many critical step failures, stopping execution`
+                  )
+                );
+                executionResult.success = false;
+                executionResult.error = `Critical step failed: ${stepResult.error}`;
+                break;
+              }
+            }
+          } else {
+            console.log(
+              chalk.yellow(`⚠️  Non-critical step failed, continuing...`)
+            );
+          }
+        }
       } catch (error: any) {
-        console.log(chalk.red(`   ❌ Step failed: ${error.message}`));
+        console.log(chalk.red(`   💥 Step execution error: ${error.message}`));
         const errorResult = {
           stepId: step.id,
           success: false,
@@ -341,15 +436,50 @@ export class AgenticReasoningEngine {
         executionResult.steps!.push(errorResult);
 
         if (step.critical) {
-          executionResult.success = false;
-          executionResult.error = error.message;
-          break;
+          criticalStepsFailed++;
+          if (criticalStepsFailed >= 2) {
+            executionResult.success = false;
+            executionResult.error = error.message;
+            break;
+          }
         }
       }
     }
 
-    if (!executionResult.error) {
+    // Determine overall success based on step results
+    const successRate = successfulSteps / totalSteps;
+    if (criticalStepsFailed === 0 && successRate >= 0.7) {
       executionResult.success = true;
+      executionResult.confidence = successRate;
+      console.log(
+        chalk.green(
+          `✅ Plan execution completed with ${Math.round(
+            successRate * 100
+          )}% success rate`
+        )
+      );
+    } else if (successRate >= 0.5) {
+      executionResult.success = false; // Partial success but not enough
+      executionResult.error = `Partial execution: ${successfulSteps}/${totalSteps} steps successful`;
+      console.log(
+        chalk.yellow(
+          `⚠️  Plan partially executed: ${Math.round(
+            successRate * 100
+          )}% success rate`
+        )
+      );
+    } else {
+      executionResult.success = false;
+      if (!executionResult.error) {
+        executionResult.error = `Low success rate: ${successfulSteps}/${totalSteps} steps successful`;
+      }
+      console.log(
+        chalk.red(
+          `❌ Plan execution failed: ${Math.round(
+            successRate * 100
+          )}% success rate`
+        )
+      );
     }
 
     this.executionHistory.push(executionResult);
@@ -363,24 +493,45 @@ export class AgenticReasoningEngine {
       let result: CommandResult;
 
       if (step.type === 'SEARCH') {
-        result = await this.searchEngine.performSearch(
+        result = await this.performSearchWithRetry(
           step.query || step.description
         );
       } else if (step.type === 'COMMAND') {
-        if (context.autoExecute) {
-          result = await this.executeSafeCommand(step.command);
-        } else {
-          const shouldExecute = await this.promptForExecution(step.command);
-          if (shouldExecute) {
-            result = await this.executeSafeCommand(step.command);
-          } else {
-            result = { success: false, error: 'User declined execution' };
+        // Check circuit breaker before executing command
+        if (this.isCommandBlocked(step.command)) {
+          const blockedInfo = this.commandFailures.get(step.command);
+          console.log(
+            chalk.yellow(
+              `⚠️  Command blocked due to repeated failures: ${step.command}`
+            )
+          );
+          if (blockedInfo?.alternativeSuggested) {
+            console.log(
+              chalk.blue(
+                `💡 Suggested alternative: ${blockedInfo.alternativeSuggested}`
+              )
+            );
           }
+
+          result = {
+            success: false,
+            error: `Command blocked due to repeated failures. Last failure: ${blockedInfo?.lastFailure}`,
+            output: '',
+          };
+        } else {
+          result = await this.executeCommandWithEnhancedHandling(
+            step.command,
+            context
+          );
         }
       } else {
-        // Generic AI-assisted step
-        const aiResponse = await this.aia.queryAI(stepPrompt);
-        result = { success: true, output: aiResponse };
+        // Generic AI-assisted step with retry
+        result = await this.executeAIStepWithRetry(stepPrompt);
+      }
+
+      // Track command success/failure
+      if (step.type === 'COMMAND') {
+        this.trackCommandResult(step.command, result);
       }
 
       return {
@@ -391,6 +542,15 @@ export class AgenticReasoningEngine {
         timestamp: new Date().toISOString(),
       };
     } catch (error: any) {
+      // Track command failure if it was a command step
+      if (step.type === 'COMMAND') {
+        this.trackCommandResult(step.command, {
+          success: false,
+          error: error.message,
+          output: '',
+        });
+      }
+
       throw new Error(`Step execution failed: ${error.message}`);
     }
   }
@@ -789,6 +949,949 @@ Provide recovery analysis in this JSON format:
         error: error.message,
         output: '',
       };
+    }
+  }
+
+  /**
+   * Enhanced command execution with smart error handling
+   */
+  async executeCommandWithEnhancedHandling(
+    command: string,
+    context: AgenticExecutionContext
+  ): Promise<CommandResult> {
+    try {
+      // Pre-validate command exists
+      const validationResult = await this.validateCommand(command);
+      if (!validationResult.valid) {
+        return {
+          success: false,
+          error: `Command validation failed: ${validationResult.reason}`,
+          output: '',
+        };
+      }
+
+      // Check if user approval needed
+      if (!context.autoExecute) {
+        const shouldExecute = await this.promptForExecution(command);
+        if (!shouldExecute) {
+          return {
+            success: false,
+            error: 'User declined execution',
+            output: '',
+          };
+        }
+      }
+
+      // Execute with retry logic
+      return await this.errorHandler.withRetry(
+        () => this.executeSafeCommand(command),
+        {
+          maxRetries: 2,
+          baseDelay: 1000,
+          retryCondition: (error: Error) => {
+            // Don't retry certain types of errors
+            const nonRetryableErrors = [
+              'command not found',
+              'permission denied',
+              'no such file',
+              'user declined',
+            ];
+            return !nonRetryableErrors.some((err) =>
+              error.message.toLowerCase().includes(err)
+            );
+          },
+        }
+      );
+    } catch (error: any) {
+      console.log(chalk.red(`❌ Command execution failed: ${error.message}`));
+
+      // Suggest alternatives for common failures
+      const alternative = this.suggestCommandAlternative(
+        command,
+        error.message
+      );
+      if (alternative) {
+        console.log(chalk.blue(`💡 Suggested alternative: ${alternative}`));
+        this.setCommandAlternative(command, alternative);
+      }
+
+      return {
+        success: false,
+        error: error.message,
+        output: '',
+      };
+    }
+  }
+
+  /**
+   * Validate if a command exists and is safe to execute
+   */
+  async validateCommand(
+    command: string
+  ): Promise<{ valid: boolean; reason?: string }> {
+    try {
+      // Extract base command (first word)
+      const baseCommand = command.trim().split(' ')[0];
+
+      // Check if command exists using 'which' (Unix-like systems)
+      const whichResult = await this.aia.executeCommand(
+        'which',
+        [baseCommand],
+        {
+          timeout: 2000,
+          captureOutput: true,
+        }
+      );
+
+      if (!whichResult.success) {
+        return {
+          valid: false,
+          reason: `Command '${baseCommand}' not found in PATH`,
+        };
+      }
+
+      return { valid: true };
+    } catch (error: any) {
+      return {
+        valid: false,
+        reason: `Command validation error: ${error.message}`,
+      };
+    }
+  }
+
+  /**
+   * Search with retry capability
+   */
+  async performSearchWithRetry(query: string): Promise<CommandResult> {
+    try {
+      return await this.errorHandler.withRetry(
+        () => this.searchEngine.performSearch(query),
+        { maxRetries: 2, baseDelay: 500 }
+      );
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+        output: '',
+      };
+    }
+  }
+
+  /**
+   * AI step execution with retry
+   */
+  async executeAIStepWithRetry(stepPrompt: string): Promise<CommandResult> {
+    try {
+      return await this.errorHandler.withRetry(
+        async () => {
+          const aiResponse = await this.aia.queryAI(stepPrompt);
+          return { success: true, output: aiResponse, error: undefined };
+        },
+        { maxRetries: 2, baseDelay: 1000 }
+      );
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.message,
+        output: '',
+      };
+    }
+  }
+
+  /**
+   * Check if a command is blocked by circuit breaker
+   */
+  isCommandBlocked(command: string): boolean {
+    const failure = this.commandFailures.get(command);
+    if (!failure) return false;
+
+    if (failure.isBlocked && Date.now() > failure.blockUntil) {
+      // Reset the circuit breaker
+      failure.isBlocked = false;
+      failure.consecutiveFailures = 0;
+      console.log(
+        chalk.green(`🔄 Circuit breaker reset for command: ${command}`)
+      );
+    }
+
+    return failure.isBlocked;
+  }
+
+  /**
+   * Track command execution results for circuit breaker pattern
+   */
+  trackCommandResult(command: string, result: CommandResult): void {
+    const baseCommand = command.trim().split(' ')[0];
+
+    if (!this.commandFailures.has(baseCommand)) {
+      this.commandFailures.set(baseCommand, {
+        command: baseCommand,
+        failureCount: 0,
+        lastFailure: '',
+        consecutiveFailures: 0,
+        isBlocked: false,
+        blockUntil: 0,
+      });
+    }
+
+    const failure = this.commandFailures.get(baseCommand)!;
+
+    if (result.success) {
+      // Reset consecutive failures on success
+      failure.consecutiveFailures = 0;
+      if (failure.isBlocked) {
+        failure.isBlocked = false;
+        console.log(chalk.green(`✅ Command working again: ${baseCommand}`));
+      }
+    } else {
+      failure.failureCount++;
+      failure.consecutiveFailures++;
+      failure.lastFailure = result.error || 'Unknown error';
+
+      // Trigger circuit breaker if threshold reached
+      if (failure.consecutiveFailures >= this.circuitBreakerThreshold) {
+        failure.isBlocked = true;
+        failure.blockUntil = Date.now() + this.circuitBreakerResetTimeMs;
+        console.log(
+          chalk.red(`🚫 Circuit breaker triggered for command: ${baseCommand}`)
+        );
+        console.log(
+          chalk.yellow(
+            `⏱️  Will retry after ${this.circuitBreakerResetTimeMs / 1000}s`
+          )
+        );
+      }
+    }
+  }
+
+  /**
+   * Suggest alternative commands for common failures
+   */
+  suggestCommandAlternative(
+    command: string,
+    errorMessage: string
+  ): string | null {
+    const baseCommand = command.trim().split(' ')[0];
+    const lowerError = errorMessage.toLowerCase();
+
+    // Common command alternatives
+    const alternatives: Record<string, string[]> = {
+      npm: ['yarn', 'pnpm'],
+      yarn: ['npm', 'pnpm'],
+      depcheck: ['npm-check-unused-deps', 'npm ls --depth=0'],
+      eslint: ['jshint', 'tslint', 'prettier'],
+      'sonarqube-scanner': ['eslint', 'jshint'],
+      njsscan: ['eslint --ext .js,.ts .'],
+      git: ['git --version || echo "Git not available"'],
+    };
+
+    if (alternatives[baseCommand]) {
+      return alternatives[baseCommand][0];
+    }
+
+    // Pattern-based suggestions
+    if (
+      lowerError.includes('not found') ||
+      lowerError.includes('command not found')
+    ) {
+      if (baseCommand.includes('npm')) {
+        return 'yarn';
+      }
+      if (baseCommand.includes('check') || baseCommand.includes('audit')) {
+        return 'npm audit --audit-level moderate';
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Set alternative command for a failed command
+   */
+  setCommandAlternative(command: string, alternative: string): void {
+    const baseCommand = command.trim().split(' ')[0];
+    const failure = this.commandFailures.get(baseCommand);
+    if (failure) {
+      failure.alternativeSuggested = alternative;
+    }
+  }
+
+  /**
+   * Suggest recovery strategies for failed steps
+   */
+  async suggestStepRecovery(
+    step: any,
+    errorMessage: string
+  ): Promise<RecoveryResult | null> {
+    try {
+      const lowerError = errorMessage.toLowerCase();
+
+      // Quick recovery suggestions based on common error patterns
+      if (lowerError.includes('command not found')) {
+        const alternative = this.suggestCommandAlternative(
+          step.command,
+          errorMessage
+        );
+        if (alternative) {
+          return {
+            canRecover: true,
+            strategy: `Use alternative command: ${alternative}`,
+            steps: [`Execute: ${alternative}`],
+            reason: 'Original command not available, trying alternative',
+          };
+        }
+      }
+
+      if (lowerError.includes('permission denied')) {
+        return {
+          canRecover: true,
+          strategy: 'Request elevated permissions',
+          steps: [
+            'Try with sudo/administrator privileges',
+            'Check file permissions',
+          ],
+          reason: 'Permission issue detected',
+        };
+      }
+
+      if (lowerError.includes('timeout') || lowerError.includes('timed out')) {
+        return {
+          canRecover: true,
+          strategy: 'Retry with longer timeout',
+          steps: ['Increase timeout duration', 'Check network connectivity'],
+          reason: 'Operation timed out, may need more time',
+        };
+      }
+
+      if (
+        lowerError.includes('no such file') ||
+        lowerError.includes('file not found')
+      ) {
+        return {
+          canRecover: true,
+          strategy: 'Verify file paths and existence',
+          steps: [
+            'Check if file exists',
+            'Verify correct path',
+            'Create missing directories',
+          ],
+          reason: 'File path issue detected',
+        };
+      }
+
+      // For non-command steps or unrecognized errors
+      return {
+        canRecover: false,
+        strategy: 'Manual intervention required',
+        steps: [
+          'Review error message',
+          'Check step requirements',
+          'Consider alternative approach',
+        ],
+        reason: 'Error type requires human review',
+      };
+    } catch (error: any) {
+      console.warn(
+        chalk.yellow(
+          `Warning: Could not generate recovery suggestion: ${error.message}`
+        )
+      );
+      return null;
+    }
+  }
+
+  /**
+   * Enhanced plan execution with graceful failure handling
+   */
+  async executePlanWithGracefulHandling(
+    plan: AgenticPlan,
+    context: AgenticExecutionContext,
+    options: EnhancedExecutionOptions = {}
+  ): Promise<AgenticExecutionResult> {
+    const {
+      continueOnFailure = true,
+      gracefulDegradation = true,
+      allowFallbackExecution = true,
+      skipNonCritical = true,
+    } = options;
+
+    console.log(
+      chalk.blue(
+        '🚀 Starting enhanced execution with graceful failure handling...'
+      )
+    );
+
+    const executionResult: AgenticExecutionResult = {
+      step: {
+        command: 'workflow',
+        description: plan.description || 'Execute workflow',
+        expectedOutcome: 'Complete workflow execution',
+        reasoning:
+          plan.reasoning || 'Executing plan with graceful failure handling',
+        risks: plan.fallbackOptions?.map((f) => `Fallback: ${f}`) || [],
+        dependencies: [],
+      },
+      success: false,
+      output: '',
+      confidence: 0,
+      timestamp: new Date().toISOString(),
+      steps: [],
+      error: undefined,
+    };
+
+    let successfulSteps = 0;
+    let criticalStepsFailed = 0;
+    let totalSteps = plan.steps?.length || 0;
+    let workflowShouldContinue = true;
+
+    for (let i = 0; i < totalSteps && workflowShouldContinue; i++) {
+      const step = plan.steps![i];
+      const stepNumber = i + 1;
+
+      console.log(
+        chalk.cyan(`📋 Step ${stepNumber}/${totalSteps}: ${step.description}`)
+      );
+
+      try {
+        // Execute step with enhanced error handling
+        const stepResult = await this.executeStepWithRecovery(
+          step,
+          context,
+          options
+        );
+        executionResult.steps!.push(stepResult);
+
+        if (stepResult.success) {
+          successfulSteps++;
+          console.log(
+            chalk.green(`   ✅ Step ${stepNumber} completed successfully`)
+          );
+        } else {
+          console.log(
+            chalk.yellow(
+              `   ⚠️  Step ${stepNumber} failed: ${stepResult.error}`
+            )
+          );
+
+          // Determine recovery strategy
+          const recoveryStrategy = await this.determineRecoveryStrategy(
+            step,
+            stepResult,
+            context
+          );
+
+          if (step.critical && !stepResult.recoveryAttempted) {
+            criticalStepsFailed++;
+            console.log(
+              chalk.red(`❌ Critical step failed: ${step.description}`)
+            );
+
+            // For critical steps, try harder recovery
+            if (allowFallbackExecution) {
+              const fallbackResult = await this.attemptStepFallback(
+                step,
+                stepResult,
+                context
+              );
+              if (fallbackResult.success) {
+                successfulSteps++;
+                console.log(
+                  chalk.green(
+                    `✅ Fallback execution successful for critical step`
+                  )
+                );
+                continue;
+              }
+            }
+
+            // Decide whether to continue after critical failure
+            if (criticalStepsFailed >= 2 && !continueOnFailure) {
+              console.log(
+                chalk.red(`🛑 Multiple critical failures, stopping execution`)
+              );
+              workflowShouldContinue = false;
+              executionResult.error = `Critical step failed: ${stepResult.error}`;
+              break;
+            }
+          } else if (!step.critical && skipNonCritical) {
+            console.log(
+              chalk.yellow(
+                `⏭️  Skipping non-critical step failure, continuing workflow`
+              )
+            );
+          }
+
+          // Apply graceful degradation if enabled
+          if (gracefulDegradation) {
+            const degradedResult = await this.applyGracefulDegradation(
+              step,
+              stepResult,
+              context
+            );
+            if (degradedResult) {
+              console.log(
+                chalk.blue(
+                  `🔄 Applied graceful degradation: ${degradedResult.fallbackStrategy}`
+                )
+              );
+              executionResult.steps![executionResult.steps!.length - 1] =
+                degradedResult;
+              if (degradedResult.continueWorkflow) {
+                continue;
+              }
+            }
+          }
+        }
+      } catch (error: any) {
+        console.log(
+          chalk.red(
+            `💥 Unexpected error in step ${stepNumber}: ${error.message}`
+          )
+        );
+
+        // Handle unexpected errors gracefully
+        const errorResult: EnhancedStepResult = {
+          stepId: step.id,
+          success: false,
+          output: '',
+          error: error.message,
+          timestamp: new Date().toISOString(),
+          recoveryAttempted: false,
+          continueWorkflow: continueOnFailure && !step.critical,
+        };
+
+        executionResult.steps!.push(errorResult);
+
+        if (step.critical) {
+          criticalStepsFailed++;
+          if (!continueOnFailure) {
+            workflowShouldContinue = false;
+            executionResult.error = `Critical step error: ${error.message}`;
+            break;
+          }
+        }
+      }
+    }
+
+    // Calculate final success based on graceful failure handling
+    const successRate = totalSteps > 0 ? successfulSteps / totalSteps : 0;
+
+    if (successRate >= 0.8 || (gracefulDegradation && successRate >= 0.6)) {
+      executionResult.success = true;
+      console.log(
+        chalk.green(
+          `✅ Workflow completed with ${Math.round(
+            successRate * 100
+          )}% success rate`
+        )
+      );
+    } else if (successRate >= 0.4 && continueOnFailure) {
+      executionResult.success = false;
+      executionResult.error = `Partial success: ${successfulSteps}/${totalSteps} steps completed`;
+      console.log(
+        chalk.yellow(
+          `⚠️  Workflow partially completed: ${Math.round(
+            successRate * 100
+          )}% success rate`
+        )
+      );
+    } else {
+      executionResult.success = false;
+      if (!executionResult.error) {
+        executionResult.error = `Low success rate: ${successfulSteps}/${totalSteps} steps completed`;
+      }
+      console.log(
+        chalk.red(
+          `❌ Workflow failed: ${Math.round(successRate * 100)}% success rate`
+        )
+      );
+    }
+
+    // Provide summary with actionable recommendations
+    this.provideSummaryWithRecommendations(executionResult, context);
+
+    this.executionHistory.push(executionResult);
+    return executionResult;
+  }
+
+  /**
+   * Execute a step with enhanced recovery mechanisms
+   */
+  async executeStepWithRecovery(
+    step: any,
+    context: AgenticExecutionContext,
+    options: EnhancedExecutionOptions = {}
+  ): Promise<EnhancedStepResult> {
+    const baseResult: EnhancedStepResult = {
+      stepId: step.id,
+      success: false,
+      output: '',
+      error: '',
+      timestamp: new Date().toISOString(),
+      recoveryAttempted: false,
+      continueWorkflow: true,
+    };
+
+    try {
+      // First attempt - normal execution
+      const result = await this.executeStep(step, context);
+
+      if (result.success) {
+        return { ...baseResult, ...result, success: true };
+      }
+
+      // Step failed, attempt recovery
+      console.log(
+        chalk.yellow(
+          `🔧 Attempting recovery for failed step: ${step.description}`
+        )
+      );
+      baseResult.recoveryAttempted = true;
+      baseResult.error = result.error;
+
+      // Try alternative command if available
+      if (step.type === 'COMMAND' && options.suggestAlternatives !== false) {
+        const alternative = this.suggestCommandAlternative(
+          step.command,
+          result.error
+        );
+        if (alternative) {
+          console.log(
+            chalk.blue(`💡 Trying alternative command: ${alternative}`)
+          );
+
+          try {
+            const altResult = await this.executeCommandWithEnhancedHandling(
+              alternative,
+              context
+            );
+
+            if (altResult.success) {
+              console.log(chalk.green(`✅ Alternative command succeeded`));
+              return {
+                ...baseResult,
+                success: true,
+                output: altResult.output || '',
+                alternativeUsed: alternative,
+                error: undefined,
+              };
+            }
+          } catch (altError: any) {
+            console.log(
+              chalk.yellow(
+                `⚠️  Alternative command also failed: ${altError.message}`
+              )
+            );
+          }
+        }
+      }
+
+      // Try step-specific recovery strategies
+      const recoveryResult = await this.suggestStepRecovery(step, result.error);
+      if (recoveryResult?.canRecover) {
+        console.log(
+          chalk.blue(
+            `🔄 Applying recovery strategy: ${recoveryResult.strategy}`
+          )
+        );
+
+        // Execute recovery steps
+        for (const recoveryStep of recoveryResult.steps) {
+          try {
+            const recoveryStepResult = await this.executeSafeCommand(
+              recoveryStep
+            );
+            if (recoveryStepResult.success) {
+              console.log(
+                chalk.green(`✅ Recovery step succeeded: ${recoveryStep}`)
+              );
+
+              // Retry original step after recovery
+              const retryResult = await this.executeStep(step, context);
+              if (retryResult.success) {
+                return {
+                  ...baseResult,
+                  success: true,
+                  output: retryResult.output,
+                  fallbackStrategy: recoveryResult.strategy,
+                  error: undefined,
+                };
+              }
+            }
+          } catch (recoveryError) {
+            console.log(
+              chalk.yellow(`⚠️  Recovery step failed: ${recoveryStep}`)
+            );
+          }
+        }
+      }
+
+      // If all recovery attempts failed, determine if workflow should continue
+      const shouldContinue =
+        !step.critical || options.continueOnFailure === true;
+
+      return {
+        ...baseResult,
+        success: false,
+        continueWorkflow: shouldContinue,
+        skipReason: shouldContinue
+          ? 'Non-critical step failure, continuing workflow'
+          : undefined,
+      };
+    } catch (error: any) {
+      return {
+        ...baseResult,
+        success: false,
+        error: error.message,
+        continueWorkflow: !step.critical || options.continueOnFailure === true,
+      };
+    }
+  }
+
+  /**
+   * Determine appropriate recovery strategy for a failed step
+   */
+  async determineRecoveryStrategy(
+    step: any,
+    stepResult: EnhancedStepResult,
+    context: AgenticExecutionContext
+  ): Promise<WorkflowRecoveryStrategy> {
+    const errorMessage = stepResult.error?.toLowerCase() || '';
+
+    return {
+      skipFailedStep:
+        !step.critical &&
+        (errorMessage.includes('command not found') ||
+          errorMessage.includes('permission denied')),
+      useAlternativeCommand:
+        errorMessage.includes('command not found') ||
+        errorMessage.includes('not installed'),
+      continueWithLimitedCapabilities:
+        !step.critical &&
+        (errorMessage.includes('timeout') || errorMessage.includes('network')),
+      suggestManualIntervention:
+        step.critical &&
+        (errorMessage.includes('permission denied') ||
+          errorMessage.includes('authentication')),
+      provideFallbackSolution:
+        errorMessage.includes('not available') ||
+        errorMessage.includes('not supported'),
+    };
+  }
+
+  /**
+   * Attempt fallback execution for critical steps
+   */
+  async attemptStepFallback(
+    step: any,
+    failedResult: EnhancedStepResult,
+    context: AgenticExecutionContext
+  ): Promise<EnhancedStepResult> {
+    console.log(
+      chalk.blue(`🔄 Attempting fallback execution for: ${step.description}`)
+    );
+
+    // Extract goal-related commands as fallback
+    const fallbackCommands = this.extractFallbackCommands(step.description);
+
+    for (const fallbackCommand of fallbackCommands) {
+      try {
+        console.log(chalk.gray(`Trying fallback: ${fallbackCommand}`));
+        const result = await this.executeSafeCommand(fallbackCommand);
+
+        if (result.success) {
+          return {
+            stepId: step.id,
+            success: true,
+            output: result.output || 'Fallback execution completed',
+            error: undefined,
+            timestamp: new Date().toISOString(),
+            recoveryAttempted: true,
+            fallbackStrategy: `Fallback command: ${fallbackCommand}`,
+            continueWorkflow: true,
+          };
+        }
+      } catch (error) {
+        continue; // Try next fallback
+      }
+    }
+
+    return failedResult;
+  }
+
+  /**
+   * Apply graceful degradation when steps fail
+   */
+  async applyGracefulDegradation(
+    step: any,
+    failedResult: EnhancedStepResult,
+    context: AgenticExecutionContext
+  ): Promise<EnhancedStepResult | null> {
+    if (step.critical) {
+      return null; // Don't degrade critical steps
+    }
+
+    const errorMessage = failedResult.error?.toLowerCase() || '';
+
+    // Different degradation strategies based on error type
+    if (errorMessage.includes('timeout')) {
+      return {
+        ...failedResult,
+        success: false,
+        fallbackStrategy: 'Timeout - continuing with partial results',
+        continueWorkflow: true,
+        skipReason: 'Operation timed out, but non-critical for workflow',
+      };
+    }
+
+    if (errorMessage.includes('command not found')) {
+      return {
+        ...failedResult,
+        success: false,
+        fallbackStrategy: 'Tool not available - workflow adapted',
+        continueWorkflow: true,
+        skipReason: 'Required tool not installed, but workflow can continue',
+      };
+    }
+
+    if (errorMessage.includes('permission denied')) {
+      return {
+        ...failedResult,
+        success: false,
+        fallbackStrategy:
+          'Permission issue - continuing with available operations',
+        continueWorkflow: true,
+        skipReason:
+          'Insufficient permissions, but other operations can proceed',
+      };
+    }
+
+    // Default graceful degradation
+    return {
+      ...failedResult,
+      success: false,
+      fallbackStrategy: 'Step failed but marked as non-critical',
+      continueWorkflow: true,
+      skipReason:
+        'Non-critical step failure, continuing with reduced functionality',
+    };
+  }
+
+  /**
+   * Provide comprehensive summary with actionable recommendations
+   */
+  provideSummaryWithRecommendations(
+    result: AgenticExecutionResult,
+    context: AgenticExecutionContext
+  ): void {
+    console.log(chalk.bold('\n📊 Execution Summary with Recommendations:'));
+    console.log(chalk.dim('─'.repeat(60)));
+
+    const totalSteps = result.steps?.length || 0;
+    const successfulSteps = result.steps?.filter((s) => s.success).length || 0;
+    const failedSteps = result.steps?.filter((s) => !s.success) || [];
+    const recoveredSteps =
+      result.steps?.filter(
+        (s) => (s as EnhancedStepResult).recoveryAttempted && s.success
+      ).length || 0;
+
+    console.log(chalk.cyan(`📋 Total Steps: ${totalSteps}`));
+    console.log(chalk.green(`✅ Successful: ${successfulSteps}`));
+    console.log(chalk.red(`❌ Failed: ${failedSteps.length}`));
+    console.log(chalk.blue(`🔄 Recovered: ${recoveredSteps}`));
+    console.log(
+      chalk.yellow(
+        `📈 Success Rate: ${Math.round((successfulSteps / totalSteps) * 100)}%`
+      )
+    );
+
+    if (failedSteps.length > 0) {
+      console.log(chalk.yellow('\n💡 Recommendations for Failed Steps:'));
+
+      failedSteps.forEach((step, index) => {
+        const enhancedStep = step as EnhancedStepResult;
+        console.log(chalk.dim(`\n${index + 1}. Step: ${step.stepId}`));
+        console.log(chalk.red(`   Error: ${step.error}`));
+
+        if (enhancedStep.alternativeUsed) {
+          console.log(
+            chalk.blue(`   Alternative used: ${enhancedStep.alternativeUsed}`)
+          );
+        }
+
+        if (enhancedStep.fallbackStrategy) {
+          console.log(
+            chalk.blue(`   Fallback applied: ${enhancedStep.fallbackStrategy}`)
+          );
+        }
+
+        if (enhancedStep.skipReason) {
+          console.log(
+            chalk.yellow(
+              `   Reason for continuation: ${enhancedStep.skipReason}`
+            )
+          );
+        }
+
+        // Provide specific recommendations
+        this.provideStepRecommendations(step);
+      });
+    }
+
+    if (result.success) {
+      console.log(
+        chalk.green(
+          '\n🎉 Workflow completed successfully with graceful error handling!'
+        )
+      );
+    } else {
+      console.log(
+        chalk.yellow(
+          '\n⚠️  Workflow completed with some limitations. Check recommendations above.'
+        )
+      );
+    }
+
+    console.log(chalk.dim('─'.repeat(60)));
+  }
+
+  /**
+   * Provide specific recommendations for failed steps
+   */
+  provideStepRecommendations(step: StepResult): void {
+    const errorMessage = step.error?.toLowerCase() || '';
+
+    if (errorMessage.includes('command not found')) {
+      console.log(
+        chalk.blue(`   💡 Install the missing tool or use alternative commands`)
+      );
+    } else if (errorMessage.includes('permission denied')) {
+      console.log(
+        chalk.blue(
+          `   💡 Check file permissions or run with appropriate privileges`
+        )
+      );
+    } else if (errorMessage.includes('timeout')) {
+      console.log(
+        chalk.blue(`   💡 Increase timeout or check network connectivity`)
+      );
+    } else if (errorMessage.includes('not installed')) {
+      console.log(
+        chalk.blue(
+          `   💡 Install required dependencies: npm install / yarn install`
+        )
+      );
+    } else if (
+      errorMessage.includes('api key') ||
+      errorMessage.includes('unauthorized')
+    ) {
+      console.log(chalk.blue(`   💡 Check API credentials and configuration`));
+    } else {
+      console.log(
+        chalk.blue(
+          `   💡 Review error details and try manual execution if needed`
+        )
+      );
     }
   }
 }

@@ -480,6 +480,29 @@ export class ServiceFactory {
       } = require('../../dist/services/ResilienceService');
       return new ResilienceService();
     });
+
+    // Configuration Validator Service (no dependencies - utility service)
+    container.registerFactory('configurationValidator', (container) => {
+      const {
+        ConfigurationValidator,
+      } = require('../../dist/services/ConfigurationValidator');
+      return new ConfigurationValidator();
+    });
+
+    // Profile Manager Service (depends on memoryPersistence)
+    container.registerFactory(
+      'profileManager',
+      (container) => {
+        const {
+          ProfileManager,
+        } = require('../../dist/services/ProfileManager');
+        const memoryPersistence = container.resolve('memoryPersistence');
+        return new ProfileManager(memoryPersistence);
+      },
+      {
+        dependencies: ['memoryPersistence'],
+      }
+    );
   }
 
   /**

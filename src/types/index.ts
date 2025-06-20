@@ -5,6 +5,7 @@ export * from '../interfaces/IPerformanceMonitor';
 // Core application types
 export interface AIAConfig {
   preferredModel: string;
+  preferredProvider?: string;
   openaiApiKey?: string;
   anthropicApiKey?: string;
   autoExecute: boolean;
@@ -99,6 +100,8 @@ export interface MemoryData {
   workingDirectories: Record<string, Record<string, unknown>>;
   semanticIndex: Record<string, unknown>;
   agenticHistory: AgenticGoal[];
+  profiles?: Array<[string, any]>;
+  activeProfile?: string;
 }
 
 export interface Conversation {

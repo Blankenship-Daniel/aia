@@ -1,25 +1,24 @@
 /**
  * AI Service Implementation
- * Manages AI model interactions and query processing
+ * Manages AI model interactions and query processing using Strategy Pattern
+ * SOLID SRP: Responsible only for AI service coordination
+ * SOLID OCP: Open for extension via new providers, closed for modification
+ * SOLID LSP: Provider implementations are substitutable
+ * SOLID ISP: Uses focused interfaces for providers
+ * SOLID DIP: Depends on IAIProvider abstraction, not concrete implementations
  */
 import { IAIService } from '../interfaces/IAIService';
 import { IConfigurationService } from '../interfaces/IConfigurationService';
 import { IConversationMemory } from '../interfaces/IConversationMemory';
+import { IAIProvider, AICallOptions } from '../interfaces/IAIProvider';
+import { AIProviderFactory, ProviderConfig } from './AIProviderFactory';
 import { AIAConfig, ContextInfo, AIModel } from '../types/index';
-import Anthropic from '@anthropic-ai/sdk';
-import OpenAI from 'openai';
 
 export class AIService implements IAIService {
   private configService: IConfigurationService;
   private conversationMemory: IConversationMemory;
   private initialized: boolean = false;
-  private clients: {
-    openai: OpenAI | null;
-    anthropic: Anthropic | null;
-  } = {
-    openai: null,
-    anthropic: null,
-  };
+  private provider: IAIProvider | null = null;
 
   constructor(
     configurationService: IConfigurationService,
@@ -30,7 +29,7 @@ export class AIService implements IAIService {
   }
 
   /**
-   * Initialize AI clients and model selection
+   * Initialize AI service with provider strategy
    */
   async initialize(): Promise<void> {
     if (this.initialized) {
@@ -40,25 +39,26 @@ export class AIService implements IAIService {
     // Get configuration from the configuration service
     const config = this.configService.getConfiguration();
 
-    // Initialize OpenAI client if API key is available
-    if (config.openaiApiKey) {
-      this.clients.openai = new OpenAI({
-        apiKey: config.openaiApiKey,
-      });
-    }
+    // Initialize provider using factory pattern
+    if (config.openaiApiKey || config.anthropicApiKey) {
+      try {
+        const providerConfig: ProviderConfig = {
+          provider: config.preferredProvider || 'openai',
+          apiKey: config.openaiApiKey || config.anthropicApiKey || '',
+          model: config.preferredModel || 'gpt-3.5-turbo',
+        };
 
-    // Initialize Anthropic client if API key is available
-    if (config.anthropicApiKey) {
-      this.clients.anthropic = new Anthropic({
-        apiKey: config.anthropicApiKey,
-      });
+        this.provider = AIProviderFactory.create(providerConfig);
+        this.initialized = true;
+      } catch (error) {
+        console.error('Failed to initialize AI provider:', error);
+        this.provider = null;
+      }
     }
-
-    this.initialized = true;
   }
 
   /**
-   * Query AI with intelligent model selection
+   * Query AI with intelligent model selection using provider strategy
    */
   async queryAI(
     prompt: string,
@@ -78,60 +78,28 @@ export class AIService implements IAIService {
     };
 
     try {
-      if (model.startsWith('claude-') && this.clients.anthropic) {
-        // Use Anthropic API
-        const anthropicResponse = await this.clients.anthropic.messages.create({
-          model: model as any,
-          max_tokens: 4000,
-          messages: [
-            {
-              role: 'user',
-              content: prompt,
-            },
-          ],
-        });
+      // Use provider strategy pattern instead of switch statement
+      if (this.provider) {
+        const options: AICallOptions = {
+          model,
+          temperature: 0.7,
+          maxTokens: 4000,
+          systemPrompt: this.getSystemPrompt(context),
+        };
 
-        const content =
-          anthropicResponse.content[0]?.type === 'text'
-            ? anthropicResponse.content[0].text
-            : 'No text response';
+        const content = await this.provider.call(prompt, options);
 
         response = {
           content,
           model,
           metadata: {
             timestamp: new Date().toISOString(),
-            tokens: anthropicResponse.usage?.input_tokens || 0,
-            outputTokens: anthropicResponse.usage?.output_tokens || 0,
-            id: anthropicResponse.id,
-          },
-        };
-      } else if (model.startsWith('gpt-') && this.clients.openai) {
-        // Use OpenAI API
-        const openaiResponse =
-          await this.clients.openai.chat.completions.create({
-            model: model as any,
-            messages: [
-              {
-                role: 'user',
-                content: prompt,
-              },
-            ],
-            max_tokens: 4000,
-          });
-
-        response = {
-          content: openaiResponse.choices[0]?.message?.content || 'No response',
-          model,
-          metadata: {
-            timestamp: new Date().toISOString(),
-            tokens: openaiResponse.usage?.prompt_tokens || 0,
-            outputTokens: openaiResponse.usage?.completion_tokens || 0,
-            id: openaiResponse.id,
+            provider: this.provider.name,
+            estimatedTokens: this.provider.estimateTokens(prompt),
           },
         };
       } else {
-        // Fallback to mock response if no API client available
+        // Fallback to mock response if no provider available
         response = {
           content: `Mock AI response for: ${prompt}\n\n⚠️ No API key configured for ${model}. Please run 'aia config' to set up your API keys.`,
           model,
@@ -148,66 +116,7 @@ export class AIService implements IAIService {
 
       // For debugging purposes, return a simulated plan response when API fails
       if (prompt.includes('execution plan') && prompt.includes('JSON')) {
-        let simulatedPlan = '';
-
-        // Generate different plans based on the goal content
-        if (prompt.toLowerCase().includes('git status')) {
-          simulatedPlan = `[
-            {
-              "id": "step-1",
-              "description": "Check current git status",
-              "command": "git status",
-              "expectedOutcome": "Display current git repository status including staged, unstaged, and untracked files",
-              "reasoning": "Git status provides comprehensive view of repository state",
-              "risks": [],
-              "dependencies": [],
-              "timeout": 10000
-            }
-          ]`;
-        } else if (
-          prompt.toLowerCase().includes('list') &&
-          prompt.toLowerCase().includes('files') &&
-          prompt.toLowerCase().includes('100 lines')
-        ) {
-          simulatedPlan = `[
-            {
-              "id": "step-1",
-              "description": "Count lines in all files using find and wc commands",
-              "command": "find . -maxdepth 1 -type f -name '*.js' -o -name '*.ts' -o -name '*.json' -o -name '*.md' | xargs wc -l | sort -nr",
-              "expectedOutcome": "List of files with line counts, sorted by number of lines",
-              "reasoning": "Using find to locate relevant files and wc to count lines",
-              "risks": [],
-              "dependencies": [],
-              "timeout": 30000
-            },
-            {
-              "id": "step-2", 
-              "description": "Filter results to show only files with more than 100 lines",
-              "command": "find . -maxdepth 1 -type f -name '*.js' -o -name '*.ts' -o -name '*.json' -o -name '*.md' | xargs wc -l | awk '$1 > 100' | sort -nr",
-              "expectedOutcome": "Only files with more than 100 lines displayed",
-              "reasoning": "Using awk to filter results where line count is greater than 100",
-              "risks": [],
-              "dependencies": ["step-1"],
-              "timeout": 30000
-            }
-          ]`;
-        } else {
-          // Generic fallback plan
-          simulatedPlan = `[
-            {
-              "id": "step-1",
-              "description": "Execute basic system information command",
-              "command": "echo 'This is a simulated command execution. Goal: ${
-                prompt.split('Goal: ')[1]?.split('\\n')[0] || 'Unknown goal'
-              }'",
-              "expectedOutcome": "Display simulated execution message",
-              "reasoning": "Simulated response due to API connectivity issues",
-              "risks": [],
-              "dependencies": [],
-              "timeout": 5000
-            }
-          ]`;
-        }
+        let simulatedPlan = this.generateSimulatedPlan(prompt);
 
         response = {
           content: simulatedPlan,
@@ -376,5 +285,99 @@ export class AIService implements IAIService {
       openai: true,
       anthropic: true,
     };
+  }
+
+  /**
+   * Get system prompt based on context
+   * @param context Context information
+   * @returns System prompt string
+   */
+  private getSystemPrompt(context: ContextInfo): string {
+    const contextInfo = [];
+
+    if (context.workingDirectory) {
+      contextInfo.push(`Working Directory: ${context.workingDirectory}`);
+    }
+
+    if (context.projectType) {
+      contextInfo.push(`Project Type: ${context.projectType}`);
+    }
+
+    if (context.gitStatus) {
+      contextInfo.push(`Git Status: ${context.gitStatus}`);
+    }
+
+    const systemPrompt = `You are an AI assistant helping with development tasks.
+
+${contextInfo.length > 0 ? `Context:\n${contextInfo.join('\n')}\n` : ''}
+
+Please provide helpful, accurate responses based on the user's request and the provided context.`;
+
+    return systemPrompt;
+  }
+
+  /**
+   * Generate simulated execution plan for development purposes
+   * @param prompt Original prompt
+   * @returns Simulated plan JSON
+   */
+  private generateSimulatedPlan(prompt: string): string {
+    // Generate different plans based on the goal content
+    if (prompt.toLowerCase().includes('git status')) {
+      return `[
+        {
+          "id": "step-1",
+          "description": "Check current git status",
+          "command": "git status",
+          "expectedOutcome": "Display current git repository status including staged, unstaged, and untracked files",
+          "reasoning": "Git status provides comprehensive view of repository state",
+          "risks": [],
+          "dependencies": [],
+          "timeout": 10000
+        }
+      ]`;
+    } else if (
+      prompt.toLowerCase().includes('list') &&
+      prompt.toLowerCase().includes('files') &&
+      prompt.toLowerCase().includes('100 lines')
+    ) {
+      return `[
+        {
+          "id": "step-1",
+          "description": "Count lines in all files using find and wc commands",
+          "command": "find . -maxdepth 1 -type f -name '*.js' -o -name '*.ts' -o -name '*.json' -o -name '*.md' | xargs wc -l | sort -nr",
+          "expectedOutcome": "List of files with line counts, sorted by number of lines",
+          "reasoning": "Using find to locate relevant files and wc to count lines",
+          "risks": [],
+          "dependencies": [],
+          "timeout": 30000
+        },
+        {
+          "id": "step-2", 
+          "description": "Filter results to show only files with more than 100 lines",
+          "command": "find . -maxdepth 1 -type f -name '*.js' -o -name '*.ts' -o -name '*.json' -o -name '*.md' | xargs wc -l | awk '$1 > 100' | sort -nr",
+          "expectedOutcome": "Only files with more than 100 lines displayed",
+          "reasoning": "Using awk to filter results where line count is greater than 100",
+          "risks": [],
+          "dependencies": ["step-1"],
+          "timeout": 30000
+        }
+      ]`;
+    } else {
+      // Generic fallback plan
+      const goal = prompt.split('Goal: ')[1]?.split('\\n')[0] || 'Unknown goal';
+      return `[
+        {
+          "id": "step-1",
+          "description": "Execute basic system information command",
+          "command": "echo 'This is a simulated command execution. Goal: ${goal}'",
+          "expectedOutcome": "Display simulated execution message",
+          "reasoning": "Simulated response due to API connectivity issues",
+          "risks": [],
+          "dependencies": [],
+          "timeout": 5000
+        }
+      ]`;
+    }
   }
 }

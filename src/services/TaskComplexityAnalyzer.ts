@@ -209,6 +209,21 @@ export class TaskComplexityAnalyzer {
         'report',
         'summary',
         'find',
+        'what',
+        'which',
+        'where',
+        'how many',
+        'how much',
+        'largest',
+        'smallest',
+        'biggest',
+        'size',
+        'count',
+        'list',
+        'show',
+        'display',
+        'search',
+        'locate',
       ])
     ) {
       return TaskType.ANALYSIS;

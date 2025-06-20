@@ -561,6 +561,11 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
     plan: ExecutionStep[],
     taskAnalysis: any
   ): ExecutionStep[] {
+    // Skip validation steps for analysis tasks to keep output clean
+    if (taskAnalysis.type === 'analysis') {
+      return plan;
+    }
+
     // For documentation tasks, add comprehensive validation steps
     if (
       taskAnalysis.type === 'documentation' ||

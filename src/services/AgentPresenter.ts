@@ -105,8 +105,8 @@ export class AgentPresenter implements IAgentPresenter {
           riskLevel === 'high'
             ? chalk.red('⚠️')
             : riskLevel === 'medium'
-              ? chalk.yellow('⚡')
-              : chalk.green('✨');
+            ? chalk.yellow('⚡')
+            : chalk.green('✨');
 
         console.log(
           `${stepNumber} ${riskIcon} ${chalk.bold(step.description)}`
@@ -179,7 +179,9 @@ export class AgentPresenter implements IAgentPresenter {
           memoryMB
         );
 
-        const progressText = `${chalk.blue('⚡')} [${chalk.cyan(bar)}] ${chalk.gray(`${elapsedSec}s/${timeoutSec}s | ${memoryMB}MB`)}`;
+        const progressText = `${chalk.blue('⚡')} [${chalk.cyan(
+          bar
+        )}] ${chalk.gray(`${elapsedSec}s/${timeoutSec}s | ${memoryMB}MB`)}`;
         this.activeSpinner.text = progressText;
       }
     }, 500);
@@ -201,8 +203,14 @@ export class AgentPresenter implements IAgentPresenter {
             process.memoryUsage().heapUsed / 1024 / 1024
           );
           const progressText = details
-            ? `${chalk.blue('⚡')} [${chalk.cyan(bar)}] ${details} ${chalk.gray(`${elapsedSec}s | ${memoryMB}MB`)}`
-            : `${chalk.blue('⚡')} [${chalk.cyan(bar)}] Executing... ${chalk.gray(`${elapsedSec}s/${timeoutSec}s | ${memoryMB}MB`)}`;
+            ? `${chalk.blue('⚡')} [${chalk.cyan(bar)}] ${details} ${chalk.gray(
+                `${elapsedSec}s | ${memoryMB}MB`
+              )}`
+            : `${chalk.blue('⚡')} [${chalk.cyan(
+                bar
+              )}] Executing... ${chalk.gray(
+                `${elapsedSec}s/${timeoutSec}s | ${memoryMB}MB`
+              )}`;
           this.activeSpinner.text = progressText;
         }
       },
@@ -217,7 +225,9 @@ export class AgentPresenter implements IAgentPresenter {
 
           const successMessage = message || step.description;
           this.activeSpinner.succeed(
-            `${chalk.green('✓')} ${successMessage} ${chalk.gray(`(${durationSec}s | ${memoryMB}MB)`)}`
+            `${chalk.green('✓')} ${successMessage} ${chalk.gray(
+              `(${durationSec}s | ${memoryMB}MB)`
+            )}`
           );
           this.activeSpinner = null;
 
@@ -236,7 +246,9 @@ export class AgentPresenter implements IAgentPresenter {
 
           const errorMessage = message || `${step.description} failed`;
           this.activeSpinner.fail(
-            `${chalk.red('✗')} ${errorMessage} ${chalk.gray(`(${durationSec}s | ${memoryMB}MB)`)}`
+            `${chalk.red('✗')} ${errorMessage} ${chalk.gray(
+              `(${durationSec}s | ${memoryMB}MB)`
+            )}`
           );
           this.activeSpinner = null;
         }
@@ -267,6 +279,12 @@ export class AgentPresenter implements IAgentPresenter {
   }
 
   displayExecutionSummary(execution: AgenticExecution): void {
+    if (this.isSimpleAnalysisExecution(execution)) {
+      this.displaySimplifiedAnalysisSummary(execution);
+      return;
+    }
+
+    // Original complex summary for non-analysis tasks
     // Stop resource monitoring
     this.stopResourceMonitoring();
 
@@ -292,7 +310,9 @@ export class AgentPresenter implements IAgentPresenter {
     const totalTimeSec = (totalTime / 1000).toFixed(2);
     const timeRating = this.getPerformanceRating(totalTime);
     console.log(
-      `⏱️  ${chalk.cyan('Total Time:')} ${chalk.yellow(totalTimeSec)}s (${timeRating})`
+      `⏱️  ${chalk.cyan('Total Time:')} ${chalk.yellow(
+        totalTimeSec
+      )}s (${timeRating})`
     );
 
     // Step statistics
@@ -304,13 +324,17 @@ export class AgentPresenter implements IAgentPresenter {
       totalSteps > 0 ? ((successfulSteps / totalSteps) * 100).toFixed(1) : '0';
 
     console.log(
-      `🔢 ${chalk.cyan('Steps:')} ${chalk.yellow(successfulSteps)}/${chalk.yellow(totalSteps)} (${chalk.green(successRate)}% success)`
+      `🔢 ${chalk.cyan('Steps:')} ${chalk.yellow(
+        successfulSteps
+      )}/${chalk.yellow(totalSteps)} (${chalk.green(successRate)}% success)`
     );
 
     // Iteration information
     if (execution.iterations > 1) {
       console.log(
-        `🔄 ${chalk.cyan('Iterations:')} ${chalk.yellow(execution.iterations)} (intelligent retry enabled)`
+        `🔄 ${chalk.cyan('Iterations:')} ${chalk.yellow(
+          execution.iterations
+        )} (intelligent retry enabled)`
       );
     }
 
@@ -324,7 +348,9 @@ export class AgentPresenter implements IAgentPresenter {
     // Performance insights
     if (this.performance.filesProcessed > 0) {
       console.log(
-        `📁 ${chalk.cyan('Files Processed:')} ${chalk.yellow(this.performance.filesProcessed)}`
+        `📁 ${chalk.cyan('Files Processed:')} ${chalk.yellow(
+          this.performance.filesProcessed
+        )}`
       );
     }
 
@@ -461,6 +487,17 @@ export class AgentPresenter implements IAgentPresenter {
   }
 
   formatExecutionSummary(execution: AgenticExecution): string {
+    if (this.isSimpleAnalysisExecution(execution)) {
+      const result = this.extractAnalysisAnswer(execution);
+      if (result) {
+        return result;
+      }
+      return execution.success
+        ? 'Analysis completed successfully'
+        : 'Analysis failed - please try refining your query';
+    }
+
+    // Original formatting for complex tasks
     const lines = [];
     lines.push(`Goal: ${execution.goal}`);
     lines.push(`Status: ${execution.status}`);
@@ -660,17 +697,21 @@ export class AgentPresenter implements IAgentPresenter {
       durationChange < 0
         ? chalk.green('↓')
         : durationChange > 0
-          ? chalk.red('↑')
-          : chalk.gray('→');
+        ? chalk.red('↑')
+        : chalk.gray('→');
     const durationColor =
       durationChange < 0
         ? chalk.green
         : durationChange > 0
-          ? chalk.red
-          : chalk.gray;
+        ? chalk.red
+        : chalk.gray;
 
     console.log(
-      `  Duration: ${(comparison.currentExecution.duration / 1000).toFixed(2)}s ${durationIcon} ${durationColor(Math.abs(durationChange).toFixed(1) + '%')}`
+      `  Duration: ${(comparison.currentExecution.duration / 1000).toFixed(
+        2
+      )}s ${durationIcon} ${durationColor(
+        Math.abs(durationChange).toFixed(1) + '%'
+      )}`
     );
     console.log(
       `  Memory Peak: ${comparison.currentExecution.memoryPeak.toFixed(1)}MB`
@@ -693,7 +734,9 @@ export class AgentPresenter implements IAgentPresenter {
             : 0;
         console.log(`  ${index + 1}. ${metric.className}.${metric.methodName}`);
         console.log(
-          `     Avg: ${metric.averageExecutionTime.toFixed(1)}ms | Errors: ${errorRate.toFixed(1)}%`
+          `     Avg: ${metric.averageExecutionTime.toFixed(
+            1
+          )}ms | Errors: ${errorRate.toFixed(1)}%`
         );
       });
     }
@@ -929,17 +972,17 @@ export class AgentPresenter implements IAgentPresenter {
       totalTimeMs < 30000
         ? 'Excellent'
         : totalTimeMs < 60000
-          ? 'Good'
-          : totalTimeMs < 120000
-            ? 'Fair'
-            : 'Slow';
+        ? 'Good'
+        : totalTimeMs < 120000
+        ? 'Fair'
+        : 'Slow';
 
     const memoryRating =
       this.performance.peakMemoryMB < 100
         ? 'Efficient'
         : this.performance.peakMemoryMB < 200
-          ? 'Moderate'
-          : 'Heavy';
+        ? 'Moderate'
+        : 'Heavy';
 
     return `${timeRating} (${memoryRating} memory usage)`;
   }
@@ -1149,5 +1192,95 @@ export class AgentPresenter implements IAgentPresenter {
     const remainingMs = timeoutMs - currentDuration;
     const remainingSeconds = Math.ceil(remainingMs / 1000);
     this.displayTimeoutWarning(remainingSeconds, operation);
+  }
+
+  /**
+   * Check if this is a simple analysis execution
+   */
+  private isSimpleAnalysisExecution(execution: AgenticExecution): boolean {
+    // Check if the goal or plan indicates this is an analysis task
+    const goalLower = execution.goal.toLowerCase();
+    const isAnalysisGoal =
+      goalLower.includes('what is') ||
+      goalLower.includes('what are') ||
+      goalLower.includes('how many') ||
+      goalLower.includes('which') ||
+      goalLower.includes('find') ||
+      goalLower.includes('show') ||
+      goalLower.includes('list') ||
+      goalLower.includes('largest') ||
+      goalLower.includes('smallest') ||
+      goalLower.includes('analyze') ||
+      goalLower.includes('analysis');
+
+    // Also check if there's only one step and it's an analysis step
+    const singleAnalysisStep =
+      execution.plan.length === 1 &&
+      execution.plan[0].id === 'perform_analysis';
+
+    return isAnalysisGoal && singleAnalysisStep;
+  }
+
+  /**
+   * Display simplified summary for analysis tasks
+   */
+  private displaySimplifiedAnalysisSummary(execution: AgenticExecution): void {
+    console.log(chalk.gray('━'.repeat(60)));
+
+    if (execution.success) {
+      console.log(chalk.green('✅ Analysis Complete'));
+
+      // Try to extract and highlight the answer from the execution results
+      const result = this.extractAnalysisAnswer(execution);
+      if (result) {
+        console.log('\n' + result);
+      }
+    } else {
+      console.log(chalk.red('❌ Analysis Failed'));
+      console.log(
+        chalk.yellow(
+          'Please try refining your query or check the codebase status.'
+        )
+      );
+    }
+
+    console.log(chalk.gray('━'.repeat(60)));
+  }
+
+  /**
+   * Extract the main answer from analysis execution results
+   */
+  private extractAnalysisAnswer(execution: AgenticExecution): string | null {
+    // Look through execution results for content with the answer marker
+    for (const result of execution.executionResults || []) {
+      if (typeof result === 'object' && result !== null) {
+        const resultObj = result as any;
+        if (resultObj.output && typeof resultObj.output === 'string') {
+          const output = resultObj.output;
+
+          // Look for the 🎯 ANSWER: marker
+          const answerMatch = output.match(/🎯 ANSWER:(.*?)(?=\n\n|\n$|$)/s);
+          if (answerMatch) {
+            return chalk.cyan('🎯 ') + chalk.white(answerMatch[1].trim());
+          }
+
+          // Fallback: look for command output that might contain the answer
+          const lines = output.split('\n');
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (
+              trimmed &&
+              !trimmed.startsWith('$') &&
+              !trimmed.startsWith('#') &&
+              !trimmed.includes('━')
+            ) {
+              return chalk.cyan('📊 ') + chalk.white(trimmed);
+            }
+          }
+        }
+      }
+    }
+
+    return null;
   }
 }

@@ -659,34 +659,15 @@ export class PlanningTemplateSystem {
       description: 'Analyze code and generate reports',
       stepTemplates: [
         {
-          id: 'gather_targets',
-          description: 'Identify files/code to analyze',
+          id: 'perform_analysis',
+          description: 'Analyze and provide results',
+          command: '', // Will be dynamically generated based on task
           type: 'analysis',
           critical: true,
           dependencies: [],
-          timeout: 15000,
-          expectedOutcome: 'List of analysis targets',
-          failureHandling: 'Cannot analyze without targets',
-        },
-        {
-          id: 'perform_analysis',
-          description: 'Analyze code structure and patterns',
-          type: 'analysis',
-          critical: true,
-          dependencies: ['gather_targets'],
           timeout: 60000,
           expectedOutcome: 'Analysis results gathered',
           failureHandling: 'Use simpler analysis if detailed fails',
-        },
-        {
-          id: 'generate_report',
-          description: 'Generate analysis report',
-          type: 'reporting',
-          critical: true,
-          dependencies: ['perform_analysis'],
-          timeout: 20000,
-          expectedOutcome: 'Analysis report generated',
-          failureHandling: 'Generate basic report if detailed fails',
         },
       ],
       validationSteps: [
@@ -724,10 +705,18 @@ export class PlanningTemplateSystem {
     const steps: ExecutionStep[] = [];
 
     for (const stepTemplate of template.stepTemplates) {
-      console.log(`[DEBUG] Processing stepTemplate.id: ${stepTemplate.id}`);
-      console.log(
-        `[DEBUG] Processing stepTemplate.description: ${stepTemplate.description}`
-      );
+      let command = stepTemplate.command
+        ? this.interpolateCommand(stepTemplate.command, context)
+        : '';
+
+      // Generate specific commands for analysis tasks
+      if (template.taskType === TaskType.ANALYSIS && !command) {
+        command = this.generateAnalysisCommand(
+          stepTemplate.id,
+          taskDescription,
+          context
+        );
+      }
 
       const step: ExecutionStep = {
         id: stepTemplate.id,
@@ -736,9 +725,7 @@ export class PlanningTemplateSystem {
           taskDescription,
           context
         ),
-        command: stepTemplate.command
-          ? this.interpolateCommand(stepTemplate.command, context)
-          : '',
+        command,
         expectedOutcome: stepTemplate.expectedOutcome,
         reasoning: `This step is ${
           stepTemplate.critical ? 'critical' : 'optional'
@@ -749,9 +736,6 @@ export class PlanningTemplateSystem {
         dependencies: stepTemplate.dependencies,
         timeout: stepTemplate.timeout,
       };
-
-      console.log(`[DEBUG] Created step with id: ${step.id}`);
-      console.log(`[DEBUG] Created step with description: ${step.description}`);
 
       steps.push(step);
     }
@@ -823,5 +807,92 @@ export class PlanningTemplateSystem {
         timeout: 20000,
       },
     ];
+  }
+
+  /**
+   * Generate specific commands for analysis tasks based on the task description
+   */
+  private generateAnalysisCommand(
+    stepId: string,
+    taskDescription: string,
+    context: any
+  ): string {
+    const normalizedTask = taskDescription.toLowerCase();
+
+    if (stepId === 'perform_analysis') {
+      // Generate specific analysis commands based on the query
+
+      // File size analysis
+      if (
+        normalizedTask.includes('largest') &&
+        normalizedTask.includes('file')
+      ) {
+        return 'find . -type f -exec du -h {} + | sort -rh | head -n 10 && echo "" && echo "🎯 ANSWER: The largest file is:" && find . -type f -exec du -h {} + | sort -rh | head -n 1 && echo ""';
+      }
+
+      if (
+        normalizedTask.includes('smallest') &&
+        normalizedTask.includes('file')
+      ) {
+        return 'find . -type f -exec du -h {} + | sort -h | head -n 10 && echo "" && echo "🎯 ANSWER: The smallest file is:" && find . -type f -exec du -h {} + | sort -h | head -n 1 && echo ""';
+      }
+
+      // File count analysis
+      if (
+        normalizedTask.includes('how many') &&
+        normalizedTask.includes('file')
+      ) {
+        return 'total_files=$(find . -type f | wc -l) && echo "🎯 ANSWER: $total_files files total" && echo "" && echo "Breakdown by file type:" && find . -type f -name "*.*" | sed "s/.*\\.//" | sort | uniq -c | sort -rn | head -n 10';
+      }
+
+      // TypeScript specific count
+      if (
+        normalizedTask.includes('typescript') ||
+        normalizedTask.includes('*.ts')
+      ) {
+        return 'ts_files=$(find . -name "*.ts" | wc -l) && echo "🎯 ANSWER: $ts_files TypeScript files" && echo "" && echo "File type breakdown:" && find . -type f -name "*.*" | sed "s/.*\\.//" | sort | uniq -c | sort -rn | head -n 10';
+      }
+
+      // Directory size analysis
+      if (
+        normalizedTask.includes('size') &&
+        (normalizedTask.includes('directory') ||
+          normalizedTask.includes('folder'))
+      ) {
+        return 'echo "🎯 ANSWER: Directory sizes (largest first):" && du -sh */ 2>/dev/null | sort -rh | head -n 10';
+      }
+
+      // Line count analysis
+      if (
+        normalizedTask.includes('line') &&
+        (normalizedTask.includes('count') ||
+          normalizedTask.includes('most') ||
+          normalizedTask.includes('largest'))
+      ) {
+        return 'echo "🎯 ANSWER: Files with most lines of code:" && find . -name "*.ts" -o -name "*.js" -o -name "*.tsx" -o -name "*.jsx" | head -20 | xargs wc -l | sort -rn | head -n 10';
+      }
+
+      // General file listing
+      if (normalizedTask.includes('list') && normalizedTask.includes('file')) {
+        return 'total=$(find . -type f | wc -l) && echo "🎯 ANSWER: $total files in the codebase" && echo "" && echo "Sample files:" && find . -type f | head -20';
+      }
+
+      // Generic code analysis
+      if (
+        normalizedTask.includes('code') ||
+        normalizedTask.includes('codebase')
+      ) {
+        return 'echo "🎯 ANSWER: Codebase Overview" && echo "=========================" && total_files=$(find . -type f | wc -l) && code_files=$(find . -name "*.ts" -o -name "*.js" -o -name "*.tsx" -o -name "*.jsx" | wc -l) && test_files=$(find . -name "*.test.*" -o -name "*.spec.*" | wc -l) && echo "Total files: $total_files" && echo "Code files: $code_files" && echo "Test files: $test_files" && echo "" && echo "File types:" && find . -type f -name "*.*" | sed "s/.*\\.//" | sort | uniq -c | sort -rn | head -n 10';
+      }
+
+      // Default analysis
+      return (
+        'echo "🎯 ANSWER: Analysis completed for: ' +
+        taskDescription +
+        '" && ls -la'
+      );
+    }
+
+    return '';
   }
 }

@@ -162,6 +162,22 @@ export class ServiceFactory {
       });
     });
 
+    // Enhanced Caching Service (depends on caching and configuration)
+    container.registerFactory(
+      'enhancedCaching',
+      (container) => {
+        const {
+          EnhancedCachingService,
+        } = require('../../dist/services/EnhancedCachingService');
+        const caching = container.resolve('caching');
+        const config = container.resolve('configuration');
+        return new EnhancedCachingService(caching, config);
+      },
+      {
+        dependencies: ['caching', 'configuration'],
+      }
+    );
+
     // Performance Monitor Service (no dependencies - foundational)
     container.registerFactory('performanceMonitor', (container) => {
       const {
@@ -254,6 +270,89 @@ export class ServiceFactory {
       return new CommandRegistrar();
     });
 
+    // Command Registry Service (no dependencies - utility service)
+    container.registerFactory('commandRegistry', (container) => {
+      const {
+        CommandRegistry,
+      } = require('../../dist/services/CommandRegistry');
+      return new CommandRegistry();
+    });
+
+    // Command Intelligence Service (depends on commandRegistry, context, memory, configuration)
+    container.registerFactory(
+      'commandIntelligence',
+      (container) => {
+        const {
+          CommandIntelligenceService,
+        } = require('../../dist/services/CommandIntelligenceService');
+        const commandRegistry = container.resolve('commandRegistry');
+        const context = container.resolve('context');
+        const memory = container.resolve('memory');
+        const config = container.resolve('configuration');
+        return new CommandIntelligenceService(
+          commandRegistry,
+          context,
+          memory,
+          config
+        );
+      },
+      {
+        dependencies: ['commandRegistry', 'context', 'memory', 'configuration'],
+      }
+    );
+
+    // Interactive CLI Service (depends on commandIntelligence, context, command, configuration, commandRegistry)
+    container.registerFactory(
+      'interactiveCLI',
+      (container) => {
+        const {
+          InteractiveCLIService,
+        } = require('../../dist/services/InteractiveCLIService');
+        const commandIntelligence = container.resolve('commandIntelligence');
+        const context = container.resolve('context');
+        const command = container.resolve('command');
+        const config = container.resolve('configuration');
+        const commandRegistry = container.resolve('commandRegistry');
+        return new InteractiveCLIService(
+          commandIntelligence,
+          context,
+          command,
+          config,
+          commandRegistry
+        );
+      },
+      {
+        dependencies: [
+          'commandIntelligence',
+          'context',
+          'command',
+          'configuration',
+          'commandRegistry',
+        ],
+      }
+    );
+
+    // Analytics Service (depends on memory, performanceMonitor, and optionally enhancedCaching)
+    container.registerFactory(
+      'analytics',
+      (container) => {
+        const {
+          AnalyticsService,
+        } = require('../../dist/services/AnalyticsService');
+        const memory = container.resolve('memory');
+        const performanceMonitor = container.resolve('performanceMonitor');
+        const enhancedCaching = container.resolve('enhancedCaching');
+        return new AnalyticsService(
+          memory,
+          performanceMonitor,
+          enhancedCaching
+        );
+      },
+      {
+        dependencies: ['memory', 'performanceMonitor', 'enhancedCaching'],
+      }
+    );
+
     // Command Factory V2 (depends on all service interfaces)
     container.registerFactory(
       'commandFactory',
@@ -269,6 +368,8 @@ export class ServiceFactory {
         const agentExecutionEngine = container.resolve('agentExecutionEngine');
         const agentPresenter = container.resolve('agentPresenter');
         const resilienceService = container.resolve('resilienceService');
+        const enhancedCaching = container.resolve('enhancedCaching');
+        const analytics = container.resolve('analytics');
         return new CommandFactoryV2(
           ai,
           memory,
@@ -277,7 +378,9 @@ export class ServiceFactory {
           config,
           agentExecutionEngine,
           agentPresenter,
-          resilienceService
+          resilienceService,
+          enhancedCaching,
+          analytics
         );
       },
       {
@@ -290,6 +393,8 @@ export class ServiceFactory {
           'agentExecutionEngine',
           'agentPresenter',
           'resilienceService',
+          'enhancedCaching',
+          'analytics',
         ],
       }
     );

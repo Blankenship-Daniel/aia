@@ -75,6 +75,10 @@ export default class CLIApplication {
         this.container.resolve<IConfigurationService>('configuration');
       this.services.command =
         this.container.resolve<ICommandService>('command');
+      this.services.interactiveCLI = this.container.resolve('interactiveCLI');
+
+      // Use commandRegistry from the container instead of creating a new one
+      this.commandRegistry = this.container.resolve('commandRegistry');
 
       console.log(chalk.green('✅ Services initialized successfully'));
     } catch (error: any) {
@@ -207,6 +211,37 @@ export default class CLIApplication {
       case 'config':
         cmd.option('--global', 'Use global configuration');
         cmd.option('--reset', 'Reset configuration to defaults');
+        break;
+
+      case 'cache':
+        cmd.option('--stats', 'Show cache statistics');
+        cmd.option('--performance', 'Display performance analytics');
+        cmd.option('--perf', 'Alias for performance');
+        cmd.option('--warm', 'Warm cache with suggested keys');
+        cmd.option('--cleanup', 'Clean up low-value cache entries');
+        cmd.option('--clean', 'Alias for cleanup');
+        cmd.option('--analytics', 'Show comprehensive analytics');
+        cmd.option('--suggest', 'Show optimization suggestions');
+        cmd.option('--clear', 'Clear entire cache');
+        cmd.option('--strategy', 'Manage cache strategies');
+        cmd.option('--auto', 'Auto-execute suggestions');
+        cmd.option('--confirm', 'Confirm destructive operations');
+        break;
+
+      case 'analytics':
+        cmd.option('--usage', 'Show usage analytics');
+        cmd.option('--performance', 'Display performance analytics');
+        cmd.option('--perf', 'Alias for performance');
+        cmd.option('--productivity', 'Generate productivity report');
+        cmd.option(
+          '--trends <timeRange>',
+          'Show usage trends (day/week/month)'
+        );
+        cmd.option('--recommendations', 'Show optimization recommendations');
+        cmd.option('--rec', 'Alias for recommendations');
+        cmd.option('--export <format>', 'Export analytics data (json/csv)');
+        cmd.option('--clear', 'Clear analytics data');
+        cmd.option('--confirm', 'Confirm destructive operations');
         break;
     }
   }
@@ -344,6 +379,14 @@ export default class CLIApplication {
     try {
       await this.initialize();
 
+      // Check if no arguments provided - start interactive mode
+      const args = argv || process.argv;
+      if (args.length <= 2) {
+        // No command provided, start interactive mode
+        await this.startInteractiveMode();
+        return;
+      }
+
       if (argv) {
         await this.program.parseAsync(argv);
       } else {
@@ -363,6 +406,9 @@ export default class CLIApplication {
       if (error.code === 'commander.unknownCommand') {
         console.error(chalk.red('Unknown command:'), error.message);
         console.log(chalk.yellow('Run "aia --help" to see available commands'));
+        console.log(
+          chalk.blue('Or run "aia" without arguments for interactive mode')
+        );
         await this.shutdown();
         process.exit(1);
       }
@@ -374,6 +420,26 @@ export default class CLIApplication {
       }
 
       await this.shutdown();
+      process.exit(1);
+    }
+  }
+
+  /**
+   * Start interactive mode
+   */
+  private async startInteractiveMode(): Promise<void> {
+    try {
+      if (this.services.interactiveCLI) {
+        await this.services.interactiveCLI.startInteractiveMode();
+      } else {
+        console.error(chalk.red('Interactive CLI service not available'));
+        process.exit(1);
+      }
+    } catch (error: any) {
+      console.error(
+        chalk.red('Failed to start interactive mode:'),
+        error.message
+      );
       process.exit(1);
     }
   }

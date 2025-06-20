@@ -8,6 +8,8 @@ import { IConfigurationService } from '../interfaces/IConfigurationService';
 import { IAgentExecutionEngine } from '../interfaces/IAgentExecutionEngine';
 import { IAgentPresenter } from '../interfaces/IAgentPresenter';
 import { IResilienceService } from '../interfaces/IResilienceService';
+import { IAnalyticsService } from '../interfaces/IAnalyticsService';
+import { IEnhancedCachingService } from '../interfaces/IEnhancedCachingService';
 import { CommandRegistrar } from '../services/CommandRegistrar';
 
 // Command Imports
@@ -19,6 +21,8 @@ import { ConfigCommand } from './ConfigCommand';
 import { AgentCommandRefactored } from './AgentCommandRefactored';
 import { IndexCommand } from './IndexCommand';
 import { InitCommand } from './InitCommand';
+import { CacheCommand } from './CacheCommand';
+import { AnalyticsCommand } from './AnalyticsCommand';
 
 /**
  * CommandFactoryV2 - SOLID-Compliant Command Factory
@@ -54,7 +58,9 @@ export class CommandFactoryV2 {
     private readonly configurationService: IConfigurationService,
     private readonly agentExecutionEngine: IAgentExecutionEngine,
     private readonly agentPresenter: IAgentPresenter,
-    private readonly resilienceService: IResilienceService
+    private readonly resilienceService: IResilienceService,
+    private readonly enhancedCachingService?: IEnhancedCachingService, // Optional for backward compatibility
+    private readonly analyticsService?: IAnalyticsService // Optional for Phase 2 features
   ) {
     this.registrar = new CommandRegistrar();
     this.setupCoreCommands();
@@ -129,6 +135,25 @@ export class CommandFactoryV2 {
 
     // Init Command - Project initialization
     this.registrar.register('init', ['i'], () => new InitCommand());
+
+    // Cache Command - Advanced cache management (only if service is available)
+    if (this.enhancedCachingService) {
+      this.registrar.register(
+        'cache',
+        ['caching'],
+        () =>
+          new CacheCommand(this.enhancedCachingService!, this.contextService)
+      );
+    }
+
+    // Analytics Command - Usage analytics and insights (only if service is available)
+    if (this.analyticsService) {
+      this.registrar.register(
+        'analytics',
+        ['insights', 'metrics'],
+        () => new AnalyticsCommand(this.analyticsService!, this.contextService)
+      );
+    }
   }
 
   /**
@@ -203,6 +228,7 @@ export class CommandFactoryV2 {
     const agentExecutionEngine = services.agentExecutionEngine || {};
     const agentPresenter = services.agentPresenter || {};
     const resilienceService = services.resilienceService || {};
+    const enhancedCachingService = services.enhancedCachingService;
 
     const factory = new CommandFactoryV2(
       services.aiService,
@@ -212,7 +238,8 @@ export class CommandFactoryV2 {
       services.configurationService,
       agentExecutionEngine,
       agentPresenter,
-      resilienceService
+      resilienceService,
+      enhancedCachingService
     );
 
     let registeredCount = 0;
@@ -238,6 +265,7 @@ export class CommandFactoryV2 {
     const agentExecutionEngine = services.agentExecutionEngine || {};
     const agentPresenter = services.agentPresenter || {};
     const resilienceService = services.resilienceService || {};
+    const enhancedCachingService = services.enhancedCachingService;
 
     const factory = new CommandFactoryV2(
       services.aiService,
@@ -247,7 +275,8 @@ export class CommandFactoryV2 {
       services.configurationService,
       agentExecutionEngine,
       agentPresenter,
-      resilienceService
+      resilienceService,
+      enhancedCachingService
     );
 
     const commands = [];

@@ -225,7 +225,7 @@ class CommandHandler {
         const duration = Date.now() - startTime;
         const result: CommandResult = {
           success: code === 0,
-          code: code || -1,
+          code: code ?? -1,
           stdout,
           stderr,
           duration,

@@ -64,6 +64,7 @@ describe('AgentCommandRefactored - SOLID Compliance', () => {
         succeed: jest.fn(),
         fail: jest.fn(),
         stop: jest.fn(),
+        updateProgress: jest.fn(),
       })),
       showIteration: jest.fn(),
       displayStepOutput: jest.fn(),
@@ -73,6 +74,16 @@ describe('AgentCommandRefactored - SOLID Compliance', () => {
       displaySuccess: jest.fn(),
       askConfirmation: jest.fn(),
       formatExecutionSummary: jest.fn(),
+      // Phase 1 UX enhancements
+      displayCircuitBreakerStatus: jest.fn(),
+      displayRetryAttempt: jest.fn(),
+      displayTimeoutWarning: jest.fn(),
+      displayEnhancedError: jest.fn(),
+      displayEnhancedErrorFromCommandExecution: jest.fn(),
+      displayRetryInProgress: jest.fn(),
+      displayTimeoutWarningForOperation: jest.fn(),
+      displayPerformanceComparison: jest.fn(),
+      displayResilienceStatus: jest.fn(),
     };
 
     // Type-safe mocks for generic methods
@@ -127,6 +138,8 @@ describe('AgentCommandRefactored - SOLID Compliance', () => {
       compressMemory: jest.fn(),
       getRecentCommands: jest.fn(),
       searchMemory: jest.fn(),
+      updatePreferences: jest.fn(),
+      getPreferences: jest.fn(),
     };
 
     // Create AgentCommand with mocked dependencies
@@ -193,9 +206,12 @@ describe('AgentCommandRefactored - SOLID Compliance', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Please provide a goal to achieve');
-      expect(mockPresenter.displayError).toHaveBeenCalledWith(
-        'Please provide a goal to achieve'
-      );
+      expect(
+        mockPresenter.displayEnhancedErrorFromCommandExecution
+      ).toHaveBeenCalledWith(expect.any(Error), 'agent', [], {
+        phase: 'validation',
+        context: 'goal-required',
+      });
     });
   });
 
@@ -230,9 +246,12 @@ describe('AgentCommandRefactored - SOLID Compliance', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Planning failed');
-      expect(mockPresenter.displayError).toHaveBeenCalledWith(
-        'Planning failed'
-      );
+      expect(
+        mockPresenter.displayEnhancedErrorFromCommandExecution
+      ).toHaveBeenCalledWith(expect.any(Error), 'agent', ['test goal'], {
+        phase: 'planning',
+        context: 'plan-generation',
+      });
     });
 
     it('should handle timeout errors', async () => {
@@ -244,9 +263,12 @@ describe('AgentCommandRefactored - SOLID Compliance', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Operation timed out');
-      expect(mockPresenter.displayError).toHaveBeenCalledWith(
-        'Operation timed out'
-      );
+      expect(
+        mockPresenter.displayEnhancedErrorFromCommandExecution
+      ).toHaveBeenCalledWith(expect.any(Error), 'agent', ['test goal'], {
+        phase: 'execution',
+        context: 'main-execution-flow',
+      });
     });
   });
 
@@ -260,10 +282,9 @@ describe('AgentCommandRefactored - SOLID Compliance', () => {
         plan: [mockExecutionStep],
       });
       mockPresenter.askConfirmation.mockResolvedValue(true);
-      mockExecutionEngine.executePlan.mockResolvedValue({
+      mockExecutionEngine.executeStep.mockResolvedValue({
         success: true,
-        results: [{ success: true, output: 'Success' }],
-        learnings: [],
+        output: 'Success',
       });
       mockMemoryService.storeAgenticExecution.mockResolvedValue();
       mockPresenter.formatExecutionSummary.mockReturnValue(
@@ -291,7 +312,7 @@ describe('AgentCommandRefactored - SOLID Compliance', () => {
       expect(mockMemoryService.getAgenticHistory).toHaveBeenCalled();
       expect(mockExecutionEngine.planExecution).toHaveBeenCalled();
       expect(mockPresenter.displayExecutionPlan).toHaveBeenCalled();
-      expect(mockExecutionEngine.executePlan).toHaveBeenCalled();
+      expect(mockExecutionEngine.executeStep).toHaveBeenCalled();
       expect(mockMemoryService.storeAgenticExecution).toHaveBeenCalled();
       expect(mockPresenter.displayExecutionSummary).toHaveBeenCalled();
     });

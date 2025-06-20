@@ -531,6 +531,39 @@ export interface StepResult {
   timestamp: string;
 }
 
+// Analytics types for Phase 2 UX Enhancements
+export interface CommandUsage {
+  command: string;
+  count: number;
+  averageTime: number;
+  successRate: number;
+  lastUsed: Date;
+}
+
+export interface TimeDistribution {
+  hourly: Record<string, number>;
+  daily: Record<string, number>;
+  weekly: Record<string, number>;
+  peakHours: number[];
+  mostProductiveTime: string;
+}
+
+export interface FeatureUsage {
+  feature: string;
+  usageCount: number;
+  adoptionDate: Date;
+  frequency: 'low' | 'medium' | 'high';
+  category: string;
+}
+
+export interface ErrorPattern {
+  errorType: string;
+  frequency: number;
+  commands: string[];
+  commonCauses: string[];
+  lastOccurrence: Date;
+}
+
 // SOLID-compliant Memory Service Interfaces
 export { IMemoryPersistence } from '../interfaces/IMemoryPersistence';
 export { IConversationMemory } from '../interfaces/IConversationMemory';

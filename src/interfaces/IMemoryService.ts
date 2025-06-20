@@ -124,6 +124,16 @@ export interface IMemoryService {
   storeAgenticExecution(execution: any): Promise<void>;
 
   /**
+   * Update user preferences
+   */
+  updatePreferences(preferences: Record<string, unknown>): Promise<void>;
+
+  /**
+   * Get user preferences
+   */
+  getPreferences(): Promise<Record<string, unknown>>;
+
+  /**
    * Semantic search across memory
    */
   searchMemory(

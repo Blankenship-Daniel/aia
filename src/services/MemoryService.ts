@@ -670,6 +670,21 @@ export class MemoryService implements IMemoryService {
   }
 
   /**
+   * Update user preferences
+   */
+  async updatePreferences(preferences: Record<string, unknown>): Promise<void> {
+    this.memory.preferences = { ...this.memory.preferences, ...preferences };
+    await this.saveMemory();
+  }
+
+  /**
+   * Get user preferences
+   */
+  async getPreferences(): Promise<Record<string, unknown>> {
+    return this.memory.preferences || {};
+  }
+
+  /**
    * Calculate semantic similarity between two text strings
    */
   private calculateSemanticSimilarity(text1: string, text2: string): number {

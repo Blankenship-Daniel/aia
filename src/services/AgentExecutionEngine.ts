@@ -7,6 +7,7 @@ import { IContextService } from '../interfaces/IContextService';
 import { ICommandService } from '../interfaces/ICommandService';
 import { IAgentExecutionEngine } from '../interfaces/IAgentExecutionEngine';
 import { TaskComplexityAnalyzer } from './TaskComplexityAnalyzer';
+import { EnhancedTaskComplexityAnalyzer } from './EnhancedTaskComplexityAnalyzer';
 import { PlanningTemplateSystem } from './PlanningTemplateSystem';
 import { OutcomeValidationSystem } from './OutcomeValidationSystem';
 import {
@@ -21,6 +22,7 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
   private readonly STEP_TIMEOUT_MS = 60000;
 
   private taskAnalyzer: TaskComplexityAnalyzer;
+  private enhancedTaskAnalyzer?: EnhancedTaskComplexityAnalyzer;
   private planningSystem: PlanningTemplateSystem;
   private validationSystem: OutcomeValidationSystem;
   private currentFilePath?: string;
@@ -30,10 +32,24 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
     private contextService: IContextService,
     private commandService: ICommandService
   ) {
-    // Initialize the new analysis and planning systems
+    // Initialize the analysis and planning systems
     this.taskAnalyzer = new TaskComplexityAnalyzer();
     this.planningSystem = new PlanningTemplateSystem();
     this.validationSystem = new OutcomeValidationSystem();
+
+    // Initialize the enhanced analyzer if AI services are available
+    try {
+      this.enhancedTaskAnalyzer = new EnhancedTaskComplexityAnalyzer(
+        this.aiService,
+        this.contextService
+      );
+      console.log('✅ AI-powered task classification enabled');
+    } catch (error) {
+      console.log(
+        '⚠️  AI-powered task classification not available, using programmatic fallback'
+      );
+      this.enhancedTaskAnalyzer = undefined;
+    }
   }
 
   async planExecution(
@@ -48,8 +64,22 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
     try {
       console.log('🔍 Analyzing task complexity and requirements...');
 
-      // Step 1: Analyze the task to understand its complexity and requirements
-      const taskAnalysis = this.taskAnalyzer.analyzeTask(goal);
+      // Step 1: Analyze the task using enhanced AI-powered classification if available
+      let taskAnalysis;
+      if (this.enhancedTaskAnalyzer) {
+        console.log('🧠 Using AI-powered task classification...');
+        try {
+          taskAnalysis = await this.enhancedTaskAnalyzer.analyzeTask(goal);
+        } catch (error) {
+          console.log(
+            '⚠️  AI classification failed, falling back to programmatic analysis'
+          );
+          taskAnalysis = this.taskAnalyzer.analyzeTask(goal);
+        }
+      } else {
+        console.log('📊 Using programmatic task classification...');
+        taskAnalysis = this.taskAnalyzer.analyzeTask(goal);
+      }
 
       console.log(`📊 Task Analysis:`);
       console.log(`   Type: ${taskAnalysis.type}`);

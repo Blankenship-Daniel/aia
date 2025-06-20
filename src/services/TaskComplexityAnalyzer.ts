@@ -106,16 +106,70 @@ export class TaskComplexityAnalyzer {
   }
 
   private determineTaskType(task: string): TaskType {
-    // Documentation tasks
+    // Analysis tasks (check first for markdown summarization)
+    if (
+      this.matchesPatterns(task, [
+        'analyze',
+        'review',
+        'examine',
+        'check',
+        'audit',
+        'report',
+        'summary',
+        'summarize',
+        'find',
+        'what',
+        'which',
+        'where',
+        'how many',
+        'how much',
+        'largest',
+        'smallest',
+        'biggest',
+        'size',
+        'count',
+        'list',
+        'show',
+        'display',
+        'search',
+        'locate',
+      ]) ||
+      // Specifically handle markdown summary tasks as analysis
+      this.matchesPatterns(task, [
+        'create a markdown summarizing',
+        'markdown summarizing',
+        'summarizing the contents',
+        'markdown summary',
+        'create markdown',
+        'generate markdown',
+      ])
+    ) {
+      return TaskType.ANALYSIS;
+    }
+
+    // Documentation tasks (JSDoc, inline comments)
     if (
       this.matchesPatterns(task, [
         'add jsdoc',
+        'jsdoc',
         'document',
         'add comments',
         'documentation',
         'generate docs',
         'create readme',
         'add docstring',
+        'class documentation',
+        'add inline comments',
+        'document all',
+        'generate jsdoc',
+        'add documentation',
+      ]) &&
+      // Exclude markdown summarization tasks
+      !this.matchesPatterns(task, [
+        'create a markdown summarizing',
+        'markdown summarizing',
+        'summarizing the contents',
+        'markdown summary',
       ])
     ) {
       return TaskType.DOCUMENTATION;
@@ -157,8 +211,11 @@ export class TaskComplexityAnalyzer {
       this.matchesPatterns(task, [
         'test',
         'unit test',
+        'unit tests',
         'add test',
         'generate test',
+        'generate tests',
+        'generate unit tests',
         'test coverage',
         'spec',
         'jest',
@@ -187,6 +244,9 @@ export class TaskComplexityAnalyzer {
     if (
       this.matchesPatterns(task, [
         'create file',
+        'create a file',
+        'create new file',
+        'create a new file',
         'delete file',
         'move file',
         'copy file',
@@ -196,38 +256,6 @@ export class TaskComplexityAnalyzer {
       ])
     ) {
       return TaskType.FILE_OPERATION;
-    }
-
-    // Analysis tasks
-    if (
-      this.matchesPatterns(task, [
-        'analyze',
-        'review',
-        'examine',
-        'check',
-        'audit',
-        'report',
-        'summary',
-        'summarize',
-        'find',
-        'what',
-        'which',
-        'where',
-        'how many',
-        'how much',
-        'largest',
-        'smallest',
-        'biggest',
-        'size',
-        'count',
-        'list',
-        'show',
-        'display',
-        'search',
-        'locate',
-      ])
-    ) {
-      return TaskType.ANALYSIS;
     }
 
     // Configuration tasks

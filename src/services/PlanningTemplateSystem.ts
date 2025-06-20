@@ -913,6 +913,27 @@ export class PlanningTemplateSystem {
         return 'echo "🎯 ANSWER: File Summary for this directory" && echo "=================================" && total_files=$(find . -maxdepth 1 -type f | wc -l) && total_dirs=$(find . -maxdepth 1 -type d | grep -v "^\\.$" | wc -l) && echo "📁 Total files: $total_files" && echo "📂 Total directories: $total_dirs" && echo "" && echo "📋 File types:" && find . -maxdepth 1 -type f -name "*.*" | sed "s/.*\\.//" | sort | uniq -c | sort -rn | head -n 10 && echo "" && echo "🗂️  Main files:" && find . -maxdepth 1 -type f | head -15';
       }
 
+      // TypeScript class documentation generation
+      if (
+        normalizedTask.includes('markdown') &&
+        (normalizedTask.includes('typescript') ||
+          normalizedTask.includes('class')) &&
+        (normalizedTask.includes('summariz') ||
+          normalizedTask.includes('contents'))
+      ) {
+        return `echo "🎯 GENERATING: TypeScript Class Documentation" && echo "# TypeScript Classes Summary" > typescript-classes.md && echo "" >> typescript-classes.md && echo "Generated on: \$(date)" >> typescript-classes.md && echo "" >> typescript-classes.md && echo "## Classes Found" >> typescript-classes.md && echo "" >> typescript-classes.md && find . -name "*.ts" -not -path "./node_modules/*" -not -path "./dist/*" -not -name "*.test.ts" -not -name "*.spec.ts" | while read file; do echo "### \$(basename "\$file" .ts)" >> typescript-classes.md; echo "" >> typescript-classes.md; echo "**File:** \`\$file\`" >> typescript-classes.md; echo "" >> typescript-classes.md; grep -n "^export class\\|^class\\|^abstract class\\|^export abstract class" "\$file" 2>/dev/null | head -5 | while IFS=: read -r line_num class_line; do echo "- **Line \$line_num:** \`\$class_line\`" >> typescript-classes.md; done; echo "" >> typescript-classes.md; grep -n "constructor\\|public\\|private\\|protected" "\$file" 2>/dev/null | head -3 | while IFS=: read -r line_num method_line; do echo "  - \`\$method_line\`" >> typescript-classes.md; done; echo "" >> typescript-classes.md; done && echo "✅ Documentation generated: typescript-classes.md" && echo "" && echo "📊 Summary:" && echo "- Classes found: \$(find . -name "*.ts" -not -path "./node_modules/*" -not -path "./dist/*" -not -name "*.test.ts" -not -name "*.spec.ts" -exec grep -l "^export class\\|^class\\|^abstract class\\|^export abstract class" {} \\; | wc -l)" && echo "- Total TypeScript files: \$(find . -name "*.ts" -not -path "./node_modules/*" -not -path "./dist/*" | wc -l)" && echo "- Output file: typescript-classes.md"`;
+      }
+
+      // Class analysis (more general)
+      if (
+        normalizedTask.includes('class') &&
+        (normalizedTask.includes('typescript') ||
+          normalizedTask.includes('ts')) &&
+        (normalizedTask.includes('analyze') || normalizedTask.includes('list'))
+      ) {
+        return 'echo "🎯 ANSWER: TypeScript Classes Analysis" && echo "=====================================" && echo "" && echo "📁 TypeScript files with classes:" && find . -name "*.ts" -not -path "./node_modules/*" -not -path "./dist/*" -not -name "*.test.ts" -not -name "*.spec.ts" -exec grep -l "^export class\\|^class\\|^abstract class\\|^export abstract class" {} \\; && echo "" && echo "🔍 Class definitions found:" && find . -name "*.ts" -not -path "./node_modules/*" -not -path "./dist/*" -not -name "*.test.ts" -not -name "*.spec.ts" -exec grep -H "^export class\\|^class\\|^abstract class\\|^export abstract class" {} \\; && echo "" && echo "📊 Statistics:" && echo "- Files with classes: $(find . -name "*.ts" -not -path "./node_modules/*" -not -path "./dist/*" -not -name "*.test.ts" -not -name "*.spec.ts" -exec grep -l "^export class\\|^class\\|^abstract class\\|^export abstract class" {} \\; | wc -l)" && echo "- Total class definitions: $(find . -name "*.ts" -not -path "./node_modules/*" -not -path "./dist/*" -not -name "*.test.ts" -not -name "*.spec.ts" -exec grep "^export class\\|^class\\|^abstract class\\|^export abstract class" {} \\; | wc -l)"';
+      }
+
       // Line count analysis
       if (
         normalizedTask.includes('line') &&

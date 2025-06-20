@@ -103,13 +103,44 @@ export class AIService implements IAIService {
     // Get configuration from the configuration service
     const config = this.configService.getConfiguration();
 
+    // Only read API keys from environment variables for security
+    const envOpenAIKey = process.env.OPENAI_API_KEY;
+    const envAnthropicKey = process.env.ANTHROPIC_API_KEY;
+
     // Initialize provider using factory pattern
-    if (config.openaiApiKey || config.anthropicApiKey) {
+    if (envOpenAIKey || envAnthropicKey) {
       try {
+        // Determine provider based on preferredProvider or infer from model
+        let provider = config.preferredProvider || 'openai';
+        if (!config.preferredProvider) {
+          // Infer provider from model name if not explicitly set
+          provider = this.inferProviderFromModel(
+            config.preferredModel || 'gpt-3.5-turbo'
+          );
+        }
+
+        // Select appropriate API key based on provider
+        let apiKey = '';
+        if (provider === 'anthropic' && envAnthropicKey) {
+          apiKey = envAnthropicKey;
+        } else if (provider === 'openai' && envOpenAIKey) {
+          apiKey = envOpenAIKey;
+        } else {
+          // Fallback: use whichever key is available
+          apiKey = envAnthropicKey || envOpenAIKey || '';
+          // Update provider to match available key
+          if (envAnthropicKey && !envOpenAIKey) {
+            provider = 'anthropic';
+          } else if (envOpenAIKey && !envAnthropicKey) {
+            provider = 'openai';
+          }
+        }
+
         const providerConfig: ProviderConfig = {
-          provider: config.preferredProvider || 'openai',
-          apiKey: config.openaiApiKey || config.anthropicApiKey || '',
-          model: config.preferredModel || 'gpt-3.5-turbo',
+          provider,
+          apiKey,
+          model:
+            config.preferredModel || this.getDefaultModelForProvider(provider),
         };
 
         this.provider = AIProviderFactory.create(providerConfig);
@@ -195,7 +226,8 @@ export class AIService implements IAIService {
         };
       }
     } catch (error) {
-      console.error('AI API Error:', error);
+      // Don't log API errors to console - let the caller handle them gracefully
+      // This provides a cleaner user experience when AI services are used for enhancement
 
       // For debugging purposes, return a simulated plan response when API fails
       if (prompt.includes('execution plan') && prompt.includes('JSON')) {
@@ -211,14 +243,8 @@ export class AIService implements IAIService {
           },
         };
       } else {
-        response = {
-          content: `Error querying AI: ${(error as Error).message}`,
-          model,
-          metadata: {
-            timestamp: new Date().toISOString(),
-            error: true,
-          },
-        };
+        // For non-planning queries, throw the error so caller can handle gracefully
+        throw error;
       }
     }
 
@@ -461,6 +487,44 @@ Please provide helpful, accurate responses based on the user's request and the p
           "timeout": 5000
         }
       ]`;
+    }
+  }
+
+  /**
+   * Infer the AI provider from the model name.
+   * @param model Model name to analyze
+   * @returns Provider name ('openai', 'anthropic', 'gemini')
+   */
+  private inferProviderFromModel(model: string): string {
+    const modelLower = model.toLowerCase();
+
+    if (modelLower.includes('claude') || modelLower.includes('anthropic')) {
+      return 'anthropic';
+    } else if (modelLower.includes('gpt') || modelLower.includes('openai')) {
+      return 'openai';
+    } else if (modelLower.includes('gemini') || modelLower.includes('google')) {
+      return 'gemini';
+    }
+
+    // Default to openai for unknown models
+    return 'openai';
+  }
+
+  /**
+   * Get the default model for a given provider.
+   * @param provider Provider name
+   * @returns Default model name
+   */
+  private getDefaultModelForProvider(provider: string): string {
+    switch (provider.toLowerCase()) {
+      case 'anthropic':
+        return 'claude-3-5-sonnet-20241022';
+      case 'openai':
+        return 'gpt-3.5-turbo';
+      case 'gemini':
+        return 'gemini-pro';
+      default:
+        return 'gpt-3.5-turbo';
     }
   }
 }

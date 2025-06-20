@@ -162,26 +162,6 @@ export class ConfigCommand implements ICommand {
           default: 'gpt-4',
         },
         {
-          type: 'input',
-          name: 'openaiApiKey',
-          message: 'Enter your OpenAI API key (optional):',
-          validate: (input: string) => {
-            if (!input.trim()) return true; // Optional
-            if (input.startsWith('sk-') && input.length > 20) return true;
-            return 'Please enter a valid OpenAI API key (starts with sk-) or leave empty';
-          },
-        },
-        {
-          type: 'input',
-          name: 'anthropicApiKey',
-          message: 'Enter your Anthropic API key (optional):',
-          validate: (input: string) => {
-            if (!input.trim()) return true; // Optional
-            if (input.startsWith('sk-ant-') && input.length > 20) return true;
-            return 'Please enter a valid Anthropic API key (starts with sk-ant-) or leave empty';
-          },
-        },
-        {
           type: 'confirm',
           name: 'autoExecute',
           message:
@@ -267,6 +247,13 @@ export class ConfigCommand implements ICommand {
         }
       }
 
+      // Infer and set the preferred provider based on the selected model
+      if (regularSettings.preferredModel) {
+        regularSettings.preferredProvider = this.inferProviderFromModel(
+          regularSettings.preferredModel
+        );
+      }
+
       // Save regular configuration settings
       for (const [key, value] of Object.entries(regularSettings)) {
         await this.configurationService.setSetting(
@@ -291,32 +278,40 @@ export class ConfigCommand implements ICommand {
       console.log(chalk.green('\n✓ Configuration saved successfully!'));
 
       // Show summary
-      const hasOpenAI = Boolean(answers.openaiApiKey);
-      const hasAnthropic = Boolean(answers.anthropicApiKey);
-
       console.log(chalk.cyan('\nConfiguration Summary:'));
       console.log(`  Preferred Model: ${answers.preferredModel}`);
-      console.log(
-        `  OpenAI API: ${hasOpenAI ? '✓ Configured' : '✗ Not configured'}`
-      );
-      console.log(
-        `  Anthropic API: ${hasAnthropic ? '✓ Configured' : '✗ Not configured'}`
-      );
+      console.log(`  Preferred Provider: ${regularSettings.preferredProvider}`);
       console.log(
         `  Auto Execute: ${answers.autoExecute ? 'Enabled' : 'Disabled'}`
+      );
+
+      // Check environment variables for API keys
+      const hasOpenAI = Boolean(process.env.OPENAI_API_KEY);
+      const hasAnthropic = Boolean(process.env.ANTHROPIC_API_KEY);
+
+      console.log(chalk.cyan('\nAPI Key Status (from environment variables):'));
+      console.log(
+        `  OpenAI API: ${
+          hasOpenAI ? '✓ Found OPENAI_API_KEY' : '✗ OPENAI_API_KEY not set'
+        }`
+      );
+      console.log(
+        `  Anthropic API: ${
+          hasAnthropic
+            ? '✓ Found ANTHROPIC_API_KEY'
+            : '✗ ANTHROPIC_API_KEY not set'
+        }`
       );
 
       if (!hasOpenAI && !hasAnthropic) {
         console.log(
           chalk.yellow(
-            '\n⚠️  No API keys configured. AI features will not work.'
+            '\n⚠️  No API keys found in environment variables. AI features will not work.'
           )
         );
-        console.log(
-          chalk.gray(
-            'You can add them later with: aia config --set openaiApiKey=<key>'
-          )
-        );
+        console.log(chalk.gray('Set your API keys as environment variables:'));
+        console.log(chalk.gray('  export OPENAI_API_KEY=sk-...'));
+        console.log(chalk.gray('  export ANTHROPIC_API_KEY=sk-ant-...'));
       }
 
       return {
@@ -421,5 +416,25 @@ export class ConfigCommand implements ICommand {
     }
 
     return help;
+  }
+
+  /**
+   * Infer the AI provider from the model name.
+   * @param model Model name to analyze
+   * @returns Provider name ('openai', 'anthropic', 'gemini')
+   */
+  private inferProviderFromModel(model: string): string {
+    const modelLower = model.toLowerCase();
+
+    if (modelLower.includes('claude') || modelLower.includes('anthropic')) {
+      return 'anthropic';
+    } else if (modelLower.includes('gpt') || modelLower.includes('openai')) {
+      return 'openai';
+    } else if (modelLower.includes('gemini') || modelLower.includes('google')) {
+      return 'gemini';
+    }
+
+    // Default to openai for unknown models
+    return 'openai';
   }
 }

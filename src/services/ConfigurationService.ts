@@ -63,8 +63,8 @@ export class ConfigurationService implements IConfigurationService {
 
   constructor() {
     this.config = this.getDefaultConfiguration();
-    this.configPath = path.join(os.homedir(), '.aia', 'config.json');
-    this.backupPath = path.join(os.homedir(), '.aia', 'backups');
+    this.configPath = path.join(process.cwd(), '.aia', 'config.json');
+    this.backupPath = path.join(process.cwd(), '.aia', 'backups');
     this.watchers = [];
     this.schema = this.getSchema();
   }
@@ -112,14 +112,6 @@ export class ConfigurationService implements IConfigurationService {
       if (await fs.pathExists(this.configPath)) {
         const configData = await fs.readJson(this.configPath);
         config = { ...config, ...configData };
-      }
-
-      // Environment variables take precedence over config file
-      if (process.env.OPENAI_API_KEY) {
-        config.openaiApiKey = process.env.OPENAI_API_KEY;
-      }
-      if (process.env.ANTHROPIC_API_KEY) {
-        config.anthropicApiKey = process.env.ANTHROPIC_API_KEY;
       }
 
       return config;
@@ -291,9 +283,6 @@ export class ConfigurationService implements IConfigurationService {
   getDefaultConfiguration(): AIAConfig {
     return {
       preferredModel: 'claude-3-5-sonnet-20241022', // Use Claude 3.5 Sonnet as default
-      // Check environment variables for API keys
-      openaiApiKey: process.env.OPENAI_API_KEY,
-      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
       autoExecute: false,
       plugins: {},
       profiles: {},

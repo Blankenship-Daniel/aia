@@ -502,7 +502,12 @@ export class ServiceFactory {
       const { AgentPresenter } = require('../../dist/services/AgentPresenter');
       const resilienceService = container.resolve('resilienceService');
       const performanceMonitor = container.resolve('performanceMonitor');
-      return new AgentPresenter(resilienceService, performanceMonitor);
+      const aiService = container.resolve('ai');
+      return new AgentPresenter(
+        resilienceService,
+        performanceMonitor,
+        aiService
+      );
     });
 
     // Resilience Service (no dependencies - utility service)

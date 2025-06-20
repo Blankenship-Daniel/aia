@@ -7,7 +7,12 @@ import {
   RetryAttemptInfo,
   PerformanceComparison,
 } from '../interfaces/IAgentPresenter';
-import { ExecutionStep, AgenticExecution, CommandResult } from '../types/index';
+import {
+  ExecutionStep,
+  AgenticExecution,
+  CommandResult,
+  ContextInfo,
+} from '../types/index';
 import {
   CircuitBreakerState,
   IResilienceService,
@@ -17,6 +22,7 @@ import {
   MethodMetrics,
   PerformanceAlert,
 } from '../interfaces/IPerformanceMonitor';
+import { IAIService } from '../interfaces/IAIService';
 import chalk from 'chalk';
 import ora, { Ora } from 'ora';
 import inquirer from 'inquirer';
@@ -32,6 +38,7 @@ export class AgentPresenter implements IAgentPresenter {
   // Service dependencies for Phase 1 enhancements
   private resilienceService?: IResilienceService;
   private performanceMonitor?: IPerformanceMonitor;
+  private aiService?: IAIService;
   private executionHistory: AgenticExecution[] = [];
 
   // Enhanced performance tracking
@@ -45,10 +52,12 @@ export class AgentPresenter implements IAgentPresenter {
 
   constructor(
     resilienceService?: IResilienceService,
-    performanceMonitor?: IPerformanceMonitor
+    performanceMonitor?: IPerformanceMonitor,
+    aiService?: IAIService
   ) {
     this.resilienceService = resilienceService;
     this.performanceMonitor = performanceMonitor;
+    this.aiService = aiService;
   }
 
   showPlanningPhase(goal: string): void {
@@ -278,9 +287,9 @@ export class AgentPresenter implements IAgentPresenter {
     }
   }
 
-  displayExecutionSummary(execution: AgenticExecution): void {
+  async displayExecutionSummary(execution: AgenticExecution): Promise<void> {
     if (this.isSimpleAnalysisExecution(execution)) {
-      this.displaySimplifiedAnalysisSummary(execution);
+      await this.displaySimplifiedAnalysisSummary(execution);
       return;
     }
 
@@ -1224,16 +1233,26 @@ export class AgentPresenter implements IAgentPresenter {
   /**
    * Display simplified summary for analysis tasks
    */
-  private displaySimplifiedAnalysisSummary(execution: AgenticExecution): void {
+  private async displaySimplifiedAnalysisSummary(
+    execution: AgenticExecution
+  ): Promise<void> {
     console.log(chalk.gray('━'.repeat(60)));
 
     if (execution.success) {
       console.log(chalk.green('✅ Analysis Complete'));
 
-      // Try to extract and highlight the answer from the execution results
-      const result = this.extractAnalysisAnswer(execution);
-      if (result) {
-        console.log('\n' + result);
+      // Try to generate a human-readable summary using AI
+      const humanReadableSummary = await this.generateHumanReadableSummary(
+        execution
+      );
+      if (humanReadableSummary) {
+        console.log('\n' + humanReadableSummary);
+      } else {
+        // Fallback to the original answer extraction
+        const result = this.extractAnalysisAnswer(execution);
+        if (result) {
+          console.log('\n' + result);
+        }
       }
     } else {
       console.log(chalk.red('❌ Analysis Failed'));
@@ -1281,6 +1300,84 @@ export class AgentPresenter implements IAgentPresenter {
       }
     }
 
+    return null;
+  }
+
+  /**
+   * Generate a human-readable summary using AI based on the execution results
+   */
+  private async generateHumanReadableSummary(
+    execution: AgenticExecution
+  ): Promise<string | null> {
+    if (!this.aiService) {
+      return null; // No AI service available, fallback to original extraction
+    }
+
+    try {
+      // Extract the raw output from execution results
+      const rawOutput = this.extractRawOutput(execution);
+      if (!rawOutput) {
+        return null;
+      }
+
+      // Create a prompt for the AI to generate a human-readable summary
+      const prompt = `You are an AI assistant helping to summarize technical command output for a user. 
+
+The user asked: "${execution.goal}"
+
+The command output was:
+${rawOutput}
+
+Please provide a clear, concise, human-readable summary that directly answers the user's question. Focus on the key information and present it in natural language. Avoid technical jargon when possible and make it conversational like you would normally respond.
+
+Guidelines:
+- Be direct and answer the specific question asked
+- Use natural language, not technical command output format
+- Include specific numbers/details when relevant
+- Keep it concise but informative
+- If there are multiple results, summarize the most important ones
+
+Response:`;
+
+      // Create minimal context for the AI query
+      const context: ContextInfo = {
+        workingDirectory: process.cwd(),
+        platform: process.platform,
+        arch: process.arch,
+        nodeVersion: process.version,
+        user: process.env.USER || 'unknown',
+        shell: process.env.SHELL || 'unknown',
+        timestamp: new Date().toISOString(),
+        projectType: 'analysis',
+        projectInfo: {},
+        gitStatus: '',
+        environmentScore: 1.0,
+      };
+
+      const response = await this.aiService.queryAI(prompt, context);
+
+      // Format the AI response with nice styling
+      return chalk.cyan('🤖 ') + chalk.white(response.content.trim());
+    } catch (error) {
+      // If AI service fails, return null to fallback to original method
+      // Don't log the error to keep output clean - the fallback provides good UX
+      return null;
+    }
+  }
+
+  /**
+   * Extract raw output from execution results for AI processing
+   */
+  private extractRawOutput(execution: AgenticExecution): string | null {
+    // Look through execution results for the raw command output
+    for (const result of execution.executionResults || []) {
+      if (typeof result === 'object' && result !== null) {
+        const resultObj = result as any;
+        if (resultObj.output && typeof resultObj.output === 'string') {
+          return resultObj.output;
+        }
+      }
+    }
     return null;
   }
 }

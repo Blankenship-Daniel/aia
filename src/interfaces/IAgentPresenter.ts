@@ -66,7 +66,7 @@ export interface IAgentPresenter {
   /**
    * Show execution summary
    */
-  displayExecutionSummary(execution: AgenticExecution): void;
+  displayExecutionSummary(execution: AgenticExecution): Promise<void>;
 
   /**
    * Display error messages

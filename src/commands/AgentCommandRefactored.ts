@@ -341,7 +341,7 @@ The agent will:
     }
 
     // Show summary
-    this.presenter.displayExecutionSummary(execution);
+    await this.presenter.displayExecutionSummary(execution);
 
     // Format output
     const output = this.presenter.formatExecutionSummary(execution);

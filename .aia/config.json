@@ -1,4 +1,8 @@
 {
+  "preferredModel": "claude-3-5-sonnet-20241022",
+  "autoExecute": true,
+  "plugins": {},
+  "profiles": {},
   "outputDirectories": {
     "prompts": "./.github/prompts",
     "copilotInstructions": "./.github",
@@ -6,5 +10,6 @@
     "minimal": "./docs/minimal",
     "architecture": "./docs/architecture",
     "developer": "./docs/developer"
-  }
+  },
+  "preferredProvider": "anthropic"
 }

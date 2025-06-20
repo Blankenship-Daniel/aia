@@ -3,7 +3,7 @@
  * Combines all unique tests from agent-command-refactored.test.ts and agent-command-refactored-simple.test.ts
  */
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { AgentCommandRefactored } from '../src/commands/AgentCommandRefactored';
+import { AgentCommandRefactored } from '../src/commands/AgentCommand';
 import { IAgentExecutionEngine } from '../src/interfaces/IAgentExecutionEngine';
 import { IAgentPresenter } from '../src/interfaces/IAgentPresenter';
 import { IResilienceService } from '../src/interfaces/IResilienceService';

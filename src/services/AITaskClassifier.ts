@@ -34,7 +34,7 @@ export class AITaskClassifier {
   ) {}
 
   /**
-   * Classify a task using AI with programmatic fallbacks
+   * Classify a task using AI - requires successful AI classification
    */
   async classifyTask(taskDescription: string): Promise<TaskAnalysis> {
     const normalizedTask = taskDescription.toLowerCase().trim();
@@ -45,26 +45,24 @@ export class AITaskClassifier {
       return this.buildTaskAnalysis(cachedResult, taskDescription);
     }
 
-    try {
-      // Primary: AI-based classification
-      const aiResult = await this.classifyWithAI(taskDescription);
-      if (aiResult && aiResult.confidence >= 0.7) {
-        this.cacheClassification(normalizedTask, aiResult);
-        return this.buildTaskAnalysis(aiResult, taskDescription);
-      }
+    // AI-based classification (required)
+    const aiResult = await this.classifyWithAI(taskDescription);
 
-      // Fallback: Enhanced programmatic classification
-      console.log(
-        '⚠️  AI classification failed or low confidence, using programmatic fallback'
-      );
-      return this.classifyProgrammatically(taskDescription);
-    } catch (error) {
-      console.log(
-        '⚠️  AI classification error, using programmatic fallback:',
-        error instanceof Error ? error.message : 'Unknown error'
-      );
-      return this.classifyProgrammatically(taskDescription);
+    if (!aiResult) {
+      throw new Error('AI classification failed to return a result');
     }
+
+    if (aiResult.confidence < 0.7) {
+      throw new Error(
+        `AI classification confidence too low (${aiResult.confidence.toFixed(
+          2
+        )}). ` +
+          'AIA CLI requires high-confidence AI reasoning for reliable task execution.'
+      );
+    }
+
+    this.cacheClassification(normalizedTask, aiResult);
+    return this.buildTaskAnalysis(aiResult, taskDescription);
   }
 
   /**
@@ -185,57 +183,6 @@ IMPORTANT GUIDELINES:
   }
 
   /**
-   * Enhanced programmatic fallback with better patterns
-   */
-  private classifyProgrammatically(taskDescription: string): TaskAnalysis {
-    const normalizedTask = taskDescription.toLowerCase();
-
-    // Enhanced pattern matching with better context awareness
-    const patterns = {
-      [TaskType.ANALYSIS]: [
-        /create.*markdown.*summariz/i,
-        /generate.*markdown.*summary/i,
-        /markdown.*summariz.*contents/i,
-        /analyze|review|examine|audit|report|summary|find|show|display|count|list/i,
-      ],
-      [TaskType.DOCUMENTATION]: [
-        /add.*jsdoc|jsdoc.*documentation|document.*methods|inline.*comments/i,
-      ],
-      [TaskType.CODE_MODIFICATION]: [
-        /modify|change|update|edit|implement|add.*method|add.*function/i,
-      ],
-      [TaskType.REFACTORING]: [
-        /refactor|reorganize|restructure|optimize|clean.*up|improve/i,
-      ],
-      [TaskType.TEST_GENERATION]: [
-        /generate.*test|unit.*test|test.*coverage|create.*test/i,
-      ],
-      [TaskType.BUG_FIXING]: [/fix|bug|error|issue|debug|resolve|patch/i],
-      [TaskType.FILE_OPERATION]: [
-        /create.*file|delete.*file|move.*file|copy.*file|rename/i,
-      ],
-      [TaskType.CONFIGURATION]: [
-        /configure|setup|install|config|environment|settings/i,
-      ],
-      [TaskType.BUILD_DEPLOYMENT]: [
-        /build|compile|deploy|package|bundle|publish/i,
-      ],
-    };
-
-    // Find best match
-    for (const [taskType, taskPatterns] of Object.entries(patterns)) {
-      if (taskPatterns.some((pattern) => pattern.test(normalizedTask))) {
-        return this.buildProgrammaticAnalysis(
-          taskType as TaskType,
-          normalizedTask
-        );
-      }
-    }
-
-    return this.buildProgrammaticAnalysis(TaskType.UNKNOWN, normalizedTask);
-  }
-
-  /**
    * Build task analysis from AI result
    */
   private buildTaskAnalysis(
@@ -252,27 +199,6 @@ IMPORTANT GUIDELINES:
       ),
       riskLevel: aiResult.riskLevel,
       validationStrategy: this.determineValidationStrategy(aiResult.taskType),
-    };
-  }
-
-  /**
-   * Build task analysis from programmatic classification
-   */
-  private buildProgrammaticAnalysis(
-    taskType: TaskType,
-    taskDescription: string
-  ): TaskAnalysis {
-    const complexity = this.assessComplexity(taskDescription, taskType);
-    const capabilities = this.identifyCapabilities(taskType);
-    const riskLevel = this.assessRiskLevel(taskType, complexity, capabilities);
-
-    return {
-      type: taskType,
-      complexity,
-      requiredCapabilities: capabilities,
-      estimatedSteps: this.estimateSteps(taskType, complexity),
-      riskLevel,
-      validationStrategy: this.determineValidationStrategy(taskType),
     };
   }
 

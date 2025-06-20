@@ -6,7 +6,6 @@ import { IAIService } from '../interfaces/IAIService';
 import { IContextService } from '../interfaces/IContextService';
 import { ICommandService } from '../interfaces/ICommandService';
 import { IAgentExecutionEngine } from '../interfaces/IAgentExecutionEngine';
-import { TaskComplexityAnalyzer } from './TaskComplexityAnalyzer';
 import { EnhancedTaskComplexityAnalyzer } from './EnhancedTaskComplexityAnalyzer';
 import { PlanningTemplateSystem } from './PlanningTemplateSystem';
 import { OutcomeValidationSystem } from './OutcomeValidationSystem';
@@ -21,8 +20,7 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
   private readonly AI_CALL_TIMEOUT_MS = 30000;
   private readonly STEP_TIMEOUT_MS = 60000;
 
-  private taskAnalyzer: TaskComplexityAnalyzer;
-  private enhancedTaskAnalyzer?: EnhancedTaskComplexityAnalyzer;
+  private taskAnalyzer: EnhancedTaskComplexityAnalyzer;
   private planningSystem: PlanningTemplateSystem;
   private validationSystem: OutcomeValidationSystem;
   private currentFilePath?: string;
@@ -33,22 +31,28 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
     private commandService: ICommandService
   ) {
     // Initialize the analysis and planning systems
-    this.taskAnalyzer = new TaskComplexityAnalyzer();
     this.planningSystem = new PlanningTemplateSystem();
     this.validationSystem = new OutcomeValidationSystem();
 
-    // Initialize the enhanced analyzer if AI services are available
+    // AI-powered task classification is required for AIA CLI functionality
     try {
-      this.enhancedTaskAnalyzer = new EnhancedTaskComplexityAnalyzer(
+      this.taskAnalyzer = new EnhancedTaskComplexityAnalyzer(
         this.aiService,
         this.contextService
       );
       console.log('✅ AI-powered task classification enabled');
     } catch (error) {
-      console.log(
-        '⚠️  AI-powered task classification not available, using programmatic fallback'
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(
+        `❌ AIA CLI requires AI-powered task classification to function.\n` +
+          `Please ensure your AI service is properly configured.\n` +
+          `Error: ${errorMessage}\n\n` +
+          `To fix this:\n` +
+          `1. Run 'aia config' to set up your AI API keys\n` +
+          `2. Ensure you have a stable internet connection\n` +
+          `3. Verify your API key is valid and has sufficient credits`
       );
-      this.enhancedTaskAnalyzer = undefined;
     }
   }
 
@@ -64,22 +68,9 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
     try {
       console.log('🔍 Analyzing task complexity and requirements...');
 
-      // Step 1: Analyze the task using enhanced AI-powered classification if available
-      let taskAnalysis;
-      if (this.enhancedTaskAnalyzer) {
-        console.log('🧠 Using AI-powered task classification...');
-        try {
-          taskAnalysis = await this.enhancedTaskAnalyzer.analyzeTask(goal);
-        } catch (error) {
-          console.log(
-            '⚠️  AI classification failed, falling back to programmatic analysis'
-          );
-          taskAnalysis = this.taskAnalyzer.analyzeTask(goal);
-        }
-      } else {
-        console.log('📊 Using programmatic task classification...');
-        taskAnalysis = this.taskAnalyzer.analyzeTask(goal);
-      }
+      // Step 1: Analyze the task using AI-powered classification (required)
+      console.log('🧠 Using AI-powered task classification...');
+      const taskAnalysis = await this.taskAnalyzer.analyzeTask(goal);
 
       console.log(`📊 Task Analysis:`);
       console.log(`   Type: ${taskAnalysis.type}`);

@@ -208,6 +208,7 @@ export class TaskComplexityAnalyzer {
         'audit',
         'report',
         'summary',
+        'summarize',
         'find',
         'what',
         'which',

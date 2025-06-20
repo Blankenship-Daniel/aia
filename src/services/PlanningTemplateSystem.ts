@@ -694,6 +694,48 @@ export class PlanningTemplateSystem {
         },
       ],
     });
+
+    // Analysis Template
+    this.templates.set(TaskType.ANALYSIS, {
+      name: 'Analysis Template',
+      taskType: TaskType.ANALYSIS,
+      description: 'Analyze files, directories, or code structures',
+      stepTemplates: [
+        {
+          id: 'perform_analysis',
+          description: 'Analyze and provide results',
+          type: 'analysis',
+          critical: true,
+          dependencies: [],
+          timeout: 60000,
+          expectedOutcome: 'Analysis results gathered',
+          failureHandling: 'Try alternative analysis methods',
+        },
+      ],
+      validationSteps: [
+        {
+          id: 'results_generated',
+          description: 'Analysis results were generated',
+          method: 'content_match',
+          parameters: { pattern: 'ANSWER:' },
+          expectedResult: true,
+        },
+      ],
+      successCriteria: [
+        {
+          metric: 'data_collected',
+          target: true,
+          critical: true,
+          description: 'Data must be successfully collected',
+        },
+        {
+          metric: 'results_clear',
+          target: true,
+          critical: true,
+          description: 'Results must be clearly presented',
+        },
+      ],
+    });
   }
 
   private instantiateTemplate(
@@ -860,6 +902,15 @@ export class PlanningTemplateSystem {
           normalizedTask.includes('folder'))
       ) {
         return 'echo "🎯 ANSWER: Directory sizes (largest first):" && du -sh */ 2>/dev/null | sort -rh | head -n 10';
+      }
+
+      // File summarization
+      if (
+        (normalizedTask.includes('summarize') ||
+          normalizedTask.includes('summary')) &&
+        normalizedTask.includes('file')
+      ) {
+        return 'echo "🎯 ANSWER: File Summary for this directory" && echo "=================================" && total_files=$(find . -maxdepth 1 -type f | wc -l) && total_dirs=$(find . -maxdepth 1 -type d | grep -v "^\\.$" | wc -l) && echo "📁 Total files: $total_files" && echo "📂 Total directories: $total_dirs" && echo "" && echo "📋 File types:" && find . -maxdepth 1 -type f -name "*.*" | sed "s/.*\\.//" | sort | uniq -c | sort -rn | head -n 10 && echo "" && echo "🗂️  Main files:" && find . -maxdepth 1 -type f | head -15';
       }
 
       // Line count analysis

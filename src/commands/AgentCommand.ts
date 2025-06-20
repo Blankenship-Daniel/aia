@@ -39,7 +39,17 @@ import {
   AgenticExecution,
   AgenticStep,
   ExecutionStep,
+  ExecutionResult,
+  ContextInfo,
+  AgenticExecutionResult,
 } from '../types/index.js';
+
+// Additional type definitions for better type safety
+interface StepResult {
+  success: boolean;
+  output?: string;
+  error?: string;
+}
 
 /**
  * AgentCommandRefactored - Advanced agentic reasoning command for complex goal achievement.
@@ -110,20 +120,18 @@ export class AgentCommandRefactored implements ICommand {
         'Execution timed out'
       );
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Agentic execution failed';
-
-      this.presenter.displayEnhancedErrorFromCommandExecution(
-        error instanceof Error ? error : new Error('Agentic execution failed'),
+      this.errorHandler.handleExecutionError(
+        error,
         'agent',
         args,
-        { phase: 'execution', context: 'main-execution-flow' }
+        { phase: 'execution', context: 'main-execution-flow' },
+        'Agentic execution failed'
       );
 
-      return {
-        success: false,
-        error: errorMessage,
-      };
+      return this.errorHandler.createErrorResult(
+        error,
+        'Agentic execution failed'
+      );
     }
   }
 
@@ -226,10 +234,51 @@ The agent will:
     `.trim();
   }
 
+  /**
+   * Execute a goal with comprehensive planning and execution
+   */
   private async executeGoal(
     goal: string,
     options: CommandOptions
   ): Promise<CommandResult> {
+    // Phase 1: Planning and preparation
+    const planningResult = await this.executePlanningPhase(goal);
+    if (!planningResult.success) {
+      return planningResult;
+    }
+
+    // Phase 2: Execution preparation and confirmation
+    const execution = await this.prepareExecution(
+      goal,
+      planningResult.plan!,
+      options
+    );
+    const confirmationResult = await this.handleExecutionConfirmation(
+      execution,
+      options
+    );
+    if (!confirmationResult.proceed) {
+      return confirmationResult.result!;
+    }
+
+    // Phase 3: Execute plan with resilience
+    const executionResult = await this.executeWithResilience(
+      execution,
+      options
+    );
+
+    // Phase 4: Finalization and storage
+    return await this.finalizeExecution(execution, executionResult);
+  }
+
+  /**
+   * Phase 1: Handle planning and context gathering
+   */
+  private async executePlanningPhase(goal: string): Promise<{
+    success: boolean;
+    plan?: ExecutionStep[];
+    error?: string;
+  }> {
     // Show planning phase
     this.presenter.showPlanningPhase(goal);
 
@@ -254,23 +303,45 @@ The agent will:
     )) as { success: boolean; plan?: ExecutionStep[]; error?: string };
 
     if (!planResult.success || !planResult.plan) {
-      this.presenter.displayEnhancedErrorFromCommandExecution(
-        new Error(planResult.error || 'Failed to generate execution plan'),
+      const planError = new Error(
+        planResult.error || 'Failed to generate execution plan'
+      );
+      this.errorHandler.handleExecutionError(
+        planError,
         'agent',
         [goal],
-        { phase: 'planning', context: 'plan-generation' }
+        { phase: 'planning', context: 'plan-generation' },
+        'Failed to generate execution plan'
       );
       return {
         success: false,
-        error: planResult.error || 'Failed to generate execution plan',
+        error: this.errorHandler.getErrorMessage(
+          planError,
+          'Failed to generate execution plan'
+        ),
       };
     }
 
-    // Create execution object
-    const execution: AgenticExecution = {
+    return {
+      success: true,
+      plan: planResult.plan,
+    };
+  }
+
+  /**
+   * Phase 2: Prepare execution object with all necessary data
+   */
+  private async prepareExecution(
+    goal: string,
+    plan: ExecutionStep[],
+    options: CommandOptions
+  ): Promise<AgenticExecution> {
+    const contextInfo = await this.contextService.gatherContext();
+
+    return {
       id: `exec-${Date.now()}`,
       goal,
-      plan: this.convertToAgenticSteps(planResult.plan),
+      plan: this.convertToAgenticSteps(plan),
       results: [],
       executionResults: [],
       status: 'pending',
@@ -282,13 +353,35 @@ The agent will:
       confidence: 0,
       success: false,
     };
+  }
 
-    // Display plan and get confirmation
-    this.presenter.displayExecutionPlan(planResult.plan);
+  /**
+   * Phase 2: Handle execution confirmation and user interaction
+   */
+  private async handleExecutionConfirmation(
+    execution: AgenticExecution,
+    options: CommandOptions
+  ): Promise<{
+    proceed: boolean;
+    result?: CommandResult;
+  }> {
+    // Display plan
+    this.presenter.displayExecutionPlan(
+      execution.plan.map((step) => ({
+        id: step.id,
+        command: step.command,
+        description: step.description,
+        expectedOutcome: step.expectedOutcome,
+        reasoning: step.reasoning,
+        risks: step.risks,
+        dependencies: step.dependencies,
+      }))
+    );
 
     const autoExecute = Boolean(
       options.autoExecute || options['auto-execute'] || options.auto
     );
+
     if (!autoExecute) {
       const proceed = await this.presenter.askConfirmation(
         'Proceed with execution?'
@@ -296,22 +389,36 @@ The agent will:
       if (!proceed) {
         this.presenter.displayWarning('Execution cancelled by user');
         return {
-          success: true,
-          output: 'Execution cancelled by user',
+          proceed: false,
+          result: {
+            success: true,
+            output: 'Execution cancelled by user',
+          },
         };
       }
     }
 
-    // Execute plan with resilience and enhanced UX feedback
+    return { proceed: true };
+  }
+
+  /**
+   * Phase 3: Execute plan with enhanced resilience
+   */
+  private async executeWithResilience(
+    execution: AgenticExecution,
+    options: CommandOptions
+  ): Promise<{ success: boolean; results: unknown[]; learnings: string[] }> {
     const executionOptions = {
-      autoExecute,
+      autoExecute: Boolean(
+        options.autoExecute || options['auto-execute'] || options.auto
+      ),
       maxIterations: (options.maxIterations ||
         options['max-iterations'] ||
         5) as number,
       noIteration: Boolean(options.noIteration || options['no-iteration']),
     };
 
-    const executionResult = await this.executeWithEnhancedResilience(
+    return await this.executeWithEnhancedResilience(
       () => this.executePlanWithProgress(execution, executionOptions),
       () => this.fallbackExecution(execution),
       {
@@ -323,7 +430,19 @@ The agent will:
       },
       'plan-execution'
     );
+  }
 
+  /**
+   * Phase 4: Finalize execution, store history, and format results
+   */
+  private async finalizeExecution(
+    execution: AgenticExecution,
+    executionResult: {
+      success: boolean;
+      results: unknown[];
+      learnings: string[];
+    }
+  ): Promise<CommandResult> {
     // Update execution status
     execution.success = executionResult.success;
     execution.status = executionResult.success ? 'completed' : 'failed';
@@ -333,11 +452,7 @@ The agent will:
     try {
       await this.memoryService.storeAgenticExecution(execution);
     } catch (error) {
-      this.presenter.displayWarning(
-        `Failed to store execution history: ${
-          error instanceof Error ? error.message : 'Unknown error'
-        }`
-      );
+      this.errorHandler.handleStorageError(error, 'store execution history');
     }
 
     // Show summary
@@ -478,7 +593,8 @@ The agent will:
             error: result.error,
             confidence: result.success ? 0.9 : 0.1,
             timestamp: new Date().toISOString(),
-            iteration, // Track which iteration this result belongs to
+            // Track which iteration this result belongs to
+            iteration: iteration,
           };
 
           execution.executionResults.push(executionResult);
@@ -513,22 +629,20 @@ The agent will:
           learnings.push(detailedLearning);
           execution.learnings.push(detailedLearning);
 
-          // Convert error to AgenticExecutionResult format
-          const executionResult = {
+          // Convert error to AgenticExecutionResult format using standardized error handling
+          const executionResult = this.errorHandler.createExecutionResult(
             step,
-            success: false,
-            output: '',
-            error: error instanceof Error ? error.message : 'Unknown error',
-            confidence: 0,
-            timestamp: new Date().toISOString(),
-            iteration, // Track which iteration this result belongs to
-          };
-
+            error,
+            iteration
+          ) as AgenticExecutionResult;
           execution.executionResults.push(executionResult);
 
           results.push({
             success: false,
-            error: error instanceof Error ? error.message : 'Unknown error',
+            error: this.errorHandler.getErrorMessage(
+              error,
+              'Step execution failed'
+            ),
           });
         }
       }
@@ -568,9 +682,9 @@ The agent will:
    */
   private async generateRefinedPlan(
     goal: string,
-    context: any,
+    context: ContextInfo,
     learnings: string[],
-    previousResults: any[],
+    previousResults: AgenticExecutionResult[],
     iteration: number
   ): Promise<{
     success: boolean;
@@ -599,10 +713,10 @@ The agent will:
     } catch (error) {
       return {
         success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Failed to generate refined plan',
+        error: this.errorHandler.getErrorMessage(
+          error,
+          'Failed to generate refined plan'
+        ),
       };
     }
   }
@@ -612,9 +726,9 @@ The agent will:
    */
   private buildRefinedPlanningPrompt(
     goal: string,
-    context: any,
+    context: ContextInfo,
     learnings: string[],
-    previousResults: any[],
+    previousResults: AgenticExecutionResult[],
     iteration: number
   ): string {
     let prompt = `REFINED EXECUTION PLAN - Iteration ${iteration}\n\n`;
@@ -644,10 +758,10 @@ The agent will:
       failedCommands.forEach((cmd, index) => {
         prompt += `${index + 1}. Command: "${cmd.command}"\n`;
         prompt += `   Description: ${cmd.description}\n`;
-        prompt += `   Error: ${cmd.error}\n`;
+        prompt += `   Error: ${cmd.error || 'Unknown error'}\n`;
         prompt += `   Analysis: ${this.analyzeCommandFailure(
           cmd.command,
-          cmd.error
+          cmd.error || 'Unknown error'
         )}\n\n`;
       });
     }
@@ -734,8 +848,8 @@ The agent will:
    * Analyze step failure with more detail
    */
   private analyzeStepFailure(
-    step: any,
-    result: any,
+    step: AgenticStep,
+    result: StepResult,
     iteration: number
   ): string {
     const baseFailure = `[Iteration ${iteration}] Step "${step.description}" failed: ${result.error}`;
@@ -749,8 +863,12 @@ The agent will:
   /**
    * Analyze step error with more detail
    */
-  private analyzeStepError(step: any, error: any, iteration: number): string {
-    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+  private analyzeStepError(
+    step: AgenticStep,
+    error: unknown,
+    iteration: number
+  ): string {
+    const errorMsg = this.errorHandler.getErrorMessage(error);
     const baseError = `[Iteration ${iteration}] Step "${step.description}" threw error: ${errorMsg}`;
     const analysis = this.analyzeCommandFailure(step.command, errorMsg);
     return `${baseError} | Analysis: ${analysis}`;
@@ -889,14 +1007,17 @@ The agent will:
         stepPresentation.fail();
         overallSuccess = false;
         learnings.push(
-          `Fallback step error: ${step.description} - ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`
+          `Fallback step error: ${
+            step.description
+          } - ${this.errorHandler.getErrorMessage(error)}`
         );
 
         results.push({
           success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: this.errorHandler.getErrorMessage(
+            error,
+            'Fallback step execution failed'
+          ),
         });
       }
     }
@@ -952,4 +1073,88 @@ The agent will:
       3 // maxRetries
     );
   }
+
+  /**
+   * Standardized error handling utilities for consistent error processing
+   */
+  private errorHandler = {
+    /**
+     * Extract error message with consistent fallback
+     */
+    getErrorMessage: (error: unknown, fallback = 'Unknown error'): string => {
+      return error instanceof Error ? error.message : fallback;
+    },
+
+    /**
+     * Ensure error is an Error instance
+     */
+    ensureError: (error: unknown, fallback = 'Unknown error'): Error => {
+      return error instanceof Error ? error : new Error(fallback);
+    },
+
+    /**
+     * Create standardized command result for errors
+     */
+    createErrorResult: (
+      error: unknown,
+      fallback = 'Command execution failed'
+    ): CommandResult => {
+      return {
+        success: false,
+        error: this.errorHandler.getErrorMessage(error, fallback),
+      };
+    },
+
+    /**
+     * Handle execution context errors with proper presenter display
+     */
+    handleExecutionError: (
+      error: unknown,
+      command: string,
+      args: string[],
+      context: { phase: string; context: string },
+      fallback = 'Execution failed'
+    ): void => {
+      const errorInstance = this.errorHandler.ensureError(error, fallback);
+      this.presenter.displayEnhancedErrorFromCommandExecution(
+        errorInstance,
+        command,
+        args,
+        context
+      );
+    },
+
+    /**
+     * Handle storage/persistence errors with warnings
+     */
+    handleStorageError: (error: unknown, operation: string): void => {
+      const message = this.errorHandler.getErrorMessage(
+        error,
+        `Failed to ${operation}`
+      );
+      this.presenter.displayWarning(`Failed to ${operation}: ${message}`);
+    },
+
+    /**
+     * Create agentic execution result with error handling
+     */
+    createExecutionResult: (
+      step: AgenticStep,
+      error: unknown,
+      iteration: number
+    ): unknown => {
+      return {
+        step,
+        success: false,
+        output: '',
+        error: this.errorHandler.getErrorMessage(
+          error,
+          'Step execution failed'
+        ),
+        confidence: 0,
+        timestamp: new Date().toISOString(),
+        iteration,
+      };
+    },
+  };
 }

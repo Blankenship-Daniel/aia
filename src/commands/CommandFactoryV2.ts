@@ -20,7 +20,7 @@ import { ExecuteCommand } from './ExecuteCommand';
 import { ContextCommand } from './ContextCommand';
 import { MemoryCommand } from './MemoryCommand';
 import { ConfigCommand } from './ConfigCommand';
-import { AgentCommandRefactored } from './AgentCommandRefactored';
+import { AgentCommandRefactored } from './AgentCommand';
 import { IndexCommand } from './IndexCommand';
 import { InitCommand } from './InitCommand';
 import { CacheCommand } from './CacheCommand';

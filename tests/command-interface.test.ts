@@ -1,7 +1,7 @@
 import { ICommand } from '../src/interfaces/ICommand.js';
 import { AskCommand } from '../src/commands/AskCommand.js';
 import { ExecuteCommand } from '../src/commands/ExecuteCommand.js';
-import { AgentCommandRefactored } from '../src/commands/AgentCommandRefactored.js';
+import { AgentCommandRefactored } from '../src/commands/AgentCommand.js';
 import { ConfigCommand } from '../src/commands/ConfigCommand.js';
 import { CommandFactoryV2 } from '../src/commands/CommandFactoryV2.js';
 

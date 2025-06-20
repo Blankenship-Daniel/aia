@@ -262,6 +262,32 @@ export class ServiceFactory {
       }
     );
 
+    // GitHub Copilot Dependency Service (no dependencies - foundational)
+    container.registerFactory('copilotDependency', (container) => {
+      const {
+        CopilotDependencyService,
+      } = require('../../dist/services/CopilotDependencyService');
+      return new CopilotDependencyService();
+    });
+
+    // GitHub Copilot Service (depends on configuration, caching, ai, and copilotDependency)
+    container.registerFactory(
+      'copilot',
+      (container) => {
+        const {
+          CopilotService,
+        } = require('../../dist/services/CopilotService');
+        const config = container.resolve('configuration');
+        const caching = container.resolve('caching');
+        const ai = container.resolve('ai');
+        const copilotDependency = container.resolve('copilotDependency');
+        return new CopilotService(config, caching, ai, copilotDependency);
+      },
+      {
+        dependencies: ['configuration', 'caching', 'ai', 'copilotDependency'],
+      }
+    );
+
     // Command Registrar Service (no dependencies - utility service)
     container.registerFactory('commandRegistrar', (container) => {
       const {
@@ -368,6 +394,8 @@ export class ServiceFactory {
         const agentExecutionEngine = container.resolve('agentExecutionEngine');
         const agentPresenter = container.resolve('agentPresenter');
         const resilienceService = container.resolve('resilienceService');
+        const copilot = container.resolve('copilot');
+        const copilotDependency = container.resolve('copilotDependency');
         const enhancedCaching = container.resolve('enhancedCaching');
         const analytics = container.resolve('analytics');
         return new CommandFactoryV2(
@@ -379,6 +407,8 @@ export class ServiceFactory {
           agentExecutionEngine,
           agentPresenter,
           resilienceService,
+          copilot,
+          copilotDependency,
           enhancedCaching,
           analytics
         );
@@ -393,6 +423,8 @@ export class ServiceFactory {
           'agentExecutionEngine',
           'agentPresenter',
           'resilienceService',
+          'copilot',
+          'copilotDependency',
           'enhancedCaching',
           'analytics',
         ],

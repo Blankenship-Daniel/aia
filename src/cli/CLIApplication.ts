@@ -213,7 +213,13 @@ export default class CLIApplication {
         '<args...>',
         'Action and parameters (e.g., search "term")'
       );
-    } else if (name === 'ask' || name === 'exec' || name === 'agent') {
+    } else if (
+      name === 'ask' ||
+      name === 'exec' ||
+      name === 'agent' ||
+      name === 'suggest' ||
+      name === 'explain'
+    ) {
       cmd = cmd.argument('<input...>', 'Command or query input');
     }
 
@@ -327,6 +333,41 @@ export default class CLIApplication {
         cmd.option('--export <format>', 'Export analytics data (json/csv)');
         cmd.option('--clear', 'Clear analytics data');
         cmd.option('--confirm', 'Confirm destructive operations');
+        break;
+
+      case 'explain':
+        cmd.option(
+          '--no-fallback',
+          'Disable AI fallback when Copilot is unavailable'
+        );
+        cmd.option(
+          '--no-safety-check',
+          'Skip safety warnings for potentially dangerous commands'
+        );
+        cmd.option('--cache', 'Use cached explanation if available');
+        break;
+
+      case 'suggest':
+        cmd.option(
+          '--context <type>',
+          'Context type for suggestions (git, shell, docker)'
+        );
+        cmd.option(
+          '--no-fallback',
+          'Disable AI fallback when Copilot is unavailable'
+        );
+        cmd.option(
+          '--no-safety-check',
+          'Skip safety warnings for potentially dangerous commands'
+        );
+        break;
+
+      case 'learn':
+        cmd.option('--interactive', 'Enable interactive learning mode');
+        cmd.option(
+          '--no-fallback',
+          'Disable AI fallback when Copilot is unavailable'
+        );
         break;
     }
   }

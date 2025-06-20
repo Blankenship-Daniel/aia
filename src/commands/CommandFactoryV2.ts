@@ -10,6 +10,8 @@ import { IAgentPresenter } from '../interfaces/IAgentPresenter';
 import { IResilienceService } from '../interfaces/IResilienceService';
 import { IAnalyticsService } from '../interfaces/IAnalyticsService';
 import { IEnhancedCachingService } from '../interfaces/IEnhancedCachingService';
+import { ICopilotService } from '../interfaces/ICopilotService';
+import { ICopilotDependencyService } from '../interfaces/ICopilotDependencyService';
 import { CommandRegistrar } from '../services/CommandRegistrar';
 
 // Command Imports
@@ -23,6 +25,10 @@ import { IndexCommand } from './IndexCommand';
 import { InitCommand } from './InitCommand';
 import { CacheCommand } from './CacheCommand';
 import { AnalyticsCommand } from './AnalyticsCommand';
+import { ExplainCommand } from './ExplainCommand';
+import { SuggestCommand } from './SuggestCommand';
+import { LearnCommand } from './LearnCommand';
+import { CopilotCheckCommand } from './CopilotCheckCommand';
 
 /**
  * CommandFactoryV2 - SOLID-Compliant Command Factory
@@ -59,6 +65,8 @@ export class CommandFactoryV2 {
     private readonly agentExecutionEngine: IAgentExecutionEngine,
     private readonly agentPresenter: IAgentPresenter,
     private readonly resilienceService: IResilienceService,
+    private readonly copilotService: ICopilotService,
+    private readonly copilotDependencyService: ICopilotDependencyService,
     private readonly enhancedCachingService?: IEnhancedCachingService, // Optional for backward compatibility
     private readonly analyticsService?: IAnalyticsService // Optional for Phase 2 features
   ) {
@@ -154,6 +162,39 @@ export class CommandFactoryV2 {
         () => new AnalyticsCommand(this.analyticsService!, this.contextService)
       );
     }
+
+    // Explain Command - Explain code and concepts (new Copilot command)
+    this.registrar.register(
+      'explain',
+      ['explainCode', 'describe'],
+      () => new ExplainCommand(this.copilotService, this.memoryService)
+    );
+
+    // Suggest Command - Suggest code completions and improvements (new Copilot command)
+    this.registrar.register(
+      'suggest',
+      ['suggestCode', 'recommend'],
+      () => new SuggestCommand(this.copilotService, this.contextService)
+    );
+
+    // Learn Command - Learn from user feedback and adapt (new Copilot command)
+    this.registrar.register(
+      'learn',
+      ['feedback', 'train'],
+      () =>
+        new LearnCommand(
+          this.copilotService,
+          this.aiService,
+          this.contextService
+        )
+    );
+
+    // Copilot Check Command - Diagnostic command for GitHub Copilot CLI setup
+    this.registrar.register(
+      'copilot-check',
+      ['copilot-status', 'check-copilot'],
+      () => new CopilotCheckCommand(this.copilotDependencyService)
+    );
   }
 
   /**
@@ -228,6 +269,7 @@ export class CommandFactoryV2 {
     const agentExecutionEngine = services.agentExecutionEngine || {};
     const agentPresenter = services.agentPresenter || {};
     const resilienceService = services.resilienceService || {};
+    const copilotDependencyService = services.copilotDependencyService || {};
     const enhancedCachingService = services.enhancedCachingService;
 
     const factory = new CommandFactoryV2(
@@ -239,6 +281,8 @@ export class CommandFactoryV2 {
       agentExecutionEngine,
       agentPresenter,
       resilienceService,
+      services.copilotService,
+      copilotDependencyService,
       enhancedCachingService
     );
 
@@ -265,6 +309,7 @@ export class CommandFactoryV2 {
     const agentExecutionEngine = services.agentExecutionEngine || {};
     const agentPresenter = services.agentPresenter || {};
     const resilienceService = services.resilienceService || {};
+    const copilotDependencyService = services.copilotDependencyService || {};
     const enhancedCachingService = services.enhancedCachingService;
 
     const factory = new CommandFactoryV2(
@@ -276,6 +321,8 @@ export class CommandFactoryV2 {
       agentExecutionEngine,
       agentPresenter,
       resilienceService,
+      services.copilotService,
+      copilotDependencyService,
       enhancedCachingService
     );
 

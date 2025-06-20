@@ -156,6 +156,7 @@ describe('SOLID CommandFactory Refactoring', () => {
       agentExecutionEngine: jest.Mocked<IAgentExecutionEngine>;
       agentPresenter: jest.Mocked<IAgentPresenter>;
       resilienceService: jest.Mocked<IResilienceService>;
+      copilotService: any;
     };
     let factory: CommandFactoryV2;
 
@@ -244,6 +245,11 @@ describe('SOLID CommandFactory Refactoring', () => {
           resetCircuitBreaker: jest.fn(),
           getFailureStats: jest.fn(),
         } as any,
+        copilotService: {
+          explainCommand: jest.fn(),
+          suggestCommand: jest.fn(),
+          getAlias: jest.fn(),
+        } as any,
       };
 
       factory = new CommandFactoryV2(
@@ -254,7 +260,8 @@ describe('SOLID CommandFactory Refactoring', () => {
         mockServices.configurationService,
         mockServices.agentExecutionEngine,
         mockServices.agentPresenter,
-        mockServices.resilienceService
+        mockServices.resilienceService,
+        mockServices.copilotService
       );
     });
 
@@ -410,6 +417,7 @@ describe('SOLID CommandFactory Refactoring', () => {
         agentExecutionEngine: {} as IAgentExecutionEngine,
         agentPresenter: {} as IAgentPresenter,
         resilienceService: {} as IResilienceService,
+        copilotService: {} as any,
       };
 
       const factory = new CommandFactoryV2(
@@ -420,7 +428,8 @@ describe('SOLID CommandFactory Refactoring', () => {
         services.configurationService,
         services.agentExecutionEngine,
         services.agentPresenter,
-        services.resilienceService
+        services.resilienceService,
+        services.copilotService
       );
 
       // Get initial command count

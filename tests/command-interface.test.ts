@@ -11,6 +11,7 @@ const mockMemoryService = {} as any;
 const mockContextService = {} as any;
 const mockCommandService = {} as any;
 const mockConfigurationService = {} as any;
+const mockCopilotService = {} as any;
 
 // Mock services for AgentCommandRefactored
 const mockAgentExecutionEngine = {} as any;
@@ -133,7 +134,8 @@ describe('Command Interface Compliance', () => {
       mockConfigurationService,
       mockAgentExecutionEngine,
       mockAgentPresenter,
-      mockResilienceService
+      mockResilienceService,
+      mockCopilotService
     );
 
     const commands = ['ask', 'exec', 'agent', 'config'];

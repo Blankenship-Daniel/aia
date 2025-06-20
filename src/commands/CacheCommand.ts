@@ -2,18 +2,28 @@ import { ICommand, CommandDefinition } from '../interfaces/ICommand';
 import { IEnhancedCachingService } from '../interfaces/IEnhancedCachingService';
 import { IContextService } from '../interfaces/IContextService';
 import { CommandResult, CommandOptions } from '../types/index';
-import chalk from 'chalk';
+import * as chalk from 'chalk';
 
 /**
  * Cache Command - Advanced cache management with user feedback
  * Provides cache analytics, performance visualization, and intelligent optimization
  */
 export class CacheCommand implements ICommand {
+  /**
+   * Constructor method
+   * @param {...any} args - Method parameters
+   * @returns {any} - Method return value
+   */
   constructor(
     private enhancedCaching: IEnhancedCachingService,
     private context: IContextService
   ) {}
 
+  /**
+   * Execute method
+   * @param {...any} args - Method parameters
+   * @returns {any} - Method return value
+   */
   async execute(
     context: Record<string, unknown>,
     args: string[],
@@ -57,6 +67,10 @@ export class CacheCommand implements ICommand {
     }
   }
 
+  /**
+   * GetDefinition method
+   * @returns CommandDefinition - Return value description
+   */
   getDefinition(): CommandDefinition {
     return {
       name: 'cache',
@@ -148,14 +162,25 @@ export class CacheCommand implements ICommand {
     };
   }
 
+  /**
+   * GetName method
+   * @returns string - Return value description
+   */
   getName(): string {
     return 'cache';
   }
 
+  /**
+   * GetAliases method
+   * @returns string[] - Return value description
+   */
   getAliases(): string[] {
     return ['caching'];
   }
 
+  /**
+   * ValidateArgs method
+   */
   validateArgs(args: string[]): { valid: boolean; errors: string[] } {
     // Cache command accepts any subcommand, so validation is permissive
     return {
@@ -164,6 +189,10 @@ export class CacheCommand implements ICommand {
     };
   }
 
+  /**
+   * GetHelp method
+   * @returns string - Return value description
+   */
   getHelp(): string {
     return `
 🔄 AIA Cache Management
@@ -193,6 +222,9 @@ Flags:
     `;
   }
 
+  /**
+   * ShowCacheStats method
+   */
   private async showCacheStats(): Promise<void> {
     console.log(chalk.blue('\n📊 Cache Statistics'));
     console.log(chalk.blue('==================='));
@@ -242,6 +274,9 @@ Flags:
     }
   }
 
+  /**
+   * ShowPerformanceAnalytics method
+   */
   private async showPerformanceAnalytics(): Promise<void> {
     console.log(chalk.blue('\n⚡ Performance Analytics'));
     console.log(chalk.blue('========================'));
@@ -249,6 +284,9 @@ Flags:
     await this.enhancedCaching.displayCachePerformance();
   }
 
+  /**
+   * WarmCache method
+   */
   private async warmCache(keys: string[], options: any): Promise<void> {
     if (keys.length === 0) {
       // Auto-suggest warming targets
@@ -281,6 +319,9 @@ Flags:
     }
   }
 
+  /**
+   * CleanupCache method
+   */
   private async cleanupCache(options: any): Promise<void> {
     if (options.confirm || options.c) {
       console.log(chalk.blue('🧹 Starting cache cleanup...'));
@@ -299,6 +340,11 @@ Flags:
     }
   }
 
+  /**
+   * ManageCacheStrategy method
+   * @param {...any} args - Method parameters
+   * @returns {any} - Method return value
+   */
   private async manageCacheStrategy(
     args: string[],
     options: any
@@ -352,6 +398,9 @@ Flags:
     }
   }
 
+  /**
+   * ShowAnalytics method
+   */
   private async showAnalytics(): Promise<void> {
     console.log(chalk.blue('\n📊 Comprehensive Cache Analytics'));
     console.log(chalk.blue('=================================='));
@@ -389,6 +438,9 @@ Flags:
     await this.showPerformanceRecommendations();
   }
 
+  /**
+   * ShowSuggestions method
+   */
   private async showSuggestions(): Promise<void> {
     console.log(chalk.blue('\n💡 Cache Optimization Suggestions'));
     console.log(chalk.blue('==================================='));
@@ -440,6 +492,9 @@ Flags:
     }
   }
 
+  /**
+   * ClearCache method
+   */
   private async clearCache(options: any): Promise<void> {
     if (options.confirm || options.c) {
       console.log(chalk.blue('🗑️  Clearing entire cache...'));
@@ -454,6 +509,9 @@ Flags:
     }
   }
 
+  /**
+   * ShowHelp method
+   */
   private async showHelp(): Promise<void> {
     console.log(chalk.blue('\n🔄 AIA Cache Management'));
     console.log(chalk.blue('========================'));
@@ -503,6 +561,11 @@ Flags:
     console.log(chalk.gray('  --confirm      Confirm destructive operations'));
   }
 
+  /**
+   * InteractiveStrategySetup method
+   * @param {...any} args - Method parameters
+   * @returns {any} - Method return value
+   */
   private async interactiveStrategySetup(
     key: string,
     options: any
@@ -523,6 +586,9 @@ Flags:
     console.log(chalk.green(`✅ Strategy updated for ${key}`));
   }
 
+  /**
+   * ListCacheStrategies method
+   */
   private async listCacheStrategies(): Promise<void> {
     console.log(chalk.blue('📋 Configured Cache Strategies'));
     console.log(chalk.blue('==============================='));
@@ -533,6 +599,9 @@ Flags:
     );
   }
 
+  /**
+   * ShowPerformanceRecommendations method
+   */
   private async showPerformanceRecommendations(): Promise<void> {
     const analytics = await this.enhancedCaching.getCacheAnalytics();
 
@@ -563,6 +632,11 @@ Flags:
     }
   }
 
+  /**
+   * FormatBytes method
+   * @param bytes - Parameter description
+   * @returns string - Return value description
+   */
   private formatBytes(bytes: number): string {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;

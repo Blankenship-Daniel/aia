@@ -154,6 +154,7 @@ export interface AgenticGoal {
 }
 
 export interface AgenticStep {
+  id?: string; // Add optional id field to preserve step IDs
   description: string;
   command: string; // Make required to match ExecutionStep
   expectedOutcome: string;

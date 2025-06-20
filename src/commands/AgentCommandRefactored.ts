@@ -309,6 +309,7 @@ The agent will:
     executionSteps: ExecutionStep[]
   ): AgenticStep[] {
     return executionSteps.map((step) => ({
+      id: step.id, // Preserve the step ID from the template
       description: step.description,
       command: step.command,
       expectedOutcome: step.expectedOutcome,
@@ -396,7 +397,7 @@ The agent will:
         );
 
         const stepPresentation = this.presenter.showExecutionStep({
-          id: step.description,
+          id: step.id || step.description, // Use step.id if available, fallback to description
           command: step.command,
           description: step.description,
           expectedOutcome: step.expectedOutcome,
@@ -408,7 +409,7 @@ The agent will:
         try {
           const result = await this.executionEngine.executeStep(
             {
-              id: step.description,
+              id: step.id || step.description, // Use step.id if available, fallback to description
               command: step.command,
               description: step.description,
               expectedOutcome: step.expectedOutcome,

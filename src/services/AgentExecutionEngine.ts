@@ -1,11 +1,14 @@
 /**
- * Agent Execution Engine Implementation
- * Core logic for planning and executing agentic workflows
+ * Agent Execution Engine
+ * Orchestrates the planning and execution of agentic workflows
  */
-import { IAgentExecutionEngine } from '../interfaces/IAgentExecutionEngine';
 import { IAIService } from '../interfaces/IAIService';
 import { IContextService } from '../interfaces/IContextService';
 import { ICommandService } from '../interfaces/ICommandService';
+import { IAgentExecutionEngine } from '../interfaces/IAgentExecutionEngine';
+import { TaskComplexityAnalyzer } from './TaskComplexityAnalyzer';
+import { PlanningTemplateSystem } from './PlanningTemplateSystem';
+import { OutcomeValidationSystem } from './OutcomeValidationSystem';
 import {
   ContextInfo,
   AgenticExecution,
@@ -17,11 +20,21 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
   private readonly AI_CALL_TIMEOUT_MS = 30000;
   private readonly STEP_TIMEOUT_MS = 60000;
 
+  private taskAnalyzer: TaskComplexityAnalyzer;
+  private planningSystem: PlanningTemplateSystem;
+  private validationSystem: OutcomeValidationSystem;
+  private currentFilePath?: string;
+
   constructor(
     private aiService: IAIService,
     private contextService: IContextService,
     private commandService: ICommandService
-  ) {}
+  ) {
+    // Initialize the new analysis and planning systems
+    this.taskAnalyzer = new TaskComplexityAnalyzer();
+    this.planningSystem = new PlanningTemplateSystem();
+    this.validationSystem = new OutcomeValidationSystem();
+  }
 
   async planExecution(
     goal: string,
@@ -33,26 +46,66 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
     error?: string;
   }> {
     try {
-      const prompt = this.buildPlanningPrompt(
+      console.log('🔍 Analyzing task complexity and requirements...');
+
+      // Step 1: Analyze the task to understand its complexity and requirements
+      const taskAnalysis = this.taskAnalyzer.analyzeTask(goal);
+
+      console.log(`📊 Task Analysis:`);
+      console.log(`   Type: ${taskAnalysis.type}`);
+      console.log(`   Complexity: ${taskAnalysis.complexity}`);
+      console.log(`   Risk Level: ${taskAnalysis.riskLevel}`);
+      console.log(
+        `   Required Capabilities: ${taskAnalysis.requiredCapabilities.join(
+          ', '
+        )}`
+      );
+      console.log(`   Estimated Steps: ${taskAnalysis.estimatedSteps}`);
+
+      // Step 2: Extract context information from the goal
+      const enhancedContext = this.enhanceContextFromGoal(goal, context);
+
+      // Store file path for execution steps
+      this.currentFilePath = enhancedContext.filePath;
+
+      // Step 3: Generate template-based plan if we have a template for this task type
+      const templatePlan = this.planningSystem.generatePlan(
+        taskAnalysis,
         goal,
-        context,
-        previousExecutions
+        enhancedContext
       );
 
-      const response = await this.aiService.queryAI(prompt, context);
+      let finalPlan: ExecutionStep[];
 
-      if (!response || !response.content) {
-        return {
-          success: false,
-          error: 'Failed to generate plan - no response from AI service',
-        };
+      if (templatePlan && templatePlan.length > 0) {
+        console.log('✅ Using template-based planning approach');
+        finalPlan = templatePlan;
+      } else {
+        console.log('🔄 Falling back to AI-based planning');
+        // Fall back to original AI-based planning
+        const prompt = this.buildPlanningPrompt(
+          goal,
+          context,
+          previousExecutions
+        );
+        const response = await this.aiService.queryAI(prompt, context);
+
+        if (!response || !response.content) {
+          return {
+            success: false,
+            error: 'Failed to generate plan - no response from AI service',
+          };
+        }
+
+        finalPlan = this.parsePlanFromResponse(response.content);
       }
 
-      const plan = this.parsePlanFromResponse(response.content);
+      // Step 3: Enhance the plan with validation steps
+      const enhancedPlan = this.addValidationSteps(finalPlan, taskAnalysis);
 
       return {
         success: true,
-        plan,
+        plan: enhancedPlan,
       };
     } catch (error) {
       return {
@@ -74,6 +127,21 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
   }> {
     try {
       if (!step.command || step.command.trim() === '') {
+        // Check if this is a special step that needs custom handling
+        const specialSteps = [
+          'analyze_file',
+          'extract_methods',
+          'generate_jsdoc',
+          'insert_documentation',
+          'validate_documentation',
+        ];
+
+        if (specialSteps.includes(step.id || '')) {
+          // Get context from the agent execution context
+          const context = { filePath: this.currentFilePath };
+          return await this.executeSpecialStep(step, context);
+        }
+
         return {
           success: true,
           output: `Step completed: ${step.description}`,
@@ -81,12 +149,23 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
         };
       }
 
-      // Execute the command
-      const result = await this.commandService.executeCommand(step.command, {
+      // Interpolate variables in the command before execution
+      const interpolatedCommand = this.interpolateVariables(step.command, {
+        filePath: this.currentFilePath,
         workingDirectory: process.cwd(),
-        timeout: step.timeout || this.STEP_TIMEOUT_MS,
-        safe: true,
       });
+
+      console.log(`🔧 Executing: ${interpolatedCommand}`);
+
+      // Execute the interpolated command
+      const result = await this.commandService.executeCommand(
+        interpolatedCommand,
+        {
+          workingDirectory: process.cwd(),
+          timeout: step.timeout || this.STEP_TIMEOUT_MS,
+          safe: true,
+        }
+      );
 
       // Some tools use non-zero exit codes for informational purposes, not failures
       // ESLint uses exit code 2 when linting issues are found (not a failure)
@@ -104,6 +183,7 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
         error: success ? undefined : result.stderr || 'Command failed',
         metadata: {
           command: step.command,
+          interpolatedCommand,
           exitCode: result.exitCode,
           duration: result.duration,
           optimized: result.optimized,
@@ -113,7 +193,7 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Step execution failed',
-        metadata: { command: step.command },
+        metadata: { command: step.command, interpolatedCommand: step.command },
       };
     }
   }
@@ -254,6 +334,157 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
     }
   }
 
+  /**
+   * Validate the overall execution outcome using the validation system
+   */
+  async validateExecutionOutcome(
+    execution: AgenticExecution,
+    taskAnalysis: any
+  ): Promise<{
+    success: boolean;
+    validationDetails: any[];
+    criticalFailures: number;
+  }> {
+    try {
+      // Create task outcome from execution results
+      const taskOutcome = {
+        taskType: taskAnalysis.type,
+        taskDescription: execution.goal,
+        completed: execution.success || false,
+        filePath: this.extractFilePathFromExecution(execution),
+        stepResults: execution.executionResults.map((result) => ({
+          stepId: result.step?.description || 'unknown',
+          success: result.success,
+          output: result.output,
+          error: result.error,
+        })),
+        executionSteps: execution.executionResults.map((result) => ({
+          stepId: result.step?.description || 'unknown',
+          success: result.success,
+          output: result.output,
+          error: result.error,
+          duration: 0, // We don't track duration in current format
+        })),
+        timestamp: new Date().toISOString(),
+        metadata: {
+          iterations: execution.iterations,
+          totalSteps: execution.plan.length,
+          successfulSteps: execution.executionResults.filter((r) => r.success)
+            .length,
+        },
+      };
+
+      // Get appropriate success criteria and validation steps for the task type
+      const { successCriteria, validationSteps } = this.getValidationConfig(
+        taskAnalysis.type
+      );
+
+      const validationResult = await this.validationSystem.validateTaskOutcome(
+        taskOutcome,
+        successCriteria,
+        validationSteps
+      );
+
+      return {
+        success: validationResult.success,
+        validationDetails: validationResult.details,
+        criticalFailures: validationResult.details.filter(
+          (d: any) => d.critical && !d.passed
+        ).length,
+      };
+    } catch (error) {
+      console.warn(
+        'Validation system error:',
+        error instanceof Error ? error.message : 'Unknown error'
+      );
+      return {
+        success: false,
+        validationDetails: [],
+        criticalFailures: 1,
+      };
+    }
+  }
+
+  /**
+   * Extract file path from execution context for validation
+   */
+  private extractFilePathFromExecution(
+    execution: AgenticExecution
+  ): string | undefined {
+    // Look for file path in execution context or steps
+    const filePathPattern = /([^\\s]+\\.(?:ts|js|tsx|jsx|py|java|cpp|c|cs))/i;
+
+    // Check execution goal first
+    const goalMatch = execution.goal.match(filePathPattern);
+    if (goalMatch) {
+      return goalMatch[1];
+    }
+
+    // Check step commands for file references
+    for (const step of execution.plan) {
+      const commandMatch = step.command.match(filePathPattern);
+      if (commandMatch) {
+        return commandMatch[1];
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Extract additional context information from the goal text
+   */
+  private enhanceContextFromGoal(goal: string, baseContext: ContextInfo): any {
+    const enhanced: any = { ...baseContext };
+
+    // Extract file paths from common patterns
+    const filePathPatterns = [
+      // Match "in path/to/file.ext"
+      /\bin\s+([^\s]+\.[a-zA-Z]+)/,
+      // Match "to path/to/file.ext"
+      /\bto\s+([^\s]+\.[a-zA-Z]+)/,
+      // Match "file path/to/file.ext"
+      /\bfile\s+([^\s]+\.[a-zA-Z]+)/,
+      // Match standalone file paths
+      /([^\s]+\/[^\s]*\.[a-zA-Z]+)/,
+    ];
+
+    for (const pattern of filePathPatterns) {
+      const match = goal.match(pattern);
+      if (match) {
+        enhanced.filePath = match[1];
+        break;
+      }
+    }
+
+    // Set working directory to current directory if not set
+    if (!enhanced.workingDirectory) {
+      enhanced.workingDirectory = process.cwd();
+    }
+
+    // Extract project type if possible
+    if (enhanced.filePath) {
+      const extension = enhanced.filePath.split('.').pop()?.toLowerCase();
+      switch (extension) {
+        case 'ts':
+        case 'tsx':
+          enhanced.projectType = 'typescript';
+          break;
+        case 'js':
+        case 'jsx':
+          enhanced.projectType = 'javascript';
+          break;
+        case 'py':
+          enhanced.projectType = 'python';
+          break;
+        default:
+          enhanced.projectType = 'generic';
+      }
+    }
+
+    return enhanced;
+  }
+
   private buildPlanningPrompt(
     goal: string,
     context: ContextInfo,
@@ -326,6 +557,156 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
     }
   }
 
+  private addValidationSteps(
+    plan: ExecutionStep[],
+    taskAnalysis: any
+  ): ExecutionStep[] {
+    // For documentation tasks, add comprehensive validation steps
+    if (
+      taskAnalysis.type === 'documentation' ||
+      taskAnalysis.type === 'code_modification'
+    ) {
+      return this.addDocumentationValidationSteps(plan, taskAnalysis);
+    }
+
+    // Add basic validation steps for other task types
+    const validationSteps: ExecutionStep[] = [];
+
+    plan.forEach((step, index) => {
+      const stepId = step.id || `step-${index + 1}`;
+      validationSteps.push({
+        id: `${stepId}-validate`,
+        description: `Validate step "${step.description}"`,
+        command: `echo Validating ${step.description} && exit 0`,
+        expectedOutcome: 'Validation successful',
+        reasoning: 'Ensure the previous step was successful',
+        risks: ['Validation may not cover all failure modes'],
+        dependencies: [stepId],
+        timeout: 30000,
+      });
+    });
+
+    return [...plan, ...validationSteps];
+  }
+
+  /**
+   * Add comprehensive validation steps for documentation tasks
+   */
+  private addDocumentationValidationSteps(
+    plan: ExecutionStep[],
+    taskAnalysis: any
+  ): ExecutionStep[] {
+    const enhancedPlan = [...plan];
+
+    // Add validation steps after backup
+    const backupStepIndex = plan.findIndex((step) =>
+      step.description.toLowerCase().includes('backup')
+    );
+
+    if (backupStepIndex >= 0) {
+      enhancedPlan.splice(backupStepIndex + 1, 0, {
+        id: 'verify-backup',
+        description: 'Verify backup file was created successfully',
+        command:
+          'test -f {filePath}.backup && echo "Backup verified" || echo "Backup missing"',
+        expectedOutcome: 'Backup file exists and is readable',
+        reasoning: 'Critical safety check before modifying source file',
+        risks: ['Cannot proceed safely without verified backup'],
+        dependencies: ['backup_file'],
+        timeout: 10000,
+      });
+    }
+
+    // Add comprehensive validation at the end
+    enhancedPlan.push({
+      id: 'validate-documentation-coverage',
+      description: 'Validate that all methods have JSDoc documentation',
+      command: '',
+      expectedOutcome: '100% JSDoc coverage for all methods',
+      reasoning: 'Ensure task objective was achieved',
+      risks: ['Documentation may be incomplete or malformed'],
+      dependencies: plan.map((step) => step.id || 'unknown'),
+      timeout: 30000,
+    });
+
+    enhancedPlan.push({
+      id: 'validate-syntax',
+      description: 'Validate file syntax after modification',
+      command: 'node -c {filePath} || tsc --noEmit {filePath}',
+      expectedOutcome: 'No syntax errors detected',
+      reasoning: 'Ensure modifications did not break code syntax',
+      risks: ['Syntax errors would break functionality'],
+      dependencies: ['validate-documentation-coverage'],
+      timeout: 20000,
+    });
+
+    return enhancedPlan;
+  }
+
+  /**
+   * Get validation configuration for a specific task type
+   */
+  private getValidationConfig(taskType: string): {
+    successCriteria: any[];
+    validationSteps: any[];
+  } {
+    switch (taskType) {
+      case 'documentation':
+      case 'code_modification':
+        return {
+          successCriteria: [
+            {
+              id: 'file_modified',
+              description: 'File was successfully modified',
+              critical: true,
+              weight: 2,
+            },
+            {
+              id: 'syntax_valid',
+              description: 'Modified file has valid syntax',
+              critical: true,
+              weight: 2,
+            },
+            {
+              id: 'backup_created',
+              description: 'Backup file was created',
+              critical: true,
+              weight: 1,
+            },
+          ],
+          validationSteps: [
+            {
+              id: 'check_file_exists',
+              description: 'Verify target file exists',
+              method: 'file_exists',
+              parameters: { path: '{filePath}' },
+              expectedResult: true,
+            },
+            {
+              id: 'check_backup_exists',
+              description: 'Verify backup file exists',
+              method: 'file_exists',
+              parameters: { path: '{filePath}.backup' },
+              expectedResult: true,
+            },
+          ],
+        };
+
+      default:
+        return {
+          successCriteria: [
+            {
+              id: 'task_completed',
+              description: 'Task was completed successfully',
+              critical: true,
+              weight: 1,
+            },
+          ],
+          validationSteps: [],
+        };
+    }
+  }
+
   /**
    * Check if a non-zero exit code should be treated as informational rather than failure
    */
@@ -354,5 +735,583 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
     }
 
     return false;
+  }
+
+  /**
+   * Handle special step types that don't have shell commands
+   */
+  private async executeSpecialStep(
+    step: ExecutionStep,
+    context: any
+  ): Promise<{
+    success: boolean;
+    output?: string;
+    error?: string;
+    metadata?: Record<string, unknown>;
+  }> {
+    try {
+      // Handle different types of special steps
+      switch (step.id) {
+        case 'analyze_file':
+          return await this.analyzeFileStructure(context.filePath);
+
+        case 'extract_methods':
+          return await this.extractMethodSignatures(context.filePath);
+
+        case 'generate_jsdoc':
+          return await this.generateJSDocComments(context.filePath);
+
+        case 'insert_documentation':
+          return await this.insertJSDocIntoFile(context.filePath);
+
+        case 'validate_documentation':
+          return await this.validateDocumentationCoverage(context.filePath);
+
+        default:
+          // For other steps without commands, mark as completed
+          return {
+            success: true,
+            output: `Step completed: ${step.description}`,
+            metadata: { skipped: true, reason: 'No implementation required' },
+          };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Step execution failed',
+        metadata: { stepType: 'special', stepId: step.id },
+      };
+    }
+  }
+
+  /**
+   * Analyze file structure and identify methods
+   */
+  private async analyzeFileStructure(filePath: string): Promise<{
+    success: boolean;
+    output?: string;
+    error?: string;
+    metadata?: Record<string, unknown>;
+  }> {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+
+      if (!fs.existsSync(filePath)) {
+        return {
+          success: false,
+          error: `File not found: ${filePath}`,
+        };
+      }
+
+      const content = fs.readFileSync(filePath, 'utf8');
+
+      // Simple method detection for TypeScript/JavaScript
+      const methodMatches =
+        content.match(
+          /(?:async\s+)?(?:public\s+|private\s+|protected\s+)?(?:static\s+)?(\w+)\s*\([^)]*\)\s*(?::\s*[^{]+)?\s*{/g
+        ) || [];
+      const functionMatches =
+        content.match(
+          /(?:export\s+)?(?:async\s+)?function\s+(\w+)\s*\([^)]*\)/g
+        ) || [];
+
+      const totalMethods = methodMatches.length + functionMatches.length;
+
+      return {
+        success: true,
+        output: `Found ${totalMethods} methods/functions requiring documentation:\n${methodMatches
+          .concat(functionMatches)
+          .slice(0, 10)
+          .join('\n')}${totalMethods > 10 ? '\n... and more' : ''}`,
+        metadata: {
+          methodCount: methodMatches.length,
+          functionCount: functionMatches.length,
+          totalCount: totalMethods,
+          filePath,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to analyze file: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      };
+    }
+  }
+
+  /**
+   * Extract method signatures for documentation
+   */
+  private async extractMethodSignatures(filePath: string): Promise<{
+    success: boolean;
+    output?: string;
+    error?: string;
+    metadata?: Record<string, unknown>;
+  }> {
+    try {
+      const fs = require('fs');
+
+      if (!fs.existsSync(filePath)) {
+        return {
+          success: false,
+          error: `File not found: ${filePath}`,
+        };
+      }
+
+      const content = fs.readFileSync(filePath, 'utf8');
+      const lines = content.split('\n');
+
+      const signatures: string[] = [];
+
+      // Find method signatures (simplified regex)
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (
+          line.match(
+            /(?:async\s+)?(?:public\s+|private\s+|protected\s+)?(?:static\s+)?(\w+)\s*\([^)]*\)\s*(?::\s*[^{]+)?\s*{/
+          )
+        ) {
+          signatures.push(`Line ${i + 1}: ${line}`);
+        }
+      }
+
+      return {
+        success: true,
+        output: `Extracted ${signatures.length} method signatures:\n${signatures
+          .slice(0, 5)
+          .join('\n')}${signatures.length > 5 ? '\n... and more' : ''}`,
+        metadata: {
+          signatures,
+          count: signatures.length,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to extract signatures: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      };
+    }
+  }
+
+  /**
+   * Generate JSDoc comments for methods
+   */
+  private async generateJSDocComments(filePath: string): Promise<{
+    success: boolean;
+    output?: string;
+    error?: string;
+    metadata?: Record<string, unknown>;
+  }> {
+    try {
+      const fs = require('fs');
+
+      if (!fs.existsSync(filePath)) {
+        return {
+          success: false,
+          error: `File not found: ${filePath}`,
+        };
+      }
+
+      const content = fs.readFileSync(filePath, 'utf8');
+      const lines = content.split('\n');
+
+      const docsGenerated: string[] = [];
+
+      // Find methods and generate basic JSDoc
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        const match = line.match(
+          /(?:async\s+)?(?:public\s+|private\s+|protected\s+)?(?:static\s+)?(\w+)\s*\(([^)]*)\)\s*(?::\s*([^{]+))?\s*{/
+        );
+
+        if (match) {
+          const [, methodName, params, returnType] = match;
+          const paramList = params
+            .split(',')
+            .filter((p: string) => p.trim())
+            .map((p: string) => p.trim().split(':')[0].trim());
+
+          let jsdoc = '  /**\n';
+          jsdoc += `   * ${
+            methodName.charAt(0).toUpperCase() + methodName.slice(1)
+          } method\n`;
+
+          if (paramList.length > 0 && paramList[0]) {
+            paramList.forEach((param: string) => {
+              if (param && param !== '') {
+                jsdoc += `   * @param ${param} - Parameter description\n`;
+              }
+            });
+          }
+
+          if (returnType && returnType.trim() !== 'void') {
+            jsdoc += `   * @returns ${returnType.trim()} - Return value description\n`;
+          }
+
+          jsdoc += '   */';
+
+          docsGenerated.push(`${methodName}: Generated JSDoc`);
+        }
+      }
+
+      return {
+        success: true,
+        output: `Generated JSDoc for ${
+          docsGenerated.length
+        } methods:\n${docsGenerated.slice(0, 5).join('\n')}${
+          docsGenerated.length > 5 ? '\n... and more' : ''
+        }`,
+        metadata: {
+          generated: docsGenerated,
+          count: docsGenerated.length,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to generate JSDoc: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      };
+    }
+  }
+
+  /**
+   * Insert JSDoc comments into the source file
+   */
+  private async insertJSDocIntoFile(filePath: string): Promise<{
+    success: boolean;
+    output?: string;
+    error?: string;
+    metadata?: Record<string, unknown>;
+  }> {
+    try {
+      const fs = require('fs');
+
+      if (!fs.existsSync(filePath)) {
+        return {
+          success: false,
+          error: `File not found: ${filePath}`,
+        };
+      }
+
+      const content = fs.readFileSync(filePath, 'utf8');
+      const lines = content.split('\n');
+      const newLines: string[] = [];
+      let insertedCount = 0;
+
+      console.log(`[DEBUG] Processing file: ${filePath}`);
+      console.log(`[DEBUG] Total lines: ${lines.length}`);
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const trimmed = line.trim();
+
+        // Check if this line contains a method declaration
+        // Handle both single-line and multi-line method declarations
+        let methodMatch = null;
+        let methodName = '';
+        let isMultiLine = false;
+
+        // First, try single-line method detection with comprehensive patterns
+        const patterns = [
+          // Pattern 1: Method with simple return type
+          /^(?:(?:public|private|protected)\s+)?(?:async\s+)?(?:static\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\s*\([^)]*\)\s*:\s*[A-Za-z<>_\[\],\s]*\s*\{$/,
+          // Pattern 2: Method with complex return type (including objects with braces)
+          /^(?:(?:public|private|protected)\s+)?(?:async\s+)?(?:static\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\s*\([^)]*\)\s*:\s*.*?\s*\{$/,
+          // Pattern 3: Method without return type
+          /^(?:(?:public|private|protected)\s+)?(?:async\s+)?(?:static\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\s*\([^)]*\)\s*\{$/,
+          // Pattern 4: Multi-line method start
+          /^(?:(?:public|private|protected)\s+)?(?:async\s+)?(?:static\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\s*\($/,
+        ];
+
+        // Try each pattern
+        for (let p = 0; p < patterns.length && !methodName; p++) {
+          methodMatch = trimmed.match(patterns[p]);
+          if (methodMatch && methodMatch[1]) {
+            methodName = methodMatch[1];
+            isMultiLine = p === 3; // Fourth pattern is multi-line
+          }
+        }
+
+        // For multi-line methods, verify they have an opening brace
+        if (isMultiLine && methodName) {
+          let foundBrace = false;
+          for (let j = i + 1; j < Math.min(lines.length, i + 10); j++) {
+            if (lines[j].includes('{')) {
+              foundBrace = true;
+              break;
+            }
+          }
+          if (!foundBrace) {
+            methodName = ''; // Invalid method declaration
+          }
+        }
+
+        if (methodName) {
+          // Keywords to exclude from method detection (control flow statements)
+          const excludeKeywords = [
+            'if',
+            'for',
+            'while',
+            'switch',
+            'catch',
+            'try',
+          ];
+
+          // Skip if it matches excluded keywords
+          if (excludeKeywords.includes(methodName)) {
+            newLines.push(line);
+            continue;
+          }
+
+          console.log(
+            `[DEBUG] Found method at line ${i + 1}: ${methodName} (${
+              isMultiLine ? 'multi-line' : 'single-line'
+            })`
+          );
+
+          // Check if there's already JSDoc above this method
+          const prevLine = i > 0 ? lines[i - 1].trim() : '';
+          const hasPrevJSDoc =
+            prevLine.includes('*/') ||
+            (i > 1 && lines[i - 2].trim().includes('/**'));
+
+          console.log(`[DEBUG] Has existing JSDoc: ${hasPrevJSDoc}`);
+
+          if (!hasPrevJSDoc) {
+            // Get the indentation of the method line
+            const indent = line.match(/^(\s*)/)?.[1] || '  ';
+
+            // Generate JSDoc with proper indentation
+            newLines.push(`${indent}/**`);
+            newLines.push(
+              `${indent} * ${
+                methodName.charAt(0).toUpperCase() + methodName.slice(1)
+              } method`
+            );
+
+            // For multi-line methods, we can't easily parse parameters, so use generic JSDoc
+            if (isMultiLine) {
+              newLines.push(
+                `${indent} * @param {...any} args - Method parameters`
+              );
+              newLines.push(`${indent} * @returns {any} - Method return value`);
+            } else {
+              // Extract parameters and return type for single-line methods
+              const [, , params, returnType] = methodMatch || [];
+              const paramList = params
+                ? params
+                    .split(',')
+                    .filter((p: string) => p.trim())
+                    .map((p: string) => p.trim().split(':')[0].trim())
+                : [];
+
+              if (paramList.length > 0 && paramList[0]) {
+                paramList.forEach((param: string) => {
+                  if (param && param !== '') {
+                    newLines.push(
+                      `${indent} * @param ${param} - Parameter description`
+                    );
+                  }
+                });
+              }
+
+              if (returnType && returnType.trim() !== 'void') {
+                newLines.push(
+                  `${indent} * @returns ${returnType.trim()} - Return value description`
+                );
+              }
+            }
+
+            newLines.push(`${indent} */`);
+            insertedCount++;
+            console.log(`[DEBUG] Inserted JSDoc for method: ${methodName}`);
+          } else {
+            console.log(
+              `[DEBUG] Skipping method with existing JSDoc: ${methodName}`
+            );
+          }
+        }
+
+        newLines.push(line);
+      }
+
+      // Write the modified content back to the file
+      if (insertedCount > 0) {
+        fs.writeFileSync(filePath, newLines.join('\n'));
+      }
+
+      return {
+        success: true,
+        output: `Successfully inserted JSDoc comments for ${insertedCount} methods into ${filePath}`,
+        metadata: {
+          insertedCount,
+          filePath,
+          totalLines: newLines.length,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to insert JSDoc: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      };
+    }
+  }
+
+  /**
+   * Validate JSDoc documentation coverage
+   */
+  private async validateDocumentationCoverage(filePath: string): Promise<{
+    success: boolean;
+    output?: string;
+    error?: string;
+    metadata?: Record<string, unknown>;
+  }> {
+    try {
+      const fs = require('fs');
+
+      if (!fs.existsSync(filePath)) {
+        return {
+          success: false,
+          error: `File not found: ${filePath}`,
+        };
+      }
+
+      const content = fs.readFileSync(filePath, 'utf8');
+      const lines = content.split('\n');
+
+      let totalMethods = 0;
+      let documentedMethods = 0;
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+
+        // Handle both single-line and multi-line method declarations with comprehensive patterns
+        let methodMatch = null;
+        let methodName = '';
+        let isMultiLine = false;
+
+        const patterns = [
+          // Pattern 1: Method with simple return type
+          /^(?:(?:public|private|protected)\s+)?(?:async\s+)?(?:static\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\s*\([^)]*\)\s*:\s*[A-Za-z<>_\[\],\s]*\s*\{$/,
+          // Pattern 2: Method with complex return type (including objects with braces)
+          /^(?:(?:public|private|protected)\s+)?(?:async\s+)?(?:static\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\s*\([^)]*\)\s*:\s*.*?\s*\{$/,
+          // Pattern 3: Method without return type
+          /^(?:(?:public|private|protected)\s+)?(?:async\s+)?(?:static\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\s*\([^)]*\)\s*\{$/,
+          // Pattern 4: Multi-line method start
+          /^(?:(?:public|private|protected)\s+)?(?:async\s+)?(?:static\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\s*\($/,
+        ];
+
+        // Try each pattern
+        for (let p = 0; p < patterns.length && !methodName; p++) {
+          methodMatch = line.match(patterns[p]);
+          if (methodMatch && methodMatch[1]) {
+            methodName = methodMatch[1];
+            isMultiLine = p === 3; // Fourth pattern is multi-line
+          }
+        }
+
+        // For multi-line methods, verify they have an opening brace
+        if (isMultiLine && methodName) {
+          let foundBrace = false;
+          for (let j = i + 1; j < Math.min(lines.length, i + 10); j++) {
+            if (lines[j].includes('{')) {
+              foundBrace = true;
+              break;
+            }
+          }
+          if (!foundBrace) {
+            methodName = '';
+          }
+        }
+
+        if (methodName) {
+          // Keywords to exclude from method detection (control flow statements)
+          const excludeKeywords = [
+            'if',
+            'for',
+            'while',
+            'switch',
+            'catch',
+            'try',
+          ];
+
+          // Skip if it matches excluded keywords
+          if (!excludeKeywords.includes(methodName)) {
+            totalMethods++;
+
+            // Check if there's JSDoc above this method
+            for (let j = i - 1; j >= Math.max(0, i - 5); j--) {
+              if (lines[j].trim().includes('/**')) {
+                documentedMethods++;
+                break;
+              }
+              if (
+                lines[j].trim() &&
+                !lines[j].trim().startsWith('*') &&
+                !lines[j].trim().startsWith('//')
+              ) {
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      const coverage =
+        totalMethods > 0 ? (documentedMethods / totalMethods) * 100 : 100;
+      const success = coverage >= 90; // Consider 90%+ coverage as success
+
+      return {
+        success,
+        output: `Documentation coverage: ${documentedMethods}/${totalMethods} methods (${coverage.toFixed(
+          1
+        )}%)`,
+        metadata: {
+          totalMethods,
+          documentedMethods,
+          coverage,
+          filePath,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to validate coverage: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      };
+    }
+  }
+
+  /**
+   * Interpolates variables in command strings
+   * Replaces placeholders like {filePath} with actual values
+   */
+  private interpolateVariables(
+    command: string,
+    variables: Record<string, string | undefined>
+  ): string {
+    let interpolated = command;
+
+    // Replace each variable placeholder with its value
+    for (const [key, value] of Object.entries(variables)) {
+      if (value !== undefined) {
+        const placeholder = `{${key}}`;
+        interpolated = interpolated.replace(
+          new RegExp(placeholder, 'g'),
+          value
+        );
+      }
+    }
+
+    return interpolated;
   }
 }

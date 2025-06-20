@@ -1,3 +1,25 @@
+/**
+ * AskCommand.ts - Direct AI query command with context awareness and memory integration.
+ *
+ * Responsibilities:
+ * - Processes direct user questions to AI with contextual information.
+ * - Integrates with AI service for model selection and query processing.
+ * - Manages conversation memory for improved context awareness.
+ * - Provides user-friendly interface with progress indicators and error handling.
+ *
+ * Architecture:
+ * - Implements ICommand interface for consistent command structure.
+ * - Uses dependency injection for AI, context, and memory services.
+ * - Supports model selection and additional context parameters.
+ *
+ * Exports:
+ * - {@link AskCommand}: Command implementation for AI queries.
+ *
+ * @see IAIService - AI model interaction and query processing.
+ * @see IContextService - Environment and project context gathering.
+ * @see IMemoryService - Conversation history and memory management.
+ */
+
 import { ICommand, CommandDefinition } from '../interfaces/ICommand';
 import { IAIService } from '../interfaces/IAIService';
 import { IContextService } from '../interfaces/IContextService';
@@ -11,6 +33,30 @@ import {
 import chalk from 'chalk';
 import ora from 'ora';
 
+/**
+ * AskCommand - Direct AI query command providing context-aware question answering.
+ *
+ * Purpose:
+ * - Enables users to ask direct questions to AI with automatic context integration.
+ * - Manages conversation memory to provide improved contextual responses.
+ * - Supports flexible model selection and additional context parameters.
+ * - Provides user-friendly interface with progress indicators and clear error messages.
+ *
+ * Key Features:
+ * - Context-aware AI queries with project and environment information.
+ * - Integration with conversation memory for enhanced responses.
+ * - Model selection support for different AI capabilities.
+ * - Progress indication during AI processing.
+ *
+ * Dependencies:
+ * @see IAIService - Handles AI model interactions and query processing.
+ * @see IContextService - Gathers environment and project context.
+ * @see IMemoryService - Manages conversation history and memory.
+ *
+ * @example
+ * const askCmd = new AskCommand(aiService, contextService, memoryService);
+ * await askCmd.execute({}, ['How do I optimize this code?'], { model: 'gpt-4' });
+ */
 export class AskCommand implements ICommand {
   public readonly name = 'ask';
   public readonly description = 'Ask AI a question with context awareness';
@@ -49,6 +95,30 @@ export class AskCommand implements ICommand {
     };
   }
 
+  /**
+   * Executes the ask command to process user questions with AI integration.
+   *
+   * Detailed Process:
+   * - Validates the user query and ensures it's not empty.
+   * - Gathers current context including project and environment information.
+   * - Retrieves recent conversation history for enhanced context awareness.
+   * - Queries AI service with the question, context, and conversation history.
+   * - Stores the conversation exchange in memory for future reference.
+   * - Displays the AI response with model information to the user.
+   *
+   * @param {Record<string, unknown>} context - Execution context (not directly used).
+   * @param {string[]} args - User question arguments to be joined as the query.
+   * @param {CommandOptions} [options={}] - Command options including model preference and additional context.
+   * @returns {Promise<CommandResult>} Result containing AI response data or error information.
+   * @throws {Error} If AI service interaction or memory storage fails.
+   *
+   * @example
+   * const result = await askCmd.execute({}, ['How to optimize performance?'], { model: 'gpt-4' });
+   * console.log(result.data.content); // AI response content
+   *
+   * @see IAIService.queryAI - Core AI query processing.
+   * @see IMemoryService.addConversation - Stores conversation for future context.
+   */
   async execute(
     context: Record<string, unknown>,
     args: string[],

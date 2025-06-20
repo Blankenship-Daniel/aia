@@ -1,4 +1,26 @@
 /**
+ * AIService.ts - Core AI service managing model interactions and query processing.
+ *
+ * Responsibilities:
+ * - Coordinates AI model interactions using the Strategy Pattern for provider abstraction.
+ * - Manages intelligent model selection based on query context and requirements.
+ * - Integrates with conversation memory for context-aware responses.
+ * - Handles provider initialization, configuration, and error recovery.
+ *
+ * Architecture:
+ * - Implements SOLID principles with focused responsibilities and provider abstraction.
+ * - Uses Strategy Pattern for AI provider implementations (OpenAI, Anthropic, etc.).
+ * - Integrates with conversation memory for context persistence.
+ *
+ * Exports:
+ * - {@link AIService}: Main service class implementing IAIService interface.
+ *
+ * @see IAIService - Interface defining AI service contract.
+ * @see AIProviderFactory - Factory for creating AI provider instances.
+ * @see IConversationMemory - Memory service for conversation context.
+ */
+
+/**
  * AI Service Implementation
  * Manages AI model interactions and query processing using Strategy Pattern
  * SOLID SRP: Responsible only for AI service coordination
@@ -14,6 +36,33 @@ import { IAIProvider, AICallOptions } from '../interfaces/IAIProvider';
 import { AIProviderFactory, ProviderConfig } from './AIProviderFactory';
 import { AIAConfig, ContextInfo, AIModel } from '../types/index';
 
+/**
+ * AIService - Core service coordinating AI model interactions with provider abstraction.
+ *
+ * Purpose:
+ * - Manages AI provider lifecycle using Strategy Pattern for flexible model support.
+ * - Performs intelligent model selection based on query complexity and context.
+ * - Integrates conversation memory for context-aware AI interactions.
+ * - Provides unified AI interface abstracting provider-specific implementations.
+ *
+ * SOLID Principles:
+ * - SRP: Responsible only for AI service coordination.
+ * - OCP: Open for extension via new providers, closed for modification.
+ * - LSP: Provider implementations are substitutable.
+ * - ISP: Uses focused interfaces for providers.
+ * - DIP: Depends on IAIProvider abstraction, not concrete implementations.
+ *
+ * Dependencies:
+ * @see IConfigurationService - Provides AI provider configuration.
+ * @see IConversationMemory - Manages conversation context.
+ * @see AIProviderFactory - Creates provider instances.
+ * @see IAIProvider - Provider abstraction interface.
+ *
+ * @example
+ * const aiService = new AIService(configService, memoryService);
+ * await aiService.initialize();
+ * const response = await aiService.queryAI('Explain this code', context);
+ */
 export class AIService implements IAIService {
   private configService: IConfigurationService;
   private conversationMemory: IConversationMemory;
@@ -29,7 +78,22 @@ export class AIService implements IAIService {
   }
 
   /**
-   * Initialize AI service with provider strategy
+   * Initializes the AI service with provider strategy configuration.
+   *
+   * Detailed Process:
+   * - Retrieves AI provider configuration from configuration service.
+   * - Creates appropriate AI provider instance using factory pattern.
+   * - Validates API keys and provider availability.
+   * - Sets up provider strategy for subsequent AI queries.
+   *
+   * @returns {Promise<void>} Resolves when provider is initialized and ready.
+   * @throws {Error} If provider creation or configuration fails.
+   *
+   * @example
+   * await aiService.initialize();
+   * console.log('AI service ready for queries');
+   *
+   * @see AIProviderFactory - Creates provider instances based on configuration.
    */
   async initialize(): Promise<void> {
     if (this.initialized) {
@@ -58,7 +122,26 @@ export class AIService implements IAIService {
   }
 
   /**
-   * Query AI with intelligent model selection using provider strategy
+   * Queries AI with intelligent model selection and context integration.
+   *
+   * Detailed Process:
+   * - Selects optimal AI model based on prompt complexity and context.
+   * - Builds system prompt incorporating conversation history and context.
+   * - Executes AI query using configured provider strategy.
+   * - Stores conversation exchange in memory for future context.
+   *
+   * @param {string} prompt - The user query or prompt to send to AI.
+   * @param {ContextInfo} context - Contextual information about the current environment.
+   * @param {AIModel | null} [preferredModel] - Optional preferred model override.
+   * @returns {Promise<{content: string, model: AIModel, metadata: Record<string, unknown>}>} AI response with metadata.
+   * @throws {Error} If AI query fails or provider is not initialized.
+   *
+   * @example
+   * const response = await aiService.queryAI('Explain this function', contextInfo);
+   * console.log(response.content);
+   *
+   * @see selectModel - Intelligent model selection logic.
+   * @see IConversationMemory - Stores conversation for context.
    */
   async queryAI(
     prompt: string,

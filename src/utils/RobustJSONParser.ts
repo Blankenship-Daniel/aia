@@ -8,15 +8,57 @@ import jsonic from 'jsonic';
 import JSON5 from 'json5';
 
 /**
- * Robust JSON Parser for AI Responses
+ * RobustJSONParser.ts - Robust JSON parsing utility for AI responses with multiple fallback strategies.
  *
- * This utility replaces manual JSON parsing and string cleaning throughout AIA
- * with a more reliable, library-based approach that can handle:
- * - JSON embedded in markdown code blocks
- * - Malformed JSON with missing quotes, trailing commas
- * - Mixed text and JSON responses
- * - Single-quoted strings and unquoted keys
- * - Multiple JSON objects in a single response
+ * Responsibilities:
+ * - Parses JSON from AI responses that may contain malformed or embedded JSON.
+ * - Provides multiple fallback strategies for handling various JSON formats and edge cases.
+ * - Handles JSON embedded in markdown code blocks, mixed text responses, and partial JSON.
+ * - Supports debugging and logging of parsing attempts for troubleshooting.
+ *
+ * Capabilities:
+ * - Standard JSON parsing with validation.
+ * - Extraction from markdown code blocks.
+ * - Handling of malformed JSON with missing quotes, trailing commas.
+ * - Support for single-quoted strings and unquoted keys.
+ * - Multiple JSON objects in single response.
+ * - Partial JSON recovery and reconstruction.
+ *
+ * Exports:
+ * - {@link RobustJSONParser}: Main parser class with comprehensive parsing strategies.
+ * - {@link parseAgenticPlan}: Specialized parser for agentic plan structures.
+ * - {@link parseEvaluationResult}: Parser for evaluation result objects.
+ * - {@link parseStepVerification}: Parser for step verification data.
+ *
+ * @see AgenticReasoningEngine - Primary consumer of parsing functionality.
+ * @see extract-first-json - Library for extracting JSON from mixed content.
+ * @see dirty-json - Library for parsing malformed JSON.
+ * @see jsonic - Library for relaxed JSON parsing.
+ */
+
+/**
+ * RobustJSONParser - Advanced JSON parsing utility designed for AI response processing.
+ *
+ * Purpose:
+ * - Provides reliable JSON extraction from AI responses that may contain malformed, embedded, or mixed content.
+ * - Implements multiple parsing strategies with intelligent fallback mechanisms.
+ * - Handles various edge cases including markdown code blocks, partial JSON, and syntax errors.
+ * - Supports debugging and detailed logging for troubleshooting parsing issues.
+ *
+ * Parsing Strategies (in order of execution):
+ * 1. Standard JSON.parse() for well-formed JSON
+ * 2. Extraction from markdown code blocks
+ * 3. extract-first-json library for mixed content
+ * 4. dirty-json library for malformed JSON
+ * 5. jsonic library for relaxed JSON syntax
+ * 6. JSON5 library for extended JSON syntax
+ * 7. Multiple object extraction
+ * 8. Partial JSON recovery
+ *
+ * @example
+ * const parser = new RobustJSONParser();
+ * const result = parser.parseFromResponse('```json\n{"key": "value"}\n```');
+ * console.log(result); // { key: "value" }
  */
 export class RobustJSONParser {
   private parseAttempts: number;
@@ -28,7 +70,25 @@ export class RobustJSONParser {
   }
 
   /**
-   * Parse JSON from AI response with multiple fallback strategies
+   * Parses JSON from AI response using multiple fallback strategies.
+   *
+   * Detailed Process:
+   * - Attempts standard JSON parsing first for optimal performance.
+   * - Falls back to specialized libraries for malformed or embedded JSON.
+   * - Tries multiple extraction strategies until successful or all fail.
+   * - Provides detailed logging when debug mode is enabled.
+   *
+   * @param {string} response - The AI response string potentially containing JSON.
+   * @param {boolean} [logAttempts=false] - Whether to log parsing attempts and results.
+   * @returns {unknown | null} Parsed JSON object or null if all parsing strategies fail.
+   *
+   * @example
+   * const parser = new RobustJSONParser();
+   * const result = parser.parseFromResponse('Here is the data: {"status": "ok"}', true);
+   * // Returns: { status: "ok" }
+   *
+   * @see parseStandardJSON - First parsing strategy using native JSON.parse.
+   * @see parseFromCodeBlocks - Extracts JSON from markdown code blocks.
    */
   public parseFromResponse(
     response: string,

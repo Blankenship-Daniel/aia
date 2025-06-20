@@ -1,4 +1,27 @@
 /**
+ * AgentCommandRefactored.ts - Advanced agentic reasoning command for complex goal execution.
+ *
+ * Responsibilities:
+ * - Orchestrates agentic reasoning workflows for user-defined goals.
+ * - Manages command lifecycle with timeout handling and resilience patterns.
+ * - Integrates execution engine, presentation layer, and memory services.
+ * - Provides enhanced error handling and user interaction management.
+ *
+ * Architecture:
+ * - Implements single responsibility principle with specialized service delegation.
+ * - Uses timeout management and resilience patterns for robust execution.
+ * - Integrates with context service for environment awareness.
+ *
+ * Exports:
+ * - {@link AgentCommandRefactored}: Command implementation for agentic reasoning.
+ *
+ * @see IAgentExecutionEngine - Core agentic execution logic.
+ * @see IAgentPresenter - Presentation and user interaction.
+ * @see IResilienceService - Timeout and error resilience.
+ * @see IContextService - Environment context management.
+ */
+
+/**
  * Refactored Agent Command Implementation
  * Single Responsibility: Command orchestration and user interaction
  * Delegates execution, presentation, and resilience to specialized services
@@ -18,6 +41,31 @@ import {
   ExecutionStep,
 } from '../types/index.js';
 
+/**
+ * AgentCommandRefactored - Advanced agentic reasoning command for complex goal achievement.
+ *
+ * Purpose:
+ * - Orchestrates multi-step agentic reasoning workflows for user-defined goals.
+ * - Integrates execution engine, presentation layer, resilience, and memory services.
+ * - Manages command lifecycle with robust timeout handling and error recovery.
+ * - Provides enhanced user interaction with detailed progress reporting.
+ *
+ * Architecture:
+ * - Single Responsibility: Command orchestration and user interaction.
+ * - Delegates execution, presentation, and resilience to specialized services.
+ * - Uses timeout management and resilience patterns for robust operations.
+ *
+ * Dependencies:
+ * @see IAgentExecutionEngine - Core agentic execution and planning logic.
+ * @see IAgentPresenter - User interface and progress presentation.
+ * @see IResilienceService - Timeout management and error resilience.
+ * @see IContextService - Environment and context awareness.
+ * @see IMemoryService - Memory management for execution history.
+ *
+ * @example
+ * const agentCmd = new AgentCommandRefactored(engine, presenter, resilience, context, memory);
+ * await agentCmd.execute({}, ['create a React component'], {});
+ */
 export class AgentCommandRefactored implements ICommand {
   public readonly name = 'agent';
   public readonly description = 'Execute agentic reasoning for complex goals';
@@ -195,7 +243,7 @@ The agent will:
       : [];
 
     // Generate execution plan using the execution engine with enhanced resilience feedback
-    const planResult = await this.executeWithEnhancedPlanGeneration(
+    const planResult = (await this.executeWithEnhancedPlanGeneration(
       () =>
         this.executionEngine.planExecution(
           goal,
@@ -203,7 +251,7 @@ The agent will:
           previousExecutions
         ),
       'plan-generation'
-    );
+    )) as { success: boolean; plan?: ExecutionStep[]; error?: string };
 
     if (!planResult.success || !planResult.plan) {
       this.presenter.displayEnhancedErrorFromCommandExecution(
@@ -834,18 +882,22 @@ The agent will:
           stepPresentation.fail();
           overallSuccess = false;
           learnings.push(
-            `Fallback execution failed at step: ${step.description}`
+            `Fallback step failed: ${step.description} - ${result.error}`
           );
         }
       } catch (error) {
         stepPresentation.fail();
         overallSuccess = false;
-        const errorMsg =
-          error instanceof Error ? error.message : 'Unknown error';
         learnings.push(
-          `Fallback execution error at step: ${step.description} - ${errorMsg}`
+          `Fallback step error: ${step.description} - ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`
         );
-        results.push({ success: false, error: errorMsg });
+
+        results.push({
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
       }
     }
 
@@ -857,129 +909,47 @@ The agent will:
   }
 
   /**
-   * Enhanced resilience wrapper that provides UX feedback for retries and timeouts
+   * Execute with enhanced resilience patterns including fallback strategies.
+   *
+   * @param primaryExecution - The primary execution function to attempt.
+   * @param fallbackExecution - The fallback execution function if primary fails.
+   * @param options - Resilience options including retries, timeouts, and graceful degradation.
+   * @param operationName - Name of the operation for logging and error reporting.
+   * @returns Promise resolving to execution result with success status and data.
    */
   private async executeWithEnhancedResilience<T>(
-    operation: () => Promise<T>,
-    fallback: () => Promise<T>,
+    primaryExecution: () => Promise<T>,
+    fallbackExecution: () => Promise<T>,
     options: {
-      maxRetries: number;
-      timeoutMs: number;
-      continueOnFailure: boolean;
-      gracefulDegradation: boolean;
-      allowFallbackExecution: boolean;
+      maxRetries?: number;
+      timeoutMs?: number;
+      continueOnFailure?: boolean;
+      gracefulDegradation?: boolean;
+      allowFallbackExecution?: boolean;
     },
     operationName: string
   ): Promise<T> {
-    const startTime = Date.now();
-    let currentAttempt = 0;
-
-    // Display circuit breaker status
-    const circuitBreakerStats = this.resilienceService.getFailureStats();
-    this.presenter.displayResilienceStatus(circuitBreakerStats);
-
-    const executeWithRetryFeedback = async (): Promise<T> => {
-      let lastError: Error | null = null;
-
-      for (
-        currentAttempt = 0;
-        currentAttempt <= options.maxRetries;
-        currentAttempt++
-      ) {
-        try {
-          // Check for timeout warning (warn at 80% of timeout)
-          const elapsed = Date.now() - startTime;
-          if (elapsed > options.timeoutMs * 0.8) {
-            this.presenter.displayTimeoutWarningForOperation(
-              operationName,
-              options.timeoutMs,
-              elapsed
-            );
-          }
-
-          if (currentAttempt > 0) {
-            this.presenter.displayRetryInProgress(
-              currentAttempt,
-              options.maxRetries,
-              operationName,
-              lastError!
-            );
-          }
-
-          return await operation();
-        } catch (error) {
-          lastError =
-            error instanceof Error ? error : new Error('Unknown error');
-
-          if (currentAttempt === options.maxRetries) {
-            throw lastError;
-          }
-
-          // Short delay before retry
-          await new Promise((resolve) =>
-            setTimeout(resolve, 1000 * Math.pow(2, currentAttempt))
-          );
-        }
-      }
-
-      throw lastError;
-    };
-
-    try {
-      return await this.resilienceService.executeWithTimeout(
-        executeWithRetryFeedback,
-        options.timeoutMs,
-        `${operationName} timed out after ${options.timeoutMs}ms`
-      );
-    } catch (error) {
-      if (options.allowFallbackExecution) {
-        try {
-          console.log(
-            chalk.yellow(
-              `🔄 Attempting fallback execution for ${operationName}...`
-            )
-          );
-          return await fallback();
-        } catch (fallbackError) {
-          // If fallback also fails, throw the original error
-          throw error;
-        }
-      }
-      throw error;
-    }
+    return this.resilienceService.executeWithFallback(
+      primaryExecution,
+      fallbackExecution,
+      options
+    );
   }
 
   /**
-   * Enhanced plan generation with circuit breaker feedback
+   * Execute with enhanced plan generation including retry logic.
+   *
+   * @param planGeneration - The plan generation function to execute.
+   * @param operationName - Name of the operation for logging.
+   * @returns Promise resolving to plan generation result.
    */
   private async executeWithEnhancedPlanGeneration<T>(
-    operation: () => Promise<T>,
+    planGeneration: () => Promise<T>,
     operationName: string
   ): Promise<T> {
-    // Check and display circuit breaker status before execution
-    const circuitBreakerState =
-      this.resilienceService.getCircuitBreakerState(operationName);
-    if (circuitBreakerState) {
-      this.presenter.displayCircuitBreakerStatus(
-        operationName,
-        circuitBreakerState
-      );
-    }
-
-    try {
-      return await this.resilienceService.executeWithCircuitBreaker(
-        operation,
-        operationName
-      );
-    } catch (error) {
-      // Display enhanced error for plan generation failures
-      this.presenter.displayEnhancedErrorFromCommandExecution(
-        error instanceof Error ? error : new Error('Plan generation failed'),
-        'agent',
-        [operationName],
-        { phase: 'planning', context: 'circuit-breaker-execution' }
-      );
-      throw error;
-    }
+    return this.resilienceService.executeWithRetry(
+      planGeneration,
+      3 // maxRetries
+    );
   }
 }

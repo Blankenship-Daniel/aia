@@ -1,3 +1,39 @@
+/**
+ * AgenticReasoningEngine.ts - Core agentic reasoning workflows for AIA CLI.
+ *
+ * Responsibilities:
+ * - Coordinates multi-step AI-driven plans for user goals.
+ * - Integrates with NLP, search engine, and conversation context management.
+ * - Manages execution history, error handling, and circuit breaker patterns.
+ *
+ * Exports:
+ * - {@link AgenticReasoningEngine}: Main class for executing agentic queries.
+ *
+ * @see AgenticSearchEngine - Semantic code search operations.
+ * @see NLPEngine - Natural language processing for goal understanding.
+ */
+
+/**
+ * AgenticReasoningEngine - Core engine orchestrating AI-driven multi-step reasoning workflows.
+ *
+ * Purpose:
+ * - Orchestrates planning, execution, evaluation, and recovery for complex user goals.
+ * - Manages execution history, error handling, and circuit breaker patterns for reliable operations.
+ * - Integrates NLP, search engine, and response generation services.
+ *
+ * Dependencies:
+ * @see AgenticSearchEngine - Semantic code and context search operations.
+ * @see NLPEngine - Natural language processing for goal understanding.
+ * @see ConversationContextManager - Manages conversation history and context.
+ * @see ResponseGenerator - Generates enhanced AI-driven responses.
+ * @see ErrorHandler - Handles errors and recovery strategies.
+ *
+ * @example
+ * // Initialize and execute a goal
+ * const engine = new AgenticReasoningEngine(aiaInstance);
+ * const result = await engine.executeAgenticQuery('Optimize build process');
+ */
+
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import AgenticSearchEngine from './AgenticSearchEngine.js';
@@ -140,6 +176,25 @@ export class AgenticReasoningEngine {
     this.circuitBreakerResetTimeMs = 300000; // Reset after 5 minutes
   }
 
+  /**
+   * Executes a multi-step AI-driven reasoning query based on a user goal.
+   *
+   * Detailed Workflow:
+   * - Performs advanced NLP analysis to refine the goal.
+   * - Iteratively plans, executes, and evaluates steps to achieve the goal.
+   * - Handles errors with fallback strategies and circuit breaker patterns.
+   * - Generates an enhanced AI-driven response upon completion.
+   *
+   * @param {string} userGoal - The natural language goal provided by the user.
+   * @param {AgenticQueryOptions} [options] - Optional execution parameters (maxIterations, autoExecute, allowIteration).
+   * @returns {Promise<AgenticQueryResult>} Result including goal achievement status, analysis, and responses.
+   * @throws {Error} If both primary and fallback executions fail.
+   *
+   * @example
+   * const engine = new AgenticReasoningEngine(aia);
+   * const result = await engine.executeAgenticQuery('Optimize build process', { maxIterations: 3 });
+   * @see reasoningLoop
+   */
   async executeAgenticQuery(
     userGoal: string,
     options: AgenticQueryOptions = {}
@@ -267,6 +322,27 @@ export class AgenticReasoningEngine {
     }
   }
 
+  /**
+   * Runs the iterative reasoning loop until goal is achieved or limits are reached.
+   *
+   * Process Steps:
+   * 1. Plan generation
+   * 2. Plan execution
+   * 3. Result evaluation
+   * 4. Learning and adjustment for next iteration
+   * 5. Recovery on failures
+   *
+   * @param {AgenticExecutionContext} context - Current execution context with state and options.
+   * @returns {Promise<EvaluationResult>} Evaluation result of the final iteration.
+   * @throws {Error} If unrecoverable errors occur during iteration.
+   *
+   * @example
+   * const context = { goal: '...', enhancedGoal: '...', ... };
+   * const eval = await engine.reasoningLoop(context);
+   * @see generatePlan
+   * @see executePlan
+   * @see evaluateResult
+   */
   async reasoningLoop(
     context: AgenticExecutionContext
   ): Promise<EvaluationResult> {
@@ -331,6 +407,18 @@ export class AgenticReasoningEngine {
     };
   }
 
+  /**
+   * Generates an AI-based plan outlining step-by-step actions to achieve the goal.
+   *
+   * @param {AgenticExecutionContext} context - Execution context containing goal and NLP analysis.
+   * @returns {Promise<AgenticPlan>} Structured plan with ordered steps for execution.
+   * @throws {Error} When plan generation via AI fails.
+   *
+   * @example
+   * const plan = await engine.generatePlan(context);
+   * console.log(plan.steps.length);
+   * @see parseAgenticPlan
+   */
   async generatePlan(context: AgenticExecutionContext): Promise<AgenticPlan> {
     console.log(chalk.blue('📋 Generating execution plan...'));
 
@@ -354,6 +442,19 @@ export class AgenticReasoningEngine {
     }
   }
 
+  /**
+   * Executes each step in the provided plan, managing successes, failures, and recoveries.
+   *
+   * @param {AgenticPlan} plan - The structured plan containing steps to execute.
+   * @param {AgenticExecutionContext} context - Execution state and options.
+   * @returns {Promise<AgenticExecutionResult>} Detailed execution results including per-step outcomes.
+   * @throws {Error} If plan execution fails critically without recovery.
+   *
+   * @example
+   * const execResult = await engine.executePlan(plan, context);
+   * console.log(execResult.success);
+   * @see executeStep
+   */
   async executePlan(
     plan: AgenticPlan,
     context: AgenticExecutionContext

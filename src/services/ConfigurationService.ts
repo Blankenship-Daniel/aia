@@ -1,3 +1,25 @@
+/**
+ * ConfigurationService.ts - Core configuration management for AIA CLI application.
+ *
+ * Responsibilities:
+ * - Manages application configuration loading, validation, and persistence.
+ * - Handles configuration profiles, backups, and schema validation.
+ * - Provides environment variable integration and configuration watchers.
+ * - Supports feature flags, security settings, and preference management.
+ *
+ * Architecture:
+ * - Implements IConfigurationService with comprehensive config lifecycle management.
+ * - Provides backup and recovery mechanisms for configuration safety.
+ * - Supports configuration watching for real-time updates.
+ *
+ * Exports:
+ * - {@link ConfigurationService}: Main service implementing configuration management.
+ *
+ * @see IConfigurationService - Interface defining configuration service contract.
+ * @see AIAConfig - Core configuration type definition.
+ * @see ConfigProfile - User profile configuration structure.
+ */
+
 import { IConfigurationService } from '../interfaces/IConfigurationService';
 import { AIAConfig, ConfigProfile, AsyncResult } from '../types/index';
 import * as fs from 'fs-extra';
@@ -5,8 +27,31 @@ import * as path from 'path';
 import * as os from 'os';
 
 /**
- * Configuration Service Implementation
- * Manages application configuration and user preferences
+ * ConfigurationService - Centralized configuration management for the AIA CLI application.
+ *
+ * Purpose:
+ * - Manages complete configuration lifecycle including loading, validation, and persistence.
+ * - Provides secure handling of API keys, user preferences, and application settings.
+ * - Supports configuration profiles, backup/recovery, and real-time updates.
+ * - Integrates environment variables with file-based configuration.
+ *
+ * Key Features:
+ * - Schema validation for configuration integrity.
+ * - Automatic backup creation before configuration changes.
+ * - Configuration watchers for real-time updates.
+ * - Environment variable override support.
+ * - Profile-based configuration management.
+ *
+ * Dependencies:
+ * @see AIAConfig - Core configuration type structure.
+ * @see ConfigProfile - User profile configuration.
+ * @see fs-extra - File system operations with enhanced functionality.
+ *
+ * @example
+ * const configService = new ConfigurationService();
+ * await configService.initialize();
+ * const config = configService.getConfiguration();
+ * await configService.saveConfiguration(updatedConfig);
  */
 export class ConfigurationService implements IConfigurationService {
   private config: AIAConfig;
@@ -25,7 +70,23 @@ export class ConfigurationService implements IConfigurationService {
   }
 
   /**
-   * Initialize configuration service and load settings
+   * Initializes the configuration service and loads settings from storage.
+   *
+   * Detailed Process:
+   * - Creates necessary directories for configuration and backups.
+   * - Loads configuration from file system with fallback to defaults.
+   * - Applies environment variable overrides for API keys.
+   * - Validates loaded configuration against schema.
+   *
+   * @returns {Promise<void>} Resolves when configuration is loaded and ready.
+   * @throws {Error} If critical initialization steps fail (non-blocking for config loading).
+   *
+   * @example
+   * await configService.initialize();
+   * console.log('Configuration ready:', configService.getConfiguration());
+   *
+   * @see loadConfiguration - Loads config from file system.
+   * @see getDefaultConfiguration - Provides fallback configuration.
    */
   async initialize(): Promise<void> {
     try {

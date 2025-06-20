@@ -1,3 +1,17 @@
+/**
+ * AgenticSearchEngine.ts - Enhanced search and context discovery for agentic reasoning workflows.
+ *
+ * Responsibilities:
+ * - Gathers relevant context including memory, project, environment, and historical patterns.
+ * - Performs semantic search and resource suggestion to inform AI planning and execution.
+ *
+ * Exports:
+ * - {@link AgenticSearchEngine}: Core engine for context gathering and search operations.
+ *
+ * @see AgenticReasoningEngine - Consumes context data for reasoning workflows.
+ * @see MemoryService - Underlying memory search integration.
+ */
+
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
@@ -77,9 +91,19 @@ interface SearchResult {
 }
 
 /**
- * AgenticSearchEngine - Enhanced search and information discovery for agentic reasoning
- * This engine helps the AgenticReasoningEngine gather relevant information,
- * search through memory, and discover contextual data to improve decision making.
+ * AgenticSearchEngine - Core search engine for gathering contextual data and memory insights.
+ *
+ * Purpose:
+ * - Provides semantic search capabilities across memory, project files, environment, and historical patterns.
+ * - Supplies relevant resources to optimize AI-driven planning and reasoning.
+ *
+ * Dependencies:
+ * @see RelevantContext - Structure of combined context data.
+ * @see MemoryInsights - Interface for memory-based search results.
+ *
+ * @example
+ * const searchEngine = new AgenticSearchEngine(aiaInstance);
+ * const context = await searchEngine.gatherRelevantContext('Optimize build');
  */
 export default class AgenticSearchEngine {
   private aia: any;
@@ -93,7 +117,25 @@ export default class AgenticSearchEngine {
   }
 
   /**
-   * Enhanced context search for agentic reasoning
+   * Gathers a comprehensive set of context data to inform AI planning.
+   *
+   * Detailed Description:
+   * - Performs memory search for conversational and command insights.
+   * - Analyzes project structure, dependencies, and configurations.
+   * - Assesses environment details (OS, shell, resources).
+   * - Identifies historical patterns and suggests relevant resources.
+   *
+   * @param {string} goal - The user’s natural language goal to gather context for.
+   * @param {Record<string, unknown>} [context={}] - Optional baseline context overrides.
+   * @returns {Promise<RelevantContext>} Aggregated context including memory, project, environment, patterns, and resources.
+   * @throws {Error} If critical context gathering operations fail.
+   *
+   * @example
+   * const ctx = await engine.gatherRelevantContext('Refactor module');
+   * console.log(ctx.projectContext.relevantFiles);
+   *
+   * @see searchMemoryForGoal - Retrieves memory-based insights.
+   * @see analyzeProjectForGoal - Inspects project files and configurations.
    */
   async gatherRelevantContext(
     goal: string,
@@ -113,7 +155,22 @@ export default class AgenticSearchEngine {
   }
 
   /**
-   * Search through memory for relevant information related to the goal
+   * Searches stored memory for insights related to the user’s goal.
+   *
+   * Detailed Description:
+   * - Attempts service-based semantic memory search if available.
+   * - Falls back to legacy semantic or simple text-based search.
+   * - Filters and limits results for relevant conversations and commands.
+   *
+   * @param {string} goal - The goal to search memory for.
+   * @returns {Promise<MemoryInsights>} Insights including past conversations, commands, and extracted insights.
+   * @throws {Error} If memory loading or search operations fail critically.
+   *
+   * @example
+   * const memInsights = await engine.searchMemoryForGoal('Deploy service');
+   * console.log(memInsights.insights);
+   *
+   * @see extractInsightsFromMemory - Derives actionable insights from conversation history.
    */
   async searchMemoryForGoal(goal: string): Promise<MemoryInsights> {
     try {

@@ -1,5 +1,18 @@
-// CLI Formatting and Display Module
-// Centralizes all output formatting, colors, and user interface elements
+/**
+ * CLIFormatter.ts - Centralized CLI output formatting, colors, and user interface elements.
+ *
+ * Responsibilities:
+ * - Provides consistent formatting for success, error, warning, and info messages.
+ * - Manages loading spinners and progress indicators for long-running operations.
+ * - Handles structured display of memory stats, context info, and command suggestions.
+ * - Centralizes all CLI styling and color schemes for maintainability.
+ *
+ * Exports:
+ * - {@link CLIFormatter}: Main formatter class for all CLI output operations.
+ *
+ * @see chalk - Color and styling library for terminal output.
+ * @see ora - Elegant terminal spinner library for loading indicators.
+ */
 
 import chalk from 'chalk';
 import ora, { Ora } from 'ora';
@@ -27,6 +40,27 @@ interface ContextInfo {
   [key: string]: unknown;
 }
 
+/**
+ * CLIFormatter - Centralized formatting and display system for consistent CLI output.
+ *
+ * Purpose:
+ * - Provides standardized methods for displaying various types of messages and status indicators.
+ * - Manages loading spinners with customizable options for long-running operations.
+ * - Ensures consistent color schemes and formatting across the entire CLI application.
+ * - Handles complex data structures display with proper formatting and indentation.
+ *
+ * Key Features:
+ * - Success, error, warning, and info message formatting.
+ * - Loading spinners with progress tracking.
+ * - Memory statistics and context information display.
+ * - Command suggestion and debugging output.
+ *
+ * @example
+ * const formatter = new CLIFormatter();
+ * formatter.displaySuccess('Operation completed successfully');
+ * const loaderId = formatter.displayLoading('Processing...');
+ * formatter.stopLoading(loaderId);
+ */
 export class CLIFormatter {
   private loadingSpinners: Map<string, LoadingSpinner>;
 
@@ -34,6 +68,15 @@ export class CLIFormatter {
     this.loadingSpinners = new Map();
   }
 
+  /**
+   * Displays a success message with optional details.
+   *
+   * @param {string} message - The primary success message to display.
+   * @param {unknown} [details=null] - Optional additional details to show in gray text.
+   *
+   * @example
+   * formatter.displaySuccess('File saved', { path: '/tmp/output.json' });
+   */
   // Enhanced success message display
   public displaySuccess(message: string, details: unknown = null): void {
     console.log(chalk.green('✅ ' + message));
@@ -46,6 +89,15 @@ export class CLIFormatter {
     }
   }
 
+  /**
+   * Displays an error message with context and optional stack trace.
+   *
+   * @param {Error | string} error - The error object or message to display.
+   * @param {string} [context=''] - Optional context information for the error.
+   *
+   * @example
+   * formatter.displayError(new Error('File not found'), 'Loading config');
+   */
   // Enhanced error display
   public displayError(error: Error | string, context: string = ''): void {
     const errorMessage = error instanceof Error ? error.message : error;
@@ -63,6 +115,15 @@ export class CLIFormatter {
     }
   }
 
+  /**
+   * Displays a warning message with optional details.
+   *
+   * @param {string} message - The warning message to display.
+   * @param {unknown} [details=null] - Optional additional warning details.
+   *
+   * @example
+   * formatter.displayWarning('Deprecated API usage', { method: 'oldMethod' });
+   */
   // Enhanced warning display
   public displayWarning(message: string, details: unknown = null): void {
     console.log(chalk.yellow('⚠️  ' + message));
@@ -75,6 +136,15 @@ export class CLIFormatter {
     }
   }
 
+  /**
+   * Displays an informational message with optional details.
+   *
+   * @param {string} message - The informational message to display.
+   * @param {unknown} [details=null] - Optional additional information.
+   *
+   * @example
+   * formatter.displayInfo('Configuration loaded', { source: 'config.json' });
+   */
   // Enhanced info display
   public displayInfo(message: string, details: unknown = null): void {
     console.log(chalk.blue('ℹ️  ' + message));
@@ -87,12 +157,35 @@ export class CLIFormatter {
     }
   }
 
+  /**
+   * Displays a command suggestion with reasoning.
+   *
+   * @param {string} command - The suggested command to display.
+   * @param {string} reason - The reason for suggesting this command.
+   *
+   * @example
+   * formatter.displayCommandSuggestion('npm install', 'Missing dependencies detected');
+   */
   // Enhanced command suggestion display
   public displayCommandSuggestion(command: string, reason: string): void {
     console.log(chalk.cyan('💡 Suggestion: ' + command));
     console.log(chalk.gray('   Reason: ' + reason));
   }
 
+  /**
+   * Starts a loading spinner with customizable options.
+   *
+   * @param {string} message - The loading message to display.
+   * @param {Object} [options={}] - Spinner customization options.
+   * @param {string} [options.spinner] - Spinner style (dots, line, etc.).
+   * @param {string} [options.color] - Spinner color.
+   * @returns {string} Unique identifier for the spinner to stop it later.
+   *
+   * @example
+   * const loaderId = formatter.displayLoading('Processing files...', { color: 'blue' });
+   * // Later...
+   * formatter.stopLoading(loaderId);
+   */
   // Display loading message with spinner
   public displayLoading(
     message: string,

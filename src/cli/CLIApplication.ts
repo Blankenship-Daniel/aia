@@ -1,4 +1,21 @@
 /**
+ * CLIApplication.ts - Main CLI application orchestrating service architecture with Commander.js.
+ *
+ * Responsibilities:
+ * - Initializes dependency injection container and registers all services.
+ * - Sets up command-line interface with Commander.js integration.
+ * - Manages CLI program lifecycle including initialization, command setup, and execution.
+ * - Provides error handling and graceful shutdown for CLI operations.
+ *
+ * Exports:
+ * - {@link CLIApplication}: Main CLI application class managing the entire CLI lifecycle.
+ *
+ * @see ServiceFactory - Creates and configures the dependency injection container.
+ * @see CommandRegistry - Manages command registration and execution.
+ * @see DIContainer - Dependency injection container for service management.
+ */
+
+/**
  * CLI Application
  * Main CLI application that integrates the service architecture with Commander.js
  */
@@ -12,7 +29,26 @@ import { IConfigurationService } from '../interfaces/IConfigurationService.js';
 import { DIContainer } from '../container/DIContainer.js';
 
 /**
- * CLI Application class that manages the command-line interface
+ * CLIApplication - Main application class orchestrating the entire CLI experience.
+ *
+ * Purpose:
+ * - Manages the complete CLI lifecycle from initialization to command execution.
+ * - Integrates dependency injection container with Commander.js for service-aware commands.
+ * - Provides centralized error handling and graceful shutdown capabilities.
+ * - Coordinates between service layer and command execution layer.
+ *
+ * Dependencies:
+ * @see DIContainer - Manages service dependencies and lifecycle.
+ * @see CommandRegistry - Handles command registration and routing.
+ * @see ServiceFactory - Creates configured service instances.
+ * @see IConfigurationService - Provides configuration management.
+ * @see ICommandService - Handles command execution.
+ *
+ * @example
+ * // Initialize and run CLI application
+ * const app = new CLIApplication();
+ * await app.initialize();
+ * await app.run(process.argv);
  */
 export default class CLIApplication {
   private program: Command;
@@ -30,7 +66,24 @@ export default class CLIApplication {
   }
 
   /**
-   * Initialize the CLI application
+   * Initializes the CLI application with dependency injection and command setup.
+   *
+   * Detailed Process:
+   * 1. Sets up dependency injection container and all services.
+   * 2. Registers and configures all available commands.
+   * 3. Configures the Commander.js CLI program with options and handlers.
+   * 4. Ensures all components are ready for command execution.
+   *
+   * @returns {Promise<void>} Resolves when initialization is complete.
+   * @throws {Error} If service setup, command registration, or CLI configuration fails.
+   *
+   * @example
+   * const app = new CLIApplication();
+   * await app.initialize();
+   * console.log('CLI ready for commands');
+   *
+   * @see setupServices - Initializes dependency injection container.
+   * @see setupCommands - Registers all available commands.
    */
   async initialize(): Promise<void> {
     if (this.initialized) {
@@ -58,7 +111,23 @@ export default class CLIApplication {
   }
 
   /**
-   * Setup dependency injection container and services
+   * Sets up the dependency injection container and initializes all services.
+   *
+   * Detailed Process:
+   * - Creates DIContainer via ServiceFactory with all service registrations.
+   * - Initializes all services including configuration, command, and interactive CLI services.
+   * - Stores references to commonly used services for quick access.
+   * - Configures command registry from the container.
+   *
+   * @returns {Promise<void>} Resolves when all services are initialized.
+   * @throws {Error} If service creation or initialization fails.
+   *
+   * @example
+   * await this.setupServices();
+   * console.log('Services ready:', Object.keys(this.services));
+   *
+   * @see ServiceFactory - Creates configured dependency injection container.
+   * @see DIContainer - Manages service lifecycle and resolution.
    */
   private async setupServices(): Promise<void> {
     try {
@@ -88,7 +157,23 @@ export default class CLIApplication {
   }
 
   /**
-   * Setup CLI commands
+   * Sets up CLI commands by registering them with Commander.js program.
+   *
+   * Detailed Process:
+   * - Retrieves all command instances from the command factory.
+   * - Registers each command with the command registry.
+   * - Adds each command to the Commander.js program with appropriate options.
+   * - Configures command aliases, arguments, and action handlers.
+   *
+   * @returns {Promise<void>} Resolves when all commands are registered.
+   * @throws {Error} If command factory resolution or registration fails.
+   *
+   * @example
+   * await this.setupCommands();
+   * console.log('Commands registered:', this.commandRegistry.getAllCommands().length);
+   *
+   * @see CommandRegistry - Manages command registration and routing.
+   * @see addCommand - Adds individual commands to CLI program.
    */
   private async setupCommands(): Promise<void> {
     try {

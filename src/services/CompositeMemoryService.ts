@@ -1,3 +1,33 @@
+/**
+ * CompositeMemoryService.ts - Facade pattern implementation for backward-compatible memory service access.
+ *
+ * Responsibilities:
+ * - Provides unified interface to all focused memory services using Facade pattern.
+ * - Maintains backward compatibility with legacy MemoryService interface.
+ * - Delegates operations to appropriate specialized memory services.
+ * - Ensures SOLID principles compliance while preserving existing API surface.
+ *
+ * Architecture:
+ * - Implements Facade pattern for complex memory subsystem coordination.
+ * - Delegates to focused services: persistence, conversation, command, statistics, import/export.
+ * - Maintains interface segregation by routing to appropriate specialized services.
+ *
+ * SOLID Principles:
+ * - SRP: Responsible only for delegating to appropriate services.
+ * - OCP: Open for extension by adding new focused services.
+ * - LSP: Substitutable for the original MemoryService.
+ * - ISP: Delegates to appropriate interfaces based on client needs.
+ * - DIP: Depends on abstractions (interfaces) not concretions.
+ *
+ * Exports:
+ * - {@link CompositeMemoryService}: Facade service implementing IMemoryService.
+ *
+ * @see IMemoryService - Main memory service interface.
+ * @see IMemoryPersistence - Memory persistence operations.
+ * @see IConversationMemory - Conversation history management.
+ * @see ICommandMemory - Command history management.
+ */
+
 import { IMemoryService } from '../interfaces/IMemoryService.js';
 import { IMemoryPersistence } from '../interfaces/IMemoryPersistence.js';
 import { IConversationMemory } from '../interfaces/IConversationMemory.js';
@@ -13,13 +43,32 @@ import {
 } from '../types/index.js';
 
 /**
- * Composite Memory Service - Provides backward compatibility
- * Implements the Facade pattern to delegate to focused services
- * SOLID SRP: Responsible only for delegating to appropriate services
- * SOLID OCP: Open for extension by adding new focused services
- * SOLID LSP: Substitutable for the original MemoryService
- * SOLID ISP: Delegates to appropriate interfaces based on client needs
- * SOLID DIP: Depends on abstractions (interfaces) not concretions
+ * CompositeMemoryService - Facade pattern implementation providing unified access to specialized memory services.
+ *
+ * Purpose:
+ * - Maintains backward compatibility with existing MemoryService interface.
+ * - Delegates operations to focused, specialized memory services.
+ * - Provides single point of access for all memory-related operations.
+ * - Ensures clean separation of concerns while preserving existing API.
+ *
+ * Delegation Strategy:
+ * - Conversation operations → IConversationMemory
+ * - Command operations → ICommandMemory
+ * - Statistics operations → IMemoryStatistics
+ * - Import/Export operations → IMemoryImportExport
+ * - Persistence operations → IMemoryPersistence
+ *
+ * Dependencies:
+ * @see IMemoryPersistence - Handles memory data persistence.
+ * @see IConversationMemory - Manages conversation history.
+ * @see ICommandMemory - Manages command history.
+ * @see IMemoryStatistics - Provides memory usage statistics.
+ * @see IMemoryImportExport - Handles memory data import/export.
+ *
+ * @example
+ * const memoryService = new CompositeMemoryService(persistence, conversation, command, stats, importExport);
+ * await memoryService.addConversation('query', 'response', context);
+ * const recentChats = await memoryService.getRecentConversations(10);
  */
 export class CompositeMemoryService implements IMemoryService {
   constructor(

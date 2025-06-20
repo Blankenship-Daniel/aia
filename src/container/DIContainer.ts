@@ -1,6 +1,26 @@
 /**
- * Dependency Injection Container
- * Manages service registration, resolution, and lifecycle
+ * DIContainer.ts - Dependency injection container managing service registration, resolution, and lifecycle.
+ *
+ * Responsibilities:
+ * - Manages service registration with support for classes, factories, and instances.
+ * - Resolves service dependencies with automatic dependency injection.
+ * - Handles singleton lifecycle management and service initialization.
+ * - Provides validation and error handling for dependency resolution.
+ *
+ * Features:
+ * - Service registration with constructor injection.
+ * - Factory function support for complex service creation.
+ * - Singleton and transient service lifecycle management.
+ * - Circular dependency detection and validation.
+ * - Service initialization with proper dependency ordering.
+ *
+ * Exports:
+ * - {@link DIContainer}: Main dependency injection container.
+ * - {@link ServiceConfig}: Configuration interface for service registration.
+ * - {@link RegistrationOptions}: Options for service registration.
+ *
+ * @see ServiceFactory - Factory for creating and configuring the DI container.
+ * @see SOLID principles - Container implements dependency inversion principle.
  */
 
 // Type definitions for DI Container
@@ -27,6 +47,33 @@ interface ValidationResult {
   warnings: string[];
 }
 
+/**
+ * DIContainer - Dependency injection container implementing service registration and resolution.
+ *
+ * Purpose:
+ * - Provides centralized service registration with support for classes, factories, and instances.
+ * - Manages service lifecycle including singleton patterns and initialization ordering.
+ * - Resolves dependencies automatically with proper error handling and validation.
+ * - Detects and prevents circular dependencies in service graph.
+ *
+ * Key Features:
+ * - Constructor injection with automatic dependency resolution.
+ * - Factory function support for complex service instantiation.
+ * - Singleton and transient service lifecycle management.
+ * - Service validation and initialization with dependency ordering.
+ * - Circular dependency detection with detailed error reporting.
+ *
+ * Registration Types:
+ * - Class constructors with dependency injection.
+ * - Factory functions for custom instantiation logic.
+ * - Direct instances for pre-configured services.
+ *
+ * @example
+ * const container = new DIContainer();
+ * container.register('service', ServiceClass, { dependencies: ['dependency'] });
+ * await container.initialize();
+ * const service = container.resolve('service');
+ */
 export class DIContainer {
   private services: Map<string, ServiceConfig>;
   private singletons: Map<string, unknown>;
@@ -41,10 +88,17 @@ export class DIContainer {
   }
 
   /**
-   * Register a service with the container
-   * @param name - Service name/identifier
-   * @param implementation - Service implementation (class constructor or instance)
-   * @param options - Registration options
+   * Registers a service with the container using class constructor or instance.
+   *
+   * @param {string} name - Unique service identifier for resolution.
+   * @param {(new (...args: unknown[]) => T) | null} implementation - Service class constructor or null for factory-only registration.
+   * @param {RegistrationOptions} [options={}] - Registration options including singleton behavior and dependencies.
+   *
+   * @example
+   * container.register('aiService', AIService, {
+   *   dependencies: ['configuration', 'memory'],
+   *   singleton: true
+   * });
    */
   public register<T = unknown>(
     name: string,

@@ -2,7 +2,15 @@
  * CLIApplication.ts - Main CLI application orchestrating service architecture with Commander.js.
  *
  * Responsibilities:
- * - Initializes dependency injection container and registers all services.
+ * - Initializes dependency injection container and register  private async setupCommands(): Promise<void> {
+    try {
+      // Check for verbose flag directly from process arguments for startup messages
+      const isVerbose = process.argv.includes('--verbose') || process.argv.includes('--debug');
+      
+      // Only show setup messages in verbose mode for cleaner UX
+      if (isVerbose) {
+        console.log(chalk.blue('Setting up commands...'));
+      }services.
  * - Sets up command-line interface with Commander.js integration.
  * - Manages CLI program lifecycle including initialization, command setup, and execution.
  * - Provides error handling and graceful shutdown for CLI operations.
@@ -131,7 +139,14 @@ export default class CLIApplication {
    */
   private async setupServices(): Promise<void> {
     try {
-      console.log(chalk.blue('Setting up services...'));
+      // Check for verbose flag directly from process arguments for startup messages
+      const isVerbose =
+        process.argv.includes('--verbose') || process.argv.includes('--debug');
+
+      // Only show setup messages in verbose mode for cleaner UX
+      if (isVerbose) {
+        console.log(chalk.blue('Setting up services...'));
+      }
 
       // Create service factory and initialize services
       this.container = ServiceFactory.createContainer();
@@ -149,7 +164,10 @@ export default class CLIApplication {
       // Use commandRegistry from the container instead of creating a new one
       this.commandRegistry = this.container.resolve('commandRegistry');
 
-      console.log(chalk.green('✅ Services initialized successfully'));
+      // Only show success message in verbose mode for cleaner UX
+      if (isVerbose) {
+        console.log(chalk.green('✅ Services initialized successfully'));
+      }
     } catch (error: any) {
       console.error(chalk.red('Failed to setup services:'), error.message);
       throw error;
@@ -177,7 +195,10 @@ export default class CLIApplication {
    */
   private async setupCommands(): Promise<void> {
     try {
-      console.log(chalk.blue('Setting up commands...'));
+      // Only show setup messages in verbose mode for cleaner UX
+      if (this.program?.opts()?.verbose) {
+        console.log(chalk.blue('Setting up commands...'));
+      }
 
       // Create command factory with required services
       // Get the command factory from the DI container
@@ -190,7 +211,14 @@ export default class CLIApplication {
         this.addCommand(name, commandInstance);
       }
 
-      console.log(chalk.green(`✅ ${commands.size} commands registered`));
+      // Check for verbose flag directly from process arguments
+      const isVerbose =
+        process.argv.includes('--verbose') || process.argv.includes('--debug');
+
+      // Only show registration message in verbose mode for cleaner UX
+      if (isVerbose) {
+        console.log(chalk.green(`✅ ${commands.size} commands registered`));
+      }
     } catch (error: any) {
       console.error(chalk.red('Failed to setup commands:'), error.message);
       throw error;
@@ -433,13 +461,23 @@ export default class CLIApplication {
       .option('--debug', 'Enable debug mode')
       .option('--config <path>', 'Custom configuration file path');
 
-    // Global error handling
-    this.program.exitOverride();
+    // Global error handling - remove exitOverride to prevent outputHelp errors
+    // this.program.exitOverride();
 
     // Add help customization
     this.program.configureHelp({
       sortSubcommands: true,
       subcommandTerm: (cmd) => cmd.name() + ' ' + cmd.usage(),
+    });
+
+    // Override help action to avoid throwing errors
+    this.program.configureOutput({
+      outputError: (str, write) => {
+        // Suppress outputHelp errors for cleaner UX
+        if (!str.includes('outputHelp')) {
+          write(str);
+        }
+      },
     });
   }
 
@@ -523,9 +561,8 @@ export default class CLIApplication {
       await this.shutdown();
       process.exit(0);
     } catch (error: any) {
-      if (error.code === 'commander.help') {
-        // Help was displayed, exit gracefully
-        await this.shutdown();
+      if (error.code === 'commander.help' || error.message === 'outputHelp') {
+        // Help was displayed, exit gracefully without extra messages
         return;
       }
 
@@ -539,7 +576,7 @@ export default class CLIApplication {
         process.exit(1);
       }
 
-      console.error(chalk.red('CLI error:'), error.message);
+      console.error(chalk.red('Error:'), error.message);
 
       if (this.program.opts().debug) {
         console.error(chalk.gray('Stack trace:'), error.stack);
@@ -610,7 +647,10 @@ export default class CLIApplication {
    */
   async shutdown(): Promise<void> {
     try {
-      console.log(chalk.blue('Shutting down CLI application...'));
+      // Silent shutdown for cleaner UX - only show messages in debug mode
+      if (this.program?.opts()?.debug) {
+        console.log(chalk.blue('Shutting down CLI application...'));
+      }
 
       // Cleanup services in order
       const cleanupTasks: Promise<void>[] = [];
@@ -664,7 +704,10 @@ export default class CLIApplication {
         new Promise<void>((resolve) => setTimeout(resolve, 5000)), // 5 second timeout
       ]);
 
-      console.log(chalk.green('✅ CLI application shutdown complete'));
+      // Only show completion message in debug mode for cleaner UX
+      if (this.program?.opts()?.debug) {
+        console.log(chalk.green('✅ CLI application shutdown complete'));
+      }
     } catch (error: any) {
       console.error(chalk.red('Error during shutdown:'), error.message);
     }

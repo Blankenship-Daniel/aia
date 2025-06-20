@@ -360,10 +360,12 @@ export class ServiceFactory {
       }
     );
 
-    // Agent Presenter (no dependencies - UI service)
+    // Agent Presenter (Phase 1 enhancement: inject resilience and performance services)
     container.registerFactory('agentPresenter', (container) => {
       const { AgentPresenter } = require('../../dist/services/AgentPresenter');
-      return new AgentPresenter();
+      const resilienceService = container.resolve('resilienceService');
+      const performanceMonitor = container.resolve('performanceMonitor');
+      return new AgentPresenter(resilienceService, performanceMonitor);
     });
 
     // Resilience Service (no dependencies - utility service)

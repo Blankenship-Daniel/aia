@@ -42,7 +42,12 @@ export class AgentCommandRefactored implements ICommand {
     const goal = args.join(' ').trim();
 
     if (!goal) {
-      this.presenter.displayError('Please provide a goal to achieve');
+      this.presenter.displayEnhancedErrorFromCommandExecution(
+        new Error('Please provide a goal to achieve'),
+        'agent',
+        args,
+        { phase: 'validation', context: 'goal-required' }
+      );
       return {
         success: false,
         error: 'Please provide a goal to achieve',
@@ -59,7 +64,13 @@ export class AgentCommandRefactored implements ICommand {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Agentic execution failed';
-      this.presenter.displayError(errorMessage);
+
+      this.presenter.displayEnhancedErrorFromCommandExecution(
+        error instanceof Error ? error : new Error('Agentic execution failed'),
+        'agent',
+        args,
+        { phase: 'execution', context: 'main-execution-flow' }
+      );
 
       return {
         success: false,
@@ -183,8 +194,8 @@ The agent will:
       ? historyResult
       : [];
 
-    // Generate execution plan using the execution engine
-    const planResult = await this.resilienceService.executeWithCircuitBreaker(
+    // Generate execution plan using the execution engine with enhanced resilience feedback
+    const planResult = await this.executeWithEnhancedPlanGeneration(
       () =>
         this.executionEngine.planExecution(
           goal,
@@ -195,8 +206,11 @@ The agent will:
     );
 
     if (!planResult.success || !planResult.plan) {
-      this.presenter.displayError(
-        planResult.error || 'Failed to generate execution plan'
+      this.presenter.displayEnhancedErrorFromCommandExecution(
+        new Error(planResult.error || 'Failed to generate execution plan'),
+        'agent',
+        [goal],
+        { phase: 'planning', context: 'plan-generation' }
       );
       return {
         success: false,
@@ -240,7 +254,7 @@ The agent will:
       }
     }
 
-    // Execute plan with resilience
+    // Execute plan with resilience and enhanced UX feedback
     const executionOptions = {
       autoExecute,
       maxIterations: (options.maxIterations ||
@@ -249,7 +263,7 @@ The agent will:
       noIteration: Boolean(options.noIteration || options['no-iteration']),
     };
 
-    const executionResult = await this.resilienceService.executeWithFallback(
+    const executionResult = await this.executeWithEnhancedResilience(
       () => this.executePlanWithProgress(execution, executionOptions),
       () => this.fallbackExecution(execution),
       {
@@ -258,7 +272,8 @@ The agent will:
         continueOnFailure: true,
         gracefulDegradation: true,
         allowFallbackExecution: true,
-      }
+      },
+      'plan-execution'
     );
 
     // Update execution status
@@ -838,5 +853,132 @@ The agent will:
       results,
       learnings,
     };
+  }
+
+  /**
+   * Enhanced resilience wrapper that provides UX feedback for retries and timeouts
+   */
+  private async executeWithEnhancedResilience<T>(
+    operation: () => Promise<T>,
+    fallback: () => Promise<T>,
+    options: {
+      maxRetries: number;
+      timeoutMs: number;
+      continueOnFailure: boolean;
+      gracefulDegradation: boolean;
+      allowFallbackExecution: boolean;
+    },
+    operationName: string
+  ): Promise<T> {
+    const startTime = Date.now();
+    let currentAttempt = 0;
+
+    // Display circuit breaker status
+    const circuitBreakerStats = this.resilienceService.getFailureStats();
+    this.presenter.displayResilienceStatus(circuitBreakerStats);
+
+    const executeWithRetryFeedback = async (): Promise<T> => {
+      let lastError: Error | null = null;
+
+      for (
+        currentAttempt = 0;
+        currentAttempt <= options.maxRetries;
+        currentAttempt++
+      ) {
+        try {
+          // Check for timeout warning (warn at 80% of timeout)
+          const elapsed = Date.now() - startTime;
+          if (elapsed > options.timeoutMs * 0.8) {
+            this.presenter.displayTimeoutWarningForOperation(
+              operationName,
+              options.timeoutMs,
+              elapsed
+            );
+          }
+
+          if (currentAttempt > 0) {
+            this.presenter.displayRetryInProgress(
+              currentAttempt,
+              options.maxRetries,
+              operationName,
+              lastError!
+            );
+          }
+
+          return await operation();
+        } catch (error) {
+          lastError =
+            error instanceof Error ? error : new Error('Unknown error');
+
+          if (currentAttempt === options.maxRetries) {
+            throw lastError;
+          }
+
+          // Short delay before retry
+          await new Promise((resolve) =>
+            setTimeout(resolve, 1000 * Math.pow(2, currentAttempt))
+          );
+        }
+      }
+
+      throw lastError;
+    };
+
+    try {
+      return await this.resilienceService.executeWithTimeout(
+        executeWithRetryFeedback,
+        options.timeoutMs,
+        `${operationName} timed out after ${options.timeoutMs}ms`
+      );
+    } catch (error) {
+      if (options.allowFallbackExecution) {
+        try {
+          console.log(
+            chalk.yellow(
+              `🔄 Attempting fallback execution for ${operationName}...`
+            )
+          );
+          return await fallback();
+        } catch (fallbackError) {
+          // If fallback also fails, throw the original error
+          throw error;
+        }
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Enhanced plan generation with circuit breaker feedback
+   */
+  private async executeWithEnhancedPlanGeneration<T>(
+    operation: () => Promise<T>,
+    operationName: string
+  ): Promise<T> {
+    // Check and display circuit breaker status before execution
+    const circuitBreakerState =
+      this.resilienceService.getCircuitBreakerState(operationName);
+    if (circuitBreakerState) {
+      this.presenter.displayCircuitBreakerStatus(
+        operationName,
+        circuitBreakerState
+      );
+    }
+
+    try {
+      return await this.resilienceService.executeWithCircuitBreaker(
+        operation,
+        operationName
+      );
+    } catch (error) {
+      // Display enhanced error for plan generation failures
+      this.presenter.displayEnhancedErrorFromCommandExecution(
+        error instanceof Error ? error : new Error('Plan generation failed'),
+        'agent',
+        [operationName],
+        { phase: 'planning', context: 'circuit-breaker-execution' }
+      );
+      throw error;
+    }
   }
 }

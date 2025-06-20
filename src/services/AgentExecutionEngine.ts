@@ -88,7 +88,14 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
         safe: true,
       });
 
-      const success = result.exitCode === 0;
+      // Some tools use non-zero exit codes for informational purposes, not failures
+      // ESLint uses exit code 2 when linting issues are found (not a failure)
+      // TSC uses exit code 2 when type errors are found (not a failure for analysis)
+      const isInformationalExitCode = this.isInformationalExitCode(
+        step.command,
+        result.exitCode
+      );
+      const success = result.exitCode === 0 || isInformationalExitCode;
       const output = result.stdout || result.stderr;
 
       return {
@@ -317,5 +324,35 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
         },
       ];
     }
+  }
+
+  /**
+   * Check if a non-zero exit code should be treated as informational rather than failure
+   */
+  private isInformationalExitCode(command: string, exitCode: number): boolean {
+    // ESLint uses exit code 2 when linting issues are found
+    if (command.includes('eslint') && exitCode === 2) {
+      return true;
+    }
+
+    // TSC uses exit code 2 when type errors are found
+    if (command.includes('tsc') && exitCode === 2) {
+      return true;
+    }
+
+    // Jest uses exit code 1 when tests fail (but we still want the output)
+    if (command.includes('jest') && exitCode === 1) {
+      return true;
+    } // TSLint uses exit code 2 when linting issues are found
+    if (command.includes('tslint') && exitCode === 2) {
+      return true;
+    }
+
+    // npm outdated uses exit code 1 when outdated packages are found
+    if (command.includes('npm outdated') && exitCode === 1) {
+      return true;
+    }
+
+    return false;
   }
 }

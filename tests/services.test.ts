@@ -2,15 +2,16 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { AgenticMemoryService } from '../src/services/AgenticMemoryService';
 import { PreferencesService } from '../src/services/PreferencesService';
 import { WorkingDirectoryService } from '../src/services/WorkingDirectoryService';
+import { IMemoryPersistence } from '../src/interfaces/IMemoryPersistence';
 
 describe('Week 2: Additional Services Implementation', () => {
-  // Mock memory persistence that satisfies the interface
+  // Use jest.fn() for all mock methods so that mockResolvedValue and mockReturnValue are available
   const mockMemoryPersistence = {
     loadMemory: jest.fn(),
     saveMemory: jest.fn(),
     exists: jest.fn(),
     getMemoryPath: jest.fn(),
-  };
+  } as any;
 
   const mockMemoryData = {
     conversations: [],

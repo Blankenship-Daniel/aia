@@ -3,6 +3,7 @@
  * Single Responsibility: Command orchestration and user interaction
  * Delegates execution, presentation, and resilience to specialized services
  */
+import chalk from 'chalk';
 import { ICommand, CommandDefinition } from '../interfaces/ICommand';
 import { IAgentExecutionEngine } from '../interfaces/IAgentExecutionEngine';
 import { IAgentPresenter } from '../interfaces/IAgentPresenter';
@@ -223,7 +224,9 @@ The agent will:
     // Display plan and get confirmation
     this.presenter.displayExecutionPlan(planResult.plan);
 
-    const autoExecute = Boolean(options.autoExecute || options['auto-execute']);
+    const autoExecute = Boolean(
+      options.autoExecute || options['auto-execute'] || options.auto
+    );
     if (!autoExecute) {
       const proceed = await this.presenter.askConfirmation(
         'Proceed with execution?'
@@ -247,7 +250,7 @@ The agent will:
     };
 
     const executionResult = await this.resilienceService.executeWithFallback(
-      () => this.executionEngine.executePlan(execution, executionOptions),
+      () => this.executePlanWithProgress(execution, executionOptions),
       () => this.fallbackExecution(execution),
       {
         maxRetries: 2,
@@ -300,6 +303,148 @@ The agent will:
     }));
   }
 
+  /**
+   * Execute plan with enhanced progress feedback
+   */
+  private async executePlanWithProgress(
+    execution: AgenticExecution,
+    options: {
+      autoExecute: boolean;
+      maxIterations: number;
+      noIteration: boolean;
+    }
+  ): Promise<{
+    success: boolean;
+    results: unknown[];
+    learnings: string[];
+  }> {
+    const totalSteps = execution.plan.length;
+    console.log(
+      `\n${chalk.blue('🚀')} Starting execution of ${totalSteps} steps...`
+    );
+    console.log(chalk.gray('━'.repeat(60)));
+
+    let iteration = 0;
+    let allStepsSuccessful = false;
+    const results: unknown[] = [];
+    const learnings: string[] = [];
+
+    while (iteration < options.maxIterations && !allStepsSuccessful) {
+      iteration++;
+      allStepsSuccessful = true;
+
+      if (iteration > 1) {
+        this.presenter.showIteration(iteration, options.maxIterations);
+      }
+
+      for (let i = 0; i < execution.plan.length; i++) {
+        const step = execution.plan[i];
+        const stepNumber = i + 1;
+
+        console.log(
+          `\n${chalk.cyan(`[${stepNumber}/${totalSteps}]`)} ${chalk.bold(
+            step.description
+          )}`
+        );
+
+        const stepPresentation = this.presenter.showExecutionStep({
+          id: step.description,
+          command: step.command,
+          description: step.description,
+          expectedOutcome: step.expectedOutcome,
+          reasoning: step.reasoning,
+          risks: step.risks,
+          dependencies: step.dependencies,
+        });
+
+        try {
+          const result = await this.executionEngine.executeStep(
+            {
+              id: step.description,
+              command: step.command,
+              description: step.description,
+              expectedOutcome: step.expectedOutcome,
+              reasoning: step.reasoning,
+              risks: step.risks,
+              dependencies: step.dependencies,
+            },
+            options.autoExecute
+          );
+
+          results.push(result);
+
+          // Convert to AgenticExecutionResult format for storage
+          const executionResult = {
+            step,
+            success: result.success,
+            output: result.output || '',
+            error: result.error,
+            confidence: result.success ? 0.9 : 0.1,
+            timestamp: new Date().toISOString(),
+          };
+
+          execution.executionResults.push(executionResult);
+
+          if (result.success) {
+            stepPresentation.succeed();
+            if (result.output) {
+              this.presenter.displayStepOutput(result.output);
+            }
+          } else {
+            stepPresentation.fail();
+            allStepsSuccessful = false;
+
+            if (!options.noIteration) {
+              const learning = `Step "${step.description}" failed: ${result.error}`;
+              learnings.push(learning);
+              execution.learnings.push(learning);
+            }
+          }
+        } catch (error) {
+          stepPresentation.fail();
+          allStepsSuccessful = false;
+          const learning = `Step "${step.description}" threw error: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`;
+          learnings.push(learning);
+          execution.learnings.push(learning);
+
+          // Convert error to AgenticExecutionResult format
+          const executionResult = {
+            step,
+            success: false,
+            output: '',
+            error: error instanceof Error ? error.message : 'Unknown error',
+            confidence: 0,
+            timestamp: new Date().toISOString(),
+          };
+
+          execution.executionResults.push(executionResult);
+
+          results.push({
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          });
+        }
+      }
+
+      // Update execution status
+      execution.iterations = iteration;
+      execution.success = allStepsSuccessful;
+      execution.status = allStepsSuccessful ? 'completed' : 'failed';
+
+      if (options.noIteration) {
+        break; // Don't iterate if disabled
+      }
+    }
+
+    return {
+      success: allStepsSuccessful,
+      results,
+      learnings,
+    };
+  }
+
   private async fallbackExecution(execution: AgenticExecution): Promise<{
     success: boolean;
     results: unknown[];
@@ -311,8 +456,23 @@ The agent will:
     const results: unknown[] = [];
     const learnings: string[] = [];
     let overallSuccess = true;
+    const totalSteps = execution.plan.length;
 
-    for (const step of execution.plan) {
+    console.log(
+      `\n${chalk.blue('🚀')} Starting execution of ${totalSteps} steps...`
+    );
+    console.log(chalk.gray('━'.repeat(60)));
+
+    for (let i = 0; i < execution.plan.length; i++) {
+      const step = execution.plan[i];
+      const stepNumber = i + 1;
+
+      console.log(
+        `\n${chalk.cyan(`[${stepNumber}/${totalSteps}]`)} ${chalk.bold(
+          step.description
+        )}`
+      );
+
       const stepPresentation = this.presenter.showExecutionStep({
         id: step.description,
         command: step.command,

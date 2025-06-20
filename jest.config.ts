@@ -8,6 +8,9 @@ const config: Config = {
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(extract-first-json|parse-json-object|dirty-json)/)',
+  ],
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts', '!src/types/**/*'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
@@ -18,6 +21,9 @@ const config: Config = {
     '^@types/(.*)$': '<rootDir>/src/types/$1',
     // Map .js imports to .ts files for TypeScript modules
     '(.+)\\.js$': '$1',
+    // Mock problematic ESM modules
+    'extract-first-json': '<rootDir>/tests/__mocks__/extract-first-json.js',
+    'dirty-json': '<rootDir>/tests/__mocks__/dirty-json.js',
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   testTimeout: 30000,

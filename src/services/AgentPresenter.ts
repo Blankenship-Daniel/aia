@@ -1,6 +1,6 @@
 /**
- * Agent Presenter Implementation
- * Handles all user interface and presentation concerns for agent operations
+ * Enhanced Agent Presenter Implementation
+ * Provides rich, transparent user experience for agent operations
  */
 import { IAgentPresenter } from '../interfaces/IAgentPresenter';
 import { ExecutionStep, AgenticExecution, CommandResult } from '../types/index';
@@ -10,52 +10,124 @@ import inquirer from 'inquirer';
 
 export class AgentPresenter implements IAgentPresenter {
   private activeSpinner: Ora | null = null;
+  private startTime: number = Date.now();
+  private stepStartTime: number = Date.now();
 
   showPlanningPhase(goal: string): void {
+    console.log(chalk.blue('🤖 AIA Agent - Intelligent Task Execution'));
+    console.log(chalk.gray('━'.repeat(60)));
     console.log(chalk.cyan(`🎯 Goal: ${goal}`));
-    console.log(chalk.blue('📋 Analyzing goal and creating execution plan...'));
+    console.log(
+      chalk.blue(
+        '📋 Planning Phase - Analyzing goal and creating execution plan...'
+      )
+    );
+    this.startTime = Date.now();
   }
 
   displayExecutionPlan(plan: ExecutionStep[]): void {
+    const planningTime = Date.now() - this.startTime;
+    console.log(chalk.green(`✓ Planning completed in ${planningTime}ms`));
     console.log(chalk.blue('\n📋 Execution Plan:'));
+    console.log(chalk.gray('━'.repeat(60)));
+
     plan.forEach((step, index) => {
-      console.log(chalk.dim(`${index + 1}. ${step.description}`));
+      const stepNumber = chalk.cyan(`[${index + 1}/${plan.length}]`);
+      console.log(`${stepNumber} ${chalk.bold(step.description)}`);
+
       if (step.command) {
-        console.log(chalk.gray(`   Command: ${step.command}`));
+        console.log(
+          `   ${chalk.gray('Command:')} ${chalk.yellow(step.command)}`
+        );
       }
-      console.log(chalk.gray(`   Expected: ${step.expectedOutcome}`));
+
+      console.log(`   ${chalk.gray('Expected:')} ${step.expectedOutcome}`);
+
       if (step.risks && step.risks.length > 0) {
-        console.log(chalk.yellow(`   Risks: ${step.risks.join(', ')}`));
+        console.log(`   ${chalk.red('⚠️  Risks:')} ${step.risks.join(', ')}`);
       }
+
+      if (step.timeout) {
+        console.log(`   ${chalk.gray('Timeout:')} ${step.timeout}ms`);
+      }
+
+      console.log(); // Add spacing between steps
     });
-    console.log();
+
+    console.log(chalk.gray('━'.repeat(60)));
   }
 
   showExecutionStep(step: ExecutionStep): {
     succeed: (message?: string) => void;
     fail: (message?: string) => void;
     stop: () => void;
+    updateProgress: (elapsed: number, details?: string) => void;
   } {
-    this.activeSpinner = ora(`Executing: ${step.description}`).start();
+    this.stepStartTime = Date.now();
+
+    // Enhanced initial display with command details
+    console.log(
+      `\n${chalk.blue('🔄')} Executing Step: ${chalk.bold(step.description)}`
+    );
+    console.log(`${chalk.gray('   Command:')} ${chalk.yellow(step.command)}`);
+    console.log(`${chalk.gray('   Expected:')} ${step.expectedOutcome}`);
+    console.log(
+      `${chalk.gray('   Timeout:')} ${(step.timeout || 30000) / 1000}s`
+    );
+
+    const spinnerText = `${chalk.blue('⚡')} Running command...`;
+    this.activeSpinner = ora(spinnerText).start();
+
+    // Update spinner text periodically with elapsed time
+    const progressInterval = setInterval(() => {
+      if (this.activeSpinner) {
+        const elapsed = Math.floor((Date.now() - this.stepStartTime) / 1000);
+        this.activeSpinner.text = `${chalk.blue(
+          '⚡'
+        )} Running command... ${chalk.gray(`${elapsed}s elapsed`)}`;
+      }
+    }, 1000);
 
     return {
-      succeed: (message?: string) => {
+      updateProgress: (elapsed: number, details?: string) => {
         if (this.activeSpinner) {
+          const elapsedSec = Math.floor(elapsed / 1000);
+          const progressText = details
+            ? `${chalk.blue('⚡')} ${details} ${chalk.gray(`${elapsedSec}s`)}`
+            : `${chalk.blue('⚡')} Running command... ${chalk.gray(
+                `${elapsedSec}s elapsed`
+              )}`;
+          this.activeSpinner.text = progressText;
+        }
+      },
+      succeed: (message?: string) => {
+        clearInterval(progressInterval);
+        if (this.activeSpinner) {
+          const duration = Date.now() - this.stepStartTime;
+          const successMessage = message || step.description;
           this.activeSpinner.succeed(
-            chalk.green(`✓ ${message || step.description}`)
+            `${chalk.green('✓')} ${successMessage} ${chalk.gray(
+              `(${Math.floor(duration / 1000)}s)`
+            )}`
           );
           this.activeSpinner = null;
         }
       },
       fail: (message?: string) => {
+        clearInterval(progressInterval);
         if (this.activeSpinner) {
+          const duration = Date.now() - this.stepStartTime;
+          const errorMessage = message || `${step.description} failed`;
           this.activeSpinner.fail(
-            chalk.red(`✗ ${message || step.description}`)
+            `${chalk.red('✗')} ${errorMessage} ${chalk.gray(
+              `(${Math.floor(duration / 1000)}s)`
+            )}`
           );
           this.activeSpinner = null;
         }
       },
       stop: () => {
+        clearInterval(progressInterval);
         if (this.activeSpinner) {
           this.activeSpinner.stop();
           this.activeSpinner = null;

@@ -1,18 +1,44 @@
-import { CommandRegistrar } from '../../src/services/CommandRegistrar';
-import { CommandFactoryV2 } from '../../src/commands/CommandFactoryV2';
-import { ICommand } from '../../src/interfaces/ICommand';
+import { CommandFactoryV2 } from '../src/commands/CommandFactoryV2';
+import { ICommand } from '../src/interfaces/ICommand';
+import { ICommandRegistrar } from '../src/interfaces/ICommandRegistrar';
+import { CommandRegistrar } from '../src/services/CommandRegistrar';
+import { IAIService } from '../src/interfaces/IAIService';
+import { IMemoryService } from '../src/interfaces/IMemoryService';
+import { IContextService } from '../src/interfaces/IContextService';
+import { ICommandService } from '../src/interfaces/ICommandService';
+import { IConfigurationService } from '../src/interfaces/IConfigurationService';
+import { IAgentExecutionEngine } from '../src/interfaces/IAgentExecutionEngine';
+import { IAgentPresenter } from '../src/interfaces/IAgentPresenter';
+import { IResilienceService } from '../src/interfaces/IResilienceService';
 
 // Mock command for testing
 class MockCommand implements ICommand {
-  public readonly name = 'mock';
-  public readonly description = 'Mock command for testing';
-
-  async execute(args: string[]): Promise<boolean> {
-    return true;
+  getDefinition() {
+    return {
+      name: 'mock',
+      description: 'Mock command for testing',
+      usage: 'mock [args]',
+      aliases: ['mock'],
+    };
   }
-
-  getUsage(): string {
-    return 'mock [args]';
+  getName() {
+    return 'mock';
+  }
+  getAliases() {
+    return ['mock'];
+  }
+  validateArgs(args: string[]) {
+    return { valid: true, errors: [] };
+  }
+  getHelp() {
+    return 'Help for mock command';
+  }
+  async execute(
+    context: Record<string, unknown>,
+    args: string[],
+    options: any
+  ) {
+    return { success: true };
   }
 }
 
@@ -122,27 +148,102 @@ describe('SOLID CommandFactory Refactoring', () => {
 
   describe('CommandFactoryV2 OCP Compliance', () => {
     let mockServices: {
-      aiService: any;
-      memoryService: any;
-      contextService: any;
-      commandService: any;
-      configurationService: any;
-      agentExecutionEngine: any;
-      agentPresenter: any;
-      resilienceService: any;
+      aiService: jest.Mocked<IAIService>;
+      memoryService: jest.Mocked<IMemoryService>;
+      contextService: jest.Mocked<IContextService>;
+      commandService: jest.Mocked<ICommandService>;
+      configurationService: jest.Mocked<IConfigurationService>;
+      agentExecutionEngine: jest.Mocked<IAgentExecutionEngine>;
+      agentPresenter: jest.Mocked<IAgentPresenter>;
+      resilienceService: jest.Mocked<IResilienceService>;
     };
     let factory: CommandFactoryV2;
 
     beforeEach(() => {
       mockServices = {
-        aiService: {},
-        memoryService: {},
-        contextService: {},
-        commandService: {},
-        configurationService: {},
-        agentExecutionEngine: {},
-        agentPresenter: {},
-        resilienceService: {},
+        aiService: {
+          initialize: jest.fn(),
+          queryAI: jest.fn(),
+          selectModel: jest.fn(),
+          getAvailableModels: jest.fn(),
+          isConfigured: jest.fn(),
+          validateKeys: jest.fn(),
+        } as any,
+        memoryService: {
+          initialize: jest.fn(),
+          loadMemory: jest.fn(),
+          saveMemory: jest.fn(),
+          // Add other IMemoryService methods as needed
+        } as any,
+        contextService: {
+          initialize: jest.fn(),
+          gatherContext: jest.fn(),
+          analyzeProject: jest.fn(),
+          getGitStatus: jest.fn(),
+          detectProjectType: jest.fn(),
+          getEnvironmentMetrics: jest.fn(),
+          scoreContext: jest.fn(),
+        } as any,
+        commandService: {
+          initialize: jest.fn(),
+          executeCommand: jest.fn(),
+          validateCommandSafety: jest.fn(),
+          optimizeCommand: jest.fn(),
+          suggestCommands: jest.fn(),
+          parseCommand: jest.fn(),
+          getHistory: jest.fn(),
+          validateCommand: jest.fn(),
+        } as any,
+        configurationService: {
+          initialize: jest.fn(),
+          loadConfiguration: jest.fn(),
+          saveConfiguration: jest.fn(),
+          getConfiguration: jest.fn(),
+          updateSetting: jest.fn(),
+          getSetting: jest.fn(),
+          setSetting: jest.fn(),
+          createProfile: jest.fn(),
+          switchProfile: jest.fn(),
+          deleteProfile: jest.fn(),
+          listProfiles: jest.fn(),
+          getActiveProfile: jest.fn(),
+          validateApiKeys: jest.fn(),
+          getDefaultConfiguration: jest.fn(),
+          resetToDefaults: jest.fn(),
+          exportConfiguration: jest.fn(),
+          importConfiguration: jest.fn(),
+          validateConfiguration: jest.fn(),
+          getAvailableModels: jest.fn(),
+          isFeatureEnabled: jest.fn(),
+          setFeatureEnabled: jest.fn(),
+          getConfigurationPath: jest.fn(),
+          watchConfiguration: jest.fn(),
+          unwatchConfiguration: jest.fn(),
+        } as any,
+        agentExecutionEngine: {
+          planExecution: jest.fn(),
+          executeStep: jest.fn(),
+          executePlan: jest.fn(),
+          validateResult: jest.fn(),
+        } as any,
+        agentPresenter: {
+          showPlanningPhase: jest.fn(),
+          displayExecutionPlan: jest.fn(),
+          showExecutionStep: jest.fn(),
+          showIteration: jest.fn(),
+          displayStepOutput: jest.fn(),
+          displayExecutionSummary: jest.fn(),
+        } as any,
+        resilienceService: {
+          executeWithCircuitBreaker: jest.fn(),
+          executeWithTimeout: jest.fn(),
+          executeWithRetry: jest.fn(),
+          executeWithFallback: jest.fn(),
+          isCommandBlocked: jest.fn(),
+          getCircuitBreakerState: jest.fn(),
+          resetCircuitBreaker: jest.fn(),
+          getFailureStats: jest.fn(),
+        } as any,
       };
 
       factory = new CommandFactoryV2(
@@ -171,7 +272,7 @@ describe('SOLID CommandFactory Refactoring', () => {
       for (const commandName of coreCommands) {
         const command = factory.createCommand(commandName);
         expect(command).not.toBeNull();
-        expect(command?.name).toBe(commandName);
+        expect(command?.getName()).toBe(commandName);
       }
     });
 
@@ -192,7 +293,7 @@ describe('SOLID CommandFactory Refactoring', () => {
 
         expect(byName).not.toBeNull();
         expect(byAlias).not.toBeNull();
-        expect(byName?.name).toBe(byAlias?.name);
+        expect(byName?.getName()).toBe(byAlias?.getName());
       }
     });
 
@@ -201,15 +302,32 @@ describe('SOLID CommandFactory Refactoring', () => {
       // We can add new commands without modifying existing code
 
       class CustomCommand implements ICommand {
-        public readonly name = 'custom';
-        public readonly description = 'Custom command added at runtime';
-
-        async execute(args: string[]): Promise<boolean> {
-          return true;
+        getDefinition() {
+          return {
+            name: 'custom',
+            description: 'Custom command added at runtime',
+            usage: 'custom [options]',
+            aliases: ['custom', 'cust'],
+          };
         }
-
-        getUsage(): string {
-          return 'custom [options]';
+        getName() {
+          return 'custom';
+        }
+        getAliases() {
+          return ['custom', 'cust'];
+        }
+        validateArgs(args: string[]) {
+          return { valid: true, errors: [] };
+        }
+        getHelp() {
+          return 'Help for custom command';
+        }
+        async execute(
+          context: Record<string, unknown>,
+          args: string[],
+          options: any
+        ) {
+          return { success: true };
         }
       }
 
@@ -284,11 +402,14 @@ describe('SOLID CommandFactory Refactoring', () => {
     it('should demonstrate OCP compliance by adding commands without code modification', () => {
       // Mock services
       const services = {
-        aiService: {},
-        memoryService: {},
-        contextService: {},
-        commandService: {},
-        configurationService: {},
+        aiService: {} as IAIService,
+        memoryService: {} as IMemoryService,
+        contextService: {} as IContextService,
+        commandService: {} as ICommandService,
+        configurationService: {} as IConfigurationService,
+        agentExecutionEngine: {} as IAgentExecutionEngine,
+        agentPresenter: {} as IAgentPresenter,
+        resilienceService: {} as IResilienceService,
       };
 
       const factory = new CommandFactoryV2(
@@ -296,7 +417,10 @@ describe('SOLID CommandFactory Refactoring', () => {
         services.memoryService,
         services.contextService,
         services.commandService,
-        services.configurationService
+        services.configurationService,
+        services.agentExecutionEngine,
+        services.agentPresenter,
+        services.resilienceService
       );
 
       // Get initial command count
@@ -304,25 +428,62 @@ describe('SOLID CommandFactory Refactoring', () => {
 
       // Add new commands - this would have required modifying the switch statement in the old factory
       class AnalyzeCommand implements ICommand {
-        public readonly name = 'analyze';
-        public readonly description = 'Analyze code patterns';
-        async execute(args: string[]): Promise<boolean> {
-          return true;
+        getDefinition() {
+          return {
+            name: 'analyze',
+            description: 'Analyze code patterns',
+            usage: 'analyze [file]',
+            aliases: ['analyze', 'anal'],
+          };
         }
-        getUsage(): string {
-          return 'analyze [file]';
+        getName() {
+          return 'analyze';
+        }
+        getAliases() {
+          return ['analyze', 'anal'];
+        }
+        validateArgs(args: string[]) {
+          return { valid: true, errors: [] };
+        }
+        getHelp() {
+          return 'Help for analyze command';
+        }
+        async execute(
+          context: Record<string, unknown>,
+          args: string[],
+          options: any
+        ) {
+          return { success: true };
         }
       }
 
       class RefactorCommand implements ICommand {
-        public readonly name = 'refactor';
-        public readonly description =
-          'Refactor code following SOLID principles';
-        async execute(args: string[]): Promise<boolean> {
-          return true;
+        getDefinition() {
+          return {
+            name: 'refactor',
+            description: 'Refactor code following SOLID principles',
+            usage: 'refactor [pattern]',
+            aliases: ['refactor', 'ref', 'solid'],
+          };
         }
-        getUsage(): string {
-          return 'refactor [pattern]';
+        getName() {
+          return 'refactor';
+        }
+        getAliases() {
+          return ['refactor', 'ref', 'solid'];
+        }
+        validateArgs(args: string[]) {
+          return { valid: true, errors: [] };
+        }
+        getHelp() {
+          return 'Help for refactor command';
+        }
+        async execute(
+          context: Record<string, unknown>,
+          args: string[],
+          options: any
+        ) {
+          return { success: true };
         }
       }
 

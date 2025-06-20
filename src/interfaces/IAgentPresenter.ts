@@ -22,6 +22,7 @@ export interface IAgentPresenter {
     succeed: (message?: string) => void;
     fail: (message?: string) => void;
     stop: () => void;
+    updateProgress: (elapsed: number, details?: string) => void;
   };
 
   /**

@@ -431,3 +431,212 @@ The agentic reasoning system continuously learns from execution history:
 - Vague goals: "Make the code better"
 - Goals requiring human judgment: "Choose the best color scheme"
 - Goals requiring external accounts: "Deploy to my personal AWS"
+
+## Available Commands
+
+Below are all core commands available in the AIA CLI. Each command includes its usage, aliases, options, and examples for robust discoverability.
+
+---
+
+### `init` / `i`
+
+**Description:** Initialize AIA configuration for a new codebase.
+
+**Usage:**
+
+```bash
+aia init
+# or
+aia i
+```
+
+**What it does:**
+
+- Sets up the `.aia/` directory in your project root
+- Copies default `config.json`, `profiles.json`, `user.json`, and `codebase-index.json` into `.aia/`
+- Copies documentation templates to configured output directories
+- Skips files that already exist
+
+---
+
+### `ask` / `q`, `query`
+
+**Description:** Ask AI a question with context awareness.
+
+**Usage:**
+
+```bash
+aia ask "How do I optimize this Node.js project?"
+aia q "What's the best way to optimize this Node.js project?"
+```
+
+**Options:**
+
+- `--model <model>`: Preferred AI model to use
+- `--context <context>`: Additional context for the query
+
+**Examples:**
+
+- `aia ask "How do I optimize this Node.js project?"`
+- `aia ask --model gpt-4 "Explain this error message"`
+- `aia ask --context "debugging" "Why is my code slow?"`
+
+---
+
+### `exec` / `x`, `execute`
+
+**Description:** Execute terminal commands with optimization and safety validation.
+
+**Usage:**
+
+```bash
+aia exec <command> [options]
+aia x "ls -la"
+```
+
+**Options:**
+
+- `--no-optimize`: Disable command optimization
+- `--force`: Skip safety validation
+- `--quiet`: Suppress command output
+- `--dry-run`: Show what would be executed without running
+
+**Examples:**
+
+- `aia exec "npm test"`
+- `aia exec "git status" --no-optimize`
+- `aia x "rm -rf node_modules" --force`
+
+---
+
+### `agent` / `a`, `agentic`
+
+**Description:** Execute agentic reasoning for complex goals (multi-step, iterative, context-aware automation).
+
+**Usage:**
+
+```bash
+aia agent "create a new React component"
+aia a "optimize database queries"
+```
+
+**Options:**
+
+- `--auto-execute`: Execute without confirmation prompts
+- `--max-iterations <n>`: Maximum number of iterations (default: 5)
+- `--no-iteration`: Disable iteration on failures
+
+**Examples:**
+
+- `aia agent "create a new React component"`
+- `aia agent "optimize database queries"`
+- `aia agent "set up testing framework" --auto-execute`
+
+---
+
+### `context` / `ctx`, `info`
+
+**Description:** Show current environment context and project information.
+
+**Usage:**
+
+```bash
+aia context [--json] [--verbose]
+```
+
+**Options:**
+
+- `--json`: Output in JSON format
+- `--verbose`: Show detailed information
+
+**Examples:**
+
+- `aia context`
+- `aia context --json`
+- `aia context --verbose`
+
+---
+
+### `memory` / `mem`, `stats`
+
+**Description:** Show memory statistics and manage stored data.
+
+**Usage:**
+
+```bash
+aia memory [--search <query>] [--clear] [--export <file>] [--limit <number>]
+```
+
+**Options:**
+
+- `--search <query>`: Search memory for specific content
+- `--clear`: Clear all memory data (requires confirmation)
+- `--export <file>`: Export memory data to specified file
+- `--limit <number>`: Limit number of search results (default: 10)
+
+**Examples:**
+
+- `aia memory`
+- `aia memory --search "git commands"`
+- `aia memory --clear`
+- `aia memory --export backup.json`
+
+---
+
+### `config` / `cfg`, `configure`
+
+**Description:** Manage AIA configuration settings and API keys.
+
+**Usage:**
+
+```bash
+aia config [--set <key=value>] [--get <key>] [--list] [--interactive]
+```
+
+**Options:**
+
+- `--set <key=value>`: Set a configuration value
+- `--get <key>`: Get a configuration value
+- `--list`: List all configuration values
+- `--interactive`: Interactive configuration setup
+
+**Examples:**
+
+- `aia config --interactive`
+- `aia config --list`
+- `aia config --get preferredModel`
+- `aia config --set preferredModel=gpt-4`
+
+---
+
+### `index` / `idx`, `scan`, `build`
+
+**Description:** Create and manage codebase index for AI analysis.
+
+**Usage:**
+
+```bash
+aia index <action> [query]
+aia idx build
+```
+
+**Options:**
+
+- `--force`: Force re-indexing
+- `--watch`: Watch for file changes
+- `--directory <dir>`: Directory to index (default: current)
+- `--json`: Output results as JSON
+- `--detailed`: Show detailed information
+- `--output <file>`: Output file path for export
+- `--format <format>`: Export format: markdown, json, or text
+- `--code`: Include code snippets in export
+- `--type <type>`: Type of prompt to generate (copilot-instructions, comprehensive, minimal, architecture, dev-focused, all)
+
+**Examples:**
+
+- `aia index build`
+- `aia index search "AgenticReasoningEngine"`
+- `aia index stats`
+- `aia index export --format json --output codebase.json`
+
+---

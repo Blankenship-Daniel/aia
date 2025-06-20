@@ -323,14 +323,11 @@ export default class CLIApplication {
   private extractOptionsFromArgs(args: any[]): Record<string, any> {
     const options: Record<string, any> = {};
 
-    // The last argument in Commander.js is typically the options object
+    // In Commander.js with variadic arguments, the last argument is the Command object
     const lastArg = args[args.length - 1];
-    if (
-      lastArg &&
-      typeof lastArg === 'object' &&
-      lastArg.constructor === Object
-    ) {
-      Object.assign(options, lastArg);
+    if (lastArg && typeof lastArg === 'object' && lastArg.opts) {
+      // This is the Command object, extract options from it
+      Object.assign(options, lastArg.opts());
     }
 
     // Add global options from program

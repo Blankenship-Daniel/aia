@@ -18,6 +18,7 @@ import { MemoryCommand } from './MemoryCommand';
 import { ConfigCommand } from './ConfigCommand';
 import { AgentCommandRefactored } from './AgentCommandRefactored';
 import { IndexCommand } from './IndexCommand';
+import { InitCommand } from './InitCommand';
 
 /**
  * CommandFactoryV2 - SOLID-Compliant Command Factory
@@ -125,6 +126,9 @@ export class CommandFactoryV2 {
       ['idx', 'build'],
       () => new IndexCommand()
     );
+
+    // Init Command - Project initialization
+    this.registrar.register('init', ['i'], () => new InitCommand());
   }
 
   /**

@@ -61,11 +61,17 @@ export class CommandService implements ICommandService {
       let stderr = '';
 
       // Use shell: true to properly handle shell commands with pipes and operators
+      // Use null for stdin to prevent commands from hanging on interactive prompts
       const child = spawn(command, {
         cwd: options.workingDirectory || process.cwd(),
-        stdio: ['inherit', 'pipe', 'pipe'],
+        stdio: ['pipe', 'pipe', 'pipe'], // Changed from 'inherit' to 'pipe' for stdin
         shell: true,
       });
+
+      // Close stdin immediately to prevent hanging on interactive commands
+      if (child.stdin) {
+        child.stdin.end();
+      }
 
       child.stdout?.on('data', (data: Buffer) => {
         stdout += data.toString();

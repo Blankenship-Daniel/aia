@@ -21,7 +21,7 @@ describe('Week 2: Client Migration and Additional Services', () => {
   let mockContext: jest.Mocked<IContextService>;
   let mockConversationMemory: jest.Mocked<IConversationMemory>;
   let mockCommandMemory: jest.Mocked<ICommandMemory>;
-  let mockMemoryPersistence: jest.Mocked<IMemoryPersistence>;
+  let mockMemoryPersistence: any;
 
   const mockMemoryData: MemoryData = {
     conversations: [],
@@ -107,16 +107,11 @@ describe('Week 2: Client Migration and Additional Services', () => {
       saveMemory: jest.fn(),
       exists: jest.fn(),
       getMemoryPath: jest.fn(),
-    } as any;
-
+    };
     // Setup mock return values
-    (mockMemoryPersistence.loadMemory as jest.Mock).mockResolvedValue(
-      mockMemoryData
-    );
-    (mockMemoryPersistence.exists as jest.Mock).mockResolvedValue(true);
-    (mockMemoryPersistence.getMemoryPath as jest.Mock).mockReturnValue(
-      '/test/memory.json'
-    );
+    mockMemoryPersistence.loadMemory.mockResolvedValue(mockMemoryData);
+    mockMemoryPersistence.exists.mockResolvedValue(true);
+    mockMemoryPersistence.getMemoryPath.mockReturnValue('/test/memory.json');
   });
 
   describe('Client Migration Tests', () => {
@@ -128,7 +123,7 @@ describe('Week 2: Client Migration and Additional Services', () => {
 
       it('should call conversationMemory.addConversation when querying AI', async () => {
         const aiService = new AIService(mockConfig, mockConversationMemory);
-        await aiService.initialize(mockConfig_);
+        await aiService.initialize(); // Remove mockConfig_ argument
 
         await aiService.queryAI('test prompt', mockContextInfo);
 

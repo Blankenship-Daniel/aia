@@ -266,10 +266,31 @@ export class ServiceFactory {
         const context = container.resolve('context');
         const command = container.resolve('command');
         const config = container.resolve('configuration');
-        return new CommandFactoryV2(ai, memory, context, command, config);
+        const agentExecutionEngine = container.resolve('agentExecutionEngine');
+        const agentPresenter = container.resolve('agentPresenter');
+        const resilienceService = container.resolve('resilienceService');
+        return new CommandFactoryV2(
+          ai,
+          memory,
+          context,
+          command,
+          config,
+          agentExecutionEngine,
+          agentPresenter,
+          resilienceService
+        );
       },
       {
-        dependencies: ['ai', 'memory', 'context', 'command', 'configuration'],
+        dependencies: [
+          'ai',
+          'memory',
+          'context',
+          'command',
+          'configuration',
+          'agentExecutionEngine',
+          'agentPresenter',
+          'resilienceService',
+        ],
       }
     );
 

@@ -302,8 +302,14 @@ export class LearnCommand implements ICommand {
     topic: string
   ): Promise<any> {
     try {
+      console.log(chalk.yellow(`Attempting to explain: ${suggestion.command}`));
+
       // Get detailed explanation from Copilot
       const explanation = await this.copilotService.explain(suggestion.command);
+
+      console.log(
+        chalk.green(`✓ Copilot explain successful for: ${suggestion.command}`)
+      );
 
       // Get AI insights and best practices
       const aiContext = this.createBasicContext();
@@ -323,6 +329,15 @@ export class LearnCommand implements ICommand {
         relatedCommands: explanation.relatedCommands || [],
       };
     } catch (error) {
+      console.log(
+        chalk.red(
+          `Copilot explain failed for ${suggestion.command}: ${
+            error instanceof Error ? error.message : error
+          }`
+        )
+      );
+      console.log(chalk.yellow('Using AI fallback for explanation'));
+
       // Fallback content if AI services fail
       return {
         command: suggestion.command,

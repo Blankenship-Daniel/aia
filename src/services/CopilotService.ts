@@ -19,7 +19,7 @@
  * @see ICachingService - Caching service for performance optimization.
  */
 
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
 import chalk from 'chalk';
 import {
@@ -37,10 +37,11 @@ import { ICopilotDependencyService } from '../interfaces/ICopilotDependencyServi
 
 export class CopilotService implements ICopilotService {
   private execAsync = promisify(exec);
-  private readonly TIMEOUT_MS = 30000; // 30 second timeout for Copilot operations
+  private readonly TIMEOUT_MS = 30000; // 30 seconds for interactive operations
+  private readonly INTERACTIVE_TIMEOUT_MS = 25000; // 25 seconds for interactive automation
   private isAvailableCache: boolean | null = null;
   private lastAvailabilityCheck = 0;
-  private readonly AVAILABILITY_CACHE_TTL = 300000; // 5 minutes
+  private readonly AVAILABILITY_CACHE_TTL = 60000; // 1 minute instead of 5 minutes
 
   constructor(
     private configService: IConfigurationService,
@@ -77,8 +78,29 @@ export class CopilotService implements ICopilotService {
         throw new Error('GitHub Copilot CLI is not available');
       }
 
-      // Execute gh copilot explain
-      const result = await this.executeCopilotExplain(command);
+      // Try multiple methods for getting explanation
+      let result: ExplanationResult | null = null;
+
+      try {
+        // Method 1: Try direct interactive automation
+        result = await this.executeInteractiveCopilotExplain(command);
+      } catch (error) {
+        console.log(
+          chalk.yellow(
+            `Direct Copilot explain failed: ${
+              error instanceof Error ? error.message : error
+            }`
+          )
+        );
+        if (options?.useAIFallback !== false) {
+          console.log(chalk.yellow('Using AI fallback for explain'));
+          result = await this.aiExplainFallback(command);
+        }
+      }
+
+      if (!result) {
+        throw new Error('All explanation methods failed');
+      }
 
       // Cache the result
       await this.cacheService.set(cacheKey, result, { ttl: cacheTTL });
@@ -132,8 +154,31 @@ export class CopilotService implements ICopilotService {
         throw new Error('GitHub Copilot CLI is not available');
       }
 
-      // Execute gh copilot suggest
-      const suggestions = await this.executeCopilotSuggest(enhancedQuery);
+      // Try multiple methods for getting suggestions
+      let suggestions: SuggestionResult[] = [];
+
+      try {
+        // Method 1: Try interactive automation
+        console.log(chalk.yellow('Attempting Copilot CLI suggest...'));
+        suggestions = await this.executeCopilotSuggest(enhancedQuery);
+        console.log(chalk.green('✓ Copilot suggest successful'));
+      } catch (error) {
+        console.log(
+          chalk.yellow(
+            `Direct Copilot suggest failed: ${
+              error instanceof Error ? error.message : error
+            }`
+          )
+        );
+        if (options?.useAIFallback !== false) {
+          console.log(chalk.yellow('Trying AI fallback'));
+          suggestions = await this.aiSuggestFallback(query, context, options);
+        }
+      }
+
+      if (suggestions.length === 0) {
+        throw new Error('No suggestions received from any method');
+      }
 
       // Apply safety checks if enabled
       const filteredSuggestions =
@@ -206,10 +251,27 @@ export class CopilotService implements ICopilotService {
         status.authenticated &&
         status.copilotAccess;
       this.lastAvailabilityCheck = now;
+
+      // Log cache update for debugging
+      if (!this.isAvailableCache && status.errors && status.errors.length > 0) {
+        console.log(
+          chalk.gray(
+            `Copilot availability cached as false: ${status.errors.join(', ')}`
+          )
+        );
+      }
+
       return this.isAvailableCache;
     } catch (error) {
       this.isAvailableCache = false;
       this.lastAvailabilityCheck = now;
+      console.log(
+        chalk.gray(
+          `Copilot availability check failed: ${
+            error instanceof Error ? error.message : error
+          }`
+        )
+      );
       return false;
     }
   }
@@ -259,6 +321,14 @@ export class CopilotService implements ICopilotService {
   }
 
   /**
+   * Clears the availability cache to force a fresh dependency check.
+   */
+  clearAvailabilityCache(): void {
+    this.isAvailableCache = null;
+    this.lastAvailabilityCheck = 0;
+  }
+
+  /**
    * Private helper methods
    */
 
@@ -266,20 +336,153 @@ export class CopilotService implements ICopilotService {
     command: string
   ): Promise<ExplanationResult> {
     try {
-      const { stdout } = await this.execAsync(
-        `gh copilot explain "${command}"`,
+      // For explain command, try to extract from stderr/stdout without interaction
+      const { stdout, stderr } = await this.execAsync(
+        `echo "The command '${command}' is a shell command" | gh copilot explain "${command}" 2>&1 | head -50`,
         {
-          timeout: this.TIMEOUT_MS,
+          timeout: 5000, // Shorter timeout for non-interactive attempt
           encoding: 'utf8',
         }
       );
 
-      return this.parseExplanation(command, stdout);
+      // If we get useful output, parse it
+      const output = stdout + stderr;
+      if (
+        output &&
+        !output.toLowerCase().includes('waiting for') &&
+        output.length > 50
+      ) {
+        return this.parseExplanation(command, output);
+      }
+
+      // Fall back to interactive automation
+      return await this.executeInteractiveCopilotExplain(command);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       throw new Error(`Copilot explain failed: ${errorMessage}`);
     }
+  }
+
+  private async executeInteractiveCopilotExplain(
+    command: string
+  ): Promise<ExplanationResult> {
+    return new Promise((resolve, reject) => {
+      const child = spawn('gh', ['copilot', 'explain', command], {
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+
+      let output = '';
+      let error = '';
+      let hasFoundExplanation = false;
+      let hasUsefulContent = false;
+      let settled = false; // Prevent multiple resolve/reject calls
+
+      const timer = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        child.kill();
+        if (hasUsefulContent) {
+          resolve(this.parseExplanation(command, output));
+        } else {
+          reject(new Error('Interactive Copilot explain timed out'));
+        }
+      }, this.INTERACTIVE_TIMEOUT_MS);
+
+      child.stdout.on('data', (data) => {
+        const text = data.toString();
+        output += text;
+
+        // Check for explanation content
+        if (
+          text.length > 20 &&
+          (text.includes('This command') ||
+            text.includes('explanation') ||
+            text.includes('The command') ||
+            text.includes(command) ||
+            text.includes('performs') ||
+            text.includes('used to'))
+        ) {
+          hasUsefulContent = true;
+        }
+
+        // Auto-respond to interactive prompts
+        if (text.includes('Select an option') && !hasFoundExplanation) {
+          // Send "Explain command" option (usually option 2)
+          child.stdin.write('\u001b[B\n'); // Arrow down and enter
+          hasFoundExplanation = true;
+        } else if (
+          (text.includes('? ') ||
+            text.includes('Continue') ||
+            text.includes('Press')) &&
+          hasUsefulContent
+        ) {
+          // Exit after getting explanation
+          child.stdin.write('q\n'); // Quit
+          if (!settled) {
+            settled = true;
+            clearTimeout(timer);
+            child.kill();
+            resolve(this.parseExplanation(command, output));
+          }
+        }
+
+        // Check for network errors
+        if (
+          text.includes('context deadline exceeded') ||
+          text.includes('network error') ||
+          text.includes('failed to create thread')
+        ) {
+          if (!settled) {
+            settled = true;
+            clearTimeout(timer);
+            child.kill();
+            reject(new Error('Network error with Copilot CLI'));
+          }
+        }
+      });
+
+      child.stderr.on('data', (data) => {
+        const errorText = data.toString();
+        error += errorText;
+
+        // Check for network errors in stderr too
+        if (
+          errorText.includes('context deadline exceeded') ||
+          errorText.includes('network error') ||
+          errorText.includes('failed to create thread')
+        ) {
+          if (!settled) {
+            settled = true;
+            clearTimeout(timer);
+            child.kill();
+            reject(new Error('Network error with Copilot CLI'));
+          }
+        }
+      });
+
+      child.on('close', (code) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        if (hasUsefulContent || output.length > 50) {
+          resolve(this.parseExplanation(command, output));
+        } else {
+          reject(
+            new Error(
+              `No useful explanation received. Error: ${error}, Output length: ${output.length}`
+            )
+          );
+        }
+      });
+
+      child.on('error', (err) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        reject(err);
+      });
+    });
   }
 
   private async executeCopilotSuggest(
@@ -289,45 +492,188 @@ export class CopilotService implements ICopilotService {
       // Determine target type based on query content
       const target = this.detectTargetType(query);
 
-      // Create temporary file for output
-      const tmpFile = `/tmp/copilot_suggest_${Date.now()}.txt`;
-
-      const { stdout } = await this.execAsync(
-        `gh copilot suggest -t ${target} "${query}" -s "${tmpFile}"`,
-        {
-          timeout: this.TIMEOUT_MS,
-          encoding: 'utf8',
-        }
-      );
-
-      // Read the suggestion from the file
-      const fs = require('fs');
-      let suggestion = '';
-      try {
-        // Wait a moment for file to be written
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        suggestion = fs.readFileSync(tmpFile, 'utf8').trim();
-        fs.unlinkSync(tmpFile); // Clean up temp file
-      } catch (error) {
-        // If file reading fails, fall back to parsing stdout
-        suggestion = this.extractSuggestionFromStdout(stdout);
-      }
-
-      return [
-        {
-          command: suggestion,
-          description: `Suggested command for: ${query}`,
-          confidence: 0.9,
-          tags: [target, 'copilot'],
-          safetyLevel: this.assessSafetyLevel(suggestion),
-          requiresConfirmation: this.assessSafetyLevel(suggestion) !== 'safe',
-        },
-      ];
+      // Try automated interactive suggestion
+      return await this.executeInteractiveCopilotSuggest(query, target);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       throw new Error(`Copilot suggest failed: ${errorMessage}`);
     }
+  }
+
+  private async executeInteractiveCopilotSuggest(
+    query: string,
+    target: 'shell' | 'git' | 'gh'
+  ): Promise<SuggestionResult[]> {
+    return new Promise((resolve, reject) => {
+      const child = spawn('gh', ['copilot', 'suggest', '-t', target, query], {
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+
+      let output = '';
+      let error = '';
+      let suggestionFound = false;
+      let suggestionText = '';
+      let settled = false; // Prevent multiple resolve/reject calls
+
+      const timer = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        child.kill();
+        if (suggestionText) {
+          resolve([
+            {
+              command: suggestionText,
+              description: `Suggested command for: ${query}`,
+              confidence: 0.8,
+              tags: [target, 'copilot'],
+              safetyLevel: this.assessSafetyLevel(suggestionText),
+              requiresConfirmation:
+                this.assessSafetyLevel(suggestionText) !== 'safe',
+            },
+          ]);
+        } else {
+          reject(new Error('Interactive Copilot suggest timed out'));
+        }
+      }, this.INTERACTIVE_TIMEOUT_MS);
+
+      child.stdout.on('data', (data) => {
+        const text = data.toString();
+        output += text;
+
+        // Look for suggestion in output - be more flexible
+        if (
+          (text.includes('Suggestion:') ||
+            text.includes('find ') ||
+            text.includes('$')) &&
+          !suggestionFound
+        ) {
+          // Extract the suggestion from the formatted output
+          const lines = text.split('\n');
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (
+              trimmed &&
+              !trimmed.includes('Suggestion:') &&
+              !trimmed.includes('─') &&
+              !trimmed.includes('⣾') &&
+              !trimmed.includes('Welcome') &&
+              !trimmed.includes('powered by') &&
+              !trimmed.startsWith('?') &&
+              trimmed.length > 5 &&
+              trimmed.length < 200 &&
+              (trimmed.includes('find') ||
+                trimmed.includes('ls') ||
+                trimmed.includes('grep') ||
+                trimmed.startsWith('$') ||
+                this.looksLikeCommand(trimmed))
+            ) {
+              suggestionText = trimmed.replace(/^\$\s*/, ''); // Remove $ prefix
+              suggestionFound = true;
+              break;
+            }
+          }
+        }
+
+        // Auto-respond to selection menu
+        if (text.includes('Select an option') && suggestionFound) {
+          // Choose "Copy command to clipboard" (first option)
+          child.stdin.write('\n'); // Enter to select first option
+        } else if (
+          text.includes('Command copied to clipboard') ||
+          text.includes('copied to clipboard')
+        ) {
+          // Exit after copying
+          if (!settled) {
+            settled = true;
+            clearTimeout(timer);
+            child.kill();
+            resolve([
+              {
+                command: suggestionText,
+                description: `Suggested command for: ${query}`,
+                confidence: 0.9,
+                tags: [target, 'copilot'],
+                safetyLevel: this.assessSafetyLevel(suggestionText),
+                requiresConfirmation:
+                  this.assessSafetyLevel(suggestionText) !== 'safe',
+              },
+            ]);
+          }
+        } else if (text.includes('What would you like to do')) {
+          // Exit immediately if asked for more actions
+          child.stdin.write('q\n');
+        }
+
+        // Check for network errors
+        if (
+          text.includes('context deadline exceeded') ||
+          text.includes('network error') ||
+          text.includes('failed to create thread')
+        ) {
+          if (!settled) {
+            settled = true;
+            clearTimeout(timer);
+            child.kill();
+            reject(new Error('Network error with Copilot CLI'));
+          }
+        }
+      });
+
+      child.stderr.on('data', (data) => {
+        const errorText = data.toString();
+        error += errorText;
+
+        // Check for network errors in stderr too
+        if (
+          errorText.includes('context deadline exceeded') ||
+          errorText.includes('network error') ||
+          errorText.includes('failed to create thread')
+        ) {
+          if (!settled) {
+            settled = true;
+            clearTimeout(timer);
+            child.kill();
+            reject(new Error('Network error with Copilot CLI'));
+          }
+        }
+      });
+
+      child.on('close', (code) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        if (suggestionText) {
+          resolve([
+            {
+              command: suggestionText,
+              description: `Suggested command for: ${query}`,
+              confidence: 0.9,
+              tags: [target, 'copilot'],
+              safetyLevel: this.assessSafetyLevel(suggestionText),
+              requiresConfirmation:
+                this.assessSafetyLevel(suggestionText) !== 'safe',
+            },
+          ]);
+        } else {
+          reject(
+            new Error(
+              `No suggestion found. Error: ${error}, Output: ${output.substring(
+                0,
+                200
+              )}`
+            )
+          );
+        }
+      });
+
+      child.on('error', (err) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        reject(err);
+      });
+    });
   }
 
   private extractSuggestionFromStdout(stdout: string): string {
@@ -377,42 +723,58 @@ export class CopilotService implements ICopilotService {
 
   private parseExplanation(command: string, output: string): ExplanationResult {
     // Parse the copilot output into structured format
-    const lines = output.split('\\n').filter((line) => line.trim());
+    const lines = output.split('\n').filter((line) => line.trim());
     let explanation = '';
     const components: CommandComponent[] = [];
     const examples: string[] = [];
     const warnings: string[] = [];
 
-    let currentSection = '';
+    let foundExplanation = false;
 
     for (const line of lines) {
       const trimmedLine = line.trim();
 
-      if (
-        trimmedLine.includes('Explanation:') ||
-        currentSection === 'explanation'
-      ) {
-        currentSection = 'explanation';
-        if (!trimmedLine.includes('Explanation:')) {
-          explanation += (explanation ? ' ' : '') + trimmedLine;
+      // Look for explanation content after "Explanation:" header
+      if (trimmedLine.includes('Explanation:')) {
+        foundExplanation = true;
+        continue;
+      }
+
+      // If we found the explanation section, collect the content
+      if (foundExplanation && trimmedLine) {
+        // Skip formatting lines like "────" or spinner characters
+        if (
+          !trimmedLine.includes('─') &&
+          !trimmedLine.includes('⣾') &&
+          !trimmedLine.includes('Waiting for') &&
+          !trimmedLine.includes('Welcome') &&
+          !trimmedLine.includes('powered by')
+        ) {
+          // Clean up bullet points and add to explanation
+          const cleanLine = trimmedLine
+            .replace(/^•\s*/, '') // Remove bullet points
+            .replace(/^\*\s*/, '') // Remove asterisks
+            .replace(/^-\s*/, ''); // Remove dashes
+
+          if (cleanLine) {
+            explanation += (explanation ? ' ' : '') + cleanLine;
+          }
         }
-      } else if (
-        trimmedLine.includes('Example') ||
-        currentSection === 'examples'
-      ) {
-        currentSection = 'examples';
-        if (trimmedLine.startsWith('$') || trimmedLine.includes(command)) {
-          examples.push(trimmedLine);
-        }
-      } else if (
-        trimmedLine.includes('Warning') ||
-        trimmedLine.includes('Caution')
-      ) {
+      }
+
+      // Look for examples
+      if (trimmedLine.startsWith('$') || trimmedLine.includes(command)) {
+        examples.push(trimmedLine);
+      }
+
+      // Look for warnings
+      if (trimmedLine.includes('Warning') || trimmedLine.includes('Caution')) {
         warnings.push(trimmedLine);
       }
-      // Parse individual components if the output includes them
-      else if (trimmedLine.includes('-') || trimmedLine.includes('--')) {
-        const flagMatch = trimmedLine.match(/(--?\\w+)\\s*(.+)/);
+
+      // Parse individual components (flags)
+      if (trimmedLine.includes('-') || trimmedLine.includes('--')) {
+        const flagMatch = trimmedLine.match(/(--?\w+)\s*(.+)/);
         if (flagMatch) {
           components.push({
             part: flagMatch[1],
@@ -434,14 +796,14 @@ export class CopilotService implements ICopilotService {
 
   private parseSuggestions(output: string): SuggestionResult[] {
     const suggestions: SuggestionResult[] = [];
-    const lines = output.split('\\n').filter((line) => line.trim());
+    const lines = output.split('\n').filter((line) => line.trim());
 
     for (const line of lines) {
       const trimmedLine = line.trim();
 
       // Look for command suggestions (usually start with $ or contain common commands)
       if (trimmedLine.startsWith('$') || this.looksLikeCommand(trimmedLine)) {
-        const command = trimmedLine.replace(/^\\$\\s*/, '').trim();
+        const command = trimmedLine.replace(/^\$\s*/, '').trim();
         if (command) {
           suggestions.push({
             command,
@@ -556,7 +918,14 @@ export class CopilotService implements ICopilotService {
       'permission denied',
       'network error',
       'timeout',
+      'timed out',
       'ENOENT',
+      'context deadline exceeded',
+      'failed to create thread',
+      'connection refused',
+      'network is unreachable',
+      'no such host',
+      'temporary failure',
     ];
 
     return fallbackErrors.some((error) =>

@@ -27,7 +27,7 @@ import {
 
 export class CopilotDependencyService implements ICopilotDependencyService {
   private execAsync = promisify(exec);
-  private readonly TIMEOUT_MS = 10000; // 10 second timeout for dependency checks
+  private readonly TIMEOUT_MS = 15000; // 15 second timeout for dependency checks (increased for reliability)
 
   /**
    * Checks all GitHub Copilot CLI dependencies comprehensively.
@@ -243,8 +243,25 @@ export class CopilotDependencyService implements ICopilotDependencyService {
       const { stdout } = await this.execAsync('gh auth status', {
         timeout: this.TIMEOUT_MS,
       });
-      return stdout.includes('Logged in to github.com');
+      const isAuthenticated = stdout.includes('Logged in to github.com');
+
+      // Log authentication status for debugging
+      if (!isAuthenticated) {
+        console.log(
+          `Debug: gh auth status returned: ${JSON.stringify(
+            stdout.substring(0, 100)
+          )}`
+        );
+      }
+
+      return isAuthenticated;
     } catch (error) {
+      // Log authentication check failures for debugging
+      console.log(
+        `Debug: gh auth status failed: ${
+          error instanceof Error ? error.message : error
+        }`
+      );
       return false;
     }
   }

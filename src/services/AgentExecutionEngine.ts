@@ -7,7 +7,6 @@ import { IContextService } from '../interfaces/IContextService';
 import { ICommandService } from '../interfaces/ICommandService';
 import { IAgentExecutionEngine } from '../interfaces/IAgentExecutionEngine';
 import { EnhancedTaskComplexityAnalyzer } from './EnhancedTaskComplexityAnalyzer';
-import { PlanningTemplateSystem } from './PlanningTemplateSystem';
 import { OutcomeValidationSystem } from './OutcomeValidationSystem';
 import {
   ContextInfo,
@@ -21,7 +20,6 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
   private readonly STEP_TIMEOUT_MS = 60000;
 
   private taskAnalyzer: EnhancedTaskComplexityAnalyzer;
-  private planningSystem: PlanningTemplateSystem;
   private validationSystem: OutcomeValidationSystem;
   private currentFilePath?: string;
 
@@ -30,8 +28,7 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
     private contextService: IContextService,
     private commandService: ICommandService
   ) {
-    // Initialize the analysis and planning systems
-    this.planningSystem = new PlanningTemplateSystem();
+    // Initialize the validation system
     this.validationSystem = new OutcomeValidationSystem();
 
     // AI-powered task classification is required for AIA CLI functionality
@@ -89,37 +86,24 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
       // Store file path for execution steps
       this.currentFilePath = enhancedContext.filePath;
 
-      // Step 3: Generate template-based plan if we have a template for this task type
-      const templatePlan = this.planningSystem.generatePlan(
-        taskAnalysis,
+      // Step 3: Generate AI-based plan (no template fallbacks - AI-first approach)
+      console.log('🤖 Using AI-powered planning (AI-first approach)');
+      const prompt = this.buildPlanningPrompt(
         goal,
-        enhancedContext
+        context,
+        previousExecutions
       );
+      const response = await this.aiService.queryAI(prompt, context);
 
-      let finalPlan: ExecutionStep[];
-
-      if (templatePlan && templatePlan.length > 0) {
-        console.log('✅ Using template-based planning approach');
-        finalPlan = templatePlan;
-      } else {
-        console.log('🔄 Falling back to AI-based planning');
-        // Fall back to original AI-based planning
-        const prompt = this.buildPlanningPrompt(
-          goal,
-          context,
-          previousExecutions
-        );
-        const response = await this.aiService.queryAI(prompt, context);
-
-        if (!response || !response.content) {
-          return {
-            success: false,
-            error: 'Failed to generate plan - no response from AI service',
-          };
-        }
-
-        finalPlan = this.parsePlanFromResponse(response.content);
+      if (!response || !response.content) {
+        return {
+          success: false,
+          error:
+            'Failed to generate plan - AI service did not respond. The CLI requires AI to function properly.',
+        };
       }
+
+      const finalPlan = this.parsePlanFromResponse(response.content);
 
       // Step 3: Enhance the plan with validation steps
       const enhancedPlan = this.addValidationSteps(finalPlan, taskAnalysis);

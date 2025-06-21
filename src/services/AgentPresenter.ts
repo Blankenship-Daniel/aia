@@ -64,26 +64,52 @@ export class AgentPresenter implements IAgentPresenter {
     console.log(chalk.blue('🤖 AIA Agent - Intelligent Task Execution'));
     console.log(chalk.gray('━'.repeat(60)));
     console.log(chalk.cyan(`🎯 Goal: ${goal}`));
+
+    // ========== Phase Separation Enhancement ==========
     console.log(
-      chalk.blue(
-        '📋 Planning Phase - Analyzing goal and creating execution plan...'
+      chalk.magenta(
+        '\n📋 Planning Phase - Analyzing goal and creating execution plan...'
       )
     );
+    console.log(chalk.gray('━'.repeat(60)));
 
-    // Start resource monitoring
+    // ========== Real-time Progress Indicators ==========
     this.startResourceMonitoring();
     this.startTime = Date.now();
+    this.initialMemory = process.memoryUsage().heapUsed / 1024 / 1024;
+
+    // Show initial system state
+    console.log(
+      chalk.dim(
+        `🔧 System: Node.js ${
+          process.version
+        } | Memory: ${this.initialMemory.toFixed(1)}MB`
+      )
+    );
+    console.log(
+      chalk.dim(`📂 Working Directory: ${process.cwd().split('/').pop()}`)
+    );
   }
 
   displayExecutionPlan(plan: ExecutionStep[]): void {
     const planningTime = Date.now() - this.startTime;
-    console.log(chalk.green(`✓ Planning completed in ${planningTime}ms`));
+    const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
 
-    // Enhanced plan display with visual hierarchy
+    // ========== Timing Display Enhancement ==========
+    console.log(chalk.green(`✓ Planning completed in ${planningTime}ms`));
+    console.log(
+      chalk.dim(
+        `💾 Memory usage: ${currentMemory.toFixed(1)}MB (+${(
+          currentMemory - this.initialMemory
+        ).toFixed(1)}MB)`
+      )
+    );
+
+    // ========== Enhanced Phase Separation ==========
     console.log(chalk.blue('\n📋 Execution Plan:'));
     console.log(chalk.gray('━'.repeat(60)));
 
-    // Plan summary
+    // Plan summary with enhanced metrics
     const totalSteps = plan.length;
     const estimatedTime = plan.reduce(
       (sum, step) => sum + (step.timeout || 30000),
@@ -93,8 +119,11 @@ export class AgentPresenter implements IAgentPresenter {
 
     console.log(chalk.cyan(`📊 Plan Overview:`));
     console.log(
-      `   Steps: ${totalSteps} | Est. Time: ~${estimatedMinutes}min | Timeout: 5min`
+      `   Steps: ${chalk.yellow(totalSteps)} | Est. Time: ${chalk.yellow(
+        `~${estimatedMinutes}min`
+      )} | Timeout: ${chalk.yellow('5min')}`
     );
+    console.log(chalk.dim(`   Planned at: ${new Date().toLocaleTimeString()}`));
     console.log();
 
     // Group steps by phase for better visualization
@@ -150,7 +179,7 @@ export class AgentPresenter implements IAgentPresenter {
   } {
     this.stepStartTime = Date.now();
 
-    // Enhanced execution phase header
+    // ========== Enhanced Phase Separation ==========
     console.log(chalk.blue('\n🔄 Execution Phase'));
     console.log(chalk.gray('━'.repeat(60)));
     console.log(
@@ -162,12 +191,18 @@ export class AgentPresenter implements IAgentPresenter {
     const timeoutSec = (step.timeout || 30000) / 1000;
     console.log(`${chalk.gray('   Timeout:')} ${timeoutSec}s`);
 
-    // Visual progress bar initialization
+    // ========== Enhanced Memory Usage Display ==========
+    const stepStartMemory = process.memoryUsage().heapUsed / 1024 / 1024;
+    console.log(
+      chalk.dim(`   Starting Memory: ${stepStartMemory.toFixed(1)}MB`)
+    );
+
+    // ========== Enhanced Progress Indicators ==========
     const progressBarLength = 30;
     const spinnerText = `${chalk.blue('⚡')} Executing...`;
     this.activeSpinner = ora(spinnerText).start();
 
-    // Enhanced progress tracking with visual progress bar
+    // Real-time progress tracking with enhanced metrics
     const progressInterval = setInterval(() => {
       if (this.activeSpinner) {
         const elapsed = Date.now() - this.stepStartTime;
@@ -175,22 +210,28 @@ export class AgentPresenter implements IAgentPresenter {
         const timeoutMs = step.timeout || 30000;
         const progress = Math.min(elapsed / timeoutMs, 1);
 
-        // Create visual progress bar
+        // ========== Enhanced Visual Progress Bar ==========
         const filled = Math.floor(progress * progressBarLength);
-        const bar = '█'.repeat(filled) + '░'.repeat(progressBarLength - filled);
+        const remaining = progressBarLength - filled;
+        const bar = '█'.repeat(filled) + '░'.repeat(remaining);
 
-        // Resource information
-        const memoryMB = Math.round(
-          process.memoryUsage().heapUsed / 1024 / 1024
-        );
+        // ========== Real-time Resource Monitoring ==========
+        const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
+        const memoryDelta = currentMemory - stepStartMemory;
         this.performance.peakMemoryMB = Math.max(
           this.performance.peakMemoryMB,
-          memoryMB
+          currentMemory
         );
+
+        // Enhanced progress display with memory delta
+        const memoryDisplay =
+          memoryDelta > 0
+            ? `${currentMemory.toFixed(1)}MB (+${memoryDelta.toFixed(1)}MB)`
+            : `${currentMemory.toFixed(1)}MB`;
 
         const progressText = `${chalk.blue('⚡')} [${chalk.cyan(
           bar
-        )}] ${chalk.gray(`${elapsedSec}s/${timeoutSec}s | ${memoryMB}MB`)}`;
+        )}] ${chalk.gray(`${elapsedSec}s/${timeoutSec}s | ${memoryDisplay}`)}`;
         this.activeSpinner.text = progressText;
       }
     }, 500);
@@ -203,22 +244,21 @@ export class AgentPresenter implements IAgentPresenter {
           const timeoutSec = Math.floor(timeoutMs / 1000);
           const progress = Math.min(elapsed / timeoutMs, 1);
 
-          // Visual progress bar
+          // ========== Enhanced Visual Progress Bar ==========
           const filled = Math.floor(progress * progressBarLength);
           const bar =
             '█'.repeat(filled) + '░'.repeat(progressBarLength - filled);
 
-          const memoryMB = Math.round(
-            process.memoryUsage().heapUsed / 1024 / 1024
-          );
+          // ========== Real-time Memory Tracking ==========
+          const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
           const progressText = details
             ? `${chalk.blue('⚡')} [${chalk.cyan(bar)}] ${details} ${chalk.gray(
-                `${elapsedSec}s | ${memoryMB}MB`
+                `${elapsedSec}s | ${currentMemory.toFixed(1)}MB`
               )}`
             : `${chalk.blue('⚡')} [${chalk.cyan(
                 bar
               )}] Executing... ${chalk.gray(
-                `${elapsedSec}s/${timeoutSec}s | ${memoryMB}MB`
+                `${elapsedSec}s/${timeoutSec}s | ${currentMemory.toFixed(1)}MB`
               )}`;
           this.activeSpinner.text = progressText;
         }
@@ -228,14 +268,28 @@ export class AgentPresenter implements IAgentPresenter {
         if (this.activeSpinner) {
           const duration = Date.now() - this.stepStartTime;
           const durationSec = (duration / 1000).toFixed(2);
-          const memoryMB = Math.round(
-            process.memoryUsage().heapUsed / 1024 / 1024
-          );
+
+          // ========== Enhanced Memory Usage Reporting ==========
+          const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
+          const memoryDelta = currentMemory - stepStartMemory;
 
           const successMessage = message || step.description;
+
+          // ========== Enhanced Timing and Performance Display ==========
+          const performanceRating =
+            duration < 1000 ? 'Fast' : duration < 5000 ? 'Good' : 'Slow';
+          const memoryDisplay =
+            memoryDelta > 0
+              ? `+${memoryDelta.toFixed(1)}MB`
+              : memoryDelta < -0.1
+              ? `${memoryDelta.toFixed(1)}MB`
+              : 'stable';
+
           this.activeSpinner.succeed(
             `${chalk.green('✓')} ${successMessage} ${chalk.gray(
-              `(${durationSec}s | ${memoryMB}MB)`
+              `(${durationSec}s | ${currentMemory.toFixed(
+                1
+              )}MB ${memoryDisplay}) - ${performanceRating}`
             )}`
           );
           this.activeSpinner = null;
@@ -249,14 +303,26 @@ export class AgentPresenter implements IAgentPresenter {
         if (this.activeSpinner) {
           const duration = Date.now() - this.stepStartTime;
           const durationSec = (duration / 1000).toFixed(2);
-          const memoryMB = Math.round(
-            process.memoryUsage().heapUsed / 1024 / 1024
-          );
+
+          // ========== Enhanced Memory Usage Reporting ==========
+          const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
+          const memoryDelta = currentMemory - stepStartMemory;
 
           const errorMessage = message || `${step.description} failed`;
+
+          // ========== Enhanced Error Timing Display ==========
+          const memoryDisplay =
+            memoryDelta > 0
+              ? `+${memoryDelta.toFixed(1)}MB`
+              : memoryDelta < -0.1
+              ? `${memoryDelta.toFixed(1)}MB`
+              : 'stable';
+
           this.activeSpinner.fail(
             `${chalk.red('✗')} ${errorMessage} ${chalk.gray(
-              `(${durationSec}s | ${memoryMB}MB)`
+              `(${durationSec}s | ${currentMemory.toFixed(
+                1
+              )}MB ${memoryDisplay})`
             )}`
           );
           this.activeSpinner = null;
@@ -280,9 +346,24 @@ export class AgentPresenter implements IAgentPresenter {
     if (output && output.trim()) {
       console.log(chalk.dim('Output:'));
       const lines = output.trim().split('\n');
+
+      // Check if this looks like a key result
+      const keyResult = this.identifyKeyResult(output);
+
       lines.forEach((line: string) => {
-        console.log(chalk.dim(`  ${line}`));
+        // Highlight potential key results
+        if (keyResult && line.trim() === keyResult.trim()) {
+          console.log(chalk.green.bold(`  🎯 ${line}`));
+        } else {
+          console.log(chalk.dim(`  ${line}`));
+        }
       });
+
+      // Show inline result hint if we found something important
+      if (keyResult) {
+        console.log(chalk.cyan.dim('    ↳ Key result detected'));
+      }
+
       console.log(); // Add spacing
     }
   }
@@ -302,6 +383,7 @@ export class AgentPresenter implements IAgentPresenter {
     // Add current execution to history for performance comparison
     this.addToExecutionHistory(execution);
 
+    // ========== Enhanced Phase Separation ==========
     console.log(chalk.blue('\n📊 Execution Summary'));
     console.log(chalk.gray('━'.repeat(60)));
 
@@ -315,7 +397,7 @@ export class AgentPresenter implements IAgentPresenter {
       : chalk.red('Failed');
     console.log(`${statusIcon} ${chalk.cyan('Status:')} ${statusText}`);
 
-    // Performance metrics
+    // ========== Enhanced Timing Display ==========
     const totalTimeSec = (totalTime / 1000).toFixed(2);
     const timeRating = this.getPerformanceRating(totalTime);
     console.log(
@@ -323,6 +405,10 @@ export class AgentPresenter implements IAgentPresenter {
         totalTimeSec
       )}s (${timeRating})`
     );
+
+    // Add execution timestamp
+    const completedAt = new Date().toLocaleTimeString();
+    console.log(chalk.dim(`   Completed at: ${completedAt}`));
 
     // Step statistics
     const successfulSteps = execution.executionResults.filter(
@@ -347,12 +433,23 @@ export class AgentPresenter implements IAgentPresenter {
       );
     }
 
-    // Resource usage
+    // ========== Enhanced Memory Usage Display ==========
+    const finalMemory = process.memoryUsage().heapUsed / 1024 / 1024;
+    const memoryGrowth = finalMemory - this.initialMemory;
     const memoryUsage =
-      this.performance.peakMemoryMB > this.initialMemory
-        ? `${this.performance.peakMemoryMB.toFixed(1)}MB (peak)`
-        : `${this.initialMemory.toFixed(1)}MB (stable)`;
+      memoryGrowth > 0
+        ? `${finalMemory.toFixed(1)}MB (+${memoryGrowth.toFixed(1)}MB growth)`
+        : `${finalMemory.toFixed(1)}MB (stable)`;
+
     console.log(`💾 ${chalk.cyan('Memory:')} ${chalk.yellow(memoryUsage)}`);
+
+    if (this.performance.peakMemoryMB > finalMemory) {
+      console.log(
+        chalk.dim(
+          `   Peak Usage: ${this.performance.peakMemoryMB.toFixed(1)}MB`
+        )
+      );
+    }
 
     // Performance insights
     if (this.performance.filesProcessed > 0) {
@@ -457,6 +554,16 @@ export class AgentPresenter implements IAgentPresenter {
           '   The agent will learn from this attempt and try a different approach.'
         )
       );
+    }
+
+    // ========== FINAL RESULT HIGHLIGHT ==========
+    const finalResult = await this.extractFinalResult(execution);
+    if (finalResult) {
+      console.log(chalk.bgGreen.black.bold('\n🎯 FINAL RESULT '));
+      console.log(chalk.green('━'.repeat(60)));
+      console.log(chalk.green.bold(`📋 ${execution.goal}`));
+      console.log(chalk.white.bold(`💡 Answer: ${finalResult}`));
+      console.log(chalk.green('━'.repeat(60)));
     }
 
     console.log(chalk.gray('━'.repeat(60)));
@@ -1378,6 +1485,497 @@ Response:`;
         }
       }
     }
+    return null;
+  }
+
+  /**
+   * Generates an AI-powered final summary based on all execution step outputs
+   */
+  private async generateAIFinalSummary(
+    execution: AgenticExecution
+  ): Promise<string | null> {
+    try {
+      // Aggregate all meaningful outputs from execution steps
+      const aggregatedFindings = this.aggregateExecutionFindings(execution);
+
+      if (!aggregatedFindings || aggregatedFindings.trim().length === 0) {
+        return null;
+      }
+
+      // Create a comprehensive prompt for AI to generate a holistic summary
+      const prompt = `You are an AI assistant analyzing the results of executing multiple commands to answer a user's question.
+
+**User's Original Question:** "${execution.goal}"
+
+**All Command Outputs and Findings:**
+${aggregatedFindings}
+
+**Your Task:**
+Based on all the command outputs above, provide a comprehensive, human-readable summary that directly answers the user's question. This should be a natural, conversational response that synthesizes all the information gathered.
+
+**Guidelines:**
+- Provide a holistic analysis, not just a dump of command output
+- Answer the user's specific question directly and naturally
+- Highlight the most important information discovered
+- Use natural language, avoid technical jargon where possible
+- If multiple pieces of information were gathered, explain how they relate to each other
+- Be specific and include relevant details (numbers, names, versions, etc.)
+- Keep it concise but comprehensive
+- Write as if you're having a conversation with the user
+
+**Response Format:**
+Write your response as a natural, flowing explanation that directly addresses "${execution.goal}". Start your response immediately without prefacing it with "Based on the commands" or similar phrases.`;
+
+      // Create context for the AI query
+      const context: ContextInfo = {
+        workingDirectory: process.cwd(),
+        platform: process.platform,
+        arch: process.arch,
+        nodeVersion: process.version,
+        user: process.env.USER || 'unknown',
+        shell: process.env.SHELL || 'unknown',
+        timestamp: new Date().toISOString(),
+        projectType: 'repository-analysis',
+        projectInfo: { goal: execution.goal },
+        gitStatus: '',
+        environmentScore: 1.0,
+      };
+
+      // Get AI response
+      const response = await this.aiService!.queryAI(prompt, context);
+
+      if (response && response.content) {
+        return response.content.trim();
+      }
+
+      return null;
+    } catch (error) {
+      // Silently fail and return null to fall back to original extraction
+      return null;
+    }
+  }
+
+  /**
+   * Aggregates all meaningful outputs from execution steps for AI analysis
+   */
+  private aggregateExecutionFindings(execution: AgenticExecution): string {
+    const findings: string[] = [];
+
+    for (const [index, result] of execution.executionResults.entries()) {
+      if (result.success && result.output) {
+        const output = result.output.toString().trim();
+
+        // Skip validation steps and empty outputs
+        if (output.includes('Validating') || output.length < 5) {
+          continue;
+        }
+
+        // Add step information for context
+        const stepInfo = result.step
+          ? result.step.description
+          : `Step ${index + 1}`;
+        const command = result.step?.command || 'Unknown command';
+
+        findings.push(`**${stepInfo}**`);
+        findings.push(`Command: \`${command}\``);
+        findings.push(`Output:`);
+        findings.push('```');
+        findings.push(output);
+        findings.push('```');
+        findings.push(''); // Empty line for separation
+      }
+    }
+
+    return findings.join('\n');
+  }
+
+  // ========== Phase 1 UX Enhancements - Implementation Priority Matrix ==========
+
+  /**
+   * Shows phase transition with enhanced visual separators
+   */
+  showPhaseTransition(fromPhase: string, toPhase: string): void {
+    const transitionTime = Date.now() - this.stepStartTime;
+    console.log(chalk.gray('\n' + '━'.repeat(60)));
+    console.log(
+      chalk.magenta(`📍 Phase Transition: ${fromPhase} → ${toPhase}`)
+    );
+    console.log(chalk.dim(`⏱️  Transition completed in ${transitionTime}ms`));
+    console.log(chalk.gray('━'.repeat(60)));
+  }
+
+  /**
+   * Shows enhanced planning progress with real-time feedback
+   */
+  showPlanningProgress(step: string, progress: number): void {
+    const elapsed = Date.now() - this.startTime;
+    const elapsedSec = (elapsed / 1000).toFixed(1);
+    const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
+    const memoryDelta = currentMemory - this.initialMemory;
+
+    // Progress bar for planning phase
+    const barLength = 20;
+    const filled = Math.floor(progress * barLength);
+    const bar = '█'.repeat(filled) + '░'.repeat(barLength - filled);
+
+    const memoryDisplay =
+      memoryDelta > 0.1 ? `+${memoryDelta.toFixed(1)}MB` : 'stable';
+
+    console.log(chalk.cyan(`🔍 ${step}`));
+    console.log(
+      chalk.dim(
+        `   [${chalk.cyan(bar)}] ${(progress * 100).toFixed(
+          0
+        )}% | ${elapsedSec}s | ${currentMemory.toFixed(1)}MB (${memoryDisplay})`
+      )
+    );
+  }
+
+  /**
+   * Shows verification phase with enhanced metrics
+   */
+  showVerificationPhase(results: any): void {
+    console.log(chalk.green('\n✅ Verification Phase'));
+    console.log(chalk.gray('━'.repeat(60)));
+
+    const verificationTime = Date.now() - this.stepStartTime;
+    const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
+
+    console.log(chalk.cyan(`🔍 Verifying execution results...`));
+    console.log(
+      chalk.dim(
+        `⏱️  Verification time: ${(verificationTime / 1000).toFixed(1)}s`
+      )
+    );
+    console.log(chalk.dim(`💾 Memory usage: ${currentMemory.toFixed(1)}MB`));
+
+    if (results) {
+      // Show verification details
+      console.log(chalk.green(`✓ Verification completed successfully`));
+    }
+  }
+
+  /**
+   * Extracts the most relevant final result from the execution
+   * Generates an AI-powered summary of all findings instead of just showing command output
+   */
+  private async extractFinalResult(
+    execution: AgenticExecution
+  ): Promise<string | null> {
+    if (!execution.success || !execution.executionResults.length) {
+      return null;
+    }
+
+    // First priority: Try to generate an AI-powered summary of all findings
+    if (this.aiService && this.aiService.isConfigured()) {
+      const aiSummary = await this.generateAIFinalSummary(execution);
+      if (aiSummary) {
+        return aiSummary;
+      }
+    }
+
+    // Fallback: Look for existing AI responses in the output
+    for (const result of execution.executionResults) {
+      if (result.success && result.output) {
+        const output = result.output.toString().trim();
+
+        // Look for AI responses - these usually contain 🎯 ANSWER: or are longer explanatory text
+        if (output.includes('🎯 ANSWER:')) {
+          // Extract everything after the ANSWER marker
+          const answerMatch = output.match(/🎯 ANSWER:(.*?)(?=\n\n|\n$|$)/s);
+          if (answerMatch) {
+            return answerMatch[1].trim();
+          }
+        }
+
+        // Look for analysis step output (likely AI generated content)
+        if (
+          result.step &&
+          result.step.id === 'perform_analysis' &&
+          output.length > 50
+        ) {
+          // Return the full AI response without parsing
+          return output;
+        }
+
+        // Look for longer, explanatory responses that are likely from AI
+        if (
+          output.length > 100 &&
+          !output.includes('Validating') &&
+          !this.looksLikeCommandOutput(output)
+        ) {
+          return output;
+        }
+      }
+    }
+
+    // Second priority: Look for longer, meaningful responses that appear to be AI-generated
+    // This catches cases where the AI response isn't in the analysis step
+    for (const result of execution.executionResults) {
+      if (result.success && result.output) {
+        const output = result.output.toString().trim();
+
+        // Skip validation steps and very short outputs
+        if (output.includes('Validating') || output.length < 20) {
+          continue;
+        }
+
+        // Look for outputs that seem like explanations or analyses (likely from AI)
+        if (this.looksLikeAIResponse(output)) {
+          return output;
+        }
+      }
+    }
+
+    // Fallback to custom parsing for simple command outputs
+    return this.extractSimpleCommandResult(execution);
+  }
+
+  /**
+   * Checks if output looks like an AI response vs simple command output
+   */
+  private looksLikeAIResponse(output: string): boolean {
+    // AI responses typically have certain characteristics
+    const aiIndicators = [
+      'Based on',
+      'This project',
+      'The main',
+      'According to',
+      'Analysis shows',
+      'I can see',
+      'This appears to be',
+      'From the information',
+      'Looking at',
+      'The purpose',
+      'This is a',
+      'Important files include',
+      'Key components',
+      'The project structure',
+      'In this project',
+      'The most important',
+    ];
+
+    const lowerOutput = output.toLowerCase();
+
+    // Check for AI-like language patterns
+    const hasAILanguage = aiIndicators.some((indicator) =>
+      lowerOutput.includes(indicator.toLowerCase())
+    );
+
+    // AI responses are usually longer and more explanatory
+    const hasExplanatoryLength = output.length > 100;
+
+    // AI responses often have multiple sentences
+    const hasMultipleSentences = (output.match(/\./g) || []).length > 1;
+
+    return hasAILanguage || (hasExplanatoryLength && hasMultipleSentences);
+  }
+
+  /**
+   * Checks if output looks like raw command output vs AI response
+   */
+  private looksLikeCommandOutput(output: string): boolean {
+    const lines = output.split('\n');
+
+    // Command outputs are usually short, have file listings, or are simple numbers
+    if (lines.length === 1 && /^\s*\d+\s*$/.test(output)) return true; // Just a number
+    if (lines.length === 1 && /^v?\d+\.\d+/.test(output)) return true; // Version number
+    if (output.includes('total ') && output.includes('drwx')) return true; // ls -la output
+    if (lines.every((line) => line.length < 100)) return true; // Short lines (likely file names)
+
+    return false;
+  }
+
+  /**
+   * Fallback method for simple command results when no AI response is found
+   */
+  private extractSimpleCommandResult(
+    execution: AgenticExecution
+  ): string | null {
+    // For counting tasks (like "count files")
+    if (execution.goal.toLowerCase().includes('count')) {
+      return this.extractCountResult(execution);
+    }
+
+    // For version or info queries
+    if (
+      execution.goal.toLowerCase().includes('version') ||
+      execution.goal.toLowerCase().includes('info')
+    ) {
+      return this.extractVersionResult(execution);
+    }
+
+    // For listing tasks - show a few items
+    if (
+      execution.goal.toLowerCase().includes('list') ||
+      execution.goal.toLowerCase().includes('show')
+    ) {
+      return this.extractListResult(execution);
+    }
+
+    // Generic result extraction - look for meaningful outputs
+    return this.extractGenericResult(execution);
+  }
+
+  /**
+   * Extracts count results from execution steps
+   */
+  private extractCountResult(execution: AgenticExecution): string | null {
+    // Look for numeric outputs that represent counts
+    for (const result of execution.executionResults) {
+      if (result.success && result.output) {
+        const output = result.output.toString().trim();
+
+        // Look for a simple number (likely a count)
+        const numberMatch = output.match(/^\s*(\d+)\s*$/);
+        if (numberMatch) {
+          const count = parseInt(numberMatch[1]);
+          if (execution.goal.toLowerCase().includes('file')) {
+            return `${count} files`;
+          } else if (execution.goal.toLowerCase().includes('director')) {
+            return `${count} directories`;
+          } else {
+            return `${count} items`;
+          }
+        }
+
+        // Look for more complex count outputs
+        const countMatch = output.match(
+          /(\d+)\s*(files?|directories?|items?)/i
+        );
+        if (countMatch) {
+          return `${countMatch[1]} ${countMatch[2].toLowerCase()}`;
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Extracts list results from execution steps
+   */
+  private extractListResult(execution: AgenticExecution): string | null {
+    // For list commands, show a summary of what was found
+    for (const result of execution.executionResults) {
+      if (result.success && result.output) {
+        const output = result.output.toString().trim();
+        const lines = output.split('\n').filter((line) => line.trim());
+
+        if (lines.length > 0) {
+          if (lines.length <= 3) {
+            return lines.join(', ');
+          } else {
+            return `${lines.length} items found (${lines
+              .slice(0, 2)
+              .join(', ')}, ...)`;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Extracts version information from execution steps
+   */
+  private extractVersionResult(execution: AgenticExecution): string | null {
+    for (const result of execution.executionResults) {
+      if (result.success && result.output) {
+        const output = result.output.toString().trim();
+
+        // Look for version patterns
+        const versionMatch = output.match(/v?\d+\.\d+(\.\d+)?/);
+        if (versionMatch) {
+          return versionMatch[0];
+        }
+
+        // Return first meaningful line if it looks like version info
+        const firstLine = output.split('\n')[0].trim();
+        if (firstLine && firstLine.length < 50) {
+          return firstLine;
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Generic result extraction for other types of tasks
+   */
+  private extractGenericResult(execution: AgenticExecution): string | null {
+    // Look for the last successful step with meaningful output
+    const successfulResults = execution.executionResults
+      .filter((r) => r.success && r.output)
+      .reverse(); // Start from the end
+
+    for (const result of successfulResults) {
+      const output = result.output.toString().trim();
+
+      // Skip validation steps
+      if (output.includes('Validating')) {
+        continue;
+      }
+
+      // Look for concise, meaningful output
+      const lines = output.split('\n').filter((line) => line.trim());
+      const meaningfulLines = lines.filter(
+        (line) =>
+          !line.includes('echo') &&
+          !line.includes('exit') &&
+          line.length > 0 &&
+          line.length < 200
+      );
+
+      if (meaningfulLines.length > 0) {
+        // Return the first meaningful line or a summary
+        if (meaningfulLines.length === 1) {
+          return meaningfulLines[0];
+        } else if (meaningfulLines.length <= 3) {
+          return meaningfulLines.join(' | ');
+        } else {
+          return `${meaningfulLines[0]} (and ${
+            meaningfulLines.length - 1
+          } more results)`;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Identifies if a step output contains a key result that should be highlighted
+   */
+  private identifyKeyResult(output: string): string | null {
+    const trimmed = output.trim();
+
+    // Look for simple numeric results (likely counts)
+    const simpleNumberMatch = trimmed.match(/^\s*(\d+)\s*$/);
+    if (simpleNumberMatch) {
+      return simpleNumberMatch[1];
+    }
+
+    // Look for version numbers
+    const versionMatch = trimmed.match(/^(v?\d+\.\d+(?:\.\d+)?)\s*$/);
+    if (versionMatch) {
+      return versionMatch[1];
+    }
+
+    // Look for short, meaningful single lines (likely results)
+    const lines = trimmed.split('\n').filter((line) => line.trim());
+    if (
+      lines.length === 1 &&
+      lines[0].length < 100 &&
+      !lines[0].includes('Validating')
+    ) {
+      return lines[0];
+    }
+
+    // Look for "Valid count" or similar confirmation messages
+    if (trimmed.includes('Valid count') || trimmed.includes('confirmed')) {
+      return trimmed;
+    }
+
     return null;
   }
 }

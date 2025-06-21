@@ -12,6 +12,7 @@ import { IAnalyticsService } from '../interfaces/IAnalyticsService';
 import { IEnhancedCachingService } from '../interfaces/IEnhancedCachingService';
 import { ICopilotService } from '../interfaces/ICopilotService';
 import { ICopilotDependencyService } from '../interfaces/ICopilotDependencyService';
+import { ICodeHighlightService } from '../interfaces/ICodeHighlightService';
 import { CommandRegistrar } from '../services/CommandRegistrar';
 
 // Command Imports
@@ -67,6 +68,7 @@ export class CommandFactoryV2 {
     private readonly resilienceService: IResilienceService,
     private readonly copilotService: ICopilotService,
     private readonly copilotDependencyService: ICopilotDependencyService,
+    private readonly codeHighlightService: ICodeHighlightService,
     private readonly enhancedCachingService?: IEnhancedCachingService, // Optional for backward compatibility
     private readonly analyticsService?: IAnalyticsService // Optional for Phase 2 features
   ) {
@@ -84,7 +86,12 @@ export class CommandFactoryV2 {
       'ask',
       ['q', 'query'],
       () =>
-        new AskCommand(this.aiService, this.contextService, this.memoryService)
+        new AskCommand(
+          this.aiService,
+          this.contextService,
+          this.memoryService,
+          this.codeHighlightService
+        )
     );
 
     // Execute Command - Shell command execution

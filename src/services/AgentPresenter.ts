@@ -23,6 +23,7 @@ import {
   PerformanceAlert,
 } from '../interfaces/IPerformanceMonitor';
 import { IAIService } from '../interfaces/IAIService';
+import { ICodeHighlightService } from '../interfaces/ICodeHighlightService';
 import chalk from 'chalk';
 import ora, { Ora } from 'ora';
 import inquirer from 'inquirer';
@@ -39,6 +40,7 @@ export class AgentPresenter implements IAgentPresenter {
   private resilienceService?: IResilienceService;
   private performanceMonitor?: IPerformanceMonitor;
   private aiService?: IAIService;
+  private codeHighlight?: ICodeHighlightService;
   private executionHistory: AgenticExecution[] = [];
 
   // Enhanced performance tracking
@@ -53,11 +55,13 @@ export class AgentPresenter implements IAgentPresenter {
   constructor(
     resilienceService?: IResilienceService,
     performanceMonitor?: IPerformanceMonitor,
-    aiService?: IAIService
+    aiService?: IAIService,
+    codeHighlight?: ICodeHighlightService
   ) {
     this.resilienceService = resilienceService;
     this.performanceMonitor = performanceMonitor;
     this.aiService = aiService;
+    this.codeHighlight = codeHighlight;
   }
 
   showPlanningPhase(goal: string, verbose: boolean = false): void {
@@ -310,23 +314,15 @@ export class AgentPresenter implements IAgentPresenter {
         return;
       }
 
-      // Verbose mode - original detailed output
+      // Verbose mode - enhanced output with syntax highlighting
       console.log(chalk.dim('Output:'));
-      const lines = output.trim().split('\n');
+
+      // Try to detect if output contains code and highlight it
+      const highlightedOutput = this.enhanceOutputDisplay(output);
+      console.log(highlightedOutput);
 
       // Check if this looks like a key result
       const keyResult = this.identifyKeyResult(output);
-
-      lines.forEach((line: string) => {
-        // Highlight potential key results
-        if (keyResult && line.trim() === keyResult.trim()) {
-          console.log(chalk.green.bold(`  🎯 ${line}`));
-        } else {
-          console.log(chalk.dim(`  ${line}`));
-        }
-      });
-
-      // Show inline result hint if we found something important
       if (keyResult) {
         console.log(chalk.cyan.dim('    ↳ Key result detected'));
       }
@@ -1921,5 +1917,158 @@ Write your response as a natural, flowing explanation that directly addresses "$
     }
 
     return null;
+  }
+
+  /**
+   * Enhance output display with syntax highlighting for code blocks
+   * @param output - Raw output text to enhance
+   * @returns Enhanced output with syntax highlighting
+   */
+  private enhanceOutputDisplay(output: string): string {
+    if (!this.codeHighlight) {
+      // Fallback to basic formatting if code highlight service is not available
+      return output
+        .split('\n')
+        .map((line) => chalk.dim(`  ${line}`))
+        .join('\n');
+    }
+
+    try {
+      // Check if output looks like code
+      const detectedLanguage = this.codeHighlight.detectLanguage(output);
+
+      if (detectedLanguage || this.looksLikeCode(output)) {
+        // Format as code block with syntax highlighting
+        const highlightedCode = this.codeHighlight.highlightCode(
+          output,
+          detectedLanguage
+        );
+        return highlightedCode
+          .split('\n')
+          .map((line) => `  ${line}`)
+          .join('\n');
+      }
+
+      // Check for JSON output
+      if (this.looksLikeJSON(output)) {
+        try {
+          // Pretty print and highlight JSON
+          const parsed = JSON.parse(output);
+          const formattedJSON = JSON.stringify(parsed, null, 2);
+          const highlighted = this.codeHighlight.highlightCode(
+            formattedJSON,
+            'json'
+          );
+          return highlighted
+            .split('\n')
+            .map((line) => `  ${line}`)
+            .join('\n');
+        } catch {
+          // Not valid JSON, treat as regular text
+        }
+      }
+
+      // Check for error messages or stack traces
+      if (this.looksLikeError(output)) {
+        const errorHighlighted = this.codeHighlight.formatError(output);
+        return errorHighlighted
+          .split('\n')
+          .map((line: string) => `  ${line}`)
+          .join('\n');
+      }
+
+      // Default formatting for regular text
+      const keyResult = this.identifyKeyResult(output);
+      const lines = output.trim().split('\n');
+
+      return lines
+        .map((line: string) => {
+          // Highlight potential key results
+          if (keyResult && line.trim() === keyResult.trim()) {
+            return chalk.green.bold(`  🎯 ${line}`);
+          } else {
+            return chalk.dim(`  ${line}`);
+          }
+        })
+        .join('\n');
+    } catch (error) {
+      // Fallback to basic formatting on any error
+      console.warn(
+        `Error enhancing output display: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+      );
+      return output
+        .split('\n')
+        .map((line) => chalk.dim(`  ${line}`))
+        .join('\n');
+    }
+  }
+
+  /**
+   * Check if text looks like code
+   * @param text - Text to analyze
+   * @returns True if text appears to be code
+   */
+  private looksLikeCode(text: string): boolean {
+    const codeIndicators = [
+      /function\s+\w+\s*\(/,
+      /class\s+\w+/,
+      /import\s+.*from/,
+      /const\s+\w+\s*=/,
+      /let\s+\w+\s*=/,
+      /var\s+\w+\s*=/,
+      /if\s*\([^)]+\)\s*\{/,
+      /for\s*\([^)]+\)\s*\{/,
+      /while\s*\([^)]+\)\s*\{/,
+      /def\s+\w+\s*\(/,
+      /public\s+class/,
+      /private\s+\w+/,
+      /#include\s*</,
+      /SELECT\s+.*FROM/i,
+      /INSERT\s+INTO/i,
+      /<\w+[^>]*>/,
+    ];
+
+    return codeIndicators.some((pattern) => pattern.test(text));
+  }
+
+  /**
+   * Check if text looks like JSON
+   * @param text - Text to analyze
+   * @returns True if text appears to be JSON
+   */
+  private looksLikeJSON(text: string): boolean {
+    const trimmed = text.trim();
+    return (
+      (trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+      (trimmed.startsWith('[') && trimmed.endsWith(']'))
+    );
+  }
+
+  /**
+   * Check if text looks like an error message
+   * @param text - Text to analyze
+   * @returns True if text appears to be an error
+   */
+  private looksLikeError(text: string): boolean {
+    const errorIndicators = [
+      /error:/i,
+      /exception/i,
+      /traceback/i,
+      /stack trace/i,
+      /at\s+.*\(/,
+      /^\s*at\s+/m,
+      /file\s+".*",\s+line\s+\d+/i,
+      /syntax error/i,
+      /reference error/i,
+      /type error/i,
+      /undefined/i,
+      /cannot read property/i,
+      /module not found/i,
+      /command not found/i,
+    ];
+
+    return errorIndicators.some((pattern) => pattern.test(text));
   }
 }

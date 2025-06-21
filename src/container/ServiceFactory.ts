@@ -532,6 +532,7 @@ export class ServiceFactory {
         const resilienceService = container.resolve('resilienceService');
         const copilot = container.resolve('copilot');
         const copilotDependency = container.resolve('copilotDependency');
+        const codeHighlight = container.resolve('codeHighlight');
         const enhancedCaching = container.resolve('enhancedCaching');
         const analytics = container.resolve('analytics');
         return new CommandFactoryV2(
@@ -545,6 +546,7 @@ export class ServiceFactory {
           resilienceService,
           copilot,
           copilotDependency,
+          codeHighlight,
           enhancedCaching,
           analytics
         );
@@ -561,6 +563,7 @@ export class ServiceFactory {
           'resilienceService',
           'copilot',
           'copilotDependency',
+          'codeHighlight',
           'enhancedCaching',
           'analytics',
         ],
@@ -639,10 +642,12 @@ export class ServiceFactory {
       const resilienceService = container.resolve('resilienceService');
       const performanceMonitor = container.resolve('performanceMonitor');
       const aiService = container.resolve('ai');
+      const codeHighlight = container.resolve('codeHighlight');
       return new AgentPresenter(
         resilienceService,
         performanceMonitor,
-        aiService
+        aiService,
+        codeHighlight
       );
     });
 
@@ -707,6 +712,14 @@ export class ServiceFactory {
         PerformanceOptimizer,
       } = require('../../dist/PerformanceOptimizer');
       return new PerformanceOptimizer();
+    });
+
+    // Code Highlight Service
+    container.registerFactory('codeHighlight', (container) => {
+      const {
+        CodeHighlightService,
+      } = require('../../dist/services/CodeHighlightService');
+      return new CodeHighlightService();
     });
   }
 

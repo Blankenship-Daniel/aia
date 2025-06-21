@@ -2,6 +2,9 @@
 export * from '../interfaces/ICachingService';
 export * from '../interfaces/IPerformanceMonitor';
 
+// Export utility interfaces
+export * from '../interfaces/ICodeHighlightService';
+
 // Core application types
 export interface AIAConfig {
   preferredModel: string;

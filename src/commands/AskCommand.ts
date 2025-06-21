@@ -24,6 +24,7 @@ import { ICommand, CommandDefinition } from '../interfaces/ICommand';
 import { IAIService } from '../interfaces/IAIService';
 import { IContextService } from '../interfaces/IContextService';
 import { IMemoryService } from '../interfaces/IMemoryService';
+import { ICodeHighlightService } from '../interfaces/ICodeHighlightService';
 import {
   CommandResult,
   CommandOptions,
@@ -64,7 +65,8 @@ export class AskCommand implements ICommand {
   constructor(
     private aiService: IAIService,
     private contextService: IContextService,
-    private memoryService: IMemoryService
+    private memoryService: IMemoryService,
+    private codeHighlightService: ICodeHighlightService
   ) {}
 
   getDefinition(): CommandDefinition {
@@ -171,7 +173,7 @@ export class AskCommand implements ICommand {
 
         console.log(
           chalk.cyan('\n🤖 AI Response:\n'),
-          response.content,
+          this.processResponseWithHighlighting(response.content),
           chalk.dim(`\n\n(Model: ${response.model})`)
         );
 
@@ -190,6 +192,35 @@ export class AskCommand implements ICommand {
           error instanceof Error ? error.message : 'Query processing failed',
       };
     }
+  }
+
+  /**
+   * Process AI response content to apply syntax highlighting to code blocks
+   * @param content - Raw AI response content
+   * @returns Processed content with highlighted code blocks
+   */
+  private processResponseWithHighlighting(content: string): string {
+    // Regular expression to match markdown code blocks
+    const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+
+    return content.replace(codeBlockRegex, (match, language, code) => {
+      try {
+        // Use the code highlighting service to highlight the code
+        const highlightedCode = this.codeHighlightService.highlightCode(
+          code.trim(),
+          language || 'javascript'
+        );
+
+        // Return the highlighted code with markdown-style borders
+        return `\n${chalk.gray(
+          '```' + (language || 'javascript')
+        )}\n${highlightedCode}\n${chalk.gray('```')}\n`;
+      } catch (error) {
+        // Fallback to original code block if highlighting fails
+        console.error('Code highlighting failed:', error);
+        return match;
+      }
+    });
   }
 
   getExamples(): string[] {

@@ -332,6 +332,10 @@ export default class CLIApplication {
         cmd.option('--reset', 'Reset configuration to defaults');
         break;
 
+      case 'context':
+        cmd.option('--json', 'Output in JSON format');
+        break;
+
       case 'cache':
         cmd.option('--stats', 'Show cache statistics');
         cmd.option('--performance', 'Display performance analytics');

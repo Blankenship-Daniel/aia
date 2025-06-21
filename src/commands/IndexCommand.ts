@@ -9,11 +9,11 @@ const inquirer = require('inquirer');
 import { ICommand, CommandDefinition } from '../interfaces/ICommand.js';
 import { CommandResult, CommandOptions, AsyncResult } from '../types/index.js';
 
-// Import TypeScript modules
-import { CodeIndexService } from '../services/CodeIndexService.js';
-import { SymbolIndexService } from '../services/SymbolIndexService.js';
-import CodebaseSummarizer from '../CodebaseSummarizer.js';
-import SemanticCodeAnalyzer from '../SemanticCodeAnalyzer.js';
+// Import interfaces instead of concrete classes
+import { ICodeIndexService } from '../interfaces/ICodeIndexService.js';
+import { ISymbolIndex } from '../interfaces/ISymbolIndex.js';
+import { ICodebaseSummarizer } from '../interfaces/ICodebaseSummarizer.js';
+import { ISemanticCodeAnalyzer } from '../interfaces/ISemanticCodeAnalyzer.js';
 import ConfigurationManager from '../ConfigurationManager.js';
 
 interface IndexStats {
@@ -127,77 +127,21 @@ export class IndexCommand implements ICommand {
   private description = 'Create and manage codebase index for AI analysis';
   private aliases = ['idx', 'scan'];
 
-  private codeIndexService: CodeIndexService;
-  private symbolIndexService: SymbolIndexService;
-  private codebaseSummarizer: CodebaseSummarizer;
-  private semanticAnalyzer: SemanticCodeAnalyzer;
+  private codeIndexService: ICodeIndexService;
+  private symbolIndexService: ISymbolIndex;
+  private codebaseSummarizer: ICodebaseSummarizer;
+  private semanticAnalyzer: ISemanticCodeAnalyzer;
 
-  constructor() {
-    this.codeIndexService = new CodeIndexService();
-
-    // TODO: This should be injected via DI container
-    // For now, create a simple mock cache service
-    const mockCache = {
-      async get<T>(key: string): Promise<T | null> {
-        return null;
-      },
-      async set<T>(key: string, value: T, options?: any): Promise<void> {},
-      async has(key: string): Promise<boolean> {
-        return false;
-      },
-      async delete(key: string): Promise<boolean> {
-        return false;
-      },
-      async deletePattern(pattern: string): Promise<number> {
-        return 0;
-      },
-      async clear(): Promise<void> {},
-      async getStatistics(): Promise<any> {
-        return {
-          totalKeys: 0,
-          hitRate: 0,
-          missRate: 0,
-          totalHits: 0,
-          totalMisses: 0,
-          totalRequests: 0,
-          averageAccessTime: 0,
-          memoryUsage: 0,
-          oldestEntry: 0,
-          newestEntry: 0,
-        };
-      },
-      async keys(): Promise<string[]> {
-        return [];
-      },
-      async size(): Promise<number> {
-        return 0;
-      },
-      async refresh(key: string, ttl?: number): Promise<boolean> {
-        return false;
-      },
-      async mget<T>(keys: string[]): Promise<(T | null)[]> {
-        return keys.map(() => null);
-      },
-      async mset<T>(
-        entries: Array<{ key: string; value: T; options?: any }>
-      ): Promise<void> {},
-      async warm<T>(
-        key: string,
-        loader: () => Promise<T>,
-        options?: any
-      ): Promise<T> {
-        return await loader();
-      },
-      startCleanup(intervalMs?: number): void {},
-      stopCleanup(): void {},
-      async cleanup(): Promise<number> {
-        return 0;
-      },
-    };
-
-    this.symbolIndexService = new SymbolIndexService(mockCache);
-    this.codebaseSummarizer = new CodebaseSummarizer();
-    this.semanticAnalyzer = new SemanticCodeAnalyzer();
+  constructor(
+    codeIndexService: ICodeIndexService,
+    symbolIndexService: ISymbolIndex,
+    codebaseSummarizer: ICodebaseSummarizer,
+    semanticAnalyzer: ISemanticCodeAnalyzer
+  ) {
+    this.codeIndexService = codeIndexService;
+    this.symbolIndexService = symbolIndexService;
+    this.codebaseSummarizer = codebaseSummarizer;
+    this.semanticAnalyzer = semanticAnalyzer;
   }
 
   public async execute(
@@ -778,12 +722,12 @@ export class IndexCommand implements ICommand {
 
       // Convert to expected format
       const analysis: AnalysisResult = {
-        architecture: semanticAnalysis.architecture.map((pattern) => ({
+        architecture: semanticAnalysis.architecture.map((pattern: any) => ({
           name: pattern.name,
           confidence: pattern.confidence,
-          evidence: pattern.evidence.map((e) => e.indicator),
+          evidence: pattern.evidence.map((e: any) => e.indicator),
         })),
-        patterns: semanticAnalysis.patterns.map((pattern) => ({
+        patterns: semanticAnalysis.patterns.map((pattern: any) => ({
           name: pattern.name,
           confidence: pattern.confidence,
           description: pattern.name, // Using name as description for now
@@ -796,7 +740,8 @@ export class IndexCommand implements ICommand {
             `Documentation: ${semanticAnalysis.quality.documentation}%`,
           ],
           suggestions: semanticAnalysis.quality.issues.map(
-            (issue) => `${issue.severity.toUpperCase()}: ${issue.type} issue`
+            (issue: any) =>
+              `${issue.severity.toUpperCase()}: ${issue.type} issue`
           ),
         },
       };

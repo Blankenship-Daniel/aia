@@ -88,4 +88,19 @@ export interface ISymbolIndex {
    * @returns Dependency graph structure
    */
   getDependencyGraph(symbolName: string, depth?: number): Record<string, any>;
+
+  /**
+   * Build complete symbol index for a directory
+   * @param rootDir - Root directory to index
+   * @param options - Indexing options
+   * @returns Promise resolving to symbol lookup table
+   */
+  buildSymbolIndex(
+    rootDir: string,
+    options?: {
+      excludePatterns?: string[];
+      includePatterns?: string[];
+      useCache?: boolean;
+    }
+  ): Promise<any>;
 }

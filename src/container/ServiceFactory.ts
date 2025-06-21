@@ -533,6 +533,10 @@ export class ServiceFactory {
         const copilot = container.resolve('copilot');
         const copilotDependency = container.resolve('copilotDependency');
         const codeHighlight = container.resolve('codeHighlight');
+        const codeIndex = container.resolve('codeIndex');
+        const symbolIndex = container.resolve('symbolIndex');
+        const codebaseSummarizer = container.resolve('codebaseSummarizer');
+        const semanticCodeAnalyzer = container.resolve('semanticCodeAnalyzer');
         const enhancedCaching = container.resolve('enhancedCaching');
         const analytics = container.resolve('analytics');
         return new CommandFactoryV2(
@@ -547,6 +551,10 @@ export class ServiceFactory {
           copilot,
           copilotDependency,
           codeHighlight,
+          codeIndex,
+          symbolIndex,
+          codebaseSummarizer,
+          semanticCodeAnalyzer,
           enhancedCaching,
           analytics
         );
@@ -564,6 +572,10 @@ export class ServiceFactory {
           'copilot',
           'copilotDependency',
           'codeHighlight',
+          'codeIndex',
+          'symbolIndex',
+          'codebaseSummarizer',
+          'semanticCodeAnalyzer',
           'enhancedCaching',
           'analytics',
         ],
@@ -682,7 +694,31 @@ export class ServiceFactory {
       }
     );
 
-    // Symbol Index Service (depends on caching)
+    // Code Index Service (for codebase indexing and analysis)
+    container.registerFactory('codeIndex', (container) => {
+      const {
+        CodeIndexService,
+      } = require('../../dist/services/CodeIndexService');
+      return new CodeIndexService();
+    });
+
+    // Codebase Summarizer (for AI-powered codebase analysis)
+    container.registerFactory('codebaseSummarizer', (container) => {
+      const {
+        default: CodebaseSummarizer,
+      } = require('../../dist/CodebaseSummarizer');
+      return new CodebaseSummarizer();
+    });
+
+    // Semantic Code Analyzer (for pattern detection and quality analysis)
+    container.registerFactory('semanticCodeAnalyzer', (container) => {
+      const {
+        default: SemanticCodeAnalyzer,
+      } = require('../../dist/SemanticCodeAnalyzer');
+      return new SemanticCodeAnalyzer();
+    });
+
+    // Symbol Index Service (Phase 2: AI-Enhanced with optional dependencies)
     container.registerFactory(
       'symbolIndex',
       (container) => {
@@ -690,7 +726,26 @@ export class ServiceFactory {
           SymbolIndexService,
         } = require('../../dist/services/SymbolIndexService');
         const caching = container.resolve('caching');
-        return new SymbolIndexService(caching);
+
+        // Optional dependencies for AI enhancement
+        let aiService, codeIndexService, semanticAnalyzer;
+        try {
+          aiService = container.resolve('ai');
+          codeIndexService = container.resolve('codeIndex');
+          semanticAnalyzer = container.resolve('semanticCodeAnalyzer');
+        } catch (error) {
+          // Services not available, continue with basic functionality
+          console.log(
+            'ℹ️ AI services not available, using basic symbol indexing'
+          );
+        }
+
+        return new SymbolIndexService(
+          caching,
+          aiService,
+          codeIndexService,
+          semanticAnalyzer
+        );
       },
       {
         dependencies: ['caching'],

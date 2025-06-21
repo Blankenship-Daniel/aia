@@ -13,6 +13,10 @@ import { IEnhancedCachingService } from '../interfaces/IEnhancedCachingService';
 import { ICopilotService } from '../interfaces/ICopilotService';
 import { ICopilotDependencyService } from '../interfaces/ICopilotDependencyService';
 import { ICodeHighlightService } from '../interfaces/ICodeHighlightService';
+import { ICodeIndexService } from '../interfaces/ICodeIndexService';
+import { ISymbolIndex } from '../interfaces/ISymbolIndex';
+import { ICodebaseSummarizer } from '../interfaces/ICodebaseSummarizer';
+import { ISemanticCodeAnalyzer } from '../interfaces/ISemanticCodeAnalyzer';
 import { CommandRegistrar } from '../services/CommandRegistrar';
 
 // Command Imports
@@ -69,6 +73,10 @@ export class CommandFactoryV2 {
     private readonly copilotService: ICopilotService,
     private readonly copilotDependencyService: ICopilotDependencyService,
     private readonly codeHighlightService: ICodeHighlightService,
+    private readonly codeIndexService: ICodeIndexService,
+    private readonly symbolIndexService: ISymbolIndex,
+    private readonly codebaseSummarizer: ICodebaseSummarizer,
+    private readonly semanticCodeAnalyzer: ISemanticCodeAnalyzer,
     private readonly enhancedCachingService?: IEnhancedCachingService, // Optional for backward compatibility
     private readonly analyticsService?: IAnalyticsService // Optional for Phase 2 features
   ) {
@@ -145,7 +153,13 @@ export class CommandFactoryV2 {
     this.registrar.register(
       'index',
       ['idx', 'build'],
-      () => new IndexCommand()
+      () =>
+        new IndexCommand(
+          this.codeIndexService,
+          this.symbolIndexService,
+          this.codebaseSummarizer,
+          this.semanticCodeAnalyzer
+        )
     );
 
     // Init Command - Project initialization
@@ -290,6 +304,11 @@ export class CommandFactoryV2 {
       resilienceService,
       services.copilotService,
       copilotDependencyService,
+      services.codeHighlightService,
+      services.codeIndexService,
+      services.symbolIndexService,
+      services.codebaseSummarizer,
+      services.semanticCodeAnalyzer,
       enhancedCachingService
     );
 
@@ -330,6 +349,11 @@ export class CommandFactoryV2 {
       resilienceService,
       services.copilotService,
       copilotDependencyService,
+      services.codeHighlightService,
+      services.codeIndexService,
+      services.symbolIndexService,
+      services.codebaseSummarizer,
+      services.semanticCodeAnalyzer,
       enhancedCachingService
     );
 

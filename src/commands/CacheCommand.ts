@@ -2,7 +2,7 @@ import { ICommand, CommandDefinition } from '../interfaces/ICommand';
 import { IEnhancedCachingService } from '../interfaces/IEnhancedCachingService';
 import { IContextService } from '../interfaces/IContextService';
 import { CommandResult, CommandOptions } from '../types/index';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 
 /**
  * Cache Command - Advanced cache management with user feedback

@@ -235,7 +235,7 @@ aia/
 ### Core Services
 - **[`AIService`](src/services/AIService.ts)**: Manages AI model interactions
   - Dependencies: [`ConfigurationService`](src/services/ConfigurationService.ts), [`ContextService`](src/services/ContextService.ts)
-  - Used by: [`AgentCommandRefactored`](src/commands/AgentCommandRefactored.ts), [`AskCommand`](src/commands/AskCommand.ts)
+  - Used by: [`AgentCommand`](src/commands/AgentCommand.ts), [`AskCommand`](src/commands/AskCommand.ts)
 
 - **[`CodeIndexService`](src/services/CodeIndexService.ts)**: Builds and manages code indexes
   - Creates: `.aia/codebase-index.json`

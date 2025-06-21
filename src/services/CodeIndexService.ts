@@ -1619,7 +1619,7 @@ export class CodeIndexService {
     content +=
       '  - Dependencies: [`ConfigurationService`](src/services/ConfigurationService.ts), [`ContextService`](src/services/ContextService.ts)\n';
     content +=
-      '  - Used by: [`AgentCommandRefactored`](src/commands/AgentCommandRefactored.ts), [`AskCommand`](src/commands/AskCommand.ts)\n\n';
+      '  - Used by: [`AgentCommand`](src/commands/AgentCommand.ts), [`AskCommand`](src/commands/AskCommand.ts)\n\n';
 
     content +=
       '- **[`CodeIndexService`](src/services/CodeIndexService.ts)**: Builds and manages code indexes\n';

@@ -3,7 +3,7 @@
  * Combines all unique tests from agent-command-refactored.test.ts and agent-command-refactored-simple.test.ts
  */
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { AgentCommandRefactored } from '../src/commands/AgentCommand';
+import { AgentCommand } from '../src/commands/AgentCommand';
 import { IAgentExecutionEngine } from '../src/interfaces/IAgentExecutionEngine';
 import { IAgentPresenter } from '../src/interfaces/IAgentPresenter';
 import { IResilienceService } from '../src/interfaces/IResilienceService';
@@ -15,13 +15,13 @@ import {
   AgenticExecution,
 } from '../src/types/index';
 
-describe('AgentCommandRefactored - SOLID Compliance', () => {
+describe('AgentCommand - SOLID Compliance', () => {
   let mockExecutionEngine: jest.Mocked<IAgentExecutionEngine>;
   let mockPresenter: jest.Mocked<IAgentPresenter>;
   let mockResilienceService: jest.Mocked<IResilienceService>;
   let mockContextService: jest.Mocked<IContextService>;
   let mockMemoryService: jest.Mocked<IMemoryService>;
-  let agentCommand: AgentCommandRefactored;
+  let agentCommand: AgentCommand;
 
   const mockContext: ContextInfo = {
     workingDirectory: '/test',
@@ -143,7 +143,7 @@ describe('AgentCommandRefactored - SOLID Compliance', () => {
     };
 
     // Create AgentCommand with mocked dependencies
-    agentCommand = new AgentCommandRefactored(
+    agentCommand = new AgentCommand(
       mockExecutionEngine,
       mockPresenter,
       mockResilienceService,

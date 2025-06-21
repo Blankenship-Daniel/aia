@@ -1,5 +1,5 @@
 /**
- * AgentCommandRefactored.ts - Advanced agentic reasoning command for complex goal execution.
+ * AgentCommand.ts - Advanced agentic reasoning command for complex goal execution.
  *
  * Responsibilities:
  * - Orchestrates agentic reasoning workflows for user-defined goals.
@@ -13,7 +13,7 @@
  * - Integrates with context service for environment awareness.
  *
  * Exports:
- * - {@link AgentCommandRefactored}: Command implementation for agentic reasoning.
+ * - {@link AgentCommand}: Command implementation for agentic reasoning.
  *
  * @see IAgentExecutionEngine - Core agentic execution logic.
  * @see IAgentPresenter - Presentation and user interaction.
@@ -39,20 +39,11 @@ import {
   AgenticExecution,
   AgenticStep,
   ExecutionStep,
-  ExecutionResult,
-  ContextInfo,
-  AgenticExecutionResult,
 } from '../types/index.js';
-
-// Additional type definitions for better type safety
-interface StepResult {
-  success: boolean;
-  output?: string;
-  error?: string;
-}
+import inquirer from 'inquirer';
 
 /**
- * AgentCommandRefactored - Advanced agentic reasoning command for complex goal achievement.
+ * AgentCommand - Advanced agentic reasoning command for complex goal achievement.
  *
  * Purpose:
  * - Orchestrates multi-step agentic reasoning workflows for user-defined goals.
@@ -73,10 +64,10 @@ interface StepResult {
  * @see IMemoryService - Memory management for execution history.
  *
  * @example
- * const agentCmd = new AgentCommandRefactored(engine, presenter, resilience, context, memory);
+ * const agentCmd = new AgentCommand(engine, presenter, resilience, context, memory);
  * await agentCmd.execute({}, ['create a React component'], {});
  */
-export class AgentCommandRefactored implements ICommand {
+export class AgentCommand implements ICommand {
   public readonly name = 'agent';
   public readonly description = 'Execute agentic reasoning for complex goals';
   public readonly aliases = ['a', 'agentic'];
@@ -97,7 +88,7 @@ export class AgentCommandRefactored implements ICommand {
     args: string[],
     options: CommandOptions
   ): Promise<CommandResult> {
-    const goal = args.join(' ').trim();
+    let goal = args.join(' ').trim();
 
     if (!goal) {
       this.presenter.displayEnhancedErrorFromCommandExecution(
@@ -112,27 +103,52 @@ export class AgentCommandRefactored implements ICommand {
       };
     }
 
-    try {
-      // Wrap the entire execution in timeout and resilience patterns
-      return await this.resilienceService.executeWithTimeout(
-        () => this.executeGoal(goal, options),
-        this.EXECUTION_TIMEOUT_MS,
-        'Execution timed out'
-      );
-    } catch (error) {
-      this.errorHandler.handleExecutionError(
-        error,
-        'agent',
-        args,
-        { phase: 'execution', context: 'main-execution-flow' },
-        'Agentic execution failed'
-      );
-
-      return this.errorHandler.createErrorResult(
-        error,
-        'Agentic execution failed'
-      );
+    let lastResult: CommandResult = {
+      success: false,
+      error: 'No execution performed',
+    };
+    // Loop for interactive conversation until user types 'exit'
+    while (true) {
+      try {
+        const result = await this.resilienceService.executeWithTimeout(
+          () => this.executeGoal(goal, options),
+          this.EXECUTION_TIMEOUT_MS,
+          'Execution timed out'
+        );
+        // Display the formatted summary to the user
+        const summary =
+          result.output ||
+          this.presenter.formatExecutionSummary(result.data as any);
+        console.log(summary);
+        lastResult = result;
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Agentic execution failed';
+        this.presenter.displayEnhancedErrorFromCommandExecution(
+          error instanceof Error
+            ? error
+            : new Error('Agentic execution failed'),
+          'agent',
+          args,
+          { phase: 'execution', context: 'interactive-loop' }
+        );
+        return { success: false, error: errorMessage };
+      }
+      // Prompt for next input or exit
+      const { nextInput } = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'nextInput',
+          message: "Continue conversation (type 'exit' to quit):",
+        },
+      ]);
+      if (nextInput.trim().toLowerCase() === 'exit') {
+        this.presenter.displaySuccess('Exiting conversation');
+        break;
+      }
+      goal = nextInput.trim();
     }
+    return lastResult;
   }
 
   public getDefinition(): CommandDefinition {
@@ -164,6 +180,14 @@ export class AgentCommandRefactored implements ICommand {
         {
           name: 'noIteration',
           description: 'Disable iteration on failures',
+          type: 'boolean',
+          required: false,
+          default: false,
+        },
+        {
+          name: 'verbose',
+          description:
+            'Show detailed output including planning, execution steps, and performance metrics',
           type: 'boolean',
           required: false,
           default: false,
@@ -223,6 +247,7 @@ Options:
   --auto-execute    Execute without confirmation prompts
   --max-iterations  Maximum number of iterations (default: 5)
   --no-iteration    Disable iteration on failures
+  --verbose         Show detailed output including planning, execution steps, and performance metrics
 
 The agent will:
 1. Analyze your goal and current context
@@ -234,64 +259,18 @@ The agent will:
     `.trim();
   }
 
-  /**
-   * Execute a goal with comprehensive planning and execution
-   */
   private async executeGoal(
     goal: string,
     options: CommandOptions
   ): Promise<CommandResult> {
-    // Phase 1: Planning and preparation
-    const planningResult = await this.executePlanningPhase(goal);
-    if (!planningResult.success) {
-      return planningResult;
-    }
+    const verbose = Boolean(options.verbose);
 
-    // Phase 2: Execution preparation and confirmation
-    const execution = await this.prepareExecution(
-      goal,
-      planningResult.plan!,
-      options
-    );
-    const confirmationResult = await this.handleExecutionConfirmation(
-      execution,
-      options
-    );
-    if (!confirmationResult.proceed) {
-      return confirmationResult.result!;
-    }
+    // 1. Gather context and history
+    const { contextInfo, previousExecutions } =
+      await this.gatherExecutionContext(goal);
 
-    // Phase 3: Execute plan with resilience
-    const executionResult = await this.executeWithResilience(
-      execution,
-      options
-    );
-
-    // Phase 4: Finalization and storage
-    return await this.finalizeExecution(execution, executionResult);
-  }
-
-  /**
-   * Phase 1: Handle planning and context gathering
-   */
-  private async executePlanningPhase(goal: string): Promise<{
-    success: boolean;
-    plan?: ExecutionStep[];
-    error?: string;
-  }> {
-    // Show planning phase
-    this.presenter.showPlanningPhase(goal);
-
-    // Gather context
-    const contextInfo = await this.contextService.gatherContext();
-
-    // Get previous executions for learning
-    const historyResult = await this.memoryService.getAgenticHistory(goal);
-    const previousExecutions = Array.isArray(historyResult)
-      ? historyResult
-      : [];
-
-    // Generate execution plan using the execution engine with enhanced resilience feedback
+    // 2. Plan
+    this.presenter.showPlanningPhase(goal, verbose);
     const planResult = (await this.executeWithEnhancedPlanGeneration(
       () =>
         this.executionEngine.planExecution(
@@ -303,45 +282,23 @@ The agent will:
     )) as { success: boolean; plan?: ExecutionStep[]; error?: string };
 
     if (!planResult.success || !planResult.plan) {
-      const planError = new Error(
-        planResult.error || 'Failed to generate execution plan'
-      );
-      this.errorHandler.handleExecutionError(
-        planError,
+      this.presenter.displayEnhancedErrorFromCommandExecution(
+        new Error(planResult.error || 'Failed to generate execution plan'),
         'agent',
         [goal],
-        { phase: 'planning', context: 'plan-generation' },
-        'Failed to generate execution plan'
+        { phase: 'planning', context: 'plan-generation' }
       );
       return {
         success: false,
-        error: this.errorHandler.getErrorMessage(
-          planError,
-          'Failed to generate execution plan'
-        ),
+        error: planResult.error || 'Failed to generate execution plan',
       };
     }
 
-    return {
-      success: true,
-      plan: planResult.plan,
-    };
-  }
-
-  /**
-   * Phase 2: Prepare execution object with all necessary data
-   */
-  private async prepareExecution(
-    goal: string,
-    plan: ExecutionStep[],
-    options: CommandOptions
-  ): Promise<AgenticExecution> {
-    const contextInfo = await this.contextService.gatherContext();
-
-    return {
+    // 3. Prepare execution object
+    const execution: AgenticExecution = {
       id: `exec-${Date.now()}`,
       goal,
-      plan: this.convertToAgenticSteps(plan),
+      plan: this.convertToAgenticSteps(planResult.plan),
       results: [],
       executionResults: [],
       status: 'pending',
@@ -353,72 +310,31 @@ The agent will:
       confidence: 0,
       success: false,
     };
-  }
 
-  /**
-   * Phase 2: Handle execution confirmation and user interaction
-   */
-  private async handleExecutionConfirmation(
-    execution: AgenticExecution,
-    options: CommandOptions
-  ): Promise<{
-    proceed: boolean;
-    result?: CommandResult;
-  }> {
-    // Display plan
-    this.presenter.displayExecutionPlan(
-      execution.plan.map((step) => ({
-        id: step.id,
-        command: step.command,
-        description: step.description,
-        expectedOutcome: step.expectedOutcome,
-        reasoning: step.reasoning,
-        risks: step.risks,
-        dependencies: step.dependencies,
-      }))
-    );
-
+    // 4. Show plan and confirm
+    this.presenter.displayExecutionPlan(planResult.plan, verbose);
     const autoExecute = Boolean(
       options.autoExecute || options['auto-execute'] || options.auto
     );
-
-    if (!autoExecute) {
-      const proceed = await this.presenter.askConfirmation(
-        'Proceed with execution?'
-      );
-      if (!proceed) {
-        this.presenter.displayWarning('Execution cancelled by user');
-        return {
-          proceed: false,
-          result: {
-            success: true,
-            output: 'Execution cancelled by user',
-          },
-        };
-      }
+    const proceed = await this.confirmExecution(autoExecute);
+    if (!proceed) {
+      this.presenter.displayWarning('Execution cancelled by user');
+      return {
+        success: true,
+        output: 'Execution cancelled by user',
+      };
     }
 
-    return { proceed: true };
-  }
-
-  /**
-   * Phase 3: Execute plan with enhanced resilience
-   */
-  private async executeWithResilience(
-    execution: AgenticExecution,
-    options: CommandOptions
-  ): Promise<{ success: boolean; results: unknown[]; learnings: string[] }> {
+    // 5. Execute plan
     const executionOptions = {
-      autoExecute: Boolean(
-        options.autoExecute || options['auto-execute'] || options.auto
-      ),
+      autoExecute,
       maxIterations: (options.maxIterations ||
         options['max-iterations'] ||
         5) as number,
       noIteration: Boolean(options.noIteration || options['no-iteration']),
+      verbose,
     };
-
-    return await this.executeWithEnhancedResilience(
+    const executionResult = await this.executeWithEnhancedResilience(
       () => this.executePlanWithProgress(execution, executionOptions),
       () => this.fallbackExecution(execution),
       {
@@ -430,42 +346,60 @@ The agent will:
       },
       'plan-execution'
     );
-  }
 
-  /**
-   * Phase 4: Finalize execution, store history, and format results
-   */
-  private async finalizeExecution(
-    execution: AgenticExecution,
-    executionResult: {
-      success: boolean;
-      results: unknown[];
-      learnings: string[];
-    }
-  ): Promise<CommandResult> {
-    // Update execution status
+    // 6. Update and store execution
     execution.success = executionResult.success;
     execution.status = executionResult.success ? 'completed' : 'failed';
     execution.endTime = new Date().toISOString();
+    await this.storeExecutionHistory(execution);
 
-    // Store execution history
-    try {
-      await this.memoryService.storeAgenticExecution(execution);
-    } catch (error) {
-      this.errorHandler.handleStorageError(error, 'store execution history');
-    }
-
-    // Show summary
-    await this.presenter.displayExecutionSummary(execution);
-
-    // Format output
+    // 7. Show summary
+    await this.handleExecutionResult(execution, executionResult, verbose);
     const output = this.presenter.formatExecutionSummary(execution);
-
     return {
       success: execution.success || false,
       data: execution,
       output,
     };
+  }
+
+  // --- Extracted helpers ---
+  private async gatherExecutionContext(
+    goal: string
+  ): Promise<{ contextInfo: any; previousExecutions: any[] }> {
+    const contextInfo = await this.contextService.gatherContext();
+    const historyResult = await this.memoryService.getAgenticHistory(goal);
+    const previousExecutions = Array.isArray(historyResult)
+      ? historyResult
+      : [];
+    return { contextInfo, previousExecutions };
+  }
+
+  private async confirmExecution(autoExecute: boolean): Promise<boolean> {
+    if (autoExecute) return true;
+    return this.presenter.askConfirmation('Proceed with execution?');
+  }
+
+  private async storeExecutionHistory(
+    execution: AgenticExecution
+  ): Promise<void> {
+    try {
+      await this.memoryService.storeAgenticExecution(execution);
+    } catch (error) {
+      this.presenter.displayWarning(
+        `Failed to store execution history: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+      );
+    }
+  }
+
+  private async handleExecutionResult(
+    execution: AgenticExecution,
+    executionResult: any,
+    verbose: boolean
+  ): Promise<void> {
+    await this.presenter.displayExecutionSummary(execution, verbose);
   }
 
   private convertToAgenticSteps(
@@ -491,6 +425,7 @@ The agent will:
       autoExecute: boolean;
       maxIterations: number;
       noIteration: boolean;
+      verbose: boolean;
     }
   ): Promise<{
     success: boolean;
@@ -501,181 +436,194 @@ The agent will:
     console.log(
       `\n${chalk.blue('🚀')} Starting execution of ${totalSteps} steps...`
     );
-    console.log(chalk.gray('━'.repeat(60)));
-
     let iteration = 0;
     let allStepsSuccessful = false;
     const results: unknown[] = [];
     const learnings: string[] = [];
-    let currentPlan = [...execution.plan]; // Work with a copy
+    let currentPlan = [...execution.plan];
 
     while (iteration < options.maxIterations && !allStepsSuccessful) {
       iteration++;
       allStepsSuccessful = true;
 
-      if (iteration > 1) {
-        this.presenter.showIteration(iteration, options.maxIterations);
+      // 1. Refine plan if needed
+      currentPlan = await this.maybeRefinePlan(
+        iteration,
+        execution,
+        learnings,
+        currentPlan,
+        options
+      );
+      execution.plan = currentPlan;
 
-        // Generate a refined plan based on previous failures
-        const refinedPlan = await this.generateRefinedPlan(
-          execution.goal,
-          execution.context,
-          learnings,
-          execution.executionResults,
-          iteration
+      // 2. Execute steps
+      for (let i = 0; i < currentPlan.length; i++) {
+        const step = currentPlan[i];
+        const stepResult = await this.executeStepWithPresentation(
+          step,
+          execution,
+          iteration,
+          options,
+          learnings
         );
-
-        if (refinedPlan.success && refinedPlan.plan) {
-          console.log(
-            chalk.blue(
-              '🔄 Refined execution plan generated based on previous failures'
-            )
-          );
-          console.log(chalk.gray('━'.repeat(60)));
-
-          // Display the refined plan
-          this.displayRefinedPlan(refinedPlan.plan, learnings);
-
-          // Update the current plan
-          currentPlan = this.convertToAgenticSteps(refinedPlan.plan);
-          execution.plan = currentPlan; // Update the main execution plan
-        } else {
-          console.log(
-            chalk.yellow(
-              '⚠️  Using original plan - failed to generate refined plan'
-            )
-          );
+        results.push(stepResult.resultForResultsArray);
+        execution.executionResults.push(stepResult.executionResult);
+        if (!stepResult.success) {
+          allStepsSuccessful = false;
         }
       }
 
-      // Execute the current plan (original or refined)
-      for (let i = 0; i < currentPlan.length; i++) {
-        const step = currentPlan[i];
-        const stepNumber = i + 1;
+      // 3. Update execution status
+      this.updateExecutionStatus(execution, iteration, allStepsSuccessful);
 
-        // Remove step numbers for cleaner UX - let spinner handle the display
-        // console.log(
-        //   `\n${chalk.cyan(
-        //     `[${stepNumber}/${currentPlan.length}]`
-        //   )} ${chalk.bold(step.description)}`
-        // );
+      // 4. Show iteration summary if needed
+      this.handleIterationSummary(
+        iteration,
+        allStepsSuccessful,
+        options,
+        learnings
+      );
 
-        const stepPresentation = this.presenter.showExecutionStep({
-          id: step.id || step.description, // Use step.id if available, fallback to description
-          command: step.command,
-          description: step.description,
-          expectedOutcome: step.expectedOutcome,
-          reasoning: step.reasoning,
-          risks: step.risks,
-          dependencies: step.dependencies,
-        });
+      if (options.noIteration) break;
+    }
 
-        try {
-          const result = await this.executionEngine.executeStep(
-            {
-              id: step.id || step.description, // Use step.id if available, fallback to description
-              command: step.command,
-              description: step.description,
-              expectedOutcome: step.expectedOutcome,
-              reasoning: step.reasoning,
-              risks: step.risks,
-              dependencies: step.dependencies,
-            },
-            options.autoExecute
-          );
+    return { success: allStepsSuccessful, results, learnings };
+  }
 
-          results.push(result);
+  private async maybeRefinePlan(
+    iteration: number,
+    execution: AgenticExecution,
+    learnings: string[],
+    currentPlan: AgenticStep[],
+    options: { maxIterations: number; verbose: boolean }
+  ): Promise<AgenticStep[]> {
+    if (iteration === 1) return currentPlan;
+    this.presenter.showIteration(iteration, options.maxIterations);
+    const refinedPlan = await this.generateRefinedPlan(
+      execution.goal,
+      execution.context,
+      learnings,
+      execution.executionResults,
+      iteration
+    );
+    if (refinedPlan.success && refinedPlan.plan) {
+      console.log(
+        chalk.blue(
+          '🔄 Refined execution plan generated based on previous failures'
+        )
+      );
+      console.log(chalk.gray('━'.repeat(60)));
+      this.displayRefinedPlan(refinedPlan.plan, learnings);
+      return this.convertToAgenticSteps(refinedPlan.plan);
+    } else {
+      console.log(
+        chalk.yellow(
+          '⚠️  Using original plan - failed to generate refined plan'
+        )
+      );
+      return currentPlan;
+    }
+  }
 
-          // Convert to AgenticExecutionResult format for storage
-          const executionResult = {
+  private async executeStepWithPresentation(
+    step: AgenticStep,
+    execution: AgenticExecution,
+    iteration: number,
+    options: { autoExecute: boolean; verbose: boolean; noIteration: boolean },
+    learnings: string[]
+  ): Promise<{
+    success: boolean;
+    resultForResultsArray: unknown;
+    executionResult: any;
+  }> {
+    const stepPresentation = this.presenter.showExecutionStep(
+      step,
+      options.verbose
+    );
+    try {
+      const result = await this.executionEngine.executeStep(
+        step,
+        options.autoExecute
+      );
+      const executionResult = {
+        step,
+        success: result.success,
+        output: result.output || '',
+        error: result.error,
+        confidence: result.success ? 0.9 : 0.1,
+        timestamp: new Date().toISOString(),
+        iteration,
+      };
+      if (result.success) {
+        stepPresentation.succeed();
+        if (result.output) {
+          this.presenter.displayStepOutput(result.output, options.verbose);
+        }
+      } else {
+        stepPresentation.fail();
+        if (!options.noIteration) {
+          const detailedLearning = this.analyzeStepFailure(
             step,
-            success: result.success,
-            output: result.output || '',
-            error: result.error,
-            confidence: result.success ? 0.9 : 0.1,
-            timestamp: new Date().toISOString(),
-            // Track which iteration this result belongs to
-            iteration: iteration,
-          };
-
-          execution.executionResults.push(executionResult);
-
-          if (result.success) {
-            stepPresentation.succeed();
-            if (result.output) {
-              this.presenter.displayStepOutput(result.output);
-            }
-          } else {
-            stepPresentation.fail();
-            allStepsSuccessful = false;
-
-            if (!options.noIteration) {
-              const detailedLearning = this.analyzeStepFailure(
-                step,
-                result,
-                iteration
-              );
-              learnings.push(detailedLearning);
-              execution.learnings.push(detailedLearning);
-            }
-          }
-        } catch (error) {
-          stepPresentation.fail();
-          allStepsSuccessful = false;
-          const detailedLearning = this.analyzeStepError(
-            step,
-            error,
+            result,
             iteration
           );
           learnings.push(detailedLearning);
           execution.learnings.push(detailedLearning);
-
-          // Convert error to AgenticExecutionResult format using standardized error handling
-          const executionResult = this.errorHandler.createExecutionResult(
-            step,
-            error,
-            iteration
-          ) as AgenticExecutionResult;
-          execution.executionResults.push(executionResult);
-
-          results.push({
-            success: false,
-            error: this.errorHandler.getErrorMessage(
-              error,
-              'Step execution failed'
-            ),
-          });
         }
       }
-
-      // Update execution status
-      execution.iterations = iteration;
-      execution.success = allStepsSuccessful;
-      execution.status = allStepsSuccessful ? 'completed' : 'failed';
-
-      // Show iteration summary if not successful and not the last iteration
-      if (
-        !allStepsSuccessful &&
-        iteration < options.maxIterations &&
-        !options.noIteration
-      ) {
-        this.displayIterationSummary(
-          iteration,
-          learnings,
-          options.maxIterations
-        );
-      }
-
-      if (options.noIteration) {
-        break; // Don't iterate if disabled
-      }
+      return {
+        success: result.success,
+        resultForResultsArray: result,
+        executionResult,
+      };
+    } catch (error) {
+      stepPresentation.fail();
+      const detailedLearning = this.analyzeStepError(step, error, iteration);
+      learnings.push(detailedLearning);
+      execution.learnings.push(detailedLearning);
+      const executionResult = {
+        step,
+        success: false,
+        output: '',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        confidence: 0,
+        timestamp: new Date().toISOString(),
+        iteration,
+      };
+      return {
+        success: false,
+        resultForResultsArray: {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        },
+        executionResult,
+      };
     }
+  }
 
-    return {
-      success: allStepsSuccessful,
-      results,
-      learnings,
-    };
+  private updateExecutionStatus(
+    execution: AgenticExecution,
+    iteration: number,
+    allStepsSuccessful: boolean
+  ) {
+    execution.iterations = iteration;
+    execution.success = allStepsSuccessful;
+    execution.status = allStepsSuccessful ? 'completed' : 'failed';
+  }
+
+  private handleIterationSummary(
+    iteration: number,
+    allStepsSuccessful: boolean,
+    options: { maxIterations: number; noIteration: boolean },
+    learnings: string[]
+  ) {
+    if (
+      !allStepsSuccessful &&
+      iteration < options.maxIterations &&
+      !options.noIteration
+    ) {
+      this.displayIterationSummary(iteration, learnings, options.maxIterations);
+    }
   }
 
   /**
@@ -683,9 +631,9 @@ The agent will:
    */
   private async generateRefinedPlan(
     goal: string,
-    context: ContextInfo,
+    context: any,
     learnings: string[],
-    previousResults: AgenticExecutionResult[],
+    previousResults: any[],
     iteration: number
   ): Promise<{
     success: boolean;
@@ -714,10 +662,10 @@ The agent will:
     } catch (error) {
       return {
         success: false,
-        error: this.errorHandler.getErrorMessage(
-          error,
-          'Failed to generate refined plan'
-        ),
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to generate refined plan',
       };
     }
   }
@@ -727,9 +675,9 @@ The agent will:
    */
   private buildRefinedPlanningPrompt(
     goal: string,
-    context: ContextInfo,
+    context: any,
     learnings: string[],
-    previousResults: AgenticExecutionResult[],
+    previousResults: any[],
     iteration: number
   ): string {
     let prompt = `REFINED EXECUTION PLAN - Iteration ${iteration}\n\n`;
@@ -759,10 +707,10 @@ The agent will:
       failedCommands.forEach((cmd, index) => {
         prompt += `${index + 1}. Command: "${cmd.command}"\n`;
         prompt += `   Description: ${cmd.description}\n`;
-        prompt += `   Error: ${cmd.error || 'Unknown error'}\n`;
+        prompt += `   Error: ${cmd.error}\n`;
         prompt += `   Analysis: ${this.analyzeCommandFailure(
           cmd.command,
-          cmd.error || 'Unknown error'
+          cmd.error
         )}\n\n`;
       });
     }
@@ -791,7 +739,10 @@ The agent will:
     prompt += `- Implement progressive enhancement (try advanced first, fallback to basic)\n`;
     prompt += `- Add explicit dependency checking steps\n`;
     prompt += `- Use cross-platform compatible commands\n`;
-    prompt += `- Implement proper error handling and recovery\n\n`;
+    prompt += `- Implement proper error handling and recovery\n`;
+    prompt += `- For script generation: use 'cat > file << EOF' instead of complex echo commands\n`;
+    prompt += `- For code analysis: use built-in Node.js tools instead of external packages\n`;
+    prompt += `- For multiline scripts: create separate .js files instead of inline echo\n\n`;
 
     prompt += `Please generate a completely new step-by-step execution plan in JSON format:\n`;
     prompt += `[{"id": "step-1", "description": "Step description", "command": "command to execute", "expectedOutcome": "Expected result", "reasoning": "Why this approach is better", "risks": ["potential issues"], "dependencies": ["required tools/files"], "timeout": 30000}]\n\n`;
@@ -805,6 +756,21 @@ The agent will:
    * Analyze why a specific command failed and suggest alternatives
    */
   private analyzeCommandFailure(command: string, error: string): string {
+    // Echo/script generation errors
+    if (
+      error.includes('SyntaxError') ||
+      error.includes('Invalid or unexpected token')
+    ) {
+      return `Script generation error - use proper escaping or file creation instead of complex echo commands`;
+    }
+
+    // NPM package not found errors
+    if (error.includes('404') && error.includes('npm')) {
+      const packageMatch = command.match(/npx\s+([^\s]+)/);
+      const packageName = packageMatch ? packageMatch[1] : 'unknown';
+      return `NPM package '${packageName}' not found - use verified alternatives like eslint, jshint, or native Node.js tools`;
+    }
+
     // Command not found errors
     if (
       error.includes('command not found') ||
@@ -837,20 +803,25 @@ The agent will:
       return `Configuration issue - add setup steps or use different tool`;
     }
 
-    // Syntax errors
+    // Syntax errors in generated scripts
     if (error.includes('syntax') || error.includes('invalid')) {
-      return `Command syntax issue - verify command format and parameters`;
+      return `Command syntax issue - verify command format and use proper shell escaping`;
     }
 
-    return `Unknown error - consider completely different approach`;
+    // Multiline echo issues
+    if (command.includes('echo') && command.length > 100) {
+      return `Complex echo command failed - use file creation with cat or Node.js fs instead`;
+    }
+
+    return `Command execution failed - use simpler, more reliable alternatives`;
   }
 
   /**
    * Analyze step failure with more detail
    */
   private analyzeStepFailure(
-    step: AgenticStep,
-    result: StepResult,
+    step: any,
+    result: any,
     iteration: number
   ): string {
     const baseFailure = `[Iteration ${iteration}] Step "${step.description}" failed: ${result.error}`;
@@ -864,12 +835,8 @@ The agent will:
   /**
    * Analyze step error with more detail
    */
-  private analyzeStepError(
-    step: AgenticStep,
-    error: unknown,
-    iteration: number
-  ): string {
-    const errorMsg = this.errorHandler.getErrorMessage(error);
+  private analyzeStepError(step: any, error: any, iteration: number): string {
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
     const baseError = `[Iteration ${iteration}] Step "${step.description}" threw error: ${errorMsg}`;
     const analysis = this.analyzeCommandFailure(step.command, errorMsg);
     return `${baseError} | Analysis: ${analysis}`;
@@ -941,62 +908,58 @@ The agent will:
   }> {
     this.presenter.displayWarning('Using fallback execution strategy');
 
-    // Simple fallback: execute each step individually without iteration
+    // 1. Generate fallback plan (currently just uses execution.plan)
+    const plan = this.generateFallbackPlan(execution);
+
+    // 2. Execute fallback steps
+    const { results, learnings, overallSuccess } =
+      await this.executeFallbackSteps(plan);
+
+    // 3. Handle fallback summary (optional, can be expanded)
+    this.handleFallbackSummary(results, learnings, overallSuccess);
+
+    return {
+      success: overallSuccess,
+      results,
+      learnings,
+    };
+  }
+
+  // --- Extracted fallback helpers ---
+  private generateFallbackPlan(execution: AgenticExecution): AgenticStep[] {
+    // For now, fallback just uses the current plan
+    return execution.plan;
+  }
+
+  private async executeFallbackSteps(plan: AgenticStep[]): Promise<{
+    results: unknown[];
+    learnings: string[];
+    overallSuccess: boolean;
+  }> {
     const results: unknown[] = [];
     const learnings: string[] = [
       'Fallback execution used due to primary execution failure',
     ];
     let overallSuccess = true;
-    const totalSteps = execution.plan.length;
-
+    const totalSteps = plan.length;
     console.log(
       `\n${chalk.blue(
         '🚀'
       )} Starting fallback execution of ${totalSteps} steps...`
     );
-    console.log(chalk.gray('━'.repeat(60)));
-
-    for (let i = 0; i < execution.plan.length; i++) {
-      const step = execution.plan[i];
-      const stepNumber = i + 1;
-
-      // Remove step numbers for cleaner UX - let spinner handle the display
-      // console.log(
-      //   `\n${chalk.cyan(`[${stepNumber}/${totalSteps}]`)} ${chalk.bold(
-      //     step.description
-      //   )}`
-      // );
-
-      const stepPresentation = this.presenter.showExecutionStep({
-        id: step.description,
-        command: step.command,
-        description: step.description,
-        expectedOutcome: step.expectedOutcome,
-        reasoning: step.reasoning,
-        risks: step.risks,
-        dependencies: step.dependencies,
-      });
-
+    for (let i = 0; i < plan.length; i++) {
+      const step = plan[i];
+      const stepPresentation = this.presenter.showExecutionStep(
+        step,
+        false // concise mode
+      );
       try {
-        const result = await this.executionEngine.executeStep(
-          {
-            id: step.description,
-            command: step.command,
-            description: step.description,
-            expectedOutcome: step.expectedOutcome,
-            reasoning: step.reasoning,
-            risks: step.risks,
-            dependencies: step.dependencies,
-          },
-          true
-        );
-
+        const result = await this.executionEngine.executeStep(step, true);
         results.push(result);
-
         if (result.success) {
           stepPresentation.succeed();
           if (result.output) {
-            this.presenter.displayStepOutput(result.output);
+            this.presenter.displayStepOutput(result.output, false);
           }
         } else {
           stepPresentation.fail();
@@ -1009,26 +972,26 @@ The agent will:
         stepPresentation.fail();
         overallSuccess = false;
         learnings.push(
-          `Fallback step error: ${
-            step.description
-          } - ${this.errorHandler.getErrorMessage(error)}`
+          `Fallback step error: ${step.description} - ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`
         );
-
         results.push({
           success: false,
-          error: this.errorHandler.getErrorMessage(
-            error,
-            'Fallback step execution failed'
-          ),
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
+    return { results, learnings, overallSuccess };
+  }
 
-    return {
-      success: overallSuccess,
-      results,
-      learnings,
-    };
+  private handleFallbackSummary(
+    results: unknown[],
+    learnings: string[],
+    overallSuccess: boolean
+  ): void {
+    // Optionally expand: log summary, display to user, etc.
+    // For now, fallback is concise and does not display extra summary.
   }
 
   /**
@@ -1075,88 +1038,4 @@ The agent will:
       3 // maxRetries
     );
   }
-
-  /**
-   * Standardized error handling utilities for consistent error processing
-   */
-  private errorHandler = {
-    /**
-     * Extract error message with consistent fallback
-     */
-    getErrorMessage: (error: unknown, fallback = 'Unknown error'): string => {
-      return error instanceof Error ? error.message : fallback;
-    },
-
-    /**
-     * Ensure error is an Error instance
-     */
-    ensureError: (error: unknown, fallback = 'Unknown error'): Error => {
-      return error instanceof Error ? error : new Error(fallback);
-    },
-
-    /**
-     * Create standardized command result for errors
-     */
-    createErrorResult: (
-      error: unknown,
-      fallback = 'Command execution failed'
-    ): CommandResult => {
-      return {
-        success: false,
-        error: this.errorHandler.getErrorMessage(error, fallback),
-      };
-    },
-
-    /**
-     * Handle execution context errors with proper presenter display
-     */
-    handleExecutionError: (
-      error: unknown,
-      command: string,
-      args: string[],
-      context: { phase: string; context: string },
-      fallback = 'Execution failed'
-    ): void => {
-      const errorInstance = this.errorHandler.ensureError(error, fallback);
-      this.presenter.displayEnhancedErrorFromCommandExecution(
-        errorInstance,
-        command,
-        args,
-        context
-      );
-    },
-
-    /**
-     * Handle storage/persistence errors with warnings
-     */
-    handleStorageError: (error: unknown, operation: string): void => {
-      const message = this.errorHandler.getErrorMessage(
-        error,
-        `Failed to ${operation}`
-      );
-      this.presenter.displayWarning(`Failed to ${operation}: ${message}`);
-    },
-
-    /**
-     * Create agentic execution result with error handling
-     */
-    createExecutionResult: (
-      step: AgenticStep,
-      error: unknown,
-      iteration: number
-    ): unknown => {
-      return {
-        step,
-        success: false,
-        output: '',
-        error: this.errorHandler.getErrorMessage(
-          error,
-          'Step execution failed'
-        ),
-        confidence: 0,
-        timestamp: new Date().toISOString(),
-        iteration,
-      };
-    },
-  };
 }

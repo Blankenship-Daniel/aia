@@ -53,9 +53,12 @@ export class LearnCommand implements ICommand {
         ).start();
         topic = await this.detectTopic();
         spinner.succeed(`Detected topic: ${chalk.cyan(topic)}`);
+      } else {
+        console.log(
+          chalk.bold(`\n📚 Learning Session: ${chalk.cyan(topic)} (provided)`)
+        );
       }
 
-      console.log(chalk.bold(`\\n📚 Learning Session: ${chalk.cyan(topic)}`));
       console.log(chalk.gray('─'.repeat(50)));
 
       // Get context-aware suggestions from Copilot
@@ -87,6 +90,7 @@ export class LearnCommand implements ICommand {
           // Interactive pause between topics
           if (
             !options.continuous &&
+            options.interactive !== false &&
             learningContent.length < suggestions.length
           ) {
             const { continue: shouldContinue } = await inquirer.prompt([
@@ -102,8 +106,15 @@ export class LearnCommand implements ICommand {
           }
         }
 
-        // Offer additional learning options
-        await this.offerAdditionalLearning(topic, learningContent);
+        // Offer additional learning options (skip in non-interactive mode)
+        console.log(
+          chalk.gray(`Debug: interactive option = ${options.interactive}`)
+        );
+        if (options.interactive !== false) {
+          await this.offerAdditionalLearning(topic, learningContent);
+        } else {
+          console.log(chalk.green('\n📚 Learning session complete!'));
+        }
 
         return {
           success: true,
@@ -175,6 +186,12 @@ export class LearnCommand implements ICommand {
         {
           name: 'advanced',
           description: 'Include advanced tips and techniques',
+          type: 'boolean',
+          default: false,
+        },
+        {
+          name: 'no-interactive',
+          description: 'Skip interactive prompts (useful for CI/scripts)',
           type: 'boolean',
           default: false,
         },

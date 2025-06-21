@@ -241,6 +241,8 @@ export default class CLIApplication {
         '<args...>',
         'Action and parameters (e.g., search "term")'
       );
+    } else if (name === 'learn') {
+      cmd = cmd.argument('[topic]', 'Learning topic (optional)');
     } else if (
       name === 'ask' ||
       name === 'exec' ||
@@ -398,6 +400,14 @@ export default class CLIApplication {
 
       case 'learn':
         cmd.option('--interactive', 'Enable interactive learning mode');
+        cmd.option('--depth <number>', 'Number of topics to cover', '3');
+        cmd.option('--continuous', 'Do not pause between topics');
+        cmd.option('--beginner', 'Focus on beginner-friendly content');
+        cmd.option('--advanced', 'Include advanced tips and techniques');
+        cmd.option(
+          '--no-interactive',
+          'Skip interactive prompts (useful for CI/scripts)'
+        );
         cmd.option(
           '--no-fallback',
           'Disable AI fallback when Copilot is unavailable'
@@ -502,7 +512,14 @@ export default class CLIApplication {
       let cleanArgs: string[] = [];
       if (args.length > 0 && Array.isArray(args[0])) {
         cleanArgs = args[0]; // First element is the array of actual arguments
+      } else if (args.length > 0 && typeof args[0] === 'string') {
+        // Handle single argument case
+        cleanArgs = [args[0]];
       }
+
+      console.log(
+        chalk.gray(`CLI Debug: cleanArgs = ${JSON.stringify(cleanArgs)}`)
+      );
 
       // Execute the command with correct signature
       const result = await commandInstance.execute({}, cleanArgs, options);
@@ -530,9 +547,20 @@ export default class CLIApplication {
 
     // In Commander.js with variadic arguments, the last argument is the Command object
     const lastArg = args[args.length - 1];
+    console.log(chalk.gray(`CLI Debug: lastArg type = ${typeof lastArg}`));
+    console.log(
+      chalk.gray(`CLI Debug: lastArg has opts = ${!!(lastArg && lastArg.opts)}`)
+    );
+
     if (lastArg && typeof lastArg === 'object' && lastArg.opts) {
       // This is the Command object, extract options from it
-      Object.assign(options, lastArg.opts());
+      const commandOptions = lastArg.opts();
+      console.log(
+        chalk.gray(
+          `CLI Debug: commandOptions = ${JSON.stringify(commandOptions)}`
+        )
+      );
+      Object.assign(options, commandOptions);
     }
 
     // Add global options from program

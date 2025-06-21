@@ -51,7 +51,7 @@ export class CopilotCheckCommand implements ICommand {
 
         // Provide instructions if needed
         if (!this.isFullyConfigured(status)) {
-          console.log('\\n' + chalk.bold('📋 Setup Instructions:'));
+          console.log('\n' + chalk.bold('📋 Setup Instructions:'));
           console.log(chalk.gray('─'.repeat(30)));
           const instructions =
             await this.copilotDependencyService.getInstallInstructions(status);
@@ -164,7 +164,7 @@ export class CopilotCheckCommand implements ICommand {
    */
 
   private displayStatus(status: any): void {
-    console.log('\\n' + chalk.bold('📊 Status Report:'));
+    console.log('\n' + chalk.bold('📊 Status Report:'));
 
     // GitHub CLI status
     const ghIcon = status.gh ? chalk.green('✅') : chalk.red('❌');
@@ -200,17 +200,17 @@ export class CopilotCheckCommand implements ICommand {
 
     // Overall status
     if (this.isFullyConfigured(status)) {
-      console.log('\\n' + chalk.green('🎉 Overall Status: Ready to use!'));
+      console.log('\n' + chalk.green('🎉 Overall Status: Ready to use!'));
     } else {
-      console.log('\\n' + chalk.yellow('⚠️  Overall Status: Setup required'));
+      console.log('\n' + chalk.yellow('⚠️  Overall Status: Setup required'));
     }
 
     if (status.message) {
-      console.log(`\\n${chalk.bold('Message:')} ${status.message}`);
+      console.log(`\n${chalk.bold('Message:')} ${status.message}`);
     }
 
     if (status.errors && status.errors.length > 0) {
-      console.log(`\\n${chalk.bold('Issues found:')}`);
+      console.log(`\n${chalk.bold('Issues found:')}`);
       status.errors.forEach((error: string) => {
         console.log(`  ${chalk.red('•')} ${error}`);
       });

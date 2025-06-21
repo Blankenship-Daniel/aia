@@ -35,6 +35,7 @@ import { ICommand } from '../interfaces/ICommand.js';
 import { ICommandService } from '../interfaces/ICommandService.js';
 import { IConfigurationService } from '../interfaces/IConfigurationService.js';
 import { DIContainer } from '../container/DIContainer.js';
+import { UXEnhancements } from '../utils/UXEnhancements.js';
 
 /**
  * CLIApplication - Main application class orchestrating the entire CLI experience.
@@ -166,7 +167,18 @@ export default class CLIApplication {
 
       // Only show success message in verbose mode for cleaner UX
       if (isVerbose) {
-        console.log(chalk.green('✅ Services initialized successfully'));
+        const successMessage = UXEnhancements.createStatusIndicator(
+          'success',
+          'Services initialized successfully'
+        );
+        console.log(successMessage);
+
+        // Show notification for successful startup
+        UXEnhancements.showNotification(
+          'AIA CLI',
+          'All services initialized successfully',
+          'success'
+        );
       }
     } catch (error: any) {
       console.error(chalk.red('Failed to setup services:'), error.message);
@@ -517,10 +529,6 @@ export default class CLIApplication {
         cleanArgs = [args[0]];
       }
 
-      console.log(
-        chalk.gray(`CLI Debug: cleanArgs = ${JSON.stringify(cleanArgs)}`)
-      );
-
       // Execute the command with correct signature
       const result = await commandInstance.execute({}, cleanArgs, options);
 
@@ -547,19 +555,10 @@ export default class CLIApplication {
 
     // In Commander.js with variadic arguments, the last argument is the Command object
     const lastArg = args[args.length - 1];
-    console.log(chalk.gray(`CLI Debug: lastArg type = ${typeof lastArg}`));
-    console.log(
-      chalk.gray(`CLI Debug: lastArg has opts = ${!!(lastArg && lastArg.opts)}`)
-    );
 
     if (lastArg && typeof lastArg === 'object' && lastArg.opts) {
       // This is the Command object, extract options from it
       const commandOptions = lastArg.opts();
-      console.log(
-        chalk.gray(
-          `CLI Debug: commandOptions = ${JSON.stringify(commandOptions)}`
-        )
-      );
       Object.assign(options, commandOptions);
     }
 

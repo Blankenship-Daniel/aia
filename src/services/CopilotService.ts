@@ -37,8 +37,8 @@ import { ICopilotDependencyService } from '../interfaces/ICopilotDependencyServi
 
 export class CopilotService implements ICopilotService {
   private execAsync = promisify(exec);
-  private readonly TIMEOUT_MS = 30000; // 30 seconds for interactive operations
-  private readonly INTERACTIVE_TIMEOUT_MS = 25000; // 25 seconds for interactive automation
+  private readonly TIMEOUT_MS = 8000; // 8 seconds for operations
+  private readonly INTERACTIVE_TIMEOUT_MS = 6000; // 6 seconds for interactive automation
   private isAvailableCache: boolean | null = null;
   private lastAvailabilityCheck = 0;
   private readonly AVAILABILITY_CACHE_TTL = 60000; // 1 minute instead of 5 minutes
@@ -159,19 +159,13 @@ export class CopilotService implements ICopilotService {
 
       try {
         // Method 1: Try interactive automation
-        console.log(chalk.yellow('Attempting Copilot CLI suggest...'));
+        // Remove this console.log - no need to show technical details to users
         suggestions = await this.executeCopilotSuggest(enhancedQuery);
         console.log(chalk.green('✓ Copilot suggest successful'));
       } catch (error) {
-        console.log(
-          chalk.yellow(
-            `Direct Copilot suggest failed: ${
-              error instanceof Error ? error.message : error
-            }`
-          )
-        );
+        // Hide technical details from users
         if (options?.useAIFallback !== false) {
-          console.log(chalk.yellow('Trying AI fallback'));
+          // Remove console.log here - no need to show fallback message
           suggestions = await this.aiSuggestFallback(query, context, options);
         }
       }
@@ -385,7 +379,9 @@ export class CopilotService implements ICopilotService {
         if (hasUsefulContent) {
           resolve(this.parseExplanation(command, output));
         } else {
-          reject(new Error('Interactive Copilot explain timed out'));
+          reject(
+            new Error('Unable to get explanation quickly, using fallback')
+          );
         }
       }, this.INTERACTIVE_TIMEOUT_MS);
 
@@ -533,7 +529,9 @@ export class CopilotService implements ICopilotService {
             },
           ]);
         } else {
-          reject(new Error('Interactive Copilot suggest timed out'));
+          reject(
+            new Error('Unable to get suggestions quickly, using fallback')
+          );
         }
       }, this.INTERACTIVE_TIMEOUT_MS);
 

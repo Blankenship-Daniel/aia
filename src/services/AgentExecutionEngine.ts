@@ -38,7 +38,7 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
         this.aiService,
         this.contextService
       );
-      console.log('✅ AI-powered task classification enabled');
+      // Remove console.log - no need to announce this to users
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -64,22 +64,8 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
     error?: string;
   }> {
     try {
-      console.log('🔍 Analyzing task complexity and requirements...');
-
       // Step 1: Analyze the task using AI-powered classification (required)
-      console.log('🧠 Using AI-powered task classification...');
       const taskAnalysis = await this.taskAnalyzer.analyzeTask(goal);
-
-      console.log(`📊 Task Analysis:`);
-      console.log(`   Type: ${taskAnalysis.type}`);
-      console.log(`   Complexity: ${taskAnalysis.complexity}`);
-      console.log(`   Risk Level: ${taskAnalysis.riskLevel}`);
-      console.log(
-        `   Required Capabilities: ${taskAnalysis.requiredCapabilities.join(
-          ', '
-        )}`
-      );
-      console.log(`   Estimated Steps: ${taskAnalysis.estimatedSteps}`);
 
       // Step 2: Check if this is a code analysis task that should use safe commands
       const isCodeAnalysisTask =
@@ -93,7 +79,7 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
           ));
 
       if (isCodeAnalysisTask) {
-        console.log('🛡️ Using safe analysis commands for code analysis task');
+        // Use safe analysis commands for code analysis task
         const safePlan = this.generateSafeAnalysisCommands(goal);
         return {
           success: true,
@@ -181,7 +167,8 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
         workingDirectory: process.cwd(),
       });
 
-      console.log(`🔧 Executing: ${interpolatedCommand}`);
+      // Note: Don't log the command here as it interferes with spinner display
+      // The command will be shown in the step presentation
 
       // Execute the interpolated command
       const result = await this.commandService.executeCommand(

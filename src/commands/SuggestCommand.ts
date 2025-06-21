@@ -370,7 +370,7 @@ export class SuggestCommand implements ICommand {
   }
 
   private displaySuggestions(suggestions: any[]): void {
-    console.log('\\n' + chalk.bold('💡 Command Suggestions'));
+    console.log('\n' + chalk.bold('💡 Command Suggestions'));
     console.log(chalk.gray('─'.repeat(50)));
 
     suggestions.forEach((suggestion, index) => {
@@ -402,7 +402,7 @@ export class SuggestCommand implements ICommand {
       }
     });
 
-    console.log('\\n' + chalk.gray('─'.repeat(50)));
+    console.log('\n' + chalk.gray('─'.repeat(50)));
   }
 
   private formatSuggestionChoice(suggestion: any, index: number): string {
@@ -460,10 +460,10 @@ export class SuggestCommand implements ICommand {
     }
 
     if (messages.length > 0) {
-      console.log('\\n' + messages.join('\\n'));
+      console.log('\n' + messages.join('\n'));
     }
 
-    console.log(`\\nCommand: ${chalk.cyan(suggestion.command)}`);
+    console.log(`\nCommand: ${chalk.cyan(suggestion.command)}`);
 
     const { confirmed } = await inquirer.prompt([
       {

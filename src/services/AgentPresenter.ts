@@ -61,130 +61,33 @@ export class AgentPresenter implements IAgentPresenter {
   }
 
   showPlanningPhase(goal: string, verbose: boolean = false): void {
-    if (!verbose) {
-      // Concise mode - just show the goal
-      console.log(chalk.blue('🤖 AIA Agent'));
-      console.log(chalk.cyan(`🎯 ${goal}`));
+    // Clean, professional output
+    console.log(chalk.blue('🤖 AIA Agent'));
+    console.log(chalk.cyan(`🎯 ${goal}`));
+
+    if (verbose) {
+      console.log(chalk.gray('Analyzing task and creating execution plan...'));
+    } else {
       console.log(chalk.gray('Planning...'));
-      return;
     }
-
-    // Verbose mode - original detailed output
-    console.log(chalk.blue('🤖 AIA Agent - Intelligent Task Execution'));
-    console.log(chalk.gray('━'.repeat(60)));
-    console.log(chalk.cyan(`🎯 Goal: ${goal}`));
-
-    // ========== Phase Separation Enhancement ==========
-    console.log(
-      chalk.magenta(
-        '\n📋 Planning Phase - Analyzing goal and creating execution plan...'
-      )
-    );
-    console.log(chalk.gray('━'.repeat(60)));
-
-    // ========== Real-time Progress Indicators ==========
-    this.startResourceMonitoring();
-    this.startTime = Date.now();
-    this.initialMemory = process.memoryUsage().heapUsed / 1024 / 1024;
-
-    // Show initial system state
-    console.log(
-      chalk.dim(
-        `🔧 System: Node.js ${
-          process.version
-        } | Memory: ${this.initialMemory.toFixed(1)}MB`
-      )
-    );
-    console.log(
-      chalk.dim(`📂 Working Directory: ${process.cwd().split('/').pop()}`)
-    );
   }
 
   displayExecutionPlan(plan: ExecutionStep[], verbose: boolean = false): void {
-    if (!verbose) {
-      // Concise mode - just show step count and proceed
-      console.log(chalk.green(`✓ Plan ready (${plan.length} steps)`));
-      return;
-    }
+    // Clean, concise display
+    console.log(chalk.green(`✓ Plan ready (${plan.length} steps)`));
 
-    // Verbose mode - original detailed output
-    const planningTime = Date.now() - this.startTime;
-    const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
-
-    // ========== Timing Display Enhancement ==========
-    console.log(chalk.green(`✓ Planning completed in ${planningTime}ms`));
-    console.log(
-      chalk.dim(
-        `💾 Memory usage: ${currentMemory.toFixed(1)}MB (+${(
-          currentMemory - this.initialMemory
-        ).toFixed(1)}MB)`
-      )
-    );
-
-    // ========== Enhanced Phase Separation ==========
-    console.log(chalk.blue('\n📋 Execution Plan:'));
-    console.log(chalk.gray('━'.repeat(60)));
-
-    // Plan summary with enhanced metrics
-    const totalSteps = plan.length;
-    const estimatedTime = plan.reduce(
-      (sum, step) => sum + (step.timeout || 30000),
-      0
-    );
-    const estimatedMinutes = Math.ceil(estimatedTime / 60000);
-
-    console.log(chalk.cyan(`📊 Plan Overview:`));
-    console.log(
-      `   Steps: ${chalk.yellow(totalSteps)} | Est. Time: ${chalk.yellow(
-        `~${estimatedMinutes}min`
-      )} | Timeout: ${chalk.yellow('5min')}`
-    );
-    console.log(chalk.dim(`   Planned at: ${new Date().toLocaleTimeString()}`));
-    console.log();
-
-    // Group steps by phase for better visualization
-    const phases = this.groupStepsByPhase(plan);
-
-    phases.forEach((phase, phaseIndex) => {
-      console.log(chalk.magenta(`📂 Phase ${phaseIndex + 1}: ${phase.name}`));
-      console.log(chalk.gray(`   ${phase.steps.length} steps`));
-
-      phase.steps.forEach((step, stepIndex) => {
-        const overallStepNum = plan.indexOf(step) + 1;
-        const stepNumber = chalk.cyan(`[${overallStepNum}/${totalSteps}]`);
-
-        // Risk indicator
-        const riskLevel = this.getRiskLevel(step);
-        const riskIcon =
-          riskLevel === 'high'
-            ? chalk.red('⚠️')
-            : riskLevel === 'medium'
-            ? chalk.yellow('⚡')
-            : chalk.green('✨');
-
+    if (verbose) {
+      console.log(chalk.blue('\n📋 Execution Plan:'));
+      plan.forEach((step, index) => {
         console.log(
-          `${stepNumber} ${riskIcon} ${chalk.bold(step.description)}`
+          `${chalk.cyan(`[${index + 1}/${plan.length}]`)} ${step.description}`
         );
-
         if (step.command) {
-          console.log(
-            `   ${chalk.gray('Command:')} ${chalk.yellow(step.command)}`
-          );
+          console.log(`   ${chalk.gray('→')} ${chalk.yellow(step.command)}`);
         }
-
-        console.log(`   ${chalk.gray('Expected:')} ${step.expectedOutcome}`);
-
-        if (step.risks && step.risks.length > 0) {
-          console.log(`   ${chalk.red('⚠️  Risks:')} ${step.risks.join(', ')}`);
-        }
-
-        const timeoutSec = (step.timeout || 30000) / 1000;
-        console.log(`   ${chalk.gray('Timeout:')} ${timeoutSec}s`);
-        console.log();
       });
-    });
-
-    console.log(chalk.gray('━'.repeat(60)));
+      console.log();
+    }
   }
 
   showExecutionStep(
@@ -207,14 +110,16 @@ export class AgentPresenter implements IAgentPresenter {
         updateProgress: () => {}, // No-op in concise mode
         succeed: (message?: string) => {
           if (this.activeSpinner) {
-            this.activeSpinner.succeed(chalk.green(`✓ ${step.description}`));
+            this.activeSpinner.stop();
             this.activeSpinner = null;
+            console.log(chalk.green(`✓ ${step.description}`));
           }
         },
         fail: (message?: string) => {
           if (this.activeSpinner) {
-            this.activeSpinner.fail(chalk.red(`✗ ${step.description}`));
+            this.activeSpinner.stop();
             this.activeSpinner = null;
+            console.log(chalk.red(`✗ ${step.description}`));
           }
         },
         stop: () => {
@@ -440,7 +345,7 @@ export class AgentPresenter implements IAgentPresenter {
     }
 
     if (!verbose) {
-      // Concise mode - just show final result
+      // Concise mode - show completion and result with better flow
       const statusIcon = execution.success
         ? chalk.green('✅')
         : chalk.red('❌');
@@ -448,10 +353,10 @@ export class AgentPresenter implements IAgentPresenter {
 
       console.log(`\n${statusIcon} ${statusText}: ${execution.goal}`);
 
-      // Show final result if available
+      // Show final result if available with better formatting
       const finalResult = await this.extractFinalResult(execution);
       if (finalResult) {
-        console.log(chalk.cyan(`💡 ${finalResult}`));
+        console.log(chalk.cyan(`\n💡 ${finalResult}`));
       }
 
       return;
@@ -825,59 +730,15 @@ export class AgentPresenter implements IAgentPresenter {
       recoverable?: boolean;
     }
   ): void {
-    console.log(chalk.red('\n❌ Enhanced Error Analysis'));
-    console.log(chalk.gray('━'.repeat(60)));
+    // Clean, simple error display
+    console.log(chalk.red(`❌ ${error.message}`));
 
-    // Error classification
-    if (context.errorType || context.severity) {
-      console.log(chalk.red(`Error Type: ${context.errorType || 'Unknown'}`));
-      console.log(chalk.red(`Severity: ${context.severity || 'Unknown'}`));
-      console.log(
-        chalk.cyan(`Recoverable: ${context.recoverable ? 'Yes' : 'No'}`)
-      );
-      console.log();
-    }
-
-    // Main error message
-    console.log(chalk.red(`Message: ${error.message}`));
-
-    if (context.commandName) {
-      console.log(chalk.gray(`Command: ${context.commandName}`));
-    }
-
-    // Circuit breaker information
-    if (context.circuitBreakerState) {
-      console.log(chalk.yellow(`\n🔄 Resilience Status:`));
-      console.log(
-        chalk.yellow(
-          `  Failures: ${context.circuitBreakerState.consecutiveFailures}/3`
-        )
-      );
-
-      if (context.circuitBreakerState.isBlocked) {
-        const timeUntilReset = Math.max(
-          0,
-          Math.ceil(
-            (context.circuitBreakerState.blockUntil - Date.now()) / 1000
-          )
-        );
-        console.log(
-          chalk.red(
-            `  Status: Circuit breaker active (${timeUntilReset}s remaining)`
-          )
-        );
-      }
-    }
-
-    // Recovery suggestions
     if (context.recoveryActions && context.recoveryActions.length > 0) {
-      console.log(chalk.blue('\n💡 Suggested Recovery Actions:'));
-      context.recoveryActions.forEach((action, index) => {
-        console.log(chalk.blue(`  ${index + 1}. ${action}`));
+      console.log(chalk.cyan('\n💡 Suggestions:'));
+      context.recoveryActions.forEach((action) => {
+        console.log(chalk.gray(`   • ${action}`));
       });
     }
-
-    console.log(chalk.gray('━'.repeat(60)));
   }
 
   displayPerformanceComparison(

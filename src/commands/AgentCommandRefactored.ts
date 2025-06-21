@@ -397,12 +397,11 @@ The agent will:
     learnings: string[];
   }> {
     const totalSteps = execution.plan.length;
-    if (options.verbose) {
-      console.log(
-        `\n${chalk.blue('🚀')} Starting execution of ${totalSteps} steps...`
-      );
-      console.log(chalk.gray('━'.repeat(60)));
-    }
+
+    // Always show simplified execution start for better UX
+    console.log(
+      `\n${chalk.blue('🚀')} Starting execution of ${totalSteps} steps...`
+    );
 
     let iteration = 0;
     let allStepsSuccessful = false;
@@ -454,7 +453,10 @@ The agent will:
         const step = currentPlan[i];
         const stepNumber = i + 1;
 
-        if (options.verbose) {
+        // Remove redundant step numbering - let the spinner handle step display
+        // Don't show step numbers to reduce visual clutter
+        const showStepNumbers = false; // Force clean UX
+        if (showStepNumbers && options.verbose) {
           console.log(
             `\n${chalk.cyan(
               `[${stepNumber}/${currentPlan.length}]`
@@ -874,22 +876,26 @@ The agent will:
     let overallSuccess = true;
     const totalSteps = execution.plan.length;
 
+    // Clean execution start message
     console.log(
       `\n${chalk.blue(
         '🚀'
       )} Starting fallback execution of ${totalSteps} steps...`
     );
-    console.log(chalk.gray('━'.repeat(60)));
 
     for (let i = 0; i < execution.plan.length; i++) {
       const step = execution.plan[i];
       const stepNumber = i + 1;
 
-      console.log(
-        `\n${chalk.cyan(`[${stepNumber}/${totalSteps}]`)} ${chalk.bold(
-          step.description
-        )}`
-      );
+      // Only show step numbers in verbose mode
+      const verbose = false; // Fallback should be concise
+      if (verbose) {
+        console.log(
+          `\n${chalk.cyan(`[${stepNumber}/${totalSteps}]`)} ${chalk.bold(
+            step.description
+          )}`
+        );
+      }
 
       const stepPresentation = this.presenter.showExecutionStep(
         {

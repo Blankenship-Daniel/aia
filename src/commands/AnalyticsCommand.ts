@@ -3,6 +3,9 @@ import { IAnalyticsService } from '../interfaces/IAnalyticsService';
 import { IContextService } from '../interfaces/IContextService';
 import { CommandResult, CommandOptions } from '../types/index';
 import chalk from 'chalk';
+import Table from 'cli-table3';
+import boxen from 'boxen';
+import { UXEnhancements } from '../utils/UXEnhancements';
 
 /**
  * Analytics Command - Comprehensive usage analytics and insights
@@ -183,45 +186,144 @@ Flags:
   }
 
   private async showUsageAnalytics(): Promise<void> {
-    console.log(chalk.blue('\n📈 Usage Analytics'));
-    console.log(chalk.blue('=================='));
+    // Create gradient header with responsive layout
+    console.log(
+      UXEnhancements.createBrandedHeader('Usage Analytics', 'primary')
+    );
 
+    const startTime = Date.now();
     const analytics = await this.analyticsService.getUsageAnalytics();
+    const loadTime = Date.now() - startTime;
 
-    console.log(
-      `📊 Total Commands: ${chalk.yellow(analytics.totalCommands.toString())}`
-    );
-    console.log(
-      `🔧 Unique Features: ${chalk.yellow(analytics.uniqueFeatures.toString())}`
-    );
-    console.log(
-      `⏱️  Average Session: ${chalk.cyan(
-        analytics.averageSessionLength.toFixed(1)
-      )}s`
-    );
-    console.log(
-      `🎯 Productivity Score: ${chalk.green(
-        analytics.productivityScore.toFixed(1)
-      )}/10`
+    // Summary metrics table with enhanced symbols
+    const summaryTable = new Table({
+      head: [
+        chalk.cyan.bold('Metric'),
+        chalk.cyan.bold('Value'),
+        chalk.cyan.bold('Status'),
+      ],
+      style: {
+        head: [],
+        border: ['cyan'],
+        'padding-left': 1,
+        'padding-right': 1,
+      },
+      colWidths: [25, 15, 15],
+    });
+
+    // Use cross-platform symbols from UXEnhancements
+    summaryTable.push(
+      [
+        `${UXEnhancements.getSymbol('info')} Total Commands`,
+        chalk.yellow(analytics.totalCommands.toString()),
+        analytics.totalCommands > 100
+          ? UXEnhancements.createStatusIndicator('success', 'High')
+          : UXEnhancements.createStatusIndicator('info', 'Normal'),
+      ],
+      [
+        `${UXEnhancements.getSymbol('star')} Unique Features`,
+        chalk.yellow(analytics.uniqueFeatures.toString()),
+        analytics.uniqueFeatures > 10
+          ? UXEnhancements.createStatusIndicator('success', 'Diverse')
+          : UXEnhancements.createStatusIndicator('warning', 'Growing'),
+      ],
+      [
+        `${UXEnhancements.getSymbol('play')} Average Session`,
+        chalk.cyan(analytics.averageSessionLength.toFixed(1) + 's'),
+        analytics.averageSessionLength > 60
+          ? UXEnhancements.createStatusIndicator('success', 'Engaged')
+          : UXEnhancements.createStatusIndicator('info', 'Quick'),
+      ],
+      [
+        `${UXEnhancements.getSymbol('star')} Productivity Score`,
+        chalk.green(analytics.productivityScore.toFixed(1) + '/10'),
+        analytics.productivityScore > 8
+          ? UXEnhancements.createStatusIndicator('success', 'Excellent')
+          : analytics.productivityScore > 6
+          ? UXEnhancements.createStatusIndicator('warning', 'Good')
+          : UXEnhancements.createStatusIndicator('error', 'Needs Work'),
+      ]
     );
 
-    // Most used commands
+    console.log(summaryTable.toString());
+
+    // Show timing information
+    console.log(UXEnhancements.createTimingDisplay(loadTime));
+
+    // Send notification for significant metrics
+    if (analytics.productivityScore > 8) {
+      UXEnhancements.showNotification(
+        'AIA Analytics',
+        `Excellent productivity score: ${analytics.productivityScore.toFixed(
+          1
+        )}/10!`,
+        'success'
+      );
+    }
+
+    // Most used commands table
     if (analytics.mostUsedCommands.length > 0) {
-      console.log(chalk.green('\n🏆 Most Used Commands:'));
+      console.log(chalk.green.bold('\n🏆 Most Used Commands:'));
+
+      const commandsTable = new Table({
+        head: [
+          chalk.cyan.bold('Rank'),
+          chalk.cyan.bold('Command'),
+          chalk.cyan.bold('Count'),
+          chalk.cyan.bold('Avg Time'),
+          chalk.cyan.bold('Success Rate'),
+        ],
+        style: {
+          head: [],
+          border: ['green'],
+          'padding-left': 1,
+          'padding-right': 1,
+        },
+        colWidths: [6, 20, 8, 12, 15],
+      });
+
       analytics.mostUsedCommands.slice(0, 8).forEach((cmd, index) => {
         const successIcon =
           cmd.successRate > 0.8 ? '✅' : cmd.successRate > 0.6 ? '⚠️' : '❌';
-        console.log(
-          `  ${index + 1}. ${chalk.cyan(cmd.command)} - ${
-            cmd.count
-          } uses (${cmd.averageTime.toFixed(1)}ms avg) ${successIcon}`
-        );
+        const successRate = `${(cmd.successRate * 100).toFixed(
+          1
+        )}% ${successIcon}`;
+
+        commandsTable.push([
+          chalk.yellow((index + 1).toString()),
+          chalk.cyan(cmd.command),
+          chalk.white(cmd.count.toString()),
+          chalk.yellow(cmd.averageTime.toFixed(1) + 'ms'),
+          cmd.successRate > 0.8
+            ? chalk.green(successRate)
+            : cmd.successRate > 0.6
+            ? chalk.yellow(successRate)
+            : chalk.red(successRate),
+        ]);
       });
+
+      console.log(commandsTable.toString());
     }
 
-    // Feature adoption
+    // Feature adoption table
     if (analytics.featureAdoption.length > 0) {
-      console.log(chalk.green('\n🚀 Feature Adoption:'));
+      console.log(chalk.green.bold('\n🚀 Feature Adoption:'));
+
+      const featuresTable = new Table({
+        head: [
+          chalk.cyan.bold('Feature'),
+          chalk.cyan.bold('Category'),
+          chalk.cyan.bold('Usage Level'),
+        ],
+        style: {
+          head: [],
+          border: ['magenta'],
+          'padding-left': 1,
+          'padding-right': 1,
+        },
+        colWidths: [25, 15, 15],
+      });
+
       analytics.featureAdoption.slice(0, 5).forEach((feature) => {
         const freqColor =
           feature.frequency === 'high'
@@ -229,114 +331,304 @@ Flags:
             : feature.frequency === 'medium'
             ? chalk.yellow
             : chalk.gray;
-        console.log(
-          `  • ${chalk.cyan(feature.feature)} (${
-            feature.category
-          }) - ${freqColor(feature.frequency)} usage`
-        );
+        featuresTable.push([
+          chalk.cyan(feature.feature),
+          chalk.white(feature.category),
+          freqColor(feature.frequency.toUpperCase()),
+        ]);
       });
+
+      console.log(featuresTable.toString());
     }
 
-    // Most productive time
-    console.log(chalk.green('\n⏰ Usage Patterns:'));
-    console.log(
-      `  Most Productive Time: ${chalk.cyan(
-        analytics.timeDistribution.mostProductiveTime
-      )}`
+    // Usage patterns
+    console.log(chalk.green.bold('\n⏰ Usage Patterns:'));
+    const patternsTable = new Table({
+      head: [chalk.cyan.bold('Pattern'), chalk.cyan.bold('Value')],
+      style: {
+        head: [],
+        border: ['yellow'],
+        'padding-left': 1,
+        'padding-right': 1,
+      },
+      colWidths: [25, 30],
+    });
+
+    patternsTable.push(
+      [
+        'Most Productive Time',
+        chalk.cyan(analytics.timeDistribution.mostProductiveTime),
+      ],
+      [
+        'Peak Hours',
+        analytics.timeDistribution.peakHours.map((h) => `${h}:00`).join(', '),
+      ]
     );
-    if (analytics.timeDistribution.peakHours.length > 0) {
-      console.log(
-        `  Peak Hours: ${analytics.timeDistribution.peakHours
-          .map((h) => `${h}:00`)
-          .join(', ')}`
-      );
-    }
+
+    console.log(patternsTable.toString());
 
     // Error patterns
     if (analytics.errorPatterns.length > 0) {
-      console.log(chalk.yellow('\n⚠️  Error Patterns:'));
-      analytics.errorPatterns.slice(0, 3).forEach((error) => {
-        console.log(`  • ${error.errorType}: ${error.frequency} occurrences`);
-        console.log(`    Commands: ${error.commands.join(', ')}`);
+      console.log(chalk.yellow.bold('\n⚠️  Error Patterns:'));
+
+      const errorsTable = new Table({
+        head: [
+          chalk.cyan.bold('Error Type'),
+          chalk.cyan.bold('Frequency'),
+          chalk.cyan.bold('Commands'),
+        ],
+        style: {
+          head: [],
+          border: ['red'],
+          'padding-left': 1,
+          'padding-right': 1,
+        },
+        colWidths: [20, 12, 35],
       });
+
+      analytics.errorPatterns.slice(0, 3).forEach((error) => {
+        errorsTable.push([
+          chalk.red(error.errorType),
+          chalk.yellow(error.frequency.toString()),
+          chalk.gray(error.commands.join(', ')),
+        ]);
+      });
+
+      console.log(errorsTable.toString());
     }
   }
 
   private async showPerformanceAnalytics(): Promise<void> {
-    console.log(chalk.blue('\n⚡ Performance Analytics'));
-    console.log(chalk.blue('========================'));
+    console.log(
+      boxen(chalk.yellow.bold('⚡ Performance Analytics'), {
+        padding: 1,
+        margin: 1,
+        borderStyle: 'double',
+        borderColor: 'yellow',
+      })
+    );
 
     const analytics = await this.analyticsService.getPerformanceAnalytics();
 
-    console.log(
-      `📊 Average Execution: ${chalk.cyan(
-        analytics.averageExecutionTime.toFixed(1)
-      )}ms`
-    );
-    console.log(
-      `🎯 Cache Efficiency: ${chalk.green(
-        (analytics.cacheEfficiency * 100).toFixed(1)
-      )}%`
-    );
-    console.log(
-      `⚡ Performance Gain: ${chalk.green(
-        analytics.performanceImprovement.toFixed(1)
-      )}x`
+    // Performance summary table
+    const summaryTable = new Table({
+      head: [
+        chalk.cyan.bold('Metric'),
+        chalk.cyan.bold('Value'),
+        chalk.cyan.bold('Rating'),
+      ],
+      style: {
+        head: [],
+        border: ['yellow'],
+        'padding-left': 1,
+        'padding-right': 1,
+      },
+      colWidths: [25, 15, 15],
+    });
+
+    const avgExecTime = analytics.averageExecutionTime;
+    const cacheEff = analytics.cacheEfficiency * 100;
+    const perfGain = analytics.performanceImprovement;
+
+    summaryTable.push(
+      [
+        '📊 Average Execution',
+        chalk.cyan(avgExecTime.toFixed(1) + 'ms'),
+        avgExecTime < 100
+          ? chalk.green('Excellent')
+          : avgExecTime < 500
+          ? chalk.yellow('Good')
+          : chalk.red('Slow'),
+      ],
+      [
+        '🎯 Cache Efficiency',
+        chalk.green(cacheEff.toFixed(1) + '%'),
+        cacheEff > 80
+          ? chalk.green('High')
+          : cacheEff > 60
+          ? chalk.yellow('Medium')
+          : chalk.red('Low'),
+      ],
+      [
+        '⚡ Performance Gain',
+        chalk.green(perfGain.toFixed(1) + 'x'),
+        perfGain > 2
+          ? chalk.green('Excellent')
+          : perfGain > 1.5
+          ? chalk.yellow('Good')
+          : chalk.red('Minimal'),
+      ]
     );
 
-    // Command performance
+    console.log(summaryTable.toString());
+
+    // Command performance table
     if (analytics.commandPerformance.length > 0) {
-      console.log(chalk.green('\n📈 Command Performance:'));
+      console.log(chalk.green.bold('\n📈 Command Performance:'));
+
+      const perfTable = new Table({
+        head: [
+          chalk.cyan.bold('Rank'),
+          chalk.cyan.bold('Command'),
+          chalk.cyan.bold('Avg Time'),
+          chalk.cyan.bold('Success Rate'),
+          chalk.cyan.bold('Cache Hit'),
+        ],
+        style: {
+          head: [],
+          border: ['green'],
+          'padding-left': 1,
+          'padding-right': 1,
+        },
+        colWidths: [6, 20, 12, 12, 12],
+      });
+
       analytics.commandPerformance.slice(0, 5).forEach((cmd, index) => {
         const hitRate = cmd.cacheHitRate
-          ? `(${(cmd.cacheHitRate * 100).toFixed(0)}% cache hit)`
-          : '';
-        console.log(
-          `  ${index + 1}. ${chalk.cyan(
-            cmd.command
-          )} - ${cmd.averageTime.toFixed(1)}ms avg, ${(
-            cmd.successRate * 100
-          ).toFixed(0)}% success ${hitRate}`
-        );
+          ? `${(cmd.cacheHitRate * 100).toFixed(0)}%`
+          : 'N/A';
+        const successRate = `${(cmd.successRate * 100).toFixed(0)}%`;
+
+        perfTable.push([
+          chalk.yellow((index + 1).toString()),
+          chalk.cyan(cmd.command),
+          chalk.white(cmd.averageTime.toFixed(1) + 'ms'),
+          cmd.successRate > 0.9
+            ? chalk.green(successRate)
+            : cmd.successRate > 0.7
+            ? chalk.yellow(successRate)
+            : chalk.red(successRate),
+          cmd.cacheHitRate && cmd.cacheHitRate > 0.8
+            ? chalk.green(hitRate)
+            : cmd.cacheHitRate && cmd.cacheHitRate > 0.5
+            ? chalk.yellow(hitRate)
+            : chalk.gray(hitRate),
+        ]);
       });
+
+      console.log(perfTable.toString());
     }
 
-    // Slowest commands
+    // Slowest commands table
     if (analytics.slowestCommands.length > 0) {
-      console.log(chalk.yellow('\n🐌 Slowest Commands:'));
-      analytics.slowestCommands.slice(0, 3).forEach((cmd, index) => {
-        console.log(
-          `  ${index + 1}. ${chalk.cyan(cmd.command)} - ${chalk.red(
-            cmd.averageTime.toFixed(1)
-          )}ms`
-        );
+      console.log(
+        chalk.yellow.bold('\n🐌 Slowest Commands (Need Optimization):')
+      );
+
+      const slowTable = new Table({
+        head: [
+          chalk.cyan.bold('Rank'),
+          chalk.cyan.bold('Command'),
+          chalk.cyan.bold('Avg Time'),
+          chalk.cyan.bold('Impact'),
+        ],
+        style: {
+          head: [],
+          border: ['red'],
+          'padding-left': 1,
+          'padding-right': 1,
+        },
+        colWidths: [6, 25, 15, 15],
       });
+
+      analytics.slowestCommands.slice(0, 3).forEach((cmd, index) => {
+        const impact =
+          cmd.averageTime > 1000
+            ? 'High'
+            : cmd.averageTime > 500
+            ? 'Medium'
+            : 'Low';
+        const impactColor =
+          cmd.averageTime > 1000
+            ? chalk.red
+            : cmd.averageTime > 500
+            ? chalk.yellow
+            : chalk.green;
+
+        slowTable.push([
+          chalk.yellow((index + 1).toString()),
+          chalk.cyan(cmd.command),
+          chalk.red(cmd.averageTime.toFixed(1) + 'ms'),
+          impactColor(impact),
+        ]);
+      });
+
+      console.log(slowTable.toString());
     }
 
     // Fastest commands
     if (analytics.fastestCommands.length > 0) {
-      console.log(chalk.green('\n🚀 Fastest Commands:'));
-      analytics.fastestCommands.slice(0, 3).forEach((cmd, index) => {
-        console.log(
-          `  ${index + 1}. ${chalk.cyan(cmd.command)} - ${chalk.green(
-            cmd.averageTime.toFixed(1)
-          )}ms`
-        );
+      console.log(chalk.green.bold('\n🚀 Fastest Commands:'));
+
+      const fastTable = new Table({
+        head: [
+          chalk.cyan.bold('Rank'),
+          chalk.cyan.bold('Command'),
+          chalk.cyan.bold('Avg Time'),
+          chalk.cyan.bold('Efficiency'),
+        ],
+        style: {
+          head: [],
+          border: ['green'],
+          'padding-left': 1,
+          'padding-right': 1,
+        },
+        colWidths: [6, 25, 15, 15],
       });
+
+      analytics.fastestCommands.slice(0, 3).forEach((cmd, index) => {
+        fastTable.push([
+          chalk.yellow((index + 1).toString()),
+          chalk.cyan(cmd.command),
+          chalk.green(cmd.averageTime.toFixed(1) + 'ms'),
+          chalk.green('Optimal'),
+        ]);
+      });
+
+      console.log(fastTable.toString());
     }
 
     // Performance trends
     if (analytics.performanceTrends.length > 0) {
-      console.log(chalk.green('\n📊 Recent Performance Trends:'));
-      const recent = analytics.performanceTrends.slice(-3);
-      recent.forEach((trend) => {
-        const date = trend.date.toDateString();
-        console.log(
-          `  ${date}: ${trend.averageTime.toFixed(1)}ms avg, ${
-            trend.commandCount
-          } commands`
-        );
+      console.log(chalk.green.bold('\n📊 Recent Performance Trends:'));
+
+      const trendsTable = new Table({
+        head: [
+          chalk.cyan.bold('Date'),
+          chalk.cyan.bold('Avg Time'),
+          chalk.cyan.bold('Commands'),
+          chalk.cyan.bold('Trend'),
+        ],
+        style: {
+          head: [],
+          border: ['blue'],
+          'padding-left': 1,
+          'padding-right': 1,
+        },
+        colWidths: [15, 12, 12, 12],
       });
+
+      const recent = analytics.performanceTrends.slice(-3);
+      recent.forEach((trend, index) => {
+        const date = trend.date.toDateString().split(' ').slice(1, 3).join(' ');
+        const trendIcon =
+          index === recent.length - 1
+            ? '→'
+            : trend.averageTime < recent[index + 1]?.averageTime
+            ? '↑'
+            : '↓';
+
+        trendsTable.push([
+          chalk.white(date),
+          chalk.cyan(trend.averageTime.toFixed(1) + 'ms'),
+          chalk.yellow(trend.commandCount.toString()),
+          trend.averageTime < 200
+            ? chalk.green(trendIcon)
+            : chalk.yellow(trendIcon),
+        ]);
+      });
+
+      console.log(trendsTable.toString());
     }
   }
 

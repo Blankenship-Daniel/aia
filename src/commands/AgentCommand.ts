@@ -553,11 +553,12 @@ The agent will:
         const step = currentPlan[i];
         const stepNumber = i + 1;
 
-        console.log(
-          `\n${chalk.cyan(
-            `[${stepNumber}/${currentPlan.length}]`
-          )} ${chalk.bold(step.description)}`
-        );
+        // Remove step numbers for cleaner UX - let spinner handle the display
+        // console.log(
+        //   `\n${chalk.cyan(
+        //     `[${stepNumber}/${currentPlan.length}]`
+        //   )} ${chalk.bold(step.description)}`
+        // );
 
         const stepPresentation = this.presenter.showExecutionStep({
           id: step.id || step.description, // Use step.id if available, fallback to description
@@ -959,11 +960,12 @@ The agent will:
       const step = execution.plan[i];
       const stepNumber = i + 1;
 
-      console.log(
-        `\n${chalk.cyan(`[${stepNumber}/${totalSteps}]`)} ${chalk.bold(
-          step.description
-        )}`
-      );
+      // Remove step numbers for cleaner UX - let spinner handle the display
+      // console.log(
+      //   `\n${chalk.cyan(`[${stepNumber}/${totalSteps}]`)} ${chalk.bold(
+      //     step.description
+      //   )}`
+      // );
 
       const stepPresentation = this.presenter.showExecutionStep({
         id: step.description,

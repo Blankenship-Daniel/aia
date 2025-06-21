@@ -229,38 +229,38 @@ export class ExplainCommand implements ICommand {
    */
 
   private displayExplanation(result: any): void {
-    console.log('\\n' + chalk.bold('📖 Command Explanation'));
+    console.log('\n' + chalk.bold('📖 Command Explanation'));
     console.log(chalk.gray('─'.repeat(50)));
 
-    console.log(chalk.bold('\\n🔧 Command:'));
+    console.log(chalk.bold('\n🔧 Command:'));
     console.log(`  ${chalk.cyan(result.command)}`);
 
-    console.log(chalk.bold('\\n💡 Explanation:'));
+    console.log(chalk.bold('\n💡 Explanation:'));
     console.log(`  ${result.explanation}`);
 
     if (result.components?.length > 0) {
-      console.log(chalk.bold('\\n🔍 Components:'));
+      console.log(chalk.bold('\n🔍 Components:'));
       result.components.forEach((comp: any) => {
         console.log(`  ${chalk.yellow(comp.part)}: ${comp.description}`);
       });
     }
 
     if (result.examples?.length > 0) {
-      console.log(chalk.bold('\\n📝 Examples:'));
+      console.log(chalk.bold('\n📝 Examples:'));
       result.examples.forEach((ex: string) => {
         console.log(`  ${chalk.gray(ex)}`);
       });
     }
 
     if (result.warnings?.length > 0) {
-      console.log(chalk.bold('\\n⚠️  Warnings:'));
+      console.log(chalk.bold('\n⚠️  Warnings:'));
       result.warnings.forEach((warning: string) => {
         console.log(`  ${chalk.red(warning)}`);
       });
     }
 
     if (result.relatedCommands?.length > 0) {
-      console.log(chalk.bold('\\n🔗 Related Commands:'));
+      console.log(chalk.bold('\n🔗 Related Commands:'));
       result.relatedCommands.forEach((cmd: string) => {
         console.log(`  ${chalk.blue(cmd)}`);
       });
@@ -281,7 +281,7 @@ export class ExplainCommand implements ICommand {
       );
     }
 
-    console.log('\\n' + chalk.gray('─'.repeat(50)));
+    console.log('\n' + chalk.gray('─'.repeat(50)));
   }
 
   private async storeExplanation(

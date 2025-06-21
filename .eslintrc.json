@@ -1,0 +1,13 @@
+{
+  "env": {
+    "node": true,
+    "es2021": true
+  },
+  "extends": "eslint:recommended",
+  "rules": {
+    "complexity": ["warn", 10],
+    "max-depth": ["warn", 3],
+    "max-nested-callbacks": ["warn", 3],
+    "max-params": ["warn", 4]
+  }
+}

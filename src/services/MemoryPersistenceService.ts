@@ -25,10 +25,27 @@ export class MemoryPersistenceService implements IMemoryPersistence {
       }
       return this.getDefaultMemory();
     } catch (error) {
-      console.warn(
-        'Failed to load memory, using defaults:',
-        (error as Error).message
-      );
+      // Handle corrupted memory file gracefully
+      return this.handleCorruptedMemoryFile(error as Error);
+    }
+  }
+
+  /**
+   * Handle corrupted memory files by creating backup and returning defaults
+   */
+  private async handleCorruptedMemoryFile(error: Error): Promise<MemoryData> {
+    try {
+      // Create a backup of the corrupted file
+      const backupPath = `${this.memoryPath}.corrupted.${Date.now()}`;
+      if (await this.exists()) {
+        await fs.copy(this.memoryPath, backupPath);
+      }
+
+      // Remove the corrupted file and return defaults
+      await fs.remove(this.memoryPath);
+      return this.getDefaultMemory();
+    } catch (backupError) {
+      // If even backup fails, just return defaults silently
       return this.getDefaultMemory();
     }
   }

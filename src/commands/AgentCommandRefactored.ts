@@ -697,7 +697,10 @@ The agent will:
     prompt += `- Implement progressive enhancement (try advanced first, fallback to basic)\n`;
     prompt += `- Add explicit dependency checking steps\n`;
     prompt += `- Use cross-platform compatible commands\n`;
-    prompt += `- Implement proper error handling and recovery\n\n`;
+    prompt += `- Implement proper error handling and recovery\n`;
+    prompt += `- For script generation: use 'cat > file << EOF' instead of complex echo commands\n`;
+    prompt += `- For code analysis: use built-in Node.js tools instead of external packages\n`;
+    prompt += `- For multiline scripts: create separate .js files instead of inline echo\n\n`;
 
     prompt += `Please generate a completely new step-by-step execution plan in JSON format:\n`;
     prompt += `[{"id": "step-1", "description": "Step description", "command": "command to execute", "expectedOutcome": "Expected result", "reasoning": "Why this approach is better", "risks": ["potential issues"], "dependencies": ["required tools/files"], "timeout": 30000}]\n\n`;
@@ -711,6 +714,21 @@ The agent will:
    * Analyze why a specific command failed and suggest alternatives
    */
   private analyzeCommandFailure(command: string, error: string): string {
+    // Echo/script generation errors
+    if (
+      error.includes('SyntaxError') ||
+      error.includes('Invalid or unexpected token')
+    ) {
+      return `Script generation error - use proper escaping or file creation instead of complex echo commands`;
+    }
+
+    // NPM package not found errors
+    if (error.includes('404') && error.includes('npm')) {
+      const packageMatch = command.match(/npx\s+([^\s]+)/);
+      const packageName = packageMatch ? packageMatch[1] : 'unknown';
+      return `NPM package '${packageName}' not found - use verified alternatives like eslint, jshint, or native Node.js tools`;
+    }
+
     // Command not found errors
     if (
       error.includes('command not found') ||
@@ -743,12 +761,17 @@ The agent will:
       return `Configuration issue - add setup steps or use different tool`;
     }
 
-    // Syntax errors
+    // Syntax errors in generated scripts
     if (error.includes('syntax') || error.includes('invalid')) {
-      return `Command syntax issue - verify command format and parameters`;
+      return `Command syntax issue - verify command format and use proper shell escaping`;
     }
 
-    return `Unknown error - consider completely different approach`;
+    // Multiline echo issues
+    if (command.includes('echo') && command.length > 100) {
+      return `Complex echo command failed - use file creation with cat or Node.js fs instead`;
+    }
+
+    return `Command execution failed - use simpler, more reliable alternatives`;
   }
 
   /**

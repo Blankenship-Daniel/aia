@@ -1,0 +1,8 @@
+Console.log Usage Report
+Generated: Fri Jun 20 23:30:16 CDT 2025
+
+Files containing console.log statements:
+
+
+Detailed count per file:
+

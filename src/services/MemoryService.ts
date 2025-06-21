@@ -139,12 +139,8 @@ export class MemoryService implements IMemoryService {
       const defaultMemory = this.getDefaultMemory();
       this.memory = defaultMemory;
     } catch (error) {
-      console.warn(
-        'Failed to load memory, using defaults:',
-        (error as Error).message
-      );
-      const defaultMemory = this.getDefaultMemory();
-      this.memory = defaultMemory;
+      // Handle corrupted memory file gracefully
+      await this.handleCorruptedMemoryFile(error as Error);
     }
   }
 
@@ -701,5 +697,27 @@ export class MemoryService implements IMemoryService {
     const union = new Set([...set1, ...set2]);
 
     return intersection.size / union.size;
+  }
+
+  /**
+   * Handle corrupted memory file by creating backup and using defaults
+   */
+  private async handleCorruptedMemoryFile(error: Error): Promise<void> {
+    try {
+      // Create a backup of the corrupted file
+      const backupPath = `${this.memoryPath}.corrupted.${Date.now()}`;
+      if (await fs.pathExists(this.memoryPath)) {
+        await fs.copy(this.memoryPath, backupPath);
+      }
+
+      // Remove the corrupted file and use defaults
+      await fs.remove(this.memoryPath);
+      const defaultMemory = this.getDefaultMemory();
+      this.memory = defaultMemory;
+    } catch (backupError) {
+      // If even backup fails, just use defaults silently
+      const defaultMemory = this.getDefaultMemory();
+      this.memory = defaultMemory;
+    }
   }
 }

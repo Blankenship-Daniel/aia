@@ -14,6 +14,7 @@ import {
   ExecutionStep,
   CommandResult,
 } from '../types/index';
+import { TaskCapability } from './TaskComplexityAnalyzer';
 
 export class AgentExecutionEngine implements IAgentExecutionEngine {
   private readonly AI_CALL_TIMEOUT_MS = 30000;
@@ -79,6 +80,26 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
         )}`
       );
       console.log(`   Estimated Steps: ${taskAnalysis.estimatedSteps}`);
+
+      // Step 2: Check if this is a code analysis task that should use safe commands
+      const isCodeAnalysisTask =
+        goal.toLowerCase().includes('code smell') ||
+        goal.toLowerCase().includes('code analysis') ||
+        goal.toLowerCase().includes('analyze code') ||
+        goal.toLowerCase().includes('potential code smells') ||
+        (taskAnalysis.type === 'analysis' &&
+          taskAnalysis.requiredCapabilities.includes(
+            TaskCapability.CODE_ANALYSIS
+          ));
+
+      if (isCodeAnalysisTask) {
+        console.log('🛡️ Using safe analysis commands for code analysis task');
+        const safePlan = this.generateSafeAnalysisCommands(goal);
+        return {
+          success: true,
+          plan: safePlan,
+        };
+      }
 
       // Step 2: Extract context information from the goal
       const enhancedContext = this.enhanceContextFromGoal(goal, context);
@@ -515,7 +536,34 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
     }
 
     prompt += `\nGenerate a step-by-step execution plan in JSON format with the following structure:\n`;
-    prompt += `[{"id": "step-1", "description": "Step description", "command": "command to execute", "expectedOutcome": "Expected result", "dependencies": [], "timeout": 30000}]`;
+    prompt += `[{"id": "step-1", "description": "Step description", "command": "command to execute", "expectedOutcome": "Expected result", "dependencies": [], "timeout": 30000, "risks": []}]`;
+
+    prompt += `\n\n=== CRITICAL COMMAND GUIDELINES ===\n`;
+    prompt += `FORBIDDEN TECHNIQUES:\n`;
+    prompt += `- NEVER use complex multiline echo commands\n`;
+    prompt += `- NEVER embed JavaScript in echo commands\n`;
+    prompt += `- NEVER use non-existent npm packages: sonarqube-scanner, complexity-report, eslint-quick-init\n`;
+    prompt += `- NEVER use 'npx <unknown-package>'\n\n`;
+
+    prompt += `REQUIRED TECHNIQUES FOR CODE ANALYSIS:\n`;
+    prompt += `- Use 'cat > filename.js << 'EOF'' for script creation\n`;
+    prompt += `- Use Node.js built-in modules (fs, path, etc.) only\n`;
+    prompt += `- Use find + xargs + grep for pattern analysis\n`;
+    prompt += `- Use verified npm packages: eslint, npm audit, jshint only\n`;
+    prompt += `- For complex analysis, create .js files then run with 'node filename.js'\n\n`;
+
+    prompt += `CODE SMELL DETECTION TEMPLATE:\n`;
+    prompt += `Use this exact pattern for code analysis:\n`;
+    prompt += `1. "cat > analyze.js << 'EOF'" + Node.js analysis script + "EOF"\n`;
+    prompt += `2. "node analyze.js"\n`;
+    prompt += `3. "find . -name '*.js' -o -name '*.ts' | head -20"\n\n`;
+
+    prompt += `EXAMPLE SAFE COMMANDS:\n`;
+    prompt += `- find . -name "*.js" | wc -l\n`;
+    prompt += `- grep -r "TODO" --include="*.js" . | head -10\n`;
+    prompt += `- npm audit --audit-level moderate\n`;
+    prompt += `- node -e "console.log('test')"\n\n`;
+
     prompt += `\nEnsure commands are safe and appropriate for the ${
       context?.platform || 'current'
     } platform.`;
@@ -1323,5 +1371,156 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
     }
 
     return interpolated;
+  }
+
+  /**
+   * Utility method to create properly escaped multiline scripts
+   */
+  private createScriptFile(filename: string, content: string): string {
+    // Escape special characters and properly format the content
+    const escapedContent = content
+      .replace(/\\/g, '\\\\') // Escape backslashes
+      .replace(/"/g, '\\"') // Escape double quotes
+      .replace(/\n/g, '\\n') // Escape newlines
+      .replace(/'/g, "\\'"); // Escape single quotes
+
+    // Use cat with heredoc instead of echo for multiline scripts
+    return `cat > ${filename} << 'EOF'
+${content}
+EOF`;
+  }
+
+  /**
+   * Generate safe and reliable commands for code analysis
+   */
+  private generateSafeAnalysisCommands(goal: string): ExecutionStep[] {
+    const steps: ExecutionStep[] = [];
+
+    // Step 1: Basic project analysis using Node.js
+    steps.push({
+      id: 'analyze-project-structure',
+      description: 'Analyze project structure and dependencies',
+      command:
+        "node -e \"const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')); console.log(JSON.stringify({name: pkg.name, version: pkg.version, dependencies: Object.keys(pkg.dependencies || {}), devDependencies: Object.keys(pkg.devDependencies || {})}, null, 2));\"",
+      expectedOutcome: 'Project structure information',
+      timeout: 10000,
+      risks: ['package.json might not exist'],
+      dependencies: ['Node.js', 'package.json'],
+    });
+
+    // Step 2: Code metrics using built-in tools
+    steps.push({
+      id: 'basic-code-metrics',
+      description: 'Generate basic code metrics',
+      command: this.createScriptFile(
+        'code_analysis.js',
+        this.generateCodeAnalysisScript()
+      ),
+      expectedOutcome: 'Code analysis script created',
+      timeout: 5000,
+      risks: ['File write permissions'],
+      dependencies: ['Node.js', 'filesystem access'],
+    });
+
+    // Step 3: Run analysis
+    steps.push({
+      id: 'run-analysis',
+      description: 'Execute code analysis',
+      command: 'node code_analysis.js',
+      expectedOutcome: 'Code metrics and potential issues',
+      timeout: 30000,
+      risks: ['Large codebase may take longer'],
+      dependencies: ['code_analysis.js'],
+    });
+
+    // Step 4: Check for common issues
+    steps.push({
+      id: 'pattern-analysis',
+      description: 'Check for common anti-patterns',
+      command:
+        'find . -name "*.js" -o -name "*.ts" -not -path "./node_modules/*" | xargs grep -l "console.log\\|TODO\\|FIXME\\|setTimeout" | head -10',
+      expectedOutcome: 'Files with potential issues',
+      timeout: 15000,
+      risks: ['Unix-style commands may not work on Windows'],
+      dependencies: ['find', 'xargs', 'grep'],
+    });
+
+    return steps;
+  }
+
+  /**
+   * Generate a safe Node.js script for code analysis
+   */
+  private generateCodeAnalysisScript(): string {
+    return `const fs = require('fs');
+const path = require('path');
+
+async function analyzeCodebase() {
+  const results = [];
+  const exclusions = ['node_modules', '.git', 'dist', 'build', 'coverage'];
+  
+  function shouldExclude(filePath) {
+    return exclusions.some(exc => filePath.includes(exc));
+  }
+  
+  function analyzeFile(filePath) {
+    try {
+      const content = fs.readFileSync(filePath, 'utf8');
+      const lines = content.split('\\n');
+      
+      return {
+        file: filePath,
+        metrics: {
+          lines: lines.length,
+          longLines: lines.filter(l => l.length > 120).length,
+          emptyLines: lines.filter(l => l.trim() === '').length,
+          todoComments: (content.match(/\\/\\/(.*?)(TODO|FIXME|HACK)/gi) || []).length,
+          consoleStatements: (content.match(/console\\.(log|warn|error|info)/g) || []).length,
+          complexityIndicators: (content.match(/if\\s*\\(|for\\s*\\(|while\\s*\\(/g) || []).length
+        }
+      };
+    } catch (error) {
+      return { file: filePath, error: error.message };
+    }
+  }
+  
+  function scanDirectory(dir) {
+    const items = fs.readdirSync(dir);
+    
+    for (const item of items) {
+      const fullPath = path.join(dir, item);
+      
+      if (shouldExclude(fullPath)) continue;
+      
+      const stat = fs.statSync(fullPath);
+      
+      if (stat.isDirectory()) {
+        scanDirectory(fullPath);
+      } else if (item.match(/\\.(js|ts|jsx|tsx)$/)) {
+        results.push(analyzeFile(fullPath));
+      }
+    }
+  }
+  
+  scanDirectory('.');
+  
+  // Generate summary
+  const summary = {
+    totalFiles: results.length,
+    issues: {
+      longLines: results.reduce((sum, r) => sum + (r.metrics?.longLines || 0), 0),
+      todos: results.reduce((sum, r) => sum + (r.metrics?.todoComments || 0), 0),
+      consoleStatements: results.reduce((sum, r) => sum + (r.metrics?.consoleStatements || 0), 0)
+    },
+    topIssues: results
+      .filter(r => r.metrics)
+      .sort((a, b) => (b.metrics.todoComments + b.metrics.consoleStatements) - (a.metrics.todoComments + a.metrics.consoleStatements))
+      .slice(0, 5)
+  };
+  
+  console.log(JSON.stringify({ summary, details: results }, null, 2));
+}
+
+analyzeCodebase().catch(console.error);`;
   }
 }

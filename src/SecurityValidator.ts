@@ -2,6 +2,11 @@ import chalk from 'chalk';
 import path from 'path';
 import crypto from 'crypto';
 import axios from 'axios';
+import {
+  IAISecurityAnalyzer,
+  SecurityContext,
+  AISecurityAnalysis,
+} from './interfaces/IAISecurityAnalyzer';
 
 interface SecurityPattern {
   pattern: RegExp;
@@ -53,6 +58,11 @@ interface CommandContext {
   projectType?: string;
 }
 
+interface EnhancedValidationResult extends ValidationResult {
+  aiAnalysis?: AISecurityAnalysis;
+  usedAIAnalysis?: boolean;
+}
+
 class SecurityValidator {
   private securityPatterns: Map<string, SecurityPattern>;
   private customRules: Map<string, SecurityRule>;
@@ -60,12 +70,14 @@ class SecurityValidator {
   private requestCounts: Map<string, number[]>;
   private metrics: SecurityMetrics;
   private safeDiscoveryPatterns: RegExp[];
+  private aiSecurityAnalyzer?: IAISecurityAnalyzer;
 
-  constructor() {
+  constructor(aiSecurityAnalyzer?: IAISecurityAnalyzer) {
     this.securityPatterns = new Map();
     this.customRules = new Map();
     this.rateLimits = new Map();
     this.requestCounts = new Map();
+    this.aiSecurityAnalyzer = aiSecurityAnalyzer;
     this.metrics = {
       blockedCommands: 0,
       warningsIssued: 0,
@@ -232,6 +244,221 @@ class SecurityValidator {
     }
 
     return result;
+  }
+
+  /**
+   * Enhanced validation method that uses AI-only analysis (no fallback)
+   * This implements the AI-only security validation architecture
+   */
+  public async validateCommandEnhanced(
+    command: string,
+    context?: CommandContext
+  ): Promise<EnhancedValidationResult> {
+    const startTime = Date.now();
+
+    // Check if AI analyzer is available (required for enhanced validation)
+    if (!this.aiSecurityAnalyzer) {
+      throw new Error(`
+🚨 AI Security Analyzer is required for enhanced security validation.
+AIA CLI requires AI-powered security analysis to function safely.
+Please ensure your AI service is properly configured.
+
+To fix this:
+1. Run 'aia config' to set up your AI API keys
+2. Restart the AIA CLI to initialize AI services
+3. Verify your AI service configuration
+      `);
+    }
+
+    if (!this.aiSecurityAnalyzer.isAvailable()) {
+      throw new Error(`
+🚨 AI Security service is currently unavailable.
+AIA CLI requires AI-powered security validation for safe operation.
+Please ensure your AI service is properly configured.
+
+To fix this:
+1. Run 'aia config' to verify your AI API keys
+2. Check your internet connection
+3. Ensure your API key has sufficient credits
+4. Verify the AI service is responding
+      `);
+    }
+
+    try {
+      console.log('🧠 Using AI-powered security analysis...');
+
+      const securityContext: SecurityContext = {
+        workingDirectory: context?.workingDirectory || process.cwd(),
+        userRole: this.getUserRole(context?.user),
+        projectType: context?.projectType || 'unknown',
+        environment: this.getEnvironmentType(),
+        recentHistory: [], // Could be enhanced to track recent commands
+      };
+
+      const aiAnalysis = await this.aiSecurityAnalyzer.analyzeCommand(
+        command,
+        securityContext,
+        {
+          use_context: true,
+          include_suggestions: true,
+          strict_mode: false,
+        }
+      );
+
+      // Create enhanced result based on AI analysis
+      const enhancedResult: EnhancedValidationResult = {
+        allowed: true, // Default, will be overridden by AI analysis
+        blocked: false,
+        safe: true,
+        reason: null,
+        warnings: [],
+        sanitized: command, // Use original command as default
+        usedAIAnalysis: true,
+        aiAnalysis: aiAnalysis,
+      };
+
+      // Apply AI analysis results
+      this.applyAIAnalysisToResult(enhancedResult, aiAnalysis);
+
+      const analysisTime = Date.now() - startTime;
+      console.log(`✅ AI security analysis completed in ${analysisTime}ms`);
+      console.log(
+        `🎯 Threat Level: ${aiAnalysis.threat_level.toUpperCase()}, Confidence: ${(
+          aiAnalysis.confidence * 100
+        ).toFixed(1)}%`
+      );
+
+      if (aiAnalysis.reasoning) {
+        console.log(`💭 AI Reasoning: ${aiAnalysis.reasoning}`);
+      }
+
+      return enhancedResult;
+    } catch (error) {
+      const analysisTime = Date.now() - startTime;
+
+      // Enhanced error message for AI failures
+      const errorMessage = `
+🚨 AI security analysis failed: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }
+AIA CLI requires AI-powered security validation to function safely.
+Please ensure your AI service is properly configured.
+
+To fix this:
+1. Run 'aia config' to verify your AI API keys
+2. Check your internet connection
+3. Ensure your API key has sufficient credits
+4. Try the command again in a few moments
+
+Analysis failed after ${analysisTime}ms.
+      `;
+
+      throw new Error(errorMessage);
+    }
+  }
+
+  /**
+   * Apply AI analysis results to the validation result
+   */
+  private applyAIAnalysisToResult(
+    result: EnhancedValidationResult,
+    aiAnalysis: AISecurityAnalysis
+  ): void {
+    // AI overrides basic regex analysis for more accurate results
+    switch (aiAnalysis.recommended_action) {
+      case 'block':
+        result.allowed = false;
+        result.blocked = true;
+        result.safe = false;
+        result.reason = `AI Security Analysis: ${aiAnalysis.reasoning}`;
+        result.warnings = [
+          `🤖 AI detected ${aiAnalysis.threat_level} threat: ${aiAnalysis.reasoning}`,
+        ];
+        this.metrics.blockedCommands++;
+        console.log(
+          chalk.red('🚫 AI Security: Command blocked'),
+          result.reason
+        );
+        break;
+
+      case 'warn':
+        result.warnings.push(
+          `🤖 AI Security Warning (${aiAnalysis.threat_level}): ${aiAnalysis.reasoning}`
+        );
+        if (aiAnalysis.suggested_modification) {
+          result.warnings.push(
+            `💡 Suggested safer alternative: ${aiAnalysis.suggested_modification}`
+          );
+        }
+        this.metrics.warningsIssued++;
+        console.log(
+          chalk.yellow('⚠️  AI Security Warning:'),
+          aiAnalysis.reasoning
+        );
+        break;
+
+      case 'modify':
+        if (aiAnalysis.suggested_modification) {
+          result.sanitized = aiAnalysis.suggested_modification;
+          result.warnings.push(
+            `🤖 AI suggested safer command: ${aiAnalysis.suggested_modification}`
+          );
+          this.metrics.sanitizedInputs++;
+          console.log(
+            chalk.blue('🔧 AI suggested modification:'),
+            aiAnalysis.suggested_modification
+          );
+        }
+        break;
+
+      case 'allow':
+        // AI determined command is safe, even if regex flagged it
+        if (result.blocked && aiAnalysis.confidence > 0.8) {
+          result.allowed = true;
+          result.blocked = false;
+          result.safe = true;
+          result.reason = null;
+          result.warnings = [
+            `🤖 AI Override: Command deemed safe despite regex detection (confidence: ${(
+              aiAnalysis.confidence * 100
+            ).toFixed(1)}%)`,
+          ];
+          console.log(
+            chalk.green('✅ AI Override: Command approved'),
+            `(${(aiAnalysis.confidence * 100).toFixed(1)}% confidence)`
+          );
+        }
+        break;
+    }
+
+    // Add context factors to warnings if they exist
+    if (aiAnalysis.context_factors?.length > 0) {
+      result.warnings.push(
+        `🔍 Context factors: ${aiAnalysis.context_factors.join(', ')}`
+      );
+    }
+  }
+
+  /**
+   * Determine user role from context
+   */
+  private getUserRole(user?: string): SecurityContext['userRole'] {
+    if (!user) return 'user';
+
+    // Simple heuristics - could be enhanced with actual user management
+    if (user === 'root' || user.includes('admin')) return 'admin';
+    if (user.includes('dev') || user.includes('developer')) return 'developer';
+    return 'user';
+  }
+
+  /**
+   * Determine environment type
+   */
+  private getEnvironmentType(): SecurityContext['environment'] {
+    const env = process.env.NODE_ENV?.toLowerCase();
+    if (env === 'production') return 'production';
+    if (env === 'staging') return 'staging';
+    return 'development';
   }
 
   public sanitizeInput(input: string): string {
@@ -542,4 +769,5 @@ class SecurityValidator {
   }
 }
 
+export { SecurityValidator };
 export default SecurityValidator;

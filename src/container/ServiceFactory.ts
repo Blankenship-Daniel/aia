@@ -232,6 +232,122 @@ export class ServiceFactory {
       }
     );
 
+    // AI Model Recommendation Service (depends on ai and context)
+    container.registerFactory(
+      'modelRecommendation',
+      (container) => {
+        const {
+          AIModelRecommendationService,
+        } = require('../../dist/services/AIModelRecommendationService');
+        const ai = container.resolve('ai');
+        const context = container.resolve('context');
+        return new AIModelRecommendationService(ai, context);
+      },
+      {
+        dependencies: ['ai', 'context'],
+      }
+    );
+
+    // AI Security Analyzer Service (depends on ai and context)
+    container.registerFactory(
+      'aiSecurityAnalyzer',
+      (container) => {
+        const {
+          AISecurityAnalyzer,
+        } = require('../../dist/services/AISecurityAnalyzer');
+        const ai = container.resolve('ai');
+        const context = container.resolve('context');
+        return new AISecurityAnalyzer(ai, context);
+      },
+      {
+        dependencies: ['ai', 'context'],
+      }
+    );
+
+    // AI Coreference Resolution Service (depends on ai and conversationMemory)
+    container.registerFactory(
+      'coreferenceResolution',
+      (container) => {
+        const {
+          AICoreferenceResolutionService,
+        } = require('../../dist/services/AICoreferenceResolutionService');
+        const ai = container.resolve('ai');
+        const conversationMemory = container.resolve('conversationMemory');
+        return new AICoreferenceResolutionService(ai, conversationMemory);
+      },
+      {
+        dependencies: ['ai', 'conversationMemory'],
+      }
+    );
+
+    // Conversation Context Manager (depends on ai and coreferenceResolution)
+    container.registerFactory(
+      'conversationContextManager',
+      (container) => {
+        const {
+          ConversationContextManager,
+        } = require('../../dist/ConversationContextManager');
+        const ai = container.resolve('ai');
+        const coreferenceResolution = container.resolve(
+          'coreferenceResolution'
+        );
+        return new ConversationContextManager(ai, coreferenceResolution);
+      },
+      {
+        dependencies: ['ai', 'coreferenceResolution'],
+      }
+    );
+
+    // AI Error Diagnostic Service (depends on ai, context, conversationMemory)
+    container.registerFactory(
+      'errorDiagnostic',
+      (container) => {
+        const {
+          AIErrorDiagnosticService,
+        } = require('../../dist/services/AIErrorDiagnosticService');
+        const ai = container.resolve('ai');
+        const context = container.resolve('context');
+        const conversationMemory = container.resolve('conversationMemory');
+        return new AIErrorDiagnosticService(ai, context, conversationMemory);
+      },
+      {
+        dependencies: ['ai', 'context', 'conversationMemory'],
+      }
+    );
+
+    // Error Analysis Service (depends on errorDiagnostic)
+    container.registerFactory(
+      'errorAnalysis',
+      (container) => {
+        const {
+          ErrorAnalysisService,
+        } = require('../../dist/services/ErrorAnalysisService');
+        const errorDiagnostic = container.resolve('errorDiagnostic');
+        return new ErrorAnalysisService(errorDiagnostic);
+      },
+      {
+        dependencies: ['errorDiagnostic'],
+      }
+    );
+
+    // Agentic Reasoning Engine (depends on ai and conversationContextManager)
+    container.registerFactory(
+      'agenticReasoningEngine',
+      (container) => {
+        const {
+          AgenticReasoningEngine,
+        } = require('../../dist/AgenticReasoningEngine');
+        const ai = container.resolve('ai');
+        const conversationContextManager = container.resolve(
+          'conversationContextManager'
+        );
+        return new AgenticReasoningEngine(ai, conversationContextManager);
+      },
+      {
+        dependencies: ['ai', 'conversationContextManager'],
+      }
+    );
+
     // Plugin Service (depends on configuration and other services)
     container.registerFactory(
       'plugin',
@@ -285,6 +401,26 @@ export class ServiceFactory {
       },
       {
         dependencies: ['configuration', 'caching', 'ai', 'copilotDependency'],
+      }
+    );
+
+    // Security Validator Service (depends on aiSecurityAnalyzer - optional dependency)
+    container.registerFactory(
+      'securityValidator',
+      (container) => {
+        const { SecurityValidator } = require('../../dist/SecurityValidator');
+        try {
+          const aiSecurityAnalyzer = container.resolve('aiSecurityAnalyzer');
+          return new SecurityValidator(aiSecurityAnalyzer);
+        } catch (error) {
+          console.log(
+            '⚠️  AI Security Analyzer not available, using regex-only validation'
+          );
+          return new SecurityValidator();
+        }
+      },
+      {
+        dependencies: [], // Optional dependency on aiSecurityAnalyzer
       }
     );
 

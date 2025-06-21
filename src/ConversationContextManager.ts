@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { ICoreferenceResolutionService } from './interfaces/ICoreferenceResolutionService.js';
 
 interface ConversationExchange {
   userInput: string;
@@ -63,199 +64,6 @@ interface ProcessedInput {
 /**
  * Reference Resolver for handling pronouns and contextual references
  */
-class ReferenceResolver {
-  public async resolve(
-    input: ContextualInput | string,
-    conversationHistory: ConversationExchange[]
-  ): Promise<ResolvedReferences> {
-    let resolvedInput = typeof input === 'string' ? input : input.enriched;
-    const resolutions: ReferenceResolution[] = [];
-
-    // Resolve "it" references
-    resolvedInput = this.resolveItReferences(
-      resolvedInput,
-      conversationHistory,
-      resolutions
-    );
-
-    // Resolve "this" references
-    resolvedInput = this.resolveThisReferences(
-      resolvedInput,
-      conversationHistory,
-      resolutions
-    );
-
-    // Resolve "that" references
-    resolvedInput = this.resolveThatReferences(
-      resolvedInput,
-      conversationHistory,
-      resolutions
-    );
-
-    return {
-      original: typeof input === 'string' ? input : input.enriched,
-      resolved: resolvedInput,
-      resolutions,
-      confidence: this.calculateResolutionConfidence(resolutions),
-    };
-  }
-
-  private resolveItReferences(
-    input: string,
-    history: ConversationExchange[],
-    resolutions: ReferenceResolution[]
-  ): string {
-    const itPattern = /\bit\b/gi;
-    let resolved = input;
-
-    const matches = input.match(itPattern);
-    if (!matches) return resolved;
-
-    // Find the most recent noun phrase that "it" could refer to
-    for (let i = history.length - 1; i >= 0; i--) {
-      const exchange = history[i];
-      const nouns = this.extractNouns(exchange.aiResponse);
-
-      if (nouns.length > 0) {
-        const referent = nouns[0]; // Use the most prominent noun
-        resolved = resolved.replace(itPattern, referent);
-        resolutions.push({
-          type: 'it',
-          original: 'it',
-          resolved: referent,
-          confidence: 0.7,
-        });
-        break;
-      }
-    }
-
-    return resolved;
-  }
-
-  private resolveThisReferences(
-    input: string,
-    history: ConversationExchange[],
-    resolutions: ReferenceResolution[]
-  ): string {
-    const thisPattern = /\bthis\b/gi;
-    let resolved = input;
-
-    const matches = input.match(thisPattern);
-    if (!matches) return resolved;
-
-    // "This" usually refers to something recently mentioned
-    if (history.length > 0) {
-      const lastExchange = history[history.length - 1];
-      const concepts = this.extractConcepts(lastExchange.aiResponse);
-
-      if (concepts.length > 0) {
-        const referent = concepts[0];
-        resolved = resolved.replace(thisPattern, `this ${referent}`);
-        resolutions.push({
-          type: 'this',
-          original: 'this',
-          resolved: `this ${referent}`,
-          confidence: 0.8,
-        });
-      }
-    }
-
-    return resolved;
-  }
-
-  private resolveThatReferences(
-    input: string,
-    history: ConversationExchange[],
-    resolutions: ReferenceResolution[]
-  ): string {
-    const thatPattern = /\bthat\b/gi;
-    let resolved = input;
-
-    const matches = input.match(thatPattern);
-    if (!matches) return resolved;
-
-    // "That" often refers to a process or concept from earlier
-    for (
-      let i = history.length - 1;
-      i >= Math.max(0, history.length - 3);
-      i--
-    ) {
-      const exchange = history[i];
-      const processes = this.extractProcesses(exchange.aiResponse);
-
-      if (processes.length > 0) {
-        const referent = processes[0];
-        resolved = resolved.replace(thatPattern, `that ${referent}`);
-        resolutions.push({
-          type: 'that',
-          original: 'that',
-          resolved: `that ${referent}`,
-          confidence: 0.6,
-        });
-        break;
-      }
-    }
-
-    return resolved;
-  }
-
-  private extractNouns(text: string): string[] {
-    // Simple noun extraction - in production, use proper NLP
-    const words = text.toLowerCase().split(/\s+/);
-    const commonNouns = [
-      'file',
-      'function',
-      'class',
-      'method',
-      'variable',
-      'code',
-      'error',
-      'bug',
-      'issue',
-    ];
-    return words.filter((word) => commonNouns.includes(word));
-  }
-
-  private extractConcepts(text: string): string[] {
-    // Extract conceptual phrases
-    const concepts = [
-      'approach',
-      'solution',
-      'method',
-      'technique',
-      'strategy',
-      'pattern',
-    ];
-    const words = text.toLowerCase().split(/\s+/);
-    return words.filter((word) => concepts.includes(word));
-  }
-
-  private extractProcesses(text: string): string[] {
-    // Extract process-related terms
-    const processes = [
-      'installation',
-      'configuration',
-      'deployment',
-      'testing',
-      'optimization',
-    ];
-    const words = text.toLowerCase().split(/\s+/);
-    return words.filter((word) => processes.includes(word));
-  }
-
-  private calculateResolutionConfidence(
-    resolutions: ReferenceResolution[]
-  ): number {
-    if (resolutions.length === 0) return 1.0;
-
-    const totalConfidence = resolutions.reduce(
-      (sum, res) => sum + res.confidence,
-      0
-    );
-    return totalConfidence / resolutions.length;
-  }
-}
-
 /**
  * Conversation Context Manager
  * Maintains context across multi-turn conversations and improves coherence
@@ -267,15 +75,18 @@ export class ConversationContextManager {
   private conversationHistory: Map<string, ConversationExchange[]>;
   private activeContext: Map<string, Record<string, unknown>>;
   private topicStack: Map<string, Topic[]>;
-  private referenceResolver: ReferenceResolver;
+  private coreferenceService: ICoreferenceResolutionService;
   private contextWindow: number;
 
-  constructor(aia: { queryAI: (prompt: string) => Promise<string> }) {
+  constructor(
+    aia: { queryAI: (prompt: string) => Promise<string> },
+    coreferenceService: ICoreferenceResolutionService
+  ) {
     this.aia = aia;
     this.conversationHistory = new Map<string, ConversationExchange[]>();
     this.activeContext = new Map<string, Record<string, unknown>>();
     this.topicStack = new Map<string, Topic[]>();
-    this.referenceResolver = new ReferenceResolver();
+    this.coreferenceService = coreferenceService;
     this.contextWindow = 10; // Number of previous exchanges to consider
   }
 
@@ -292,10 +103,31 @@ export class ConversationContextManager {
       userInput,
       sessionId
     );
-    const resolvedReferences = await this.referenceResolver.resolve(
-      contextualInput,
+
+    // Use AI-powered coreference resolution instead of pattern-based
+    const aiResolution = await this.coreferenceService.resolveReferences(
+      contextualInput.enriched,
       this.getRecentHistory(sessionId)
     );
+
+    // Map AI resolution result to expected ResolvedReferences interface
+    const resolvedReferences: ResolvedReferences = {
+      original: contextualInput.enriched,
+      resolved: aiResolution.resolvedInput,
+      resolutions: aiResolution.resolutions.map((res) => ({
+        type:
+          res.originalReference.type === 'pronoun'
+            ? 'pronoun'
+            : res.originalReference.type === 'demonstrative'
+            ? 'this'
+            : 'pronoun',
+        original: res.originalReference.text,
+        resolved: res.resolvedText,
+        confidence: res.confidence,
+      })),
+      confidence: aiResolution.confidence,
+    };
+
     const topicContinuity = this.analyzeTopicContinuity(
       resolvedReferences,
       sessionId

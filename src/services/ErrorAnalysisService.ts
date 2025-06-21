@@ -1,9 +1,16 @@
 /**
  * Advanced Error Analysis Service
  * Provides intelligent error diagnosis and recovery suggestions
+ * Now powered by AI through the IErrorDiagnosticService
  */
 import { ExecutionStep } from '../types/index';
 import chalk from 'chalk';
+import {
+  IErrorDiagnosticService,
+  ErrorDiagnosis,
+  ExecutionError,
+  ExecutionContext,
+} from '../interfaces/IErrorDiagnosticService';
 
 export interface ErrorAnalysis {
   category:
@@ -24,273 +31,174 @@ export interface ErrorAnalysis {
 }
 
 export class ErrorAnalysisService {
-  private errorPatterns = new Map<RegExp, Partial<ErrorAnalysis>>([
-    // System errors
-    [
-      /command not found|not found/i,
-      {
-        category: 'system',
-        severity: 'high',
-        possibleCauses: [
-          'Tool not installed',
-          'PATH not configured',
-          'Typo in command',
-        ],
-        suggestedFixes: [
-          'Install missing tool',
-          'Add tool to PATH',
-          'Check command spelling',
-        ],
-        preventionTips: [
-          'Verify tool installation before use',
-          'Use absolute paths when possible',
-        ],
-      },
-    ],
+  constructor(private errorDiagnosticService: IErrorDiagnosticService) {}
 
-    // Permission errors
-    [
-      /permission denied|access denied|not permitted/i,
-      {
-        category: 'permission',
-        severity: 'medium',
-        possibleCauses: [
-          'Insufficient permissions',
-          'File/directory ownership issues',
-        ],
-        suggestedFixes: [
-          'Run with sudo/admin privileges',
-          'Change file permissions',
-          'Check ownership',
-        ],
-        recoveryStrategies: [
-          'Retry with elevated permissions',
-          'Use alternative approach',
-        ],
-        preventionTips: [
-          'Set proper permissions during setup',
-          'Use user-specific directories',
-        ],
-      },
-    ],
+  /**
+   * Analyze error using AI-powered diagnostics (async version)
+   */
+  async analyzeError(
+    error: string,
+    step: ExecutionStep,
+    context?: any
+  ): Promise<ErrorAnalysis> {
+    try {
+      // Create ExecutionError and ExecutionContext for AI analysis
+      const executionError: ExecutionError = {
+        message: error,
+        stack: error,
+        timestamp: new Date(),
+        step: step,
+        context: this.createExecutionContext(step, context),
+      };
 
-    // Network errors
-    [
-      /network|connection|timeout|dns|resolve/i,
-      {
-        category: 'network',
-        severity: 'medium',
-        possibleCauses: [
-          'Network connectivity issues',
-          'DNS resolution problems',
-          'Firewall blocking',
-        ],
-        suggestedFixes: [
-          'Check internet connection',
-          'Try different DNS servers',
-          'Check firewall settings',
-        ],
-        recoveryStrategies: [
-          'Retry after network check',
-          'Use offline alternatives',
-          'Cache results',
-        ],
-        preventionTips: [
-          'Implement network retry logic',
-          'Provide offline fallbacks',
-        ],
-      },
-    ],
+      const executionContext = this.createExecutionContext(step, context);
 
-    // Configuration errors
-    [
-      /config|configuration|settings|missing.*file/i,
-      {
-        category: 'configuration',
-        severity: 'medium',
-        possibleCauses: [
-          'Missing configuration file',
-          'Invalid configuration',
-          'Wrong file path',
-        ],
-        suggestedFixes: [
-          'Create default configuration',
-          'Validate config syntax',
-          'Check file paths',
-        ],
-        recoveryStrategies: [
-          'Use default settings',
-          'Regenerate configuration',
-          'Skip optional config',
-        ],
-        preventionTips: [
-          'Validate configuration on startup',
-          'Provide configuration templates',
-        ],
-      },
-    ],
+      // Use AI-powered error analysis
+      const aiDiagnosis = await this.errorDiagnosticService.analyzeError(
+        executionError,
+        executionContext
+      );
 
-    // Dependency errors
-    [
-      /module.*not found|cannot resolve|dependency/i,
-      {
-        category: 'dependency',
-        severity: 'high',
-        possibleCauses: [
-          'Missing dependencies',
-          'Version conflicts',
-          'Installation incomplete',
-        ],
-        suggestedFixes: [
-          'Install missing dependencies',
-          'Update package versions',
-          'Clear cache and reinstall',
-        ],
-        recoveryStrategies: [
-          'Use alternative packages',
-          'Install specific versions',
-          'Rebuild dependencies',
-        ],
-        preventionTips: [
-          'Pin dependency versions',
-          'Use lockfiles',
-          'Regular dependency audits',
-        ],
-      },
-    ],
+      // Convert AI analysis to ErrorAnalysis format
+      return this.convertAIDiagnosisToErrorAnalysis(aiDiagnosis, step, error);
+    } catch (aiError) {
+      // Fallback to basic analysis if AI fails
+      console.warn('AI error analysis failed, using fallback:', aiError);
+      return this.createFallbackAnalysis(error, step);
+    }
+  }
 
-    // Syntax errors
-    [
-      /syntax error|parse error|invalid syntax/i,
-      {
-        category: 'syntax',
-        severity: 'high',
-        possibleCauses: [
-          'Code syntax errors',
-          'Invalid configuration syntax',
-          'Wrong file format',
-        ],
-        suggestedFixes: [
-          'Check syntax in editor',
-          'Validate file format',
-          'Use syntax checker',
-        ],
-        recoveryStrategies: [
-          'Revert to last working version',
-          'Use syntax validator',
-          'Rebuild file',
-        ],
-        preventionTips: [
-          'Use linting tools',
-          'Enable syntax highlighting',
-          'Validate before commit',
-        ],
-      },
-    ],
-  ]);
-
-  analyzeError(
+  /**
+   * Synchronous error analysis for backward compatibility
+   * Uses fallback analysis when AI is not available
+   */
+  analyzeErrorSync(
     error: string,
     step: ExecutionStep,
     context?: any
   ): ErrorAnalysis {
-    const errorText = error.toLowerCase();
+    return this.createFallbackAnalysis(error, step);
+  }
 
-    // Find matching pattern
-    let analysis: Partial<ErrorAnalysis> = {
-      category: 'unknown',
-      severity: 'medium',
-    };
-
-    for (const [pattern, errorAnalysis] of this.errorPatterns) {
-      if (pattern.test(errorText)) {
-        analysis = { ...analysis, ...errorAnalysis };
-        break;
-      }
-    }
-
-    // Enhance analysis with context
-    const enhancedAnalysis = this.enhanceWithContext(
-      analysis,
-      step,
-      context,
-      error
-    );
-
+  private createExecutionContext(
+    step: ExecutionStep,
+    context?: any
+  ): ExecutionContext {
     return {
-      category: enhancedAnalysis.category || 'unknown',
-      severity: enhancedAnalysis.severity || 'medium',
-      description:
-        enhancedAnalysis.description || `Error in step: ${step.description}`,
-      possibleCauses: enhancedAnalysis.possibleCauses || ['Unknown cause'],
-      suggestedFixes: enhancedAnalysis.suggestedFixes || [
-        'Retry the operation',
-      ],
-      recoveryStrategies: enhancedAnalysis.recoveryStrategies || [
-        'Manual intervention required',
-      ],
-      preventionTips: enhancedAnalysis.preventionTips || [
-        'Monitor system health',
-      ],
-      relatedDocs: enhancedAnalysis.relatedDocs || [],
+      command: step.command,
+      workingDirectory: process.cwd(),
+      environment: process.env as Record<string, string>,
+      systemInfo: {
+        platform: process.platform,
+        architecture: process.arch,
+        nodeVersion: process.version,
+        shell: process.env.SHELL || 'unknown',
+        availableMemory: 0, // Will be filled by actual implementation
+        diskSpace: 0, // Will be filled by actual implementation
+      },
+      projectContext: context?.projectContext,
+      userContext: context?.userContext,
+      previousErrors: context?.previousErrors,
     };
   }
 
-  private enhanceWithContext(
-    analysis: Partial<ErrorAnalysis>,
+  private convertAIDiagnosisToErrorAnalysis(
+    aiDiagnosis: ErrorDiagnosis,
     step: ExecutionStep,
-    context: any,
     originalError: string
-  ): Partial<ErrorAnalysis> {
-    const enhanced = { ...analysis };
+  ): ErrorAnalysis {
+    return {
+      category: this.mapAICategoryToErrorCategory(aiDiagnosis.category.primary),
+      severity: this.mapAISeverityToErrorSeverity(aiDiagnosis.severity.level),
+      description:
+        aiDiagnosis.rootCause || `Error in step: ${step.description}`,
+      possibleCauses: this.extractPossibleCauses(aiDiagnosis),
+      suggestedFixes: this.extractSuggestedFixes(aiDiagnosis),
+      recoveryStrategies: this.extractRecoveryStrategies(aiDiagnosis),
+      preventionTips: aiDiagnosis.analysis.recommendations
+        .filter((r) => r.type === 'prevention')
+        .map((r) => r.description),
+      relatedDocs: this.extractRelatedDocs(aiDiagnosis),
+    };
+  }
 
-    // Add command-specific context
-    if (step.command) {
-      const command = step.command.toLowerCase();
+  private extractPossibleCauses(diagnosis: ErrorDiagnosis): string[] {
+    const causes: string[] = [];
+    causes.push(diagnosis.analysis.causality.directCause);
+    causes.push(...diagnosis.analysis.causality.contributingFactors);
+    return causes.filter(Boolean);
+  }
 
-      if (command.includes('git')) {
-        enhanced.relatedDocs = ['https://git-scm.com/docs'];
-        if (originalError.includes('not a git repository')) {
-          enhanced.suggestedFixes = [
-            'Run git init first',
-            'Check if you are in the correct directory',
-          ];
-        }
-      }
+  private extractSuggestedFixes(diagnosis: ErrorDiagnosis): string[] {
+    return diagnosis.analysis.recommendations
+      .filter((r) => r.type === 'immediate_action')
+      .map((r) => r.description);
+  }
 
-      if (command.includes('npm') || command.includes('yarn')) {
-        enhanced.relatedDocs = [
-          'https://docs.npmjs.com/',
-          'https://yarnpkg.com/getting-started',
-        ];
-        if (originalError.includes('ENOENT')) {
-          enhanced.suggestedFixes = [
-            'Run npm install first',
-            'Check package.json exists',
-          ];
-        }
-      }
+  private extractRecoveryStrategies(diagnosis: ErrorDiagnosis): string[] {
+    return diagnosis.analysis.recommendations
+      .filter((r) => r.type === 'investigation' || r.type === 'improvement')
+      .map((r) => r.description);
+  }
 
-      if (command.includes('docker')) {
-        enhanced.relatedDocs = ['https://docs.docker.com/'];
-        if (originalError.includes('docker daemon')) {
-          enhanced.suggestedFixes = [
-            'Start Docker daemon',
-            'Check Docker installation',
-          ];
-        }
-      }
-    }
+  private extractRelatedDocs(diagnosis: ErrorDiagnosis): string[] {
+    // Extract any URLs or documentation references from similar cases
+    return diagnosis.similarCases
+      .flatMap((c) => c.resolution.steps)
+      .map((s) => s.command)
+      .filter((cmd) => cmd && (cmd.includes('http') || cmd.includes('docs')))
+      .filter(Boolean) as string[];
+  }
 
-    // Add severity based on step importance
-    if (step.risks && step.risks.length > 0) {
-      enhanced.severity = 'high';
-    }
+  private mapAICategoryToErrorCategory(
+    aiCategory: string
+  ): ErrorAnalysis['category'] {
+    const categoryMap: Record<string, ErrorAnalysis['category']> = {
+      system: 'system',
+      permission: 'permission',
+      network: 'network',
+      configuration: 'configuration',
+      dependency: 'dependency',
+      syntax: 'syntax',
+      runtime: 'system',
+      security: 'permission',
+      resource: 'system',
+      logic: 'syntax',
+    };
 
-    // Add description with step context
-    enhanced.description = `Error in step "${step.description}": ${originalError.substring(0, 100)}${originalError.length > 100 ? '...' : ''}`;
+    return categoryMap[aiCategory.toLowerCase()] || 'unknown';
+  }
 
-    return enhanced;
+  private mapAISeverityToErrorSeverity(
+    aiSeverity: string
+  ): ErrorAnalysis['severity'] {
+    const severityMap: Record<string, ErrorAnalysis['severity']> = {
+      low: 'low',
+      medium: 'medium',
+      high: 'high',
+      critical: 'critical',
+    };
+
+    return severityMap[aiSeverity.toLowerCase()] || 'medium';
+  }
+
+  private createFallbackAnalysis(
+    error: string,
+    step: ExecutionStep
+  ): ErrorAnalysis {
+    return {
+      category: 'unknown',
+      severity: 'medium',
+      description: `Error in step "${step.description}": ${error.substring(
+        0,
+        100
+      )}${error.length > 100 ? '...' : ''}`,
+      possibleCauses: ['Unknown cause - AI analysis unavailable'],
+      suggestedFixes: ['Retry the operation', 'Check system logs'],
+      recoveryStrategies: ['Manual intervention required'],
+      preventionTips: ['Monitor system health'],
+      relatedDocs: [],
+    };
   }
 
   formatErrorAnalysis(analysis: ErrorAnalysis): string {
@@ -315,8 +223,12 @@ export class ErrorAnalysisService {
     output += chalk.red('❌ Error Analysis\n');
     output += chalk.gray('━'.repeat(60)) + '\n';
 
-    output += `${categoryIcon} ${chalk.bold('Category:')} ${chalk.cyan(analysis.category)}\n`;
-    output += `${severityColor('●')} ${chalk.bold('Severity:')} ${severityColor(analysis.severity)}\n`;
+    output += `${categoryIcon} ${chalk.bold('Category:')} ${chalk.cyan(
+      analysis.category
+    )}\n`;
+    output += `${severityColor('●')} ${chalk.bold('Severity:')} ${severityColor(
+      analysis.severity
+    )}\n`;
     output += `📝 ${chalk.bold('Description:')} ${analysis.description}\n\n`;
 
     if (analysis.possibleCauses.length > 0) {

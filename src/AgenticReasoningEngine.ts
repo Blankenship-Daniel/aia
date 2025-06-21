@@ -161,14 +161,15 @@ export class AgenticReasoningEngine {
   private circuitBreakerThreshold: number;
   private circuitBreakerResetTimeMs: number;
 
-  constructor(aia: any) {
+  constructor(aia: any, conversationManager?: ConversationContextManager) {
     this.aia = aia;
     this.maxIterations = 5;
     this.currentGoal = null;
     this.executionHistory = [];
     this.searchEngine = new AgenticSearchEngine(aia);
     this.nlpEngine = new NLPEngine(aia);
-    this.conversationManager = new ConversationContextManager(aia);
+    this.conversationManager =
+      conversationManager || new ConversationContextManager(aia, null as any);
     this.responseGenerator = new ResponseGenerator(aia);
     this.errorHandler = new ErrorHandler();
     this.commandFailures = new Map();

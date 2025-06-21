@@ -60,7 +60,16 @@ export class AgentPresenter implements IAgentPresenter {
     this.aiService = aiService;
   }
 
-  showPlanningPhase(goal: string): void {
+  showPlanningPhase(goal: string, verbose: boolean = false): void {
+    if (!verbose) {
+      // Concise mode - just show the goal
+      console.log(chalk.blue('🤖 AIA Agent'));
+      console.log(chalk.cyan(`🎯 ${goal}`));
+      console.log(chalk.gray('Planning...'));
+      return;
+    }
+
+    // Verbose mode - original detailed output
     console.log(chalk.blue('🤖 AIA Agent - Intelligent Task Execution'));
     console.log(chalk.gray('━'.repeat(60)));
     console.log(chalk.cyan(`🎯 Goal: ${goal}`));
@@ -91,7 +100,14 @@ export class AgentPresenter implements IAgentPresenter {
     );
   }
 
-  displayExecutionPlan(plan: ExecutionStep[]): void {
+  displayExecutionPlan(plan: ExecutionStep[], verbose: boolean = false): void {
+    if (!verbose) {
+      // Concise mode - just show step count and proceed
+      console.log(chalk.green(`✓ Plan ready (${plan.length} steps)`));
+      return;
+    }
+
+    // Verbose mode - original detailed output
     const planningTime = Date.now() - this.startTime;
     const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
 
@@ -171,13 +187,46 @@ export class AgentPresenter implements IAgentPresenter {
     console.log(chalk.gray('━'.repeat(60)));
   }
 
-  showExecutionStep(step: ExecutionStep): {
+  showExecutionStep(
+    step: ExecutionStep,
+    verbose: boolean = false
+  ): {
     succeed: (message?: string) => void;
     fail: (message?: string) => void;
     stop: () => void;
     updateProgress: (elapsed: number, details?: string) => void;
   } {
     this.stepStartTime = Date.now();
+
+    if (!verbose) {
+      // Concise mode - simple spinner with step description
+      const spinnerText = `${chalk.blue('⚡')} ${step.description}`;
+      this.activeSpinner = ora(spinnerText).start();
+
+      return {
+        updateProgress: () => {}, // No-op in concise mode
+        succeed: (message?: string) => {
+          if (this.activeSpinner) {
+            this.activeSpinner.succeed(chalk.green(`✓ ${step.description}`));
+            this.activeSpinner = null;
+          }
+        },
+        fail: (message?: string) => {
+          if (this.activeSpinner) {
+            this.activeSpinner.fail(chalk.red(`✗ ${step.description}`));
+            this.activeSpinner = null;
+          }
+        },
+        stop: () => {
+          if (this.activeSpinner) {
+            this.activeSpinner.stop();
+            this.activeSpinner = null;
+          }
+        },
+      };
+    }
+
+    // Verbose mode - original detailed output
 
     // ========== Enhanced Phase Separation ==========
     console.log(chalk.blue('\n🔄 Execution Phase'));
@@ -338,12 +387,25 @@ export class AgentPresenter implements IAgentPresenter {
     };
   }
 
-  showIteration(current: number, max: number): void {
+  showIteration(current: number, max: number, verbose: boolean = false): void {
     console.log(chalk.yellow(`\n🔄 Iteration ${current}/${max}`));
   }
 
-  displayStepOutput(output: string): void {
+  displayStepOutput(output: string, verbose: boolean = false): void {
     if (output && output.trim()) {
+      if (!verbose) {
+        // Concise mode - just show key results if any
+        const keyResult = this.identifyKeyResult(output);
+        if (keyResult) {
+          console.log(chalk.dim('Output:'));
+          console.log(chalk.green.bold(`  🎯 ${keyResult}`));
+          console.log(chalk.cyan.dim('    ↳ Key result detected'));
+          console.log();
+        }
+        return;
+      }
+
+      // Verbose mode - original detailed output
       console.log(chalk.dim('Output:'));
       const lines = output.trim().split('\n');
 
@@ -368,9 +430,30 @@ export class AgentPresenter implements IAgentPresenter {
     }
   }
 
-  async displayExecutionSummary(execution: AgenticExecution): Promise<void> {
+  async displayExecutionSummary(
+    execution: AgenticExecution,
+    verbose: boolean = false
+  ): Promise<void> {
     if (this.isSimpleAnalysisExecution(execution)) {
       await this.displaySimplifiedAnalysisSummary(execution);
+      return;
+    }
+
+    if (!verbose) {
+      // Concise mode - just show final result
+      const statusIcon = execution.success
+        ? chalk.green('✅')
+        : chalk.red('❌');
+      const statusText = execution.success ? 'Completed' : 'Failed';
+
+      console.log(`\n${statusIcon} ${statusText}: ${execution.goal}`);
+
+      // Show final result if available
+      const finalResult = await this.extractFinalResult(execution);
+      if (finalResult) {
+        console.log(chalk.cyan(`💡 ${finalResult}`));
+      }
+
       return;
     }
 

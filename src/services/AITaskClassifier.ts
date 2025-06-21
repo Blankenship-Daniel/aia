@@ -107,42 +107,42 @@ PROJECT CONTEXT:
 
 CLASSIFICATION REQUIREMENTS:
 1. Determine the primary task type from these options:
-   - ANALYSIS: Code review, examination, reporting, markdown generation, summarization
-   - DOCUMENTATION: Adding JSDoc, inline comments, API docs (not markdown summaries)
-   - CODE_MODIFICATION: Adding/changing code functionality
-   - REFACTORING: Improving code structure without changing functionality
-   - TEST_GENERATION: Creating unit tests, test suites
-   - BUG_FIXING: Fixing errors, debugging issues
-   - FILE_OPERATION: Creating, moving, deleting files
-   - CONFIGURATION: Setting up build tools, environment config
-   - BUILD_DEPLOYMENT: Compilation, packaging, deployment
+   - analysis: Code review, examination, reporting, markdown generation, summarization
+   - documentation: Adding JSDoc, inline comments, API docs (not markdown summaries)
+   - code_modification: Adding/changing code functionality
+   - refactoring: Improving code structure without changing functionality
+   - test_generation: Creating unit tests, test suites
+   - bug_fixing: Fixing errors, debugging issues
+   - file_operation: Creating, moving, deleting files
+   - configuration: Setting up build tools, environment config
+   - build_deployment: Compilation, packaging, deployment
 
 2. Assess complexity level:
-   - SIMPLE: 1-3 steps, low risk
-   - MODERATE: 4-8 steps, medium complexity
-   - COMPLEX: 9-15 steps, high complexity
-   - ADVANCED: 16+ steps, very complex
+   - simple: 1-3 steps, low risk
+   - moderate: 4-8 steps, medium complexity
+   - complex: 9-15 steps, high complexity
+   - advanced: 16+ steps, very complex
 
 3. Evaluate risk level:
-   - LOW: Safe operations, minimal impact
-   - MEDIUM: Some risk, requires validation
-   - HIGH: Significant changes, careful execution needed
-   - CRITICAL: High impact, extensive testing required
+   - low: Safe operations, minimal impact
+   - medium: Some risk, requires validation
+   - high: Significant changes, careful execution needed
+   - critical: High impact, extensive testing required
 
 4. Identify required capabilities from:
-   - FILE_READING, FILE_WRITING, CODE_PARSING, CODE_GENERATION
-   - CODE_MODIFICATION, AST_MANIPULATION, COMMAND_EXECUTION
-   - VALIDATION, TEMPLATE_PROCESSING, PATTERN_MATCHING
-   - DEPENDENCY_ANALYSIS, TEST_GENERATION, CODE_ANALYSIS
+   - file_reading, file_writing, code_parsing, code_generation
+   - code_modification, ast_manipulation, command_execution
+   - validation, template_processing, pattern_matching
+   - dependency_analysis, test_generation, code_analysis
 
 RESPOND IN THIS EXACT JSON FORMAT:
 {
-  "taskType": "ANALYSIS|DOCUMENTATION|CODE_MODIFICATION|REFACTORING|TEST_GENERATION|BUG_FIXING|FILE_OPERATION|CONFIGURATION|BUILD_DEPLOYMENT",
-  "complexity": "SIMPLE|MODERATE|COMPLEX|ADVANCED",
-  "riskLevel": "LOW|MEDIUM|HIGH|CRITICAL",
+  "taskType": "analysis|documentation|code_modification|refactoring|test_generation|bug_fixing|file_operation|configuration|build_deployment",
+  "complexity": "simple|moderate|complex|advanced",
+  "riskLevel": "low|medium|high|critical",
   "confidence": 0.0-1.0,
   "reasoning": "Brief explanation of why this classification was chosen",
-  "requiredCapabilities": ["CAPABILITY1", "CAPABILITY2", ...]
+  "requiredCapabilities": ["file_reading", "file_writing", "code_parsing", ...]
 }
 
 IMPORTANT GUIDELINES:

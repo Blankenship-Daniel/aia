@@ -352,7 +352,8 @@ export class AgentPresenter implements IAgentPresenter {
       // Show final result if available with better formatting
       const finalResult = await this.extractFinalResult(execution);
       if (finalResult) {
-        console.log(chalk.cyan(`\n💡 ${finalResult}`));
+        const processedResult = this.processMarkdownCodeBlocks(finalResult);
+        console.log(chalk.cyan(`\n💡 ${processedResult}`));
       }
 
       return;
@@ -546,7 +547,8 @@ export class AgentPresenter implements IAgentPresenter {
       console.log(chalk.bgGreen.black.bold('\n🎯 FINAL RESULT '));
       console.log(chalk.green('━'.repeat(60)));
       console.log(chalk.green.bold(`📋 ${execution.goal}`));
-      console.log(chalk.white.bold(`💡 Answer: ${finalResult}`));
+      const processedResult = this.processMarkdownCodeBlocks(finalResult);
+      console.log(chalk.white.bold(`💡 Answer: ${processedResult}`));
       console.log(chalk.green('━'.repeat(60)));
     }
 
@@ -1293,12 +1295,15 @@ export class AgentPresenter implements IAgentPresenter {
         execution
       );
       if (humanReadableSummary) {
-        console.log('\n' + humanReadableSummary);
+        const processedSummary =
+          this.processMarkdownCodeBlocks(humanReadableSummary);
+        console.log('\n' + processedSummary);
       } else {
         // Fallback to the original answer extraction
         const result = this.extractAnalysisAnswer(execution);
         if (result) {
-          console.log('\n' + result);
+          const processedResult = this.processMarkdownCodeBlocks(result);
+          console.log('\n' + processedResult);
         }
       }
     } else {
@@ -2003,6 +2008,39 @@ Write your response as a natural, flowing explanation that directly addresses "$
         .map((line) => chalk.dim(`  ${line}`))
         .join('\n');
     }
+  }
+
+  /**
+   * Process content to apply syntax highlighting to markdown code blocks
+   * @param content - Raw content with potential markdown code blocks
+   * @returns Processed content with highlighted code blocks
+   */
+  private processMarkdownCodeBlocks(content: string): string {
+    if (!this.codeHighlight) {
+      return content; // Return original if no highlighting service
+    }
+
+    // Regular expression to match markdown code blocks
+    const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+
+    return content.replace(codeBlockRegex, (match, language, code) => {
+      try {
+        // Use the code highlighting service to highlight the code
+        const highlightedCode = this.codeHighlight!.highlightCode(
+          code.trim(),
+          language || 'javascript'
+        );
+
+        // Return the highlighted code with markdown-style borders
+        return `\n${chalk.gray(
+          '```' + (language || 'javascript')
+        )}\n${highlightedCode}\n${chalk.gray('```')}\n`;
+      } catch (error) {
+        // Fallback to original code block if highlighting fails
+        console.error('Code highlighting failed:', error);
+        return match;
+      }
+    });
   }
 
   /**

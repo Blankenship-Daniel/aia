@@ -315,6 +315,8 @@ export default class CLIApplication {
 
       case 'exec':
         cmd.option('--dry-run', 'Show what would be executed without running');
+        cmd.option('--no-optimize', 'Disable command optimization');
+        cmd.option('--force', 'Skip safety validation');
         cmd.option(
           '--timeout <ms>',
           'Command timeout in milliseconds',

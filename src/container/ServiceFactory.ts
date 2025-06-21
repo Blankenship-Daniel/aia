@@ -681,6 +681,21 @@ export class ServiceFactory {
         dependencies: ['memoryPersistence'],
       }
     );
+
+    // Symbol Index Service (depends on caching)
+    container.registerFactory(
+      'symbolIndex',
+      (container) => {
+        const {
+          SymbolIndexService,
+        } = require('../../dist/services/SymbolIndexService');
+        const caching = container.resolve('caching');
+        return new SymbolIndexService(caching);
+      },
+      {
+        dependencies: ['caching'],
+      }
+    );
   }
 
   /**

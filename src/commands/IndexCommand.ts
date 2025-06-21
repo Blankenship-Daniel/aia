@@ -11,6 +11,7 @@ import { CommandResult, CommandOptions, AsyncResult } from '../types/index.js';
 
 // Import TypeScript modules
 import { CodeIndexService } from '../services/CodeIndexService.js';
+import { SymbolIndexService } from '../services/SymbolIndexService.js';
 import CodebaseSummarizer from '../CodebaseSummarizer.js';
 import SemanticCodeAnalyzer from '../SemanticCodeAnalyzer.js';
 import ConfigurationManager from '../ConfigurationManager.js';
@@ -127,11 +128,74 @@ export class IndexCommand implements ICommand {
   private aliases = ['idx', 'scan'];
 
   private codeIndexService: CodeIndexService;
+  private symbolIndexService: SymbolIndexService;
   private codebaseSummarizer: CodebaseSummarizer;
   private semanticAnalyzer: SemanticCodeAnalyzer;
 
   constructor() {
     this.codeIndexService = new CodeIndexService();
+
+    // TODO: This should be injected via DI container
+    // For now, create a simple mock cache service
+    const mockCache = {
+      async get<T>(key: string): Promise<T | null> {
+        return null;
+      },
+      async set<T>(key: string, value: T, options?: any): Promise<void> {},
+      async has(key: string): Promise<boolean> {
+        return false;
+      },
+      async delete(key: string): Promise<boolean> {
+        return false;
+      },
+      async deletePattern(pattern: string): Promise<number> {
+        return 0;
+      },
+      async clear(): Promise<void> {},
+      async getStatistics(): Promise<any> {
+        return {
+          totalKeys: 0,
+          hitRate: 0,
+          missRate: 0,
+          totalHits: 0,
+          totalMisses: 0,
+          totalRequests: 0,
+          averageAccessTime: 0,
+          memoryUsage: 0,
+          oldestEntry: 0,
+          newestEntry: 0,
+        };
+      },
+      async keys(): Promise<string[]> {
+        return [];
+      },
+      async size(): Promise<number> {
+        return 0;
+      },
+      async refresh(key: string, ttl?: number): Promise<boolean> {
+        return false;
+      },
+      async mget<T>(keys: string[]): Promise<(T | null)[]> {
+        return keys.map(() => null);
+      },
+      async mset<T>(
+        entries: Array<{ key: string; value: T; options?: any }>
+      ): Promise<void> {},
+      async warm<T>(
+        key: string,
+        loader: () => Promise<T>,
+        options?: any
+      ): Promise<T> {
+        return await loader();
+      },
+      startCleanup(intervalMs?: number): void {},
+      stopCleanup(): void {},
+      async cleanup(): Promise<number> {
+        return 0;
+      },
+    };
+
+    this.symbolIndexService = new SymbolIndexService(mockCache);
     this.codebaseSummarizer = new CodebaseSummarizer();
     this.semanticAnalyzer = new SemanticCodeAnalyzer();
   }
@@ -181,6 +245,16 @@ export class IndexCommand implements ICommand {
         case 'prompts':
         case 'generate-prompts':
           return await this.generatePrompts(args.slice(1), options);
+
+        // Symbol Index Actions (Phase 1)
+        case 'symbols:build':
+          return await this.buildSymbolLookup(options);
+
+        case 'symbols:query':
+          return await this.querySymbol(args.slice(1), options);
+
+        case 'symbols:export':
+          return await this.exportSymbolTable(args.slice(1), options);
 
         default:
           console.log(chalk.yellow(`Unknown action: ${action}`));
@@ -362,26 +436,26 @@ export class IndexCommand implements ICommand {
       console.log(
         chalk.white(`Last Indexed: ${stats.lastIndexed || 'Unknown'}`)
       );
-
-      if (options.verbose || options.detailed) {
-        console.log(chalk.blue('\n🌍 Language Distribution:'));
-        Object.entries(stats.languages).forEach(([lang, count]) => {
-          console.log(chalk.gray(`  ${lang}: ${count} files`));
+      if (stats.largestFiles?.length) {
+        console.log(chalk.blue('\n📁 Largest Files:'));
+        stats.largestFiles.forEach((file) => {
+          console.log(
+            chalk.white(`  ${file.file}`),
+            chalk.gray(`(${file.size} bytes)`)
+          );
         });
+      }
 
-        if (stats.largestFiles?.length) {
-          console.log(chalk.blue('\n📁 Largest Files:'));
-          stats.largestFiles.slice(0, 5).forEach((file) => {
-            console.log(
-              chalk.gray(`  ${file.file}: ${(file.size / 1024).toFixed(1)} KB`)
-            );
-          });
-        }
+      if (options.verbose) {
+        console.log(chalk.blue('\n📊 Language distribution:'));
+        Object.entries(stats.languages).forEach(([lang, count]) => {
+          console.log(chalk.gray(`   ${lang}: ${count} files`));
+        });
       }
 
       return {
         success: true,
-        output: 'Statistics displayed',
+        output: 'Stats displayed',
         data: stats,
       };
     } catch (error) {
@@ -1304,194 +1378,68 @@ export class IndexCommand implements ICommand {
     }
   }
 
-  private convertToCodebaseIndex(indexData: IndexData): CodebaseIndex {
-    // Convert IndexData to CodebaseIndex format
-    const files = new Map<string, FileInfo>();
+  // ICommand interface implementation methods
 
-    // Convert files from unknown to FileInfo
-    for (const [path, data] of indexData.files.entries()) {
-      files.set(path, {
-        path,
-        content:
-          typeof data === 'object' && data !== null && 'content' in data
-            ? (data as any).content
-            : undefined,
-        exports:
-          typeof data === 'object' && data !== null && 'exports' in data
-            ? (data as any).exports
-            : [],
-        imports:
-          typeof data === 'object' && data !== null && 'imports' in data
-            ? (data as any).imports
-            : [],
-        classes:
-          typeof data === 'object' && data !== null && 'classes' in data
-            ? (data as any).classes
-            : [],
-        functions:
-          typeof data === 'object' && data !== null && 'functions' in data
-            ? (data as any).functions
-            : [],
-        type:
-          typeof data === 'object' && data !== null && 'type' in data
-            ? (data as any).type
-            : undefined,
-        size:
-          typeof data === 'object' && data !== null && 'size' in data
-            ? (data as any).size
-            : undefined,
-      });
-    }
-
-    return {
-      files,
-      metadata: {
-        totalFiles: indexData.metadata.totalFiles,
-        linesOfCode: 0, // Calculate if needed
-        totalClasses: indexData.metadata.totalClasses,
-        totalFunctions: indexData.metadata.totalFunctions,
-        languages: indexData.metadata.languages,
-      } as any, // Type assertion to avoid complex type issues
-      dependencies: {},
-    };
-  }
-
-  private findEntryPoints(index: IndexData): EntryPoint[] {
-    const entryPoints: EntryPoint[] = [];
-    const entryFiles = ['main.js', 'index.js', 'app.js', 'server.js'];
-
-    for (const entry of entryFiles) {
-      if (index.files.has(entry)) {
-        entryPoints.push({
-          file: entry,
-          purpose: 'Application entry point',
-        });
-      }
-    }
-
-    return entryPoints;
-  }
-
-  private findKeyComponents(index: IndexData): ComponentInfo[] {
-    const components: ComponentInfo[] = [];
-
-    // Find files with many symbols or dependencies
-    for (const [filePath, fileInfo] of Array.from(index.files)) {
-      const symbolCount = (fileInfo as any).symbols
-        ? (fileInfo as any).symbols.length
-        : 0;
-      const depCount = (fileInfo as any).dependencies
-        ? (fileInfo as any).dependencies.length
-        : 0;
-
-      if (symbolCount > 3 || depCount > 2) {
-        components.push({
-          file: filePath,
-          purpose: `Core module with ${symbolCount} symbols`,
-          exports: (fileInfo as any).exports || [],
-          importance: symbolCount + depCount,
-        });
-      }
-    }
-
-    // Sort by importance and return top modules
-    return components
-      .sort((a, b) => (b.importance || 0) - (a.importance || 0))
-      .slice(0, 10);
-  }
-
-  public getName(): string {
-    return this.name;
-  }
-
-  public getDescription(): string {
-    return this.description;
-  }
-
-  public getAliases(): string[] {
-    return this.aliases;
-  }
-
-  public getDefinition(): CommandDefinition {
+  getDefinition(): CommandDefinition {
     return {
       name: this.name,
       description: this.description,
       usage: 'index <action> [options]',
-      aliases: this.aliases,
       examples: [
-        'aia index build',
-        'aia index search "UserService"',
-        'aia index stats --verbose',
-        'aia index summary --json',
-        'aia index files test',
-        'aia index symbols --verbose',
-        'aia index todos',
-        'aia index analyze',
-        'aia index export',
-        'aia index export codebase-context.md --format markdown --detailed',
-        'aia index export prompt.json --format json',
+        'index build',
+        'index search "UserService"',
+        'index symbols:build',
+        'index symbols:query "MyClass"',
+        'index symbols:export symbol-table.json',
       ],
+      aliases: this.aliases,
       options: [
         {
           name: 'force',
           description: 'Force rebuild even if index exists',
           type: 'boolean',
-          required: false,
         },
         {
           name: 'directory',
           description: 'Directory to index (default: current)',
           type: 'string',
-          required: false,
         },
         {
           name: 'verbose',
           description: 'Show detailed output',
           type: 'boolean',
-          required: false,
         },
         {
           name: 'json',
           description: 'Output results as JSON',
           type: 'boolean',
-          required: false,
-        },
-        {
-          name: 'detailed',
-          description: 'Show detailed information',
-          type: 'boolean',
-          required: false,
-        },
-        {
-          name: 'output',
-          description: 'Output file path for export',
-          type: 'string',
-          required: false,
         },
         {
           name: 'format',
-          description: 'Export format: markdown, json, or text',
+          description: 'Output format (json, markdown)',
           type: 'string',
-          required: false,
-        },
-        {
-          name: 'code',
-          description: 'Include code snippets in export',
-          type: 'boolean',
-          required: false,
-        },
-        {
-          name: 'type',
-          description:
-            'Type of prompt to generate (copilot-instructions, comprehensive, minimal, architecture, dev-focused, all)',
-          type: 'string',
-          required: false,
         },
       ],
     };
   }
 
-  public validateArgs(args: string[]): { valid: boolean; errors: string[] } {
+  getName(): string {
+    return this.name;
+  }
+
+  getAliases(): string[] {
+    return this.aliases;
+  }
+
+  validateArgs(args: string[]): { valid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    if (args.length === 0) {
+      // Default to 'build' action, which is valid
+      return { valid: true, errors: [] };
+    }
+
+    const action = args[0];
     const validActions = [
       'build',
       'create',
@@ -1508,72 +1456,333 @@ export class IndexCommand implements ICommand {
       'export',
       'prompts',
       'generate-prompts',
+      'symbols:build',
+      'symbols:query',
+      'symbols:export',
     ];
 
-    if (args.length === 0) {
-      // Default to 'build' action
-      return { valid: true, errors: [] };
-    }
-
-    const action = args[0].toLowerCase();
     if (!validActions.includes(action)) {
-      return {
-        valid: false,
-        errors: [
-          `Unknown action: ${action}. Valid actions: ${validActions.join(
-            ', '
-          )}`,
-        ],
-      };
+      errors.push(
+        `Unknown action: ${action}. Valid actions: ${validActions.join(', ')}`
+      );
     }
 
-    return { valid: true, errors: [] };
+    // Action-specific validation
+    if (
+      (action === 'search' || action === 'symbols:query') &&
+      args.length < 2
+    ) {
+      errors.push(`Action '${action}' requires a search term or symbol name`);
+    }
+
+    return { valid: errors.length === 0, errors };
   }
 
-  public getHelp(): string {
+  getHelp(): string {
     return `
-${chalk.bold(
-  'Index Command'
-)} - Create and manage codebase index for AI analysis
+  Usage: aia index <action> [options]
 
-${chalk.blue('USAGE:')}
-  aia index <action> [options]
+  Create and manage codebase index for AI analysis.
 
-${chalk.blue('ACTIONS:')}
-  build      Build/create the codebase index
-  search     Search the index for symbols or files  
-  stats      Show index statistics
-  summary    Show AI-friendly codebase summary
-  files      List files by pattern
-  symbols    List symbols (classes, functions)
-  todos      Show TODO items
-  refresh    Rebuild the entire index
-  analyze    Perform semantic code analysis
-  export     Export index to file for AI prompts
-  prompts    Generate specialized AI prompt files
+  Actions:
+    build|create       Build or create the codebase index
+    search              Search the index for symbols or files
+    stats|status         Show index statistics
+    summary             Show AI-friendly codebase summary
+    files               List files by pattern
+    symbols             List symbols (classes, functions)
+    todos               Show TODO items
+    refresh|rebuild     Rebuild the entire index
+    analyze             Perform semantic code analysis
+    export              Export index to file for AI prompts
+    prompts|generate-prompts  Generate specialized AI prompt files
 
-${chalk.blue('OPTIONS:')}
-  --force       Force rebuild even if index exists
-  --directory   Directory to index (default: current)
-  --verbose     Show detailed output
-  --json        Output results as JSON
-  --detailed    Show detailed information
-  --type        Type of prompt to generate (all, copilot-instructions, comprehensive, minimal, architecture, dev-focused)
-  --output      Output directory for generated files
-  --code        Include code snippets in prompts
+  Symbol Index Actions (Phase 1):
+    symbols:build       Build optimized symbol lookup table
+    symbols:query       Query symbol information
+    symbols:export      Export symbol lookup table
 
-${chalk.blue('EXAMPLES:')}
-  aia index build
-  aia index search "UserService"
-  aia index stats --verbose
-  aia index summary --json
-  aia index files test
-  aia index symbols --verbose
-  aia index todos
-  aia index analyze
-  aia index export codebase.md --format markdown --detailed
-  aia index prompts --type all --output ./prompts
-  aia index prompts --type copilot-instructions
+  Options:
+    --force             Force rebuild even if index exists
+    --directory <path>  Directory to index (default: current)
+    --verbose            Show detailed output
+    --json               Output results as JSON
+    --format <type>     Output format (json, markdown)
+
+  Examples:
+    aia index build
+    aia index search "UserService"
+    aia index symbols:build
+    aia index symbols:query "MyClass"
+    aia index symbols:export symbol-table.json
     `;
+  }
+
+  // Symbol Index Methods (Phase 1 Implementation)
+
+  /**
+   * Build optimized symbol lookup table
+   */
+  private async buildSymbolLookup(
+    options: CommandOptions
+  ): Promise<CommandResult> {
+    try {
+      console.log(chalk.blue('🔍 Building optimized symbol lookup table...'));
+
+      const rootDir = (options.directory as string) || process.cwd();
+      const symbolTable = await this.symbolIndexService.buildSymbolIndex(
+        rootDir,
+        {
+          excludePatterns: ['node_modules/**', '.git/**', 'dist/**'],
+          useCache: !options.force,
+        }
+      );
+
+      console.log(chalk.green('✅ Symbol lookup table built successfully!'));
+      console.log(
+        chalk.gray(
+          `   Symbols indexed: ${Object.keys(symbolTable.symbols).length}`
+        )
+      );
+      console.log(
+        chalk.gray(
+          `   Files processed: ${Object.keys(symbolTable.fileSymbols).length}`
+        )
+      );
+      console.log(
+        chalk.gray(
+          `   Relationships mapped: ${
+            Object.keys(symbolTable.relationships).length
+          }`
+        )
+      );
+
+      return {
+        success: true,
+        output: `Symbol lookup table built with ${
+          Object.keys(symbolTable.symbols).length
+        } symbols`,
+        data: { symbolTable },
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error(chalk.red('Symbol lookup build failed:'), errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  /**
+   * Query symbol information
+   */
+  private async querySymbol(
+    args: string[],
+    options: CommandOptions
+  ): Promise<CommandResult> {
+    try {
+      const symbolName = args[0];
+      if (!symbolName) {
+        console.log(chalk.yellow('Please provide a symbol name to query'));
+        return { success: false, error: 'Symbol name required' };
+      }
+
+      console.log(chalk.blue(`🔍 Querying symbol: ${symbolName}`));
+
+      const symbolInfo = this.symbolIndexService.getSymbol(symbolName);
+      if (!symbolInfo) {
+        console.log(chalk.yellow(`Symbol '${symbolName}' not found in index`));
+        return { success: false, error: 'Symbol not found' };
+      }
+
+      // Display symbol information
+      console.log(chalk.green(`\n📋 Symbol Information: ${symbolName}`));
+      console.log(chalk.white(`Type: ${symbolInfo.type}`));
+      console.log(chalk.white(`Definitions: ${symbolInfo.definitions.length}`));
+      console.log(chalk.white(`References: ${symbolInfo.references.length}`));
+
+      if (symbolInfo.definitions.length > 0) {
+        console.log(chalk.blue('\n📍 Definition:'));
+        const def = symbolInfo.definitions[0];
+        console.log(
+          chalk.gray(
+            `  ${def.location.file}:${def.location.line}:${def.location.column}`
+          )
+        );
+        if (def.snippet) {
+          console.log(chalk.gray(`  ${def.snippet}`));
+        }
+      }
+
+      if (options.verbose && symbolInfo.references.length > 0) {
+        console.log(chalk.blue('\n🔗 References:'));
+        symbolInfo.references.slice(0, 5).forEach((ref) => {
+          console.log(
+            chalk.gray(
+              `  ${ref.location.file}:${ref.location.line} - ${
+                ref.context || 'usage'
+              }`
+            )
+          );
+        });
+        if (symbolInfo.references.length > 5) {
+          console.log(
+            chalk.gray(
+              `  ... and ${symbolInfo.references.length - 5} more references`
+            )
+          );
+        }
+      }
+
+      return {
+        success: true,
+        output: `Found symbol ${symbolName}`,
+        data: { symbol: symbolInfo },
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error(chalk.red('Symbol query failed:'), errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  /**
+   * Export symbol lookup table for AI consumption
+   */
+  private async exportSymbolTable(
+    args: string[],
+    options: CommandOptions
+  ): Promise<CommandResult> {
+    try {
+      const outputFile = args[0] || 'symbol-table.json';
+      const format = options.format || 'json';
+
+      console.log(chalk.blue('📤 Exporting symbol lookup table...'));
+
+      // For now, get a basic export. In Phase 2+, this will be more sophisticated
+      const symbols = this.symbolIndexService.findSymbolsByType('class');
+      const functions = this.symbolIndexService.findSymbolsByType('function');
+
+      const exportData = {
+        metadata: {
+          timestamp: new Date().toISOString(),
+          format,
+          version: '1.0.0',
+        },
+        symbols: {
+          classes: symbols.map((name) => ({
+            name,
+            info: this.symbolIndexService.getSymbol(name),
+          })),
+          functions: functions.map((name) => ({
+            name,
+            info: this.symbolIndexService.getSymbol(name),
+          })),
+        },
+        statistics: {
+          totalSymbols: symbols.length + functions.length,
+          classes: symbols.length,
+          functions: functions.length,
+        },
+      };
+
+      const content = JSON.stringify(exportData, null, 2);
+      await fs.writeFile(outputFile, content, 'utf-8');
+
+      console.log(chalk.green(`✅ Symbol table exported to: ${outputFile}`));
+      console.log(chalk.gray(`   Format: ${format}`));
+      console.log(
+        chalk.gray(`   Size: ${(content.length / 1024).toFixed(1)} KB`)
+      );
+      console.log(
+        chalk.gray(`   Symbols: ${exportData.statistics.totalSymbols}`)
+      );
+
+      return {
+        success: true,
+        output: `Exported to ${outputFile}`,
+        data: { file: outputFile, statistics: exportData.statistics },
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error(chalk.red('Export failed:'), errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  /**
+   * Convert index data to codebase index format
+   */
+  private convertToCodebaseIndex(index: IndexData): any {
+    return {
+      files: index.files || new Map(),
+      classes: index.classes || new Map(),
+      functions: index.functions || new Map(),
+      metadata: index.metadata || {},
+      symbols: new Map(),
+      dependencies: new Map(),
+      imports: new Map(),
+      exports: new Map(),
+      constants: new Map(),
+      comments: new Map(),
+      todos: index.todos || [],
+    };
+  }
+
+  /**
+   * Find entry points in the codebase
+   */
+  private findEntryPoints(index: IndexData): string[] {
+    const entryPoints: string[] = [];
+
+    // Look for main entry files
+    const commonEntryFiles = [
+      'main.js',
+      'index.js',
+      'app.js',
+      'server.js',
+      'main.ts',
+      'index.ts',
+    ];
+
+    if (index.files) {
+      for (const [filePath] of index.files) {
+        const fileName = path.basename(filePath);
+        if (commonEntryFiles.includes(fileName)) {
+          entryPoints.push(filePath);
+        }
+      }
+    }
+
+    return entryPoints.length > 0
+      ? entryPoints
+      : ['No clear entry points found'];
+  }
+
+  /**
+   * Find key components in the codebase
+   */
+  private findKeyComponents(index: IndexData): string[] {
+    const keyComponents: string[] = [];
+
+    // Look for important classes and services
+    if (index.classes) {
+      for (const [className] of index.classes) {
+        // Add classes that seem important (services, managers, etc.)
+        if (
+          className.includes('Service') ||
+          className.includes('Manager') ||
+          className.includes('Controller') ||
+          className.includes('Engine')
+        ) {
+          keyComponents.push(className);
+        }
+      }
+    }
+
+    return keyComponents.length > 0
+      ? keyComponents
+      : ['No key components identified'];
   }
 }

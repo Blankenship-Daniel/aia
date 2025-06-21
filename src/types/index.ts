@@ -2,6 +2,10 @@
 export * from '../interfaces/ICachingService';
 export * from '../interfaces/IPerformanceMonitor';
 
+// Export symbol types for enhanced indexing
+export * from './SymbolTypes';
+export * from '../interfaces/ISymbolIndex';
+
 // Export utility interfaces
 export * from '../interfaces/ICodeHighlightService';
 

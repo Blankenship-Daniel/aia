@@ -6,7 +6,12 @@ const config: Config = {
   roots: ['<rootDir>/src', '<rootDir>/tests'],
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts$': [
+      'ts-jest',
+      {
+        tsconfig: 'tests/tsconfig.json',
+      },
+    ],
   },
   transformIgnorePatterns: [
     'node_modules/(?!(extract-first-json|parse-json-object|dirty-json)/)',

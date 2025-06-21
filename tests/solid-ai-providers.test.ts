@@ -26,6 +26,25 @@ const mockMemoryPersistence = {
 };
 
 describe('SOLID AI Provider Strategy Pattern', () => {
+  let envCleanup: (() => void) | undefined;
+
+  beforeEach(() => {
+    // Set up test environment with mock API keys
+    envCleanup = setupTestEnv({
+      ANTHROPIC_API_KEY: 'sk-ant-test-key-for-provider-tests',
+      OPENAI_API_KEY: 'sk-test-key-for-provider-tests',
+      GEMINI_API_KEY: 'test-gemini-key-for-provider-tests',
+    });
+  });
+
+  afterEach(() => {
+    // Clean up environment variables
+    if (envCleanup) {
+      envCleanup();
+      envCleanup = undefined;
+    }
+  });
+
   describe('Single Responsibility Principle (SRP)', () => {
     it('should have providers with single responsibility', () => {
       const openAIProvider = new OpenAIProvider('test-key', 'gpt-3.5-turbo');

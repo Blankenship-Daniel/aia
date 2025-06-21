@@ -105,10 +105,14 @@ export class TaskComplexityAnalyzer {
     };
   }
 
-  private determineTaskType(task: string): TaskType {
-    // Analysis tasks (check first for markdown summarization)
-    if (
-      this.matchesPatterns(task, [
+  private static readonly taskTypeDefinitions: Array<{
+    type: TaskType;
+    patterns: string[];
+    excludePatterns?: string[];
+  }> = [
+    {
+      type: TaskType.ANALYSIS,
+      patterns: [
         'analyze',
         'review',
         'examine',
@@ -133,23 +137,17 @@ export class TaskComplexityAnalyzer {
         'display',
         'search',
         'locate',
-      ]) ||
-      // Specifically handle markdown summary tasks as analysis
-      this.matchesPatterns(task, [
         'create a markdown summarizing',
         'markdown summarizing',
         'summarizing the contents',
         'markdown summary',
         'create markdown',
         'generate markdown',
-      ])
-    ) {
-      return TaskType.ANALYSIS;
-    }
-
-    // Documentation tasks (JSDoc, inline comments)
-    if (
-      this.matchesPatterns(task, [
+      ],
+    },
+    {
+      type: TaskType.DOCUMENTATION,
+      patterns: [
         'add jsdoc',
         'jsdoc',
         'document',
@@ -163,21 +161,17 @@ export class TaskComplexityAnalyzer {
         'document all',
         'generate jsdoc',
         'add documentation',
-      ]) &&
-      // Exclude markdown summarization tasks
-      !this.matchesPatterns(task, [
+      ],
+      excludePatterns: [
         'create a markdown summarizing',
         'markdown summarizing',
         'summarizing the contents',
         'markdown summary',
-      ])
-    ) {
-      return TaskType.DOCUMENTATION;
-    }
-
-    // Code modification tasks
-    if (
-      this.matchesPatterns(task, [
+      ],
+    },
+    {
+      type: TaskType.CODE_MODIFICATION,
+      patterns: [
         'modify',
         'change',
         'update',
@@ -186,14 +180,11 @@ export class TaskComplexityAnalyzer {
         'add method',
         'add function',
         'add class',
-      ])
-    ) {
-      return TaskType.CODE_MODIFICATION;
-    }
-
-    // Refactoring tasks
-    if (
-      this.matchesPatterns(task, [
+      ],
+    },
+    {
+      type: TaskType.REFACTORING,
+      patterns: [
         'refactor',
         'reorganize',
         'restructure',
@@ -201,14 +192,11 @@ export class TaskComplexityAnalyzer {
         'clean up',
         'improve',
         'simplify',
-      ])
-    ) {
-      return TaskType.REFACTORING;
-    }
-
-    // Test generation tasks
-    if (
-      this.matchesPatterns(task, [
+      ],
+    },
+    {
+      type: TaskType.TEST_GENERATION,
+      patterns: [
         'test',
         'unit test',
         'unit tests',
@@ -219,14 +207,11 @@ export class TaskComplexityAnalyzer {
         'test coverage',
         'spec',
         'jest',
-      ])
-    ) {
-      return TaskType.TEST_GENERATION;
-    }
-
-    // Bug fixing tasks
-    if (
-      this.matchesPatterns(task, [
+      ],
+    },
+    {
+      type: TaskType.BUG_FIXING,
+      patterns: [
         'fix',
         'bug',
         'error',
@@ -235,14 +220,11 @@ export class TaskComplexityAnalyzer {
         'resolve',
         'patch',
         'repair',
-      ])
-    ) {
-      return TaskType.BUG_FIXING;
-    }
-
-    // File operations
-    if (
-      this.matchesPatterns(task, [
+      ],
+    },
+    {
+      type: TaskType.FILE_OPERATION,
+      patterns: [
         'create file',
         'create a file',
         'create new file',
@@ -253,28 +235,22 @@ export class TaskComplexityAnalyzer {
         'rename',
         'backup',
         'list files',
-      ])
-    ) {
-      return TaskType.FILE_OPERATION;
-    }
-
-    // Configuration tasks
-    if (
-      this.matchesPatterns(task, [
+      ],
+    },
+    {
+      type: TaskType.CONFIGURATION,
+      patterns: [
         'configure',
         'setup',
         'install',
         'config',
         'environment',
         'settings',
-      ])
-    ) {
-      return TaskType.CONFIGURATION;
-    }
-
-    // Build and deployment
-    if (
-      this.matchesPatterns(task, [
+      ],
+    },
+    {
+      type: TaskType.BUILD_DEPLOYMENT,
+      patterns: [
         'build',
         'compile',
         'deploy',
@@ -282,11 +258,22 @@ export class TaskComplexityAnalyzer {
         'bundle',
         'publish',
         'release',
-      ])
-    ) {
-      return TaskType.BUILD_DEPLOYMENT;
-    }
+      ],
+    },
+  ];
 
+  private determineTaskType(task: string): TaskType {
+    for (const def of TaskComplexityAnalyzer.taskTypeDefinitions) {
+      if (this.matchesPatterns(task, def.patterns)) {
+        if (
+          def.excludePatterns &&
+          this.matchesPatterns(task, def.excludePatterns)
+        ) {
+          continue;
+        }
+        return def.type;
+      }
+    }
     return TaskType.UNKNOWN;
   }
 
@@ -338,61 +325,59 @@ export class TaskComplexityAnalyzer {
     return TaskComplexity.ADVANCED;
   }
 
+  private static readonly capabilityMap: Record<TaskType, TaskCapability[]> = {
+    [TaskType.DOCUMENTATION]: [
+      TaskCapability.CODE_PARSING,
+      TaskCapability.CODE_GENERATION,
+      TaskCapability.FILE_WRITING,
+      TaskCapability.TEMPLATE_PROCESSING,
+    ],
+    [TaskType.CODE_MODIFICATION]: [
+      TaskCapability.CODE_PARSING,
+      TaskCapability.CODE_MODIFICATION,
+      TaskCapability.AST_MANIPULATION,
+      TaskCapability.CODE_GENERATION,
+      TaskCapability.FILE_WRITING,
+      TaskCapability.VALIDATION,
+    ],
+    [TaskType.REFACTORING]: [
+      TaskCapability.CODE_PARSING,
+      TaskCapability.CODE_MODIFICATION,
+      TaskCapability.AST_MANIPULATION,
+      TaskCapability.DEPENDENCY_ANALYSIS,
+      TaskCapability.FILE_WRITING,
+      TaskCapability.VALIDATION,
+    ],
+    [TaskType.TEST_GENERATION]: [
+      TaskCapability.CODE_PARSING,
+      TaskCapability.CODE_ANALYSIS,
+      TaskCapability.TEST_GENERATION,
+      TaskCapability.CODE_GENERATION,
+      TaskCapability.TEMPLATE_PROCESSING,
+      TaskCapability.FILE_WRITING,
+    ],
+    [TaskType.BUG_FIXING]: [],
+    [TaskType.FILE_OPERATION]: [TaskCapability.COMMAND_EXECUTION],
+    [TaskType.ANALYSIS]: [
+      TaskCapability.PATTERN_MATCHING,
+      TaskCapability.CODE_PARSING,
+    ],
+    [TaskType.CONFIGURATION]: [],
+    [TaskType.BUILD_DEPLOYMENT]: [],
+    [TaskType.UNKNOWN]: [],
+  };
+
   private identifyRequiredCapabilities(
     task: string,
     taskType: TaskType
   ): TaskCapability[] {
     const capabilities: Set<TaskCapability> = new Set();
-
     // Always need file reading for analysis
     capabilities.add(TaskCapability.FILE_READING);
-
-    // Task-specific capabilities
-    switch (taskType) {
-      case TaskType.DOCUMENTATION:
-        capabilities.add(TaskCapability.CODE_PARSING);
-        capabilities.add(TaskCapability.CODE_GENERATION);
-        capabilities.add(TaskCapability.FILE_WRITING);
-        capabilities.add(TaskCapability.TEMPLATE_PROCESSING);
-        break;
-
-      case TaskType.CODE_MODIFICATION:
-        capabilities.add(TaskCapability.CODE_PARSING);
-        capabilities.add(TaskCapability.CODE_MODIFICATION);
-        capabilities.add(TaskCapability.AST_MANIPULATION);
-        capabilities.add(TaskCapability.CODE_GENERATION);
-        capabilities.add(TaskCapability.FILE_WRITING);
-        capabilities.add(TaskCapability.VALIDATION);
-        break;
-
-      case TaskType.REFACTORING:
-        capabilities.add(TaskCapability.CODE_PARSING);
-        capabilities.add(TaskCapability.CODE_MODIFICATION);
-        capabilities.add(TaskCapability.AST_MANIPULATION);
-        capabilities.add(TaskCapability.DEPENDENCY_ANALYSIS);
-        capabilities.add(TaskCapability.FILE_WRITING);
-        capabilities.add(TaskCapability.VALIDATION);
-        break;
-
-      case TaskType.TEST_GENERATION:
-        capabilities.add(TaskCapability.CODE_PARSING);
-        capabilities.add(TaskCapability.CODE_ANALYSIS);
-        capabilities.add(TaskCapability.TEST_GENERATION);
-        capabilities.add(TaskCapability.CODE_GENERATION);
-        capabilities.add(TaskCapability.TEMPLATE_PROCESSING);
-        capabilities.add(TaskCapability.FILE_WRITING);
-        break;
-
-      case TaskType.FILE_OPERATION:
-        capabilities.add(TaskCapability.COMMAND_EXECUTION);
-        break;
-
-      case TaskType.ANALYSIS:
-        capabilities.add(TaskCapability.PATTERN_MATCHING);
-        capabilities.add(TaskCapability.CODE_PARSING);
-        break;
-    }
-
+    // Add mapped capabilities
+    (TaskComplexityAnalyzer.capabilityMap[taskType] || []).forEach((cap) =>
+      capabilities.add(cap)
+    );
     return Array.from(capabilities);
   }
 
@@ -423,70 +408,62 @@ export class TaskComplexityAnalyzer {
     return Math.round(baseSteps[taskType] * complexityMultiplier[complexity]);
   }
 
+  private static readonly baseRiskByTaskType: Record<TaskType, number> = {
+    [TaskType.CODE_MODIFICATION]: 3,
+    [TaskType.REFACTORING]: 3,
+    [TaskType.BUG_FIXING]: 2,
+    [TaskType.DOCUMENTATION]: 1,
+    [TaskType.TEST_GENERATION]: 1,
+    [TaskType.FILE_OPERATION]: 1,
+    [TaskType.ANALYSIS]: 1,
+    [TaskType.CONFIGURATION]: 1,
+    [TaskType.BUILD_DEPLOYMENT]: 1,
+    [TaskType.UNKNOWN]: 1,
+  };
+
+  private static readonly complexityRisk: Record<TaskComplexity, number> = {
+    [TaskComplexity.ADVANCED]: 3,
+    [TaskComplexity.COMPLEX]: 2,
+    [TaskComplexity.MODERATE]: 1,
+    [TaskComplexity.SIMPLE]: 0,
+  };
+
   private assessRiskLevel(
     taskType: TaskType,
     complexity: TaskComplexity,
     capabilities: TaskCapability[]
   ): RiskLevel {
-    let riskScore = 0;
-
-    // Base risk by task type
-    switch (taskType) {
-      case TaskType.CODE_MODIFICATION:
-      case TaskType.REFACTORING:
-        riskScore += 3;
-        break;
-      case TaskType.BUG_FIXING:
-        riskScore += 2;
-        break;
-      case TaskType.DOCUMENTATION:
-        riskScore += 1;
-        break;
-      default:
-        riskScore += 1;
-    }
-
-    // Complexity risk
-    switch (complexity) {
-      case TaskComplexity.ADVANCED:
-        riskScore += 3;
-        break;
-      case TaskComplexity.COMPLEX:
-        riskScore += 2;
-        break;
-      case TaskComplexity.MODERATE:
-        riskScore += 1;
-        break;
-    }
-
-    // Capability risk
+    let riskScore = TaskComplexityAnalyzer.baseRiskByTaskType[taskType] || 1;
+    riskScore += TaskComplexityAnalyzer.complexityRisk[complexity] || 0;
     if (capabilities.includes(TaskCapability.AST_MANIPULATION)) riskScore += 2;
     if (capabilities.includes(TaskCapability.FILE_WRITING)) riskScore += 1;
-
     if (riskScore <= 2) return RiskLevel.LOW;
     if (riskScore <= 4) return RiskLevel.MEDIUM;
     if (riskScore <= 6) return RiskLevel.HIGH;
     return RiskLevel.CRITICAL;
   }
 
+  private static readonly validationStrategyMap: Record<
+    TaskType,
+    ValidationStrategy
+  > = {
+    [TaskType.DOCUMENTATION]: ValidationStrategy.SYNTAX_VALIDATION,
+    [TaskType.CODE_MODIFICATION]: ValidationStrategy.EXECUTION_TEST,
+    [TaskType.REFACTORING]: ValidationStrategy.EXECUTION_TEST,
+    [TaskType.TEST_GENERATION]: ValidationStrategy.EXECUTION_TEST,
+    [TaskType.BUG_FIXING]: ValidationStrategy.EXECUTION_TEST,
+    [TaskType.FILE_OPERATION]: ValidationStrategy.FILE_COMPARISON,
+    [TaskType.ANALYSIS]: ValidationStrategy.METRIC_BASED,
+    [TaskType.CONFIGURATION]: ValidationStrategy.MANUAL_REVIEW,
+    [TaskType.BUILD_DEPLOYMENT]: ValidationStrategy.MANUAL_REVIEW,
+    [TaskType.UNKNOWN]: ValidationStrategy.MANUAL_REVIEW,
+  };
+
   private determineValidationStrategy(taskType: TaskType): ValidationStrategy {
-    switch (taskType) {
-      case TaskType.DOCUMENTATION:
-        return ValidationStrategy.SYNTAX_VALIDATION;
-      case TaskType.CODE_MODIFICATION:
-      case TaskType.REFACTORING:
-        return ValidationStrategy.EXECUTION_TEST;
-      case TaskType.TEST_GENERATION:
-        return ValidationStrategy.EXECUTION_TEST;
-      case TaskType.BUG_FIXING:
-        return ValidationStrategy.EXECUTION_TEST;
-      case TaskType.FILE_OPERATION:
-        return ValidationStrategy.FILE_COMPARISON;
-      case TaskType.ANALYSIS:
-        return ValidationStrategy.METRIC_BASED;
-      default:
-        return ValidationStrategy.MANUAL_REVIEW;
-    }
+    return (
+      TaskComplexityAnalyzer.validationStrategyMap[taskType] ||
+      ValidationStrategy.MANUAL_REVIEW
+    );
   }
 
   private matchesPatterns(text: string, patterns: string[]): boolean {

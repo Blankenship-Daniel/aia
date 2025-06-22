@@ -34,6 +34,30 @@
       {
         "command": "aia.toggleAutoUpdate",
         "title": "AIA: Toggle Auto-Update"
+      },
+      {
+        "command": "aia.updateSymbolsOnly",
+        "title": "AIA: Update Symbol Index Only (Fast)"
+      },
+      {
+        "command": "aia.updateAIContextOnly",
+        "title": "AIA: Update AI Context Only (Expensive)"
+      },
+      {
+        "command": "aia.toggleAIUpdates",
+        "title": "AIA: Toggle AI Auto-Updates"
+      },
+      {
+        "command": "aia.showUpdateSettings",
+        "title": "AIA: Show Update Settings"
+      },
+      {
+        "command": "aia.resetDailyLimit",
+        "title": "AIA: Reset Daily AI Update Counter"
+      },
+      {
+        "command": "aia.configureUpdateStrategy",
+        "title": "AIA: Configure Update Strategy"
       }
     ],
     "configuration": {
@@ -62,7 +86,57 @@
         "aia.symbolIndex.debounceDelay": {
           "type": "number",
           "default": 2000,
-          "description": "Delay in milliseconds before triggering auto-update after file changes"
+          "description": "Delay in milliseconds before triggering local symbol updates after file changes"
+        },
+        "aia.symbolIndex.symbolDebounceDelay": {
+          "type": "number",
+          "default": 2000,
+          "description": "Delay in milliseconds before triggering local symbol index updates"
+        },
+        "aia.symbolIndex.aiDebounceDelay": {
+          "type": "number",
+          "default": 60000,
+          "description": "Delay in milliseconds before triggering expensive AI context updates (60s default to reduce costs)"
+        },
+        "aia.symbolIndex.enableAIUpdates": {
+          "type": "boolean",
+          "default": false,
+          "description": "⚠️ Enable automatic AI-powered context updates (EXPENSIVE: requires API calls)"
+        },
+        "aia.symbolIndex.aiUpdateStrategy": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "time-based",
+            "smart"
+          ],
+          "default": "manual",
+          "description": "Strategy for AI updates: manual (safest), time-based (periodic), smart (architectural changes only)"
+        },
+        "aia.symbolIndex.minAIUpdateInterval": {
+          "type": "number",
+          "default": 600000,
+          "description": "Minimum interval between AI updates in milliseconds (10 minutes default to reduce costs)"
+        },
+        "aia.symbolIndex.smartUpdateThreshold": {
+          "type": "number",
+          "default": 5,
+          "description": "Number of significant file changes required to trigger smart AI update (higher = less aggressive)"
+        },
+        "aia.symbolIndex.promptBeforeExpensiveUpdates": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show confirmation dialog before expensive AI operations"
+        },
+        "aia.symbolIndex.maxDailyAIUpdates": {
+          "type": "number",
+          "default": 10,
+          "description": "Maximum number of automatic AI updates per day (cost protection)"
+        },
+        "aia.symbolIndex.showAIUpdateNotifications": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show notifications when expensive AI updates complete"
         },
         "aia.symbolIndex.showUpdateNotifications": {
           "type": "boolean",

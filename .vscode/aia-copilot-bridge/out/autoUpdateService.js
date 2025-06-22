@@ -4,6 +4,7 @@ exports.AutoUpdateService = void 0;
 const vscode = require("vscode");
 const fs = require("fs-extra");
 const path = require("path");
+const crypto = require("crypto");
 const child_process_1 = require("child_process");
 const util_1 = require("util");
 const execAsync = (0, util_1.promisify)(child_process_1.exec);
@@ -15,6 +16,23 @@ class AutoUpdateService {
         this.isUpdating = false;
         this.pendingUpdate = false;
         this.lastUpdateTime = 0;
+        this.fileChecksums = new Map();
+        this.pendingChanges = new Set();
+        this.lastAIUpdateTime = 0;
+        this.dailyAIUpdateCount = 0;
+        this.lastResetDate = new Date().toDateString();
+        this.resetDailyCounterIfNeeded();
+    }
+    /**
+     * Reset daily counter if it's a new day
+     */
+    resetDailyCounterIfNeeded() {
+        const today = new Date().toDateString();
+        if (this.lastResetDate !== today) {
+            this.dailyAIUpdateCount = 0;
+            this.lastResetDate = today;
+            console.log('🔄 Daily AI update counter reset');
+        }
     }
     /**
      * Start watching for file changes and auto-updating copilot instructions
@@ -23,48 +41,132 @@ class AutoUpdateService {
         const config = vscode.workspace.getConfiguration('aia.symbolIndex');
         const autoUpdate = config.get('autoUpdate', true);
         const updateInterval = config.get('updateInterval', 300000); // 5 minutes default
-        const debounceDelay = config.get('debounceDelay', 2000); // 2 seconds default
+        const symbolDebounceDelay = config.get('symbolDebounceDelay', 2000); // 2 seconds for local operations
+        const aiDebounceDelay = config.get('aiDebounceDelay', 60000); // 60 seconds for AI operations (more conservative)
+        const enableAIUpdates = config.get('enableAIUpdates', false); // Default disabled
+        const aiUpdateStrategy = config.get('aiUpdateStrategy', 'manual'); // manual, time-based, or smart
+        const promptBeforeExpensive = config.get('promptBeforeExpensiveUpdates', true);
+        const maxDailyUpdates = config.get('maxDailyAIUpdates', 10);
         if (!autoUpdate) {
             console.log('Auto-update disabled in configuration');
             return;
         }
         console.log('🔄 Starting AIA auto-update service...');
+        console.log(`   💡 Symbol updates: ${symbolDebounceDelay}ms debounce`);
+        console.log(`   🧠 AI updates: ${enableAIUpdates ? aiDebounceDelay + 'ms debounce' : 'DISABLED'}`);
+        console.log(`   📋 AI strategy: ${aiUpdateStrategy}`);
+        console.log(`   ⚠️  AI prompts: ${promptBeforeExpensive ? 'ENABLED' : 'DISABLED'}`);
+        console.log(`   📊 Daily limit: ${this.dailyAIUpdateCount}/${maxDailyUpdates} AI updates used`);
         // Watch for TypeScript/JavaScript file changes
         const fileWatcher = vscode.workspace.createFileSystemWatcher('**/*.{ts,js,tsx,jsx,md}', false, // Don't ignore create events
         false, // Don't ignore change events
         false // Don't ignore delete events
         );
-        // Debounced update function
-        const triggerUpdate = () => {
-            if (this.updateTimer) {
-                clearTimeout(this.updateTimer);
+        // Fast symbol index update (local operation)
+        const triggerSymbolUpdate = (uri) => {
+            this.pendingChanges.add(uri.fsPath);
+            if (this.symbolUpdateTimer) {
+                clearTimeout(this.symbolUpdateTimer);
             }
-            this.updateTimer = setTimeout(async () => {
-                await this.performUpdate();
-            }, debounceDelay);
+            this.symbolUpdateTimer = setTimeout(async () => {
+                await this.performLocalSymbolUpdate();
+            }, symbolDebounceDelay);
         };
-        // Watch for file changes
-        fileWatcher.onDidCreate(triggerUpdate);
-        fileWatcher.onDidChange(triggerUpdate);
-        fileWatcher.onDidDelete(triggerUpdate);
+        // Slow AI context update (expensive operation)
+        const triggerAIUpdate = async () => {
+            if (!enableAIUpdates) {
+                console.log('🧠 AI updates disabled in configuration, skipping...');
+                return;
+            }
+            // Check daily limit
+            this.resetDailyCounterIfNeeded();
+            if (this.dailyAIUpdateCount >= maxDailyUpdates) {
+                console.log(`🧠 AI updates reached daily limit (${maxDailyUpdates}), skipping...`);
+                vscode.window.showWarningMessage(`⚠️ AIA: Daily AI update limit reached (${maxDailyUpdates}). Manual updates still available.`);
+                return;
+            }
+            // Prompt before expensive operation if enabled
+            if (promptBeforeExpensive && aiUpdateStrategy !== 'manual') {
+                const choice = await vscode.window.showWarningMessage(`🧠 AIA wants to perform an expensive AI context update.\n\nThis uses API credits and may take 30-60 seconds.\n\nDaily usage: ${this.dailyAIUpdateCount}/${maxDailyUpdates}`, { modal: false }, 'Allow Once', 'Allow & Don\'t Ask Today', 'Cancel');
+                if (choice === 'Cancel' || !choice) {
+                    console.log('🧠 AI update cancelled by user');
+                    return;
+                }
+                if (choice === 'Allow & Don\'t Ask Today') {
+                    await config.update('promptBeforeExpensiveUpdates', false, vscode.ConfigurationTarget.Workspace);
+                }
+            }
+            if (this.aiUpdateTimer) {
+                clearTimeout(this.aiUpdateTimer);
+            }
+            this.aiUpdateTimer = setTimeout(async () => {
+                if (await this.shouldPerformAIUpdate(aiUpdateStrategy)) {
+                    await this.performAIContextUpdate();
+                }
+            }, aiDebounceDelay);
+        };
+        // Watch for file changes with smart detection
+        fileWatcher.onDidCreate((uri) => {
+            console.log(`📄 File created: ${uri.fsPath}`);
+            triggerSymbolUpdate(uri);
+            if (this.isSignificantChange(uri.fsPath)) {
+                triggerAIUpdate();
+            }
+        });
+        fileWatcher.onDidChange(async (uri) => {
+            const hasSignificantChange = await this.hasSignificantContentChange(uri.fsPath);
+            if (hasSignificantChange) {
+                console.log(`📝 Significant change detected: ${uri.fsPath}`);
+                triggerSymbolUpdate(uri);
+                if (this.isSignificantChange(uri.fsPath)) {
+                    triggerAIUpdate();
+                }
+            }
+            else {
+                console.log(`📝 Trivial change ignored: ${uri.fsPath}`);
+            }
+        });
+        fileWatcher.onDidDelete((uri) => {
+            console.log(`🗑️ File deleted: ${uri.fsPath}`);
+            this.fileChecksums.delete(uri.fsPath);
+            triggerSymbolUpdate(uri);
+            if (this.isSignificantChange(uri.fsPath)) {
+                triggerAIUpdate();
+            }
+        });
         // Watch for configuration changes
         const configWatcher = vscode.workspace.onDidChangeConfiguration((e) => {
             if (e.affectsConfiguration('aia.symbolIndex')) {
-                console.log('🔧 AIA configuration changed, triggering update...');
-                triggerUpdate();
+                console.log('🔧 AIA configuration changed, triggering updates...');
+                triggerSymbolUpdate(vscode.Uri.file('config'));
+                // Only trigger AI update if it's a significant configuration change
+                const newConfig = vscode.workspace.getConfiguration('aia.symbolIndex');
+                const newEnableAI = newConfig.get('enableAIUpdates', false);
+                if (newEnableAI) {
+                    triggerAIUpdate();
+                }
             }
         });
-        // Periodic updates
+        // Periodic updates - but only for AI context if enabled
         const periodicUpdate = setInterval(() => {
             const now = Date.now();
             if (now - this.lastUpdateTime > updateInterval) {
                 console.log('⏰ Periodic update triggered');
-                this.performUpdate();
+                this.performLocalSymbolUpdate(); // Always update symbols
+                if (enableAIUpdates && aiUpdateStrategy === 'time-based') {
+                    this.performAIContextUpdate(); // Only update AI context if enabled
+                }
             }
         }, updateInterval);
         // Register for cleanup
         context.subscriptions.push(fileWatcher, configWatcher, {
-            dispose: () => clearInterval(periodicUpdate),
+            dispose: () => {
+                clearInterval(periodicUpdate);
+                if (this.symbolUpdateTimer)
+                    clearTimeout(this.symbolUpdateTimer);
+                if (this.aiUpdateTimer)
+                    clearTimeout(this.aiUpdateTimer);
+            },
         });
         console.log('✅ Auto-update service started successfully');
     }
@@ -458,6 +560,171 @@ Please rebuild the symbol index for enhanced context:
 ---
 *This file will auto-update when the symbol index is rebuilt.*`;
         }
+    }
+    /**
+     * Perform fast local symbol index update (no AI required)
+     */
+    async performLocalSymbolUpdate() {
+        if (this.isUpdating) {
+            this.pendingUpdate = true;
+            return;
+        }
+        this.isUpdating = true;
+        const startTime = Date.now();
+        try {
+            console.log('⚡ Fast symbol index update (local only)...');
+            // Only rebuild local symbol index - no AI operations
+            await this.rebuildSymbolIndexUsingAIA();
+            const duration = Date.now() - startTime;
+            this.lastUpdateTime = Date.now();
+            console.log(`✅ Local symbol update completed in ${duration}ms`);
+            // Clear pending changes after successful update
+            this.pendingChanges.clear();
+        }
+        catch (error) {
+            console.error('❌ Local symbol update failed:', error);
+        }
+        finally {
+            this.isUpdating = false;
+            if (this.pendingUpdate) {
+                this.pendingUpdate = false;
+                setTimeout(() => this.performLocalSymbolUpdate(), 1000);
+            }
+        }
+    }
+    /**
+     * Perform expensive AI context update (only when really needed)
+     */
+    async performAIContextUpdate() {
+        const startTime = Date.now();
+        try {
+            console.log('🧠 AI context update (expensive operation)...');
+            // Increment daily counter
+            this.resetDailyCounterIfNeeded();
+            this.dailyAIUpdateCount++;
+            const config = vscode.workspace.getConfiguration('aia.symbolIndex');
+            const maxDaily = config.get('maxDailyAIUpdates', 10);
+            // Only update AI-powered context generation
+            await this.updateCopilotInstructionsUsingAIA();
+            const duration = Date.now() - startTime;
+            this.lastAIUpdateTime = Date.now();
+            console.log(`✅ AI context update completed in ${duration}ms`);
+            console.log(`📊 Daily AI updates: ${this.dailyAIUpdateCount}/${maxDaily}`);
+            // Show notification for AI updates since they're expensive
+            const showNotifications = config.get('showAIUpdateNotifications', true);
+            if (showNotifications) {
+                vscode.window.showInformationMessage(`🧠 AIA: AI context updated (${duration}ms) • ${this.dailyAIUpdateCount}/${maxDaily} daily`, { modal: false });
+            }
+            // Clear pending changes after successful AI update
+            this.pendingChanges.clear();
+            // Warn when approaching daily limit
+            if (this.dailyAIUpdateCount >= maxDaily * 0.8) {
+                vscode.window.showWarningMessage(`⚠️ AIA: Approaching daily AI update limit (${this.dailyAIUpdateCount}/${maxDaily}). Consider switching to manual strategy.`);
+            }
+        }
+        catch (error) {
+            console.error('❌ AI context update failed:', error);
+            vscode.window.showWarningMessage(`AIA AI context update failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+    /**
+     * Smart detection for whether AI update is needed
+     */
+    async shouldPerformAIUpdate(strategy) {
+        const config = vscode.workspace.getConfiguration('aia.symbolIndex');
+        const minAIUpdateInterval = config.get('minAIUpdateInterval', 600000); // 10 minutes minimum (more conservative)
+        // Check minimum time interval
+        const timeSinceLastAI = Date.now() - this.lastAIUpdateTime;
+        if (timeSinceLastAI < minAIUpdateInterval) {
+            console.log(`🧠 AI update skipped - too recent (${Math.round(timeSinceLastAI / 1000)}s ago, minimum ${Math.round(minAIUpdateInterval / 1000)}s)`);
+            return false;
+        }
+        // Check daily limit
+        this.resetDailyCounterIfNeeded();
+        const maxDaily = config.get('maxDailyAIUpdates', 10);
+        if (this.dailyAIUpdateCount >= maxDaily) {
+            console.log(`🧠 AI update skipped - daily limit reached (${maxDaily})`);
+            return false;
+        }
+        switch (strategy) {
+            case 'manual':
+                return false; // Only manual triggers
+            case 'time-based':
+                return true; // Update based on time intervals
+            case 'smart':
+                return await this.hasSignificantArchitecturalChanges();
+            default:
+                return false;
+        }
+    }
+    /**
+     * Check if file change is significant enough to warrant AI update
+     */
+    isSignificantChange(filePath) {
+        // Only TypeScript/JavaScript files with certain patterns
+        if (!filePath.match(/\.(ts|js|tsx|jsx)$/)) {
+            return false;
+        }
+        // Ignore test files, build files, and other non-significant files
+        if (filePath.match(/(\.test\.|\.spec\.|\/tests?\/|\/dist\/|\/build\/|\/node_modules\/|\/coverage\/)/)) {
+            return false;
+        }
+        // Focus on files that typically contain architectural changes
+        // More restrictive pattern - fewer false positives
+        if (filePath.match(/(service|provider|factory|manager|engine|command|interface|type|config|index)\.ts$/i)) {
+            return true;
+        }
+        return false;
+    }
+    /**
+     * Check if file content has changed significantly (not just formatting)
+     */
+    async hasSignificantContentChange(filePath) {
+        try {
+            const content = await fs.readFile(filePath, 'utf-8');
+            // Create a normalized hash (ignore whitespace changes)
+            const normalizedContent = content
+                .replace(/\s+/g, ' ') // Normalize whitespace
+                .replace(/\/\*[\s\S]*?\*\//g, '') // Remove block comments
+                .replace(/\/\/.*$/gm, '') // Remove line comments
+                .trim();
+            const currentHash = crypto
+                .createHash('md5')
+                .update(normalizedContent)
+                .digest('hex');
+            const previousHash = this.fileChecksums.get(filePath);
+            this.fileChecksums.set(filePath, currentHash);
+            if (!previousHash) {
+                return true; // New file
+            }
+            return currentHash !== previousHash;
+        }
+        catch (error) {
+            console.warn(`Could not check content change for ${filePath}:`, error);
+            return true; // Assume significant if we can't check
+        }
+    }
+    /**
+     * Check if there have been significant architectural changes since last AI update
+     */
+    async hasSignificantArchitecturalChanges() {
+        const config = vscode.workspace.getConfiguration('aia.symbolIndex');
+        const threshold = config.get('smartUpdateThreshold', 5); // More conservative default
+        // Count significant files changed since last AI update
+        let significantChanges = 0;
+        for (const filePath of this.pendingChanges) {
+            if (this.isSignificantChange(filePath)) {
+                significantChanges++;
+            }
+        }
+        const hasChanges = significantChanges >= threshold;
+        if (hasChanges) {
+            console.log(`🧠 ${significantChanges} significant architectural changes detected (threshold: ${threshold})`);
+        }
+        else if (significantChanges > 0) {
+            console.log(`🧠 Only ${significantChanges} significant changes (threshold: ${threshold}), skipping AI update`);
+        }
+        return hasChanges;
     }
     /**
      * Manually trigger an update

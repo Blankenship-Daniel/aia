@@ -33,6 +33,8 @@ import { IAgentPresenter } from '../interfaces/IAgentPresenter';
 import { IResilienceService } from '../interfaces/IResilienceService';
 import { IContextService } from '../interfaces/IContextService';
 import { IMemoryService } from '../interfaces/IMemoryService';
+import { ICodeHighlightService } from '../interfaces/ICodeHighlightService';
+import { EnhancedUIService } from '../services/EnhancedUIService';
 import {
   CommandResult,
   CommandOptions,
@@ -74,14 +76,18 @@ export class AgentCommand implements ICommand {
 
   // Timeout configuration
   private readonly EXECUTION_TIMEOUT_MS = 300000; // 5 minutes for full execution
+  private uiService: EnhancedUIService;
 
   constructor(
     private executionEngine: IAgentExecutionEngine,
     private presenter: IAgentPresenter,
     private resilienceService: IResilienceService,
     private contextService: IContextService,
-    private memoryService: IMemoryService
-  ) {}
+    private memoryService: IMemoryService,
+    private codeHighlightService: ICodeHighlightService
+  ) {
+    this.uiService = new EnhancedUIService(codeHighlightService);
+  }
 
   public async execute(
     context: Record<string, unknown>,
@@ -91,11 +97,15 @@ export class AgentCommand implements ICommand {
     let goal = args.join(' ').trim();
 
     if (!goal) {
-      this.presenter.displayEnhancedErrorFromCommandExecution(
-        new Error('Please provide a goal to achieve'),
-        'agent',
-        args,
-        { phase: 'validation', context: 'goal-required' }
+      console.log(
+        this.uiService.createAlertBox(
+          'Please provide a goal to achieve.\n\n' +
+            'Examples:\n' +
+            '• aia agent "create a React component for user profiles"\n' +
+            '• aia agent "analyze code structure and suggest improvements"\n' +
+            '• aia agent "add TypeScript types to the project"',
+          'error'
+        )
       );
       return {
         success: false,
@@ -134,19 +144,66 @@ export class AgentCommand implements ICommand {
         );
         return { success: false, error: errorMessage };
       }
-      // Prompt for next input or exit
+      // Prompt for next input or exit with enhanced UI
+      console.log(
+        this.uiService.createStyledPrompt('What would you like to do next?')
+      );
+
       const { nextInput } = await inquirer.prompt([
         {
           type: 'input',
           name: 'nextInput',
-          message: "Continue conversation (type 'exit' to quit):",
+          message: chalk.cyan("Enter your next goal or type 'exit' to quit:"),
+          validate: (input: string) => {
+            if (!input.trim()) {
+              return 'Please provide a goal or type "exit" to quit';
+            }
+            return true;
+          },
         },
       ]);
       if (nextInput.trim().toLowerCase() === 'exit') {
-        this.presenter.displaySuccess('Exiting conversation');
+        console.log(
+          this.uiService.createAlertBox(
+            'Thank you for using AIA Agent! Session ended successfully.',
+            'info'
+          )
+        );
         break;
       }
-      goal = nextInput.trim();
+
+      // Validate new goal input
+      const newGoal = nextInput.trim();
+      if (!newGoal || newGoal.length === 0) {
+        console.log(
+          this.uiService.createAlertBox(
+            'Please provide a valid goal or type "exit" to quit',
+            'warning'
+          )
+        );
+        continue;
+      }
+
+      // Check for generic continuation phrases and provide better guidance
+      if (
+        newGoal.toLowerCase() === 'continue' ||
+        newGoal.toLowerCase() === 'go on'
+      ) {
+        console.log(
+          this.uiService.createAlertBox(
+            'Please provide a specific new goal instead of generic phrases like "continue".\n\n' +
+              'Examples:\n' +
+              '• "analyze the code structure"\n' +
+              '• "add documentation to functions"\n' +
+              '• "create unit tests for the main components"\n' +
+              '• "refactor the database layer"',
+            'warning'
+          )
+        );
+        continue;
+      }
+
+      goal = newGoal;
     }
     return lastResult;
   }
@@ -265,102 +322,154 @@ The agent will:
   ): Promise<CommandResult> {
     const verbose = Boolean(options.verbose);
 
-    // 1. Gather context and history
-    const { contextInfo, previousExecutions } =
-      await this.gatherExecutionContext(goal);
+    try {
+      // 1. Gather context and history
+      const { contextInfo, previousExecutions } =
+        await this.gatherExecutionContext(goal);
 
-    // 2. Plan
-    this.presenter.showPlanningPhase(goal, verbose);
-    const planResult = (await this.executeWithEnhancedPlanGeneration(
-      () =>
-        this.executionEngine.planExecution(
-          goal,
-          contextInfo,
-          previousExecutions
-        ),
-      'plan-generation'
-    )) as { success: boolean; plan?: ExecutionStep[]; error?: string };
+      // 2. Plan
+      this.presenter.showPlanningPhase(goal, verbose);
 
-    if (!planResult.success || !planResult.plan) {
-      this.presenter.displayEnhancedErrorFromCommandExecution(
-        new Error(planResult.error || 'Failed to generate execution plan'),
-        'agent',
-        [goal],
-        { phase: 'planning', context: 'plan-generation' }
+      // Show AI classification loading
+      const classificationSpinner = this.uiService.createLoadingSpinner(
+        'Analyzing task with AI...'
       );
+      classificationSpinner.start();
+
+      const planResult = (await this.executeWithEnhancedPlanGeneration(
+        () =>
+          this.executionEngine.planExecution(
+            goal,
+            contextInfo,
+            previousExecutions
+          ),
+        'plan-generation'
+      )) as { success: boolean; plan?: ExecutionStep[]; error?: string };
+
+      if (!planResult.success || !planResult.plan) {
+        classificationSpinner.fail('AI classification failed');
+        this.presenter.displayEnhancedErrorFromCommandExecution(
+          new Error(planResult.error || 'Failed to generate execution plan'),
+          'agent',
+          [goal],
+          { phase: 'planning', context: 'plan-generation' }
+        );
+        return {
+          success: false,
+          error: planResult.error || 'Failed to generate execution plan',
+        };
+      }
+
+      classificationSpinner.succeed('Task analyzed and classified');
+
+      // Update progress
+      this.presenter.updatePlanningProgress('generation');
+
+      // Brief delay to show progress update
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // 3. Prepare execution object
+      const execution: AgenticExecution = {
+        id: `exec-${Date.now()}`,
+        goal,
+        plan: this.convertToAgenticSteps(planResult.plan),
+        results: [],
+        executionResults: [],
+        status: 'pending',
+        iterations: 0,
+        startTime: new Date().toISOString(),
+        learnings: [],
+        context: contextInfo,
+        timestamp: new Date().toISOString(),
+        confidence: 0,
+        success: false,
+      };
+
+      // 4. Show plan and confirm
+      // Final progress update
+      this.presenter.updatePlanningProgress('ready');
+
+      // Show the execution plan
+      this.presenter.displayExecutionPlan(planResult.plan, verbose);
+
+      const autoExecute = Boolean(
+        options.autoExecute || options['auto-execute'] || options.auto
+      );
+      const proceed = await this.confirmExecution(autoExecute);
+      if (!proceed) {
+        this.presenter.displayWarning('Execution cancelled by user');
+        return {
+          success: true,
+          output: 'Execution cancelled by user',
+        };
+      }
+
+      // 5. Execute plan
+      const executionOptions = {
+        autoExecute,
+        maxIterations: (options.maxIterations ||
+          options['max-iterations'] ||
+          5) as number,
+        noIteration: Boolean(options.noIteration || options['no-iteration']),
+        verbose,
+      };
+      const executionResult = await this.executeWithEnhancedResilience(
+        () => this.executePlanWithProgress(execution, executionOptions),
+        () => this.fallbackExecution(execution),
+        {
+          maxRetries: 2,
+          timeoutMs: this.EXECUTION_TIMEOUT_MS,
+          continueOnFailure: true,
+          gracefulDegradation: true,
+          allowFallbackExecution: true,
+        },
+        'plan-execution'
+      );
+
+      // 6. Update and store execution
+      execution.success = executionResult.success;
+      execution.status = executionResult.success ? 'completed' : 'failed';
+      execution.endTime = new Date().toISOString();
+      await this.storeExecutionHistory(execution);
+
+      // 7. Show summary
+      await this.handleExecutionResult(execution, executionResult, verbose);
+      const output = this.presenter.formatExecutionSummary(execution);
+      return {
+        success: execution.success || false,
+        data: execution,
+        output,
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Goal execution failed';
+
+      // Check for specific AI classification errors
+      if (errorMessage.includes('AI classification confidence too low')) {
+        this.presenter.displayError(
+          'AI classification failed - the goal may be too ambiguous. Try being more specific.',
+          { goal, error: errorMessage }
+        );
+        this.presenter.displayWarning(
+          'Try rephrasing your goal to be more specific about what you want to achieve.'
+        );
+        this.presenter.displayWarning(
+          'Examples: "analyze code structure", "add JSDoc to functions", "create unit tests"'
+        );
+      } else if (errorMessage.includes('Cannot read properties of undefined')) {
+        this.presenter.displayError(
+          'Internal processing error occurred. Please try a different goal.',
+          { goal, error: errorMessage }
+        );
+      } else {
+        this.presenter.displayError(errorMessage, { goal });
+      }
+
       return {
         success: false,
-        error: planResult.error || 'Failed to generate execution plan',
+        error: errorMessage,
       };
     }
-
-    // 3. Prepare execution object
-    const execution: AgenticExecution = {
-      id: `exec-${Date.now()}`,
-      goal,
-      plan: this.convertToAgenticSteps(planResult.plan),
-      results: [],
-      executionResults: [],
-      status: 'pending',
-      iterations: 0,
-      startTime: new Date().toISOString(),
-      learnings: [],
-      context: contextInfo,
-      timestamp: new Date().toISOString(),
-      confidence: 0,
-      success: false,
-    };
-
-    // 4. Show plan and confirm
-    this.presenter.displayExecutionPlan(planResult.plan, verbose);
-    const autoExecute = Boolean(
-      options.autoExecute || options['auto-execute'] || options.auto
-    );
-    const proceed = await this.confirmExecution(autoExecute);
-    if (!proceed) {
-      this.presenter.displayWarning('Execution cancelled by user');
-      return {
-        success: true,
-        output: 'Execution cancelled by user',
-      };
-    }
-
-    // 5. Execute plan
-    const executionOptions = {
-      autoExecute,
-      maxIterations: (options.maxIterations ||
-        options['max-iterations'] ||
-        5) as number,
-      noIteration: Boolean(options.noIteration || options['no-iteration']),
-      verbose,
-    };
-    const executionResult = await this.executeWithEnhancedResilience(
-      () => this.executePlanWithProgress(execution, executionOptions),
-      () => this.fallbackExecution(execution),
-      {
-        maxRetries: 2,
-        timeoutMs: this.EXECUTION_TIMEOUT_MS,
-        continueOnFailure: true,
-        gracefulDegradation: true,
-        allowFallbackExecution: true,
-      },
-      'plan-execution'
-    );
-
-    // 6. Update and store execution
-    execution.success = executionResult.success;
-    execution.status = executionResult.success ? 'completed' : 'failed';
-    execution.endTime = new Date().toISOString();
-    await this.storeExecutionHistory(execution);
-
-    // 7. Show summary
-    await this.handleExecutionResult(execution, executionResult, verbose);
-    const output = this.presenter.formatExecutionSummary(execution);
-    return {
-      success: execution.success || false,
-      data: execution,
-      output,
-    };
   }
 
   // --- Extracted helpers ---

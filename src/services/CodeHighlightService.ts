@@ -307,4 +307,29 @@ export class CodeHighlightService implements ICodeHighlightService {
       return code;
     }
   }
+
+  /**
+   * Check if content looks like code based on common patterns
+   * @param content - The content to analyze
+   * @returns True if content appears to contain code
+   */
+  looksLikeCode(content: string): boolean {
+    if (!content || typeof content !== 'string') {
+      return false;
+    }
+
+    // Simple heuristics for code detection
+    const codeIndicators = [
+      /```[\s\S]*```/, // Markdown code blocks
+      /^[\s]*[\w\$]+\s*[:=]/m, // Variable assignments
+      /[\{\}\[\]]/, // Brackets/braces
+      /function\s+\w+/, // Function declarations
+      /class\s+\w+/, // Class declarations
+      /import\s+.*from/, // Import statements
+      /export\s+/, // Export statements
+      /<\w+.*>/, // HTML-like tags
+    ];
+
+    return codeIndicators.some((pattern) => pattern.test(content));
+  }
 }

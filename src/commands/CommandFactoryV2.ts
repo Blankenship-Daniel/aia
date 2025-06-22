@@ -146,7 +146,8 @@ export class CommandFactoryV2 {
           this.agentPresenter,
           this.resilienceService,
           this.contextService,
-          this.memoryService
+          this.memoryService,
+          this.codeHighlightService
         )
     );
 

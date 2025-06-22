@@ -39,6 +39,13 @@ export interface IAgentPresenter {
   showPlanningPhase(goal: string, verbose?: boolean): void;
 
   /**
+   * Update planning progress indicators
+   */
+  updatePlanningProgress(
+    phase: 'classification' | 'generation' | 'ready'
+  ): void;
+
+  /**
    * Display the generated execution plan
    */
   displayExecutionPlan(plan: ExecutionStep[], verbose?: boolean): void;

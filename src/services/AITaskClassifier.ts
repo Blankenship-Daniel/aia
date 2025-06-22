@@ -52,7 +52,7 @@ export class AITaskClassifier {
       throw new Error('AI classification failed to return a result');
     }
 
-    if (aiResult.confidence < 0.7) {
+    if (aiResult.confidence < 0.6) {
       throw new Error(
         `AI classification confidence too low (${aiResult.confidence.toFixed(
           2
@@ -149,7 +149,10 @@ IMPORTANT GUIDELINES:
 - Markdown generation/summarization tasks are ANALYSIS, not DOCUMENTATION
 - JSDoc/comment additions are DOCUMENTATION
 - Be confident in your classification (aim for 0.8+ confidence)
-- Consider the user's intent, not just keywords`;
+- Consider the user's intent, not just keywords
+- If uncertain between two types, choose the primary action being performed
+- Tasks involving 'cleanup', 'structure', 'organize' are typically ANALYSIS
+- Code cleanup and structuring are REFACTORING tasks`;
   }
 
   /**

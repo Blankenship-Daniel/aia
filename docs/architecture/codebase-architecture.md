@@ -5,248 +5,227 @@ I'll help create a comprehensive architecture documentation file. Here's the con
 
 ## Executive Summary
 
-The AIA CLI is a sophisticated TypeScript/Node.js command-line application designed to provide AI-powered development assistance. The system implements a service-oriented architecture with strong emphasis on dependency injection, modularity, and extensibility.
+AIA CLI is a TypeScript/Node.js-based command-line interface application designed for AI-powered development assistance. The system implements a service-oriented architecture with dependency injection, emphasizing modularity, extensibility, and maintainability.
 
-Key architectural characteristics:
-- Service-oriented design with clear component boundaries
-- Command pattern implementation for operation handling
-- Factory pattern usage for object creation
-- Robust memory management and context awareness
-- Plugin-based extensibility
-- Performance-optimized request handling
+Key architectural decisions:
+- Service-Oriented Architecture for modularity and separation of concerns
+- Command Pattern for extensible CLI operations
+- Interface-driven design for loose coupling
+- Plugin architecture for extensibility
+- Performance optimization through intelligent caching and lazy loading
 
 ## System Architecture
 
 ### Overall Design
 The system is structured in layers:
-
-1. **Presentation Layer**
-   - CLI interface
-   - Command parsing
-   - User interaction
-
-2. **Application Layer**
-   - Command processing
-   - Workflow management
-   - Service orchestration
-
-3. **Domain Layer**
-   - Core business logic
-   - AI interactions
-   - Memory management
-
-4. **Infrastructure Layer**
-   - Configuration management
-   - Plugin system
-   - External integrations
+1. CLI Interface Layer (Command handling)
+2. Service Layer (Core business logic)
+3. Provider Layer (External integrations)
+4. Infrastructure Layer (System operations)
 
 ### Component Organization
-
 ```mermaid
 graph TD
-    CLI[CLI Interface] --> CommandFactory[Command Factory]
-    CommandFactory --> CommandService[Command Service]
-    CommandService --> AIProvider[AI Provider]
-    CommandService --> MemoryManager[Memory Manager]
-    CommandService --> ConfigManager[Configuration Manager]
-    AIProvider --> ResponseEngine[Response Adaptation Engine]
-    MemoryManager --> PluginSystem[Plugin System]
+    CLI[CLI Interface] --> CommandService
+    CommandService --> AIService
+    CommandService --> MemoryService
+    CommandService --> ConfigService
+    AIService --> Providers[AI Providers]
+    MemoryService --> Storage
+    ConfigService --> FileSystem
 ```
+
+### Service Boundaries
+- Command Processing: Command parsing, validation, and execution
+- AI Operations: Model interactions and response processing
+- Memory Management: State persistence and retrieval
+- Configuration: System settings and environment management
+- Context Management: Development environment awareness
+- Code Analysis: Static analysis and indexing
 
 ## Design Patterns
 
 ### Implemented Patterns
 
-1. **Service-Oriented Architecture (SOA)**
-   - Loose coupling between components
-   - Clear service boundaries
-   - Interface-based communication
+1. Service-Oriented Architecture (SOA)
+   - Purpose: Modular service composition
+   - Implementation: `ServiceName`, `NewService`, `ComplexService`
+   - Benefit: Maintainable, testable components
 
-2. **Command Pattern**
-   ```typescript
-   interface ICommand {
-     execute(): Promise<void>;
-     validate(): boolean;
-   }
-   ```
+2. Command Pattern
+   - Purpose: Encapsulate CLI operations
+   - Implementation: Command handlers and executors
+   - Benefit: Extensible command system
 
-3. **Factory Pattern**
-   ```typescript
-   class CommandFactoryV2 {
-     createCommand(type: string): ICommand;
-   }
-   ```
+3. Factory Pattern
+   - Purpose: Dynamic service creation
+   - Implementation: `NewAIProvider`, service factories
+   - Benefit: Flexible provider instantiation
 
-4. **Dependency Injection**
-   ```typescript
-   class AIService {
-     constructor(
-       private provider: IAIProvider,
-       private memory: IMemoryManager
-     ) {}
-   }
-   ```
+4. Dependency Injection
+   - Purpose: Loose coupling
+   - Implementation: Constructor injection
+   - Benefit: Testability and modularity
 
 ## Component Architecture
 
 ### Core Services
 
-1. **ConfigurationManager**
-   - Configuration loading
-   - Environment management
-   - Settings validation
+#### AutoUpdateService
+- Responsibility: System updates and version management
+- Dependencies: ConfigurationService
+- Interface: `IAutoUpdateService`
 
-2. **MemoryManager**
-   - Conversation history
-   - Context persistence
-   - State management
+#### PluginManager
+- Responsibility: Plugin lifecycle management
+- Dependencies: ConfigurationService
+- Interface: `IPluginManager`
 
-3. **PluginManager**
-   - Plugin discovery
-   - Extension loading
-   - Feature management
+#### ResponseAdaptationEngine
+- Responsibility: AI response processing
+- Dependencies: AIService
+- Interface: `IResponseAdapter`
 
-4. **ResponseAdaptationEngine**
-   - Response formatting
-   - Output customization
-   - Template processing
+#### WorkflowManager
+- Responsibility: Task orchestration
+- Dependencies: Multiple services
+- Interface: `IWorkflowManager`
 
-### Service Responsibilities
-
-| Service | Primary Responsibility | Dependencies |
-|---------|----------------------|--------------|
-| AIProviderFactory | AI provider instantiation | ConfigurationManager |
-| CommandValidationService | Command validation | ContextInfo |
-| WorkflowManager | Process orchestration | MemoryManager, AIService |
+### Service Interactions
+```mermaid
+sequenceDiagram
+    participant CLI
+    participant CommandService
+    participant AIService
+    participant MemoryService
+    
+    CLI->>CommandService: Execute Command
+    CommandService->>AIService: Process Query
+    AIService->>MemoryService: Store Response
+    MemoryService-->>CommandService: Confirm Storage
+    CommandService-->>CLI: Return Result
+```
 
 ## Data Architecture
 
 ### Data Models
-
-```typescript
-interface ContextInfo {
-  workingDirectory: string;
-  projectType: string;
-  gitStatus: string;
-}
-
-interface MemoryEntry {
-  timestamp: number;
-  type: string;
-  content: any;
-}
-```
+- Command Context
+- AI Responses
+- System Configuration
+- Memory Records
+- Code Index
 
 ### Storage Patterns
-- In-memory storage for active sessions
-- File-based persistence for configuration
-- Cached results for performance optimization
+1. In-Memory Cache
+   - Purpose: Performance optimization
+   - Implementation: LRU cache
+   
+2. File System Storage
+   - Purpose: Persistence
+   - Implementation: JSON/YAML files
 
 ## Security Architecture
 
 ### Authentication
-- API key management for AI services
-- Secure configuration storage
-- Environment-based security controls
+- API key management for AI providers
+- Secure credential storage
+- Environment-based security
 
 ### Data Protection
 - Local storage encryption
-- Sensitive data masking
 - Secure memory management
+- Sensitive data handling
 
 ## Performance Architecture
 
 ### Optimization Strategies
-1. **Request Optimization**
+1. Lazy Loading
+   - Dynamic service initialization
+   - On-demand resource loading
+
+2. Caching
    - Response caching
-   - Batch processing
-   - Lazy loading
+   - Index caching
+   - Configuration caching
 
-2. **Memory Management**
-   - Efficient data structures
-   - Resource pooling
-   - Garbage collection optimization
-
-### Monitoring
-- Performance metrics collection
-- Response time tracking
-- Resource usage monitoring
+3. Parallel Processing
+   - Concurrent command execution
+   - Async service operations
 
 ## Integration Architecture
 
 ### External Integrations
-1. **AI Providers**
-   - OpenAI
-   - Azure AI
-   - Custom providers
+1. AI Providers
+   - Interface: `IAIProvider`
+   - Implementation: Provider adapters
+   - Protocol: REST/GraphQL
 
-2. **Development Tools**
+2. Development Tools
    - Git integration
    - IDE plugins
    - Build tools
 
 ### API Design
-```typescript
-interface IAIProvider {
-  query(prompt: string, context: ContextInfo): Promise<Response>;
-  stream(prompt: string, context: ContextInfo): AsyncIterator<Response>;
-}
-```
+- RESTful principles
+- Strong typing
+- Version management
+- Error handling
 
 ## Deployment Architecture
 
+### Package Structure
+```
+src/
+├── commands/
+├── services/
+├── providers/
+├── models/
+├── utils/
+└── types/
+```
+
 ### Distribution
-- NPM package
-- Docker container
-- Standalone executable
+- npm package
+- Binary distributions
+- Platform-specific builds
 
 ### Requirements
 - Node.js runtime
-- Configuration file
-- API credentials
+- TypeScript support
+- System dependencies
 
 ## Architecture Evolution
 
 ### Current Limitations
-1. Single-threaded execution model
-2. Limited concurrent processing
-3. Memory constraints for large datasets
+1. Single-thread execution
+2. Limited concurrent operations
+3. Local-only storage
 
 ### Planned Improvements
-1. Worker thread implementation
-2. Distributed processing support
-3. Enhanced caching mechanisms
-4. Improved plugin architecture
+1. Multi-threading support
+2. Distributed operation capability
+3. Cloud integration
+4. Enhanced plugin system
 
 ### Future Vision
 - Microservices architecture
 - Cloud-native deployment
-- Real-time collaboration
 - Extended AI capabilities
+- Real-time collaboration
 
-## Best Practices
+## References
 
-### Code Organization
-- Feature-based folder structure
-- Clear separation of concerns
-- Interface-driven development
-- Comprehensive documentation
+### Key Files
+- `src/services/AutoUpdateService.ts`
+- `src/managers/PluginManager.ts`
+- `src/engines/ResponseAdaptationEngine.ts`
+- `src/managers/WorkflowManager.ts`
 
-### Development Guidelines
-1. Use dependency injection
-2. Follow SOLID principles
-3. Write unit tests
-4. Document public APIs
-5. Implement error handling
-
-## Conclusion
-
-The AIA CLI architecture provides a robust foundation for AI-powered development assistance. Its service-oriented design, coupled with strong patterns and practices, ensures maintainability, extensibility, and performance.
-
----
-
-Last Updated: [Current Date]
-Version: 1.0
+### Documentation
+- TypeScript documentation
+- API specifications
+- Service contracts
+- Integration guides
 ```
 
-This architecture documentation provides a comprehensive overview of the system's design, patterns, and components. It serves as a reference for developers and architects working on the project, ensuring consistent implementation and future scalability.
+This architecture documentation provides a comprehensive overview of the AIA CLI system, its components, and design decisions. It serves as a reference for developers and architects working on the project.

@@ -76,6 +76,31 @@ export class AgentPresenter implements IAgentPresenter {
     }
   }
 
+  updatePlanningProgress(
+    phase: 'classification' | 'generation' | 'ready'
+  ): void {
+    // Simple progress indication
+    const statusIcons: Record<string, string> = {
+      active: '⚡',
+      complete: '✓',
+      pending: '○',
+    };
+    const phaseNames: Record<string, string> = {
+      classification: 'Classifying',
+      generation: 'Planning',
+      ready: 'Ready',
+    };
+
+    let status = 'active';
+    if (phase === 'ready') {
+      status = 'complete';
+    }
+
+    console.log(
+      chalk.gray(`   ${statusIcons[status]} ${phaseNames[phase]}...`)
+    );
+  }
+
   displayExecutionPlan(plan: ExecutionStep[], verbose: boolean = false): void {
     // Clean, concise display
     console.log(chalk.green(`✓ Plan ready (${plan.length} steps)`));
@@ -1601,8 +1626,8 @@ Write your response as a natural, flowing explanation that directly addresses "$
   }
 
   /**
-   * Extracts the most relevant final result from the execution
-   * Generates an AI-powered summary of all findings instead of just showing command output
+   * Extract final result from execution - AI-first approach
+   * This is the core value proposition of AIA CLI - AI-powered responses
    */
   private async extractFinalResult(
     execution: AgenticExecution
@@ -1611,22 +1636,54 @@ Write your response as a natural, flowing explanation that directly addresses "$
       return null;
     }
 
-    // First priority: Try to generate an AI-powered summary of all findings
-    if (this.aiService && this.aiService.isConfigured()) {
-      const aiSummary = await this.generateAIFinalSummary(execution);
-      if (aiSummary) {
-        return aiSummary;
+    // PRIORITY 1: Always try AI-generated summary first - this is our core value proposition
+    if (this.aiService) {
+      try {
+        const aiSummary = await this.generateAIFinalSummary(execution);
+        if (aiSummary) {
+          return aiSummary;
+        }
+      } catch (error) {
+        // AI failed - we should inform the user that the experience is degraded
+        console.log(
+          chalk.yellow(
+            '⚠️  AI summary generation failed - showing raw results instead'
+          )
+        );
+        console.log(
+          chalk.gray(
+            `   Reason: ${
+              error instanceof Error ? error.message : 'Unknown error'
+            }`
+          )
+        );
+        console.log(
+          chalk.cyan(
+            '💡 Configure a working AI provider for intelligent summaries'
+          )
+        );
       }
+    } else {
+      // No AI service available - this significantly degrades the user experience
+      console.log(
+        chalk.red(
+          '❌ AI service unavailable - AIA CLI works best with AI providers configured'
+        )
+      );
+      console.log(
+        chalk.yellow(
+          '💡 Run: aia config profiles:create to set up OpenAI, Anthropic, or other AI providers'
+        )
+      );
     }
 
-    // Fallback: Look for existing AI responses in the output
+    // FALLBACK: Look for existing AI responses in the command output
     for (const result of execution.executionResults) {
       if (result.success && result.output) {
         const output = result.output.toString().trim();
 
         // Look for AI responses - these usually contain 🎯 ANSWER: or are longer explanatory text
         if (output.includes('🎯 ANSWER:')) {
-          // Extract everything after the ANSWER marker
           const answerMatch = output.match(/🎯 ANSWER:(.*?)(?=\n\n|\n$|$)/s);
           if (answerMatch) {
             return answerMatch[1].trim();
@@ -1637,16 +1694,7 @@ Write your response as a natural, flowing explanation that directly addresses "$
         if (
           result.step &&
           result.step.id === 'perform_analysis' &&
-          output.length > 50
-        ) {
-          // Return the full AI response without parsing
-          return output;
-        }
-
-        // Look for longer, explanatory responses that are likely from AI
-        if (
-          output.length > 100 &&
-          !output.includes('Validating') &&
+          output.length > 50 &&
           !this.looksLikeCommandOutput(output)
         ) {
           return output;
@@ -1654,26 +1702,19 @@ Write your response as a natural, flowing explanation that directly addresses "$
       }
     }
 
-    // Second priority: Look for longer, meaningful responses that appear to be AI-generated
-    // This catches cases where the AI response isn't in the analysis step
-    for (const result of execution.executionResults) {
-      if (result.success && result.output) {
-        const output = result.output.toString().trim();
+    // LAST RESORT: Raw command output (clearly indicate this is not ideal)
+    const lastSuccessfulResult = execution.executionResults
+      .filter((result) => result.success && result.output)
+      .pop();
 
-        // Skip validation steps and very short outputs
-        if (output.includes('Validating') || output.length < 20) {
-          continue;
-        }
-
-        // Look for outputs that seem like explanations or analyses (likely from AI)
-        if (this.looksLikeAIResponse(output)) {
-          return output;
-        }
-      }
+    if (lastSuccessfulResult) {
+      console.log(
+        chalk.gray('ℹ️  Showing raw command output (AI processing unavailable)')
+      );
+      return lastSuccessfulResult.output?.toString().trim() || null;
     }
 
-    // Fallback to custom parsing for simple command outputs
-    return this.extractSimpleCommandResult(execution);
+    return null;
   }
 
   /**
@@ -1939,12 +1980,13 @@ Write your response as a natural, flowing explanation that directly addresses "$
     }
 
     try {
-      // Check if output looks like code
-      const detectedLanguage = this.codeHighlight.detectLanguage(output);
+      // Check if output looks like code using centralized detection
+      const detectedLanguage = this.codeHighlight?.detectLanguage(output);
+      const looksLikeCode = this.codeHighlight?.looksLikeCode(output) || false;
 
-      if (detectedLanguage || this.looksLikeCode(output)) {
+      if (detectedLanguage || looksLikeCode) {
         // Format as code block with syntax highlighting
-        const highlightedCode = this.codeHighlight.highlightCode(
+        const highlightedCode = this.codeHighlight!.highlightCode(
           output,
           detectedLanguage
         );
@@ -2041,34 +2083,6 @@ Write your response as a natural, flowing explanation that directly addresses "$
         return match;
       }
     });
-  }
-
-  /**
-   * Check if text looks like code
-   * @param text - Text to analyze
-   * @returns True if text appears to be code
-   */
-  private looksLikeCode(text: string): boolean {
-    const codeIndicators = [
-      /function\s+\w+\s*\(/,
-      /class\s+\w+/,
-      /import\s+.*from/,
-      /const\s+\w+\s*=/,
-      /let\s+\w+\s*=/,
-      /var\s+\w+\s*=/,
-      /if\s*\([^)]+\)\s*\{/,
-      /for\s*\([^)]+\)\s*\{/,
-      /while\s*\([^)]+\)\s*\{/,
-      /def\s+\w+\s*\(/,
-      /public\s+class/,
-      /private\s+\w+/,
-      /#include\s*</,
-      /SELECT\s+.*FROM/i,
-      /INSERT\s+INTO/i,
-      /<\w+[^>]*>/,
-    ];
-
-    return codeIndicators.some((pattern) => pattern.test(text));
   }
 
   /**

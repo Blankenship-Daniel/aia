@@ -10,7 +10,7 @@ No symbol data available
 No relationship data available
 
 ## Performance Hints
-- Total Symbols: 1457
+- Total Symbols: 1559
 - Symbol lookup: O(1) via hash table
 - Pre-computed relationships available
 - Zero file scanning required

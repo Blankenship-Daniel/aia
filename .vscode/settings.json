@@ -33,5 +33,7 @@
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
-  }
+  },
+  "aia.symbolIndex.aiUpdateStrategy": "manual",
+  "aia.symbolIndex.enableAIUpdates": true
 }

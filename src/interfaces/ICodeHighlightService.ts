@@ -66,4 +66,11 @@ export interface ICodeHighlightService {
     language?: string,
     variant?: 'block' | 'inline' | 'error'
   ): string;
+
+  /**
+   * Check if content looks like code based on common patterns
+   * @param content - The content to analyze
+   * @returns True if content appears to contain code
+   */
+  looksLikeCode(content: string): boolean;
 }

@@ -12,13 +12,12 @@ import {
   FileSymbolEntry,
   IndexMetadata,
   PatternIndex,
-  FileSymbolAnalysis,
-  ContextInfo,
-  DependencyInfo,
   SymbolType,
+  ImportInfo,
 } from '../types';
 import { CodeIndexService } from './CodeIndexService';
 import SemanticCodeAnalyzer from '../SemanticCodeAnalyzer';
+import { TypeScriptSymbolAnalyzer } from '../analyzers/TypeScriptSymbolAnalyzer';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as crypto from 'crypto';
@@ -41,6 +40,7 @@ export class SymbolIndexService implements ISymbolIndex {
   private aiService?: IAIService;
   private codeIndexService?: CodeIndexService;
   private semanticAnalyzer?: SemanticCodeAnalyzer;
+  private tsAnalyzer: TypeScriptSymbolAnalyzer;
   private isInitialized: boolean = false;
 
   constructor(
@@ -53,6 +53,7 @@ export class SymbolIndexService implements ISymbolIndex {
     this.aiService = aiService;
     this.codeIndexService = codeIndexService;
     this.semanticAnalyzer = semanticAnalyzer;
+    this.tsAnalyzer = new TypeScriptSymbolAnalyzer();
     this.lookupTable = this.createEmptyLookupTable();
   }
 
@@ -65,6 +66,7 @@ export class SymbolIndexService implements ISymbolIndex {
       excludePatterns?: string[];
       includePatterns?: string[];
       useCache?: boolean;
+      force?: boolean;
     }
   ): Promise<SymbolLookupTable> {
     const startTime = Date.now();
@@ -86,8 +88,15 @@ export class SymbolIndexService implements ISymbolIndex {
     this.lookupTable.metadata.rootPath = rootDir;
     this.lookupTable.metadata.excludePatterns = options?.excludePatterns || [
       'node_modules/**',
+      'dist/**',
+      'coverage/**',
+      '.vscode/**',
+      '.git/**',
       '**/*.test.ts',
       '**/*.spec.ts',
+      '**/*.log',
+      '.DS_Store',
+      '.env',
     ];
     this.lookupTable.metadata.includePatterns = options?.includePatterns || [
       '**/*.ts',
@@ -95,15 +104,23 @@ export class SymbolIndexService implements ISymbolIndex {
     ];
 
     try {
-      // Phase 2 Enhancement: Use existing codebase index if available
-      await this.buildFromExistingIndex(rootDir);
-
-      // If no existing index or it's incomplete, fall back to file analysis
-      if (Object.keys(this.lookupTable.symbols).length === 0) {
+      // If force option is used, skip existing index and use direct TypeScript analysis
+      if (options?.force) {
         console.log(
-          '📁 No existing codebase index found, analyzing files directly...'
+          '🔄 Force rebuild enabled, analyzing files directly with TypeScript AST...'
         );
         await this.buildFromFileAnalysis(rootDir);
+      } else {
+        // Phase 2 Enhancement: Use existing codebase index if available
+        await this.buildFromExistingIndex(rootDir);
+
+        // If no existing index or it's incomplete, fall back to file analysis
+        if (Object.keys(this.lookupTable.symbols).length === 0) {
+          console.log(
+            '📁 No existing codebase index found, analyzing files directly...'
+          );
+          await this.buildFromFileAnalysis(rootDir);
+        }
       }
 
       // AI Enhancement: Use semantic analysis for enhanced relationships
@@ -373,19 +390,56 @@ export class SymbolIndexService implements ISymbolIndex {
 
       for (const entry of entries) {
         const fullPath = path.join(dir, entry.name);
+        const relativePath = path.relative(rootDir, fullPath);
 
         if (entry.isDirectory()) {
-          // Skip excluded directories
-          if (
-            !metadata.excludePatterns.some((pattern) =>
-              fullPath.includes(pattern.replace('/**', ''))
-            )
-          ) {
+          // Skip excluded directories using more robust pattern matching
+          const shouldSkip = metadata.excludePatterns.some((pattern) => {
+            // Handle different pattern formats
+            if (pattern.endsWith('/**')) {
+              // Match directory patterns like "node_modules/**"
+              const dirPattern = pattern.replace('/**', '');
+              return (
+                relativePath.includes(dirPattern) || entry.name === dirPattern
+              );
+            } else if (pattern.includes('/')) {
+              // Handle path-based patterns
+              return relativePath.includes(pattern);
+            } else {
+              // Handle simple directory name patterns
+              return entry.name === pattern || relativePath.includes(pattern);
+            }
+          });
+
+          if (!shouldSkip) {
             await walkDir(fullPath);
           }
         } else if (entry.isFile()) {
-          // Include TypeScript and JavaScript files
-          if (fullPath.endsWith('.ts') || fullPath.endsWith('.js')) {
+          // Check if file should be excluded
+          const shouldSkipFile = metadata.excludePatterns.some((pattern) => {
+            if (pattern.startsWith('**/') && pattern.includes('.')) {
+              // Handle file extension patterns like "**/*.test.ts" or "**/*.log"
+              const extension = pattern.replace('**/', '');
+              return (
+                relativePath.endsWith(extension) || fullPath.endsWith(extension)
+              );
+            } else if (pattern.includes('.') && !pattern.includes('/')) {
+              // Handle direct file patterns like ".DS_Store", ".env"
+              return entry.name === pattern || relativePath.endsWith(pattern);
+            } else if (pattern.includes('.')) {
+              // Handle specific file patterns with paths
+              return (
+                relativePath.includes(pattern) || fullPath.includes(pattern)
+              );
+            }
+            return false;
+          });
+
+          // Include TypeScript and JavaScript files that aren't excluded
+          if (
+            !shouldSkipFile &&
+            (fullPath.endsWith('.ts') || fullPath.endsWith('.js'))
+          ) {
             files.push(fullPath);
           }
         }
@@ -396,33 +450,9 @@ export class SymbolIndexService implements ISymbolIndex {
     return files;
   }
 
-  private async analyzeFile(filepath: string): Promise<void> {
-    // Placeholder for file analysis
-    // In Phase 2, this will use TypeScript AST analysis
-    const stats = await fs.stat(filepath);
-    const content = await fs.readFile(filepath, 'utf-8');
-    const hash = crypto.createHash('md5').update(content).digest('hex');
-
-    // Basic file symbol info
-    const fileInfo: FileSymbolInfo = {
-      filepath,
-      exports: [],
-      imports: [],
-      defines: [],
-      references: [],
-      lastModified: stats.mtime.toISOString(),
-      hash,
-    };
-
-    this.lookupTable.fileSymbols[filepath] = {
-      info: fileInfo,
-      dependencies: [],
-      dependents: [],
-    };
-  }
-
   /**
-   * Phase 2: Build symbol index from existing codebase index
+   * Phase 2: Build symbol index from existing codebase index (legacy fallback)
+   * Note: This is a fallback method when force=false and no TypeScript analysis is available
    */
   private async buildFromExistingIndex(rootDir: string): Promise<void> {
     try {
@@ -435,40 +465,34 @@ export class SymbolIndexService implements ISymbolIndex {
         return;
       }
 
-      console.log('📋 Loading existing codebase index...');
+      console.log('📋 Loading existing codebase index (legacy fallback)...');
       const indexData = await fs.readJson(indexPath);
 
-      // Extract symbols from the files section - stored as array of [filePath, fileData]
+      // Simple extraction for basic symbol count (TypeScript AST analysis is preferred)
+      let symbolCount = 0;
+
       if (indexData.files && Array.isArray(indexData.files)) {
         for (const [filePath, fileData] of indexData.files) {
-          // Only process source files, skip config/data files
           if (
             fileData.type === 'source' &&
-            ['typescript', 'javascript'].includes(fileData.language)
+            ['typescript', 'javascript'].includes(fileData.language) &&
+            fileData.symbols
           ) {
-            await this.extractSymbolsFromFileData(filePath, fileData);
+            symbolCount += fileData.symbols.length;
           }
         }
       }
 
-      // Extract class information - stored as array of [className, classData]
       if (indexData.classes && Array.isArray(indexData.classes)) {
-        for (const [className, classData] of indexData.classes) {
-          await this.extractClassSymbolInfo(className, classData);
-        }
+        symbolCount += indexData.classes.length;
       }
 
-      // Extract function information - stored as array of [functionName, functionData]
       if (indexData.functions && Array.isArray(indexData.functions)) {
-        for (const [functionName, functionData] of indexData.functions) {
-          await this.extractFunctionSymbolInfo(functionName, functionData);
-        }
+        symbolCount += indexData.functions.length;
       }
 
       console.log(
-        `📊 Extracted ${
-          Object.keys(this.lookupTable.symbols).length
-        } symbols from existing index`
+        `📊 Found ${symbolCount} symbols in existing index (recommend using --force for accurate analysis)`
       );
     } catch (error) {
       console.log('⚠️ Failed to load existing codebase index:', error);
@@ -479,17 +503,22 @@ export class SymbolIndexService implements ISymbolIndex {
    * Phase 2: Build symbol index from direct file analysis
    */
   private async buildFromFileAnalysis(rootDir: string): Promise<void> {
+    // Initialize the TypeScript analyzer
+    await this.tsAnalyzer.initialize(rootDir);
+
     // Find all TypeScript/JavaScript files
     const files = await this.findSourceFiles(
       rootDir,
       this.lookupTable.metadata
     );
 
-    console.log(`📁 Analyzing ${files.length} source files...`);
+    console.log(
+      `📁 Analyzing ${files.length} source files with TypeScript AST...`
+    );
 
-    // Analyze each file
+    // Analyze each file for symbols and references
     for (const filepath of files) {
-      await this.analyzeFile(filepath);
+      await this.analyzeFileWithTypeScriptAST(filepath);
     }
   }
 
@@ -515,189 +544,6 @@ export class SymbolIndexService implements ISymbolIndex {
       console.log('🧠 Applied semantic analysis enhancements');
     } catch (error) {
       console.log('⚠️ Semantic analysis failed:', error);
-    }
-  }
-
-  /**
-   * Extract symbol information from existing codebase index file data
-   */
-  private async extractSymbolsFromFileData(
-    filePath: string,
-    fileData: any
-  ): Promise<void> {
-    if (!fileData.symbols || !Array.isArray(fileData.symbols)) {
-      return;
-    }
-
-    for (const symbolData of fileData.symbols) {
-      const symbolName = symbolData.name;
-      const symbolType = this.mapSymbolType(symbolData.type);
-
-      if (!symbolName || !symbolType) {
-        continue;
-      }
-
-      // Create symbol info
-      const symbolInfo: SymbolInfo = {
-        name: symbolName,
-        type: symbolType,
-        definitions: [
-          {
-            location: {
-              file: filePath,
-              line: 1,
-              column: 1,
-            },
-            snippet: '', // Will be enhanced with AI context
-            scope: 'module',
-            modifiers: fileData.exports?.includes(symbolName) ? ['export'] : [],
-          },
-        ],
-        references: [],
-        relationships: {
-          uses: [],
-          usedBy: [],
-          dependencies: fileData.dependencies || [],
-        },
-        metadata: {
-          exported: fileData.exports?.includes(symbolName) || false,
-          description: symbolData.description || '',
-          usageCount: 0,
-        },
-      };
-
-      // Store in lookup table
-      this.lookupTable.symbols[symbolName] = {
-        info: symbolInfo,
-        lastUpdated: new Date().toISOString(),
-        hash: this.generateSymbolHash(symbolInfo),
-      };
-    }
-
-    // Create file symbol info
-    this.lookupTable.fileSymbols[filePath] = {
-      info: {
-        filepath: filePath,
-        exports: fileData.exports || [],
-        imports: fileData.imports || [],
-        defines: fileData.symbols?.map((s: any) => s.name) || [],
-        references: fileData.dependencies || [],
-        lastModified: fileData.lastModified || new Date().toISOString(),
-        hash: fileData.hash || '',
-      },
-      dependencies: fileData.dependencies || [],
-      dependents: [],
-    };
-  }
-
-  /**
-   * Extract class symbol information
-   */
-  private async extractClassSymbolInfo(
-    className: string,
-    classData: any
-  ): Promise<void> {
-    const symbolInfo: SymbolInfo = {
-      name: className,
-      type: 'class',
-      definitions: [
-        {
-          location: {
-            file: classData.file || '',
-            line: 1,
-            column: 1,
-          },
-          snippet: '',
-          scope: 'module',
-          modifiers: ['export'],
-        },
-      ],
-      references: [],
-      relationships: {
-        extends: classData.extends ? [classData.extends] : [],
-        implements: classData.implements || [],
-        uses: [],
-        usedBy: [],
-        dependencies: [],
-      },
-      metadata: {
-        exported: true,
-        description: '',
-        usageCount: 0,
-      },
-    };
-
-    this.lookupTable.symbols[className] = {
-      info: symbolInfo,
-      lastUpdated: new Date().toISOString(),
-      hash: this.generateSymbolHash(symbolInfo),
-    };
-  }
-
-  /**
-   * Extract function symbol information
-   */
-  private async extractFunctionSymbolInfo(
-    functionName: string,
-    functionData: any
-  ): Promise<void> {
-    const symbolInfo: SymbolInfo = {
-      name: functionName,
-      type: 'function',
-      definitions: [
-        {
-          location: {
-            file: functionData.file || '',
-            line: 1,
-            column: 1,
-          },
-          snippet: '',
-          scope: 'module',
-          modifiers: functionData.async ? ['async', 'export'] : ['export'],
-        },
-      ],
-      references: [],
-      relationships: {
-        uses: [],
-        usedBy: [],
-        dependencies: [],
-      },
-      metadata: {
-        exported: true,
-        async: functionData.async || false,
-        description: '',
-        usageCount: 0,
-      },
-    };
-
-    this.lookupTable.symbols[functionName] = {
-      info: symbolInfo,
-      lastUpdated: new Date().toISOString(),
-      hash: this.generateSymbolHash(symbolInfo),
-    };
-  }
-
-  /**
-   * Map symbol types from codebase index to our symbol types
-   */
-  private mapSymbolType(type: string): SymbolType | null {
-    switch (type?.toLowerCase()) {
-      case 'class':
-        return 'class';
-      case 'function':
-        return 'function';
-      case 'interface':
-        return 'interface';
-      case 'variable':
-        return 'variable';
-      case 'type':
-        return 'type';
-      case 'enum':
-        return 'enum';
-      case 'namespace':
-        return 'namespace';
-      default:
-        return null;
     }
   }
 
@@ -925,5 +771,273 @@ export class SymbolIndexService implements ISymbolIndex {
     this.lookupTable.metadata.totalReferences = Object.values(
       this.lookupTable.symbols
     ).reduce((total, entry) => total + entry.info.references.length, 0);
+  }
+
+  /**
+   * Analyze a file using TypeScript AST to extract symbols and references
+   */
+  private async analyzeFileWithTypeScriptAST(filepath: string): Promise<void> {
+    try {
+      // Use TypeScript analyzer to extract symbols and references
+      const analysis = await this.tsAnalyzer.analyzeFileReferences(filepath);
+
+      // Validate the analysis result
+      if (!analysis || !analysis.symbols || !analysis.references) {
+        console.warn(`Invalid analysis result for ${filepath}, skipping file`);
+        return;
+      }
+
+      // Process symbols from the file
+      for (const symbol of analysis.symbols) {
+        try {
+          await this.addSymbolToIndex(symbol, filepath);
+        } catch (error) {
+          console.warn(
+            `Failed to add symbol ${symbol.name} from ${filepath}:`,
+            error
+          );
+        }
+      }
+
+      // Process references and update existing symbols
+      for (const [symbolName, references] of analysis.references) {
+        try {
+          if (references && Array.isArray(references)) {
+            await this.addReferencesToSymbol(symbolName, references);
+          }
+        } catch (error) {
+          console.warn(
+            `Failed to add references for symbol ${symbolName}:`,
+            error
+          );
+        }
+      }
+
+      // Create file symbol info
+      const stats = await fs.stat(filepath);
+      const content = await fs.readFile(filepath, 'utf-8');
+      const hash = crypto.createHash('md5').update(content).digest('hex');
+
+      const fileInfo: FileSymbolInfo = {
+        filepath,
+        exports: analysis.symbols
+          .filter((s) => s.metadata?.exported)
+          .map((s) => s.name),
+        imports: this.extractImportsFromSymbols(analysis.symbols),
+        defines: analysis.symbols.map((s) => s.name),
+        references: Array.from(analysis.references.keys()),
+        lastModified: stats.mtime.toISOString(),
+        hash,
+      };
+
+      this.lookupTable.fileSymbols[filepath] = {
+        info: fileInfo,
+        dependencies: [],
+        dependents: [],
+      };
+    } catch (error) {
+      console.warn(`Failed to analyze ${filepath} with TypeScript AST:`, error);
+      // Skip files that can't be analyzed
+    }
+  }
+
+  /**
+   * Add a symbol to the index or update if it already exists
+   */
+  private async addSymbolToIndex(
+    symbol: SymbolInfo,
+    filepath: string
+  ): Promise<void> {
+    const existingEntry = this.lookupTable.symbols[symbol.name];
+
+    if (existingEntry) {
+      // Merge with existing symbol
+      const existingSymbol = existingEntry.info;
+
+      // Add new definitions
+      existingSymbol.definitions.push(...symbol.definitions);
+
+      // Merge relationships (safely handling undefined arrays)
+      if (existingSymbol.relationships.extends) {
+        existingSymbol.relationships.extends.push(
+          ...(symbol.relationships.extends || [])
+        );
+      } else {
+        existingSymbol.relationships.extends =
+          symbol.relationships.extends || [];
+      }
+
+      if (existingSymbol.relationships.implements) {
+        existingSymbol.relationships.implements.push(
+          ...(symbol.relationships.implements || [])
+        );
+      } else {
+        existingSymbol.relationships.implements =
+          symbol.relationships.implements || [];
+      }
+
+      if (existingSymbol.relationships.uses) {
+        existingSymbol.relationships.uses.push(
+          ...(symbol.relationships.uses || [])
+        );
+      } else {
+        existingSymbol.relationships.uses = symbol.relationships.uses || [];
+      }
+
+      if (existingSymbol.relationships.usedBy) {
+        existingSymbol.relationships.usedBy.push(
+          ...(symbol.relationships.usedBy || [])
+        );
+      } else {
+        existingSymbol.relationships.usedBy = symbol.relationships.usedBy || [];
+      }
+
+      // Remove duplicates
+      existingSymbol.relationships.extends = [
+        ...new Set(existingSymbol.relationships.extends),
+      ];
+      existingSymbol.relationships.implements = [
+        ...new Set(existingSymbol.relationships.implements),
+      ];
+      existingSymbol.relationships.uses = [
+        ...new Set(existingSymbol.relationships.uses),
+      ];
+      existingSymbol.relationships.usedBy = [
+        ...new Set(existingSymbol.relationships.usedBy),
+      ];
+
+      // Update metadata
+      existingEntry.lastUpdated = new Date().toISOString();
+    } else {
+      // Create new symbol entry
+      this.lookupTable.symbols[symbol.name] = {
+        info: symbol,
+        lastUpdated: new Date().toISOString(),
+        hash: this.generateSymbolHash(symbol),
+      };
+    }
+  }
+
+  /**
+   * Add references to an existing symbol or create a placeholder if it doesn't exist
+   */
+  private async addReferencesToSymbol(
+    symbolName: string,
+    references: SymbolReference[]
+  ): Promise<void> {
+    // Validate inputs
+    if (!symbolName || typeof symbolName !== 'string') {
+      console.warn(`Invalid symbol name provided: ${symbolName}`);
+      return;
+    }
+
+    if (!references || !Array.isArray(references)) {
+      // Skip if references is undefined or not an array
+      console.warn(
+        `Invalid references provided for symbol ${symbolName}:`,
+        typeof references
+      );
+      return;
+    }
+
+    if (references.length === 0) {
+      // Skip if no references to add
+      return;
+    }
+
+    // Skip built-in JavaScript symbols to avoid errors
+    const builtInSymbols = new Set([
+      'toString',
+      'constructor',
+      'hasOwnProperty',
+      'valueOf',
+      'toLocaleString',
+      'propertyIsEnumerable',
+      'isPrototypeOf',
+      '__defineGetter__',
+      '__defineSetter__',
+      '__lookupGetter__',
+      '__lookupSetter__',
+    ]);
+
+    if (builtInSymbols.has(symbolName)) {
+      // Skip built-in JavaScript symbols as they don't belong in our symbol table
+      return;
+    }
+
+    const existingEntry = this.lookupTable.symbols[symbolName];
+
+    if (existingEntry) {
+      // Ensure the symbol entry has proper structure
+      if (!existingEntry.info) {
+        console.warn(`Symbol ${symbolName} exists but has no info property`);
+        return;
+      }
+
+      // Add references to existing symbol
+      if (!existingEntry.info.references) {
+        existingEntry.info.references = [];
+      }
+      existingEntry.info.references.push(...references);
+
+      // Update usage count
+      if (existingEntry.info.metadata) {
+        existingEntry.info.metadata.usageCount =
+          existingEntry.info.references.length;
+      }
+
+      existingEntry.lastUpdated = new Date().toISOString();
+    } else {
+      // Create a placeholder entry for symbols that are referenced but not defined in our codebase
+      // This could be external libraries, built-in types, etc.
+      const placeholderSymbol: SymbolInfo = {
+        name: symbolName,
+        type: 'variable', // Use 'variable' as fallback type for unknown symbols
+        definitions: [],
+        references: references,
+        relationships: {
+          extends: [],
+          implements: [],
+          uses: [],
+          usedBy: [],
+          dependencies: [],
+        },
+        metadata: {
+          exported: false,
+          usageCount: references.length,
+          description: 'External or referenced symbol',
+        },
+      };
+
+      this.lookupTable.symbols[symbolName] = {
+        info: placeholderSymbol,
+        lastUpdated: new Date().toISOString(),
+        hash: this.generateSymbolHash(placeholderSymbol),
+      };
+    }
+  }
+
+  /**
+   * Extract import statements from symbols for file symbol info
+   */
+  private extractImportsFromSymbols(symbols: SymbolInfo[]): ImportInfo[] {
+    const imports: ImportInfo[] = [];
+
+    // This is a simplified extraction - in a real implementation you might
+    // want to parse import statements from the AST more thoroughly
+    for (const symbol of symbols) {
+      for (const reference of symbol.references) {
+        if (reference.context === 'import') {
+          imports.push({
+            symbols: [symbol.name],
+            from: reference.location.file,
+            isDefault: false,
+            isNamespace: false,
+          });
+        }
+      }
+    }
+
+    return imports;
   }
 }

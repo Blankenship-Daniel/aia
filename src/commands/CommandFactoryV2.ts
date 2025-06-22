@@ -149,7 +149,7 @@ export class CommandFactoryV2 {
         )
     );
 
-    // Index Command - Codebase indexing
+    // Index Command - Codebase indexing with AI-powered prompt generation
     this.registrar.register(
       'index',
       ['idx', 'build'],
@@ -158,7 +158,8 @@ export class CommandFactoryV2 {
           this.codeIndexService,
           this.symbolIndexService,
           this.codebaseSummarizer,
-          this.semanticCodeAnalyzer
+          this.semanticCodeAnalyzer,
+          this.aiService
         )
     );
 

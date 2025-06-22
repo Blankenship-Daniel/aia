@@ -101,6 +101,7 @@ export interface ISymbolIndex {
       excludePatterns?: string[];
       includePatterns?: string[];
       useCache?: boolean;
+      force?: boolean;
     }
   ): Promise<any>;
 }

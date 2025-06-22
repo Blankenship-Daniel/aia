@@ -14,6 +14,7 @@ import { ICodeIndexService } from '../interfaces/ICodeIndexService.js';
 import { ISymbolIndex } from '../interfaces/ISymbolIndex.js';
 import { ICodebaseSummarizer } from '../interfaces/ICodebaseSummarizer.js';
 import { ISemanticCodeAnalyzer } from '../interfaces/ISemanticCodeAnalyzer.js';
+import { IAIService } from '../interfaces/IAIService.js';
 import ConfigurationManager from '../ConfigurationManager.js';
 
 interface IndexStats {
@@ -131,17 +132,20 @@ export class IndexCommand implements ICommand {
   private symbolIndexService: ISymbolIndex;
   private codebaseSummarizer: ICodebaseSummarizer;
   private semanticAnalyzer: ISemanticCodeAnalyzer;
+  private aiService: IAIService;
 
   constructor(
     codeIndexService: ICodeIndexService,
     symbolIndexService: ISymbolIndex,
     codebaseSummarizer: ICodebaseSummarizer,
-    semanticAnalyzer: ISemanticCodeAnalyzer
+    semanticAnalyzer: ISemanticCodeAnalyzer,
+    aiService: IAIService
   ) {
     this.codeIndexService = codeIndexService;
     this.symbolIndexService = symbolIndexService;
     this.codebaseSummarizer = codebaseSummarizer;
     this.semanticAnalyzer = semanticAnalyzer;
+    this.aiService = aiService;
   }
 
   public async execute(
@@ -1186,6 +1190,36 @@ export class IndexCommand implements ICommand {
         return { success: false, error: 'No index found' };
       }
 
+      // Auto-build or refresh symbol index for enhanced prompt generation
+      console.log(chalk.blue('🔍 Ensuring symbol index is up-to-date...'));
+      try {
+        const symbolResult = await this.buildSymbolLookup({
+          directory: options.directory,
+          force: Boolean(options.force), // Use the force option from user
+          verbose: options.verbose || false,
+        } as CommandOptions);
+
+        if (!symbolResult.success) {
+          console.log(
+            chalk.yellow(
+              '⚠️  Symbol index build failed, proceeding with basic index only'
+            )
+          );
+        } else {
+          console.log(
+            chalk.green('✅ Symbol index ready for enhanced prompt generation')
+          );
+        }
+      } catch (error) {
+        console.log(
+          chalk.yellow(
+            `⚠️  Symbol index error: ${
+              error instanceof Error ? error.message : 'Unknown error'
+            }, proceeding with basic index only`
+          )
+        );
+      }
+
       // Load configuration to get output directories
       const localConfigDir = path.join(process.cwd(), '.aia');
       const localConfigFile = path.join(localConfigDir, 'config.json');
@@ -1245,9 +1279,14 @@ export class IndexCommand implements ICommand {
         return '.';
       };
 
-      console.log(chalk.blue('📝 Generating AI prompt files...'));
+      console.log(
+        chalk.blue('📝 Generating AI prompt files with enhanced symbol data...')
+      );
 
       const results: ExportResult[] = [];
+
+      // Gather enhanced symbol data for prompt generation
+      const symbolData = await this.gatherSymbolEnhancements();
 
       if (type === 'all') {
         const types = [
@@ -1258,9 +1297,10 @@ export class IndexCommand implements ICommand {
           'dev-focused',
         ];
         for (const promptType of types) {
-          const content = await this.codeIndexService.generatePromptFile(
+          const content = await this.generateEnhancedPromptFile(
             promptType,
-            Boolean(options.code)
+            Boolean(options.code),
+            symbolData
           );
           const outputDir = getOutputDir(promptType);
           const filename =
@@ -1281,9 +1321,10 @@ export class IndexCommand implements ICommand {
           console.log(chalk.green(`✅ Generated: ${fullPath}`));
         }
       } else {
-        const content = await this.codeIndexService.generatePromptFile(
+        const content = await this.generateEnhancedPromptFile(
           type,
-          Boolean(options.code)
+          Boolean(options.code),
+          symbolData
         );
         const outputDir = getOutputDir(type);
         const filename =
@@ -1480,6 +1521,7 @@ export class IndexCommand implements ICommand {
         {
           excludePatterns: ['node_modules/**', '.git/**', 'dist/**'],
           useCache: !options.force,
+          force: Boolean(options.force),
         }
       );
 
@@ -1729,5 +1771,770 @@ export class IndexCommand implements ICommand {
     return keyComponents.length > 0
       ? keyComponents
       : ['No key components identified'];
+  }
+
+  /**
+   * Gather enhanced symbol data for prompt generation
+   */
+  private async gatherSymbolEnhancements(): Promise<any> {
+    try {
+      // Get all symbol types for cross-reference mapping
+      const classes = this.symbolIndexService.findSymbolsByType('class');
+      const functions = this.symbolIndexService.findSymbolsByType('function');
+      const interfaces = this.symbolIndexService.findSymbolsByType('interface');
+      const types = this.symbolIndexService.findSymbolsByType('type');
+
+      // Build relationship maps
+      const symbolRelationships: Record<string, any> = {};
+      const crossReferences: Record<string, string[]> = {};
+      const usagePatterns: Record<string, any> = {};
+
+      // Gather detailed symbol information
+      for (const symbolName of [
+        ...classes,
+        ...functions,
+        ...interfaces,
+        ...types,
+      ]) {
+        const symbolInfo = this.symbolIndexService.getSymbol(symbolName);
+        if (symbolInfo) {
+          // Debug: log symbol info for first few symbols
+          if (symbolName === classes[0] || symbolName === functions[0]) {
+            console.log(
+              chalk.cyan(
+                `    🔍 Sample symbol "${symbolName}": ${
+                  symbolInfo.references?.length || 0
+                } references, ${
+                  symbolInfo.definitions?.length || 0
+                } definitions`
+              )
+            );
+          }
+
+          symbolRelationships[symbolName] = {
+            type: symbolInfo.type,
+            definitions: symbolInfo.definitions?.length || 0,
+            references: symbolInfo.references?.length || 0,
+            files:
+              symbolInfo.definitions?.map((def) => def.location.file) || [],
+            usageContext:
+              symbolInfo.references?.slice(0, 5).map((ref) => ({
+                file: ref.location.file,
+                context: ref.context || 'usage',
+              })) || [],
+          };
+
+          // Build cross-references
+          const relatedSymbols =
+            symbolInfo.references
+              ?.map((ref) => ref.location.file)
+              .filter((file, index, arr) => arr.indexOf(file) === index) || [];
+          crossReferences[symbolName] = relatedSymbols;
+
+          // Analyze usage patterns
+          if (symbolInfo.references && symbolInfo.references.length > 0) {
+            usagePatterns[symbolName] = {
+              totalUsages: symbolInfo.references.length,
+              filesUsedIn: relatedSymbols.length,
+              averageUsagePerFile:
+                symbolInfo.references.length /
+                Math.max(relatedSymbols.length, 1),
+              commonContexts: symbolInfo.references
+                .map((ref) => ref.context)
+                .filter(Boolean)
+                .reduce((acc: Record<string, number>, context: string) => {
+                  acc[context] = (acc[context] || 0) + 1;
+                  return acc;
+                }, {}),
+            };
+          }
+        }
+      }
+
+      // Debug: log usage patterns found
+      console.log(
+        chalk.cyan(
+          `    📊 Usage patterns found: ${Object.keys(usagePatterns).length}`
+        )
+      );
+      if (Object.keys(usagePatterns).length > 0) {
+        const topUsed = Object.entries(usagePatterns)
+          .sort(
+            ([, a], [, b]) => (b as any).totalUsages - (a as any).totalUsages
+          )
+          .slice(0, 3);
+        console.log(
+          chalk.cyan(
+            `    🔝 Top used: ${topUsed
+              .map(([name, data]) => `${name}(${(data as any).totalUsages})`)
+              .join(', ')}`
+          )
+        );
+      }
+
+      return {
+        totalSymbols:
+          classes.length + functions.length + interfaces.length + types.length,
+        symbolCounts: {
+          classes: classes.length,
+          functions: functions.length,
+          interfaces: interfaces.length,
+          types: types.length,
+        },
+        symbolRelationships,
+        crossReferences,
+        usagePatterns,
+        mostUsedSymbols: Object.entries(usagePatterns)
+          .sort(
+            ([, a], [, b]) => (b as any).totalUsages - (a as any).totalUsages
+          )
+          .slice(0, 10)
+          .map(([name]) => name),
+        keyArchitecturalComponents: classes.filter(
+          (name) =>
+            name.includes('Service') ||
+            name.includes('Manager') ||
+            name.includes('Controller') ||
+            name.includes('Engine') ||
+            name.includes('Factory') ||
+            name.includes('Provider')
+        ),
+      };
+    } catch (error) {
+      console.warn(
+        chalk.yellow(
+          '⚠️  Could not gather symbol enhancements, falling back to basic data'
+        )
+      );
+      return {
+        totalSymbols: 0,
+        symbolCounts: { classes: 0, functions: 0, interfaces: 0, types: 0 },
+        symbolRelationships: {},
+        crossReferences: {},
+        usagePatterns: {},
+        mostUsedSymbols: [],
+        keyArchitecturalComponents: [],
+      };
+    }
+  }
+
+  /**
+   * Generate enhanced prompt file with symbol data integration
+   */
+  private async generateEnhancedPromptFile(
+    type: string,
+    includeCode: boolean,
+    symbolData: any
+  ): Promise<string> {
+    console.log(
+      chalk.cyan(
+        `🤖 Generating fully AI-powered ${type} file with complete GenAI generation...`
+      )
+    );
+
+    try {
+      // Check if AI service is configured
+      if (!this.aiService.isConfigured()) {
+        console.log(
+          chalk.yellow(
+            '⚠️  AI service not configured, falling back to basic template'
+          )
+        );
+        // Fallback to basic template generation
+        return await this.codeIndexService.generatePromptFile(
+          type,
+          includeCode
+        );
+      }
+
+      console.log(
+        chalk.cyan('🤖 Requesting complete AI generation of documentation...')
+      );
+
+      // Generate 100% AI-powered content
+      const aiGeneratedContent = await this.generateCompleteAIContent(
+        symbolData,
+        type
+      );
+
+      if (aiGeneratedContent.trim()) {
+        console.log(
+          chalk.green(
+            `✅ Fully AI-generated ${type} file created (${aiGeneratedContent.length} characters)`
+          )
+        );
+        return aiGeneratedContent;
+      } else {
+        console.log(
+          chalk.yellow('⚠️  AI generation failed, using template fallback')
+        );
+        // Fallback to template if AI fails
+        return await this.codeIndexService.generatePromptFile(
+          type,
+          includeCode
+        );
+      }
+    } catch (error) {
+      console.warn(
+        chalk.yellow(
+          `⚠️  AI generation failed: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }, using template fallback`
+        )
+      );
+      // Fallback to basic prompt generation
+      return await this.codeIndexService.generatePromptFile(type, includeCode);
+    }
+  }
+
+  /**
+   * Generate complete AI-powered documentation content with no templates
+   */
+  private async generateCompleteAIContent(
+    symbolData: any,
+    promptType: string
+  ): Promise<string> {
+    try {
+      // Create a comprehensive generation prompt for the AI
+      const generationPrompt = this.createCompleteGenerationPrompt(
+        symbolData,
+        promptType
+      );
+
+      console.log(
+        chalk.cyan(`🧠 Requesting ${promptType} generation from AI...`)
+      );
+
+      // Use AIService with intelligent model selection for complete generation
+      const contextInfo = {
+        workingDirectory: process.cwd(),
+        platform: process.platform,
+        arch: process.arch,
+        nodeVersion: process.version,
+        user: process.env.USER || 'unknown',
+        shell: process.env.SHELL || 'unknown',
+        timestamp: new Date().toISOString(),
+        projectType: 'typescript-nodejs',
+        projectInfo: { name: 'AIA CLI', type: 'typescript' },
+        gitStatus: 'unknown',
+        environmentScore: 100,
+      };
+
+      // Let the AI service select the best model for generation
+      const selectedModel = this.aiService.selectModel(
+        generationPrompt,
+        contextInfo
+      );
+
+      const aiResponse = await this.aiService.queryAI(
+        generationPrompt,
+        contextInfo,
+        selectedModel
+      );
+
+      if (aiResponse.content) {
+        console.log(
+          chalk.green(
+            `✅ AI content generation completed using ${aiResponse.model}`
+          )
+        );
+        return aiResponse.content;
+      } else {
+        console.log(chalk.yellow('⚠️  AI generation returned empty response'));
+        return '';
+      }
+    } catch (error) {
+      console.log(
+        chalk.yellow(
+          `⚠️  AI content generation error: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`
+        )
+      );
+      return '';
+    }
+  }
+
+  /**
+   * Create comprehensive generation prompts for complete AI-driven file creation
+   */
+  private createCompleteGenerationPrompt(
+    symbolData: any,
+    promptType: string
+  ): string {
+    const codebaseContext = this.buildCodebaseContext(symbolData);
+    const projectDetails = this.buildProjectDetails();
+
+    const prompts: Record<string, string> = {
+      'copilot-instructions': `You are a technical documentation expert. Create a comprehensive GitHub Copilot instructions file for this TypeScript/Node.js CLI project.
+
+${codebaseContext}
+
+${projectDetails}
+
+Generate a complete copilot-instructions.md file with the following sections:
+
+# Copilot Instructions for AI Assistant
+
+## Table of Contents
+Include all major sections you'll create.
+
+## Role
+Define the AI assistant's role for this specific codebase.
+
+## Project Overview
+- Project name, type, and purpose
+- Architecture summary (Service-Oriented Architecture with Dependency Injection)
+- Scale and statistics
+- Core capabilities
+
+## Architecture Patterns
+- Service-Oriented Architecture details
+- Dependency Injection patterns
+- Command Pattern implementation
+- Key architectural components
+
+## Directory Structure
+Provide the actual directory structure based on the project type.
+
+## Key Components & Relationships
+Document the major services, commands, and their relationships using the ACTUAL symbol data provided above. Include real class names and their usage patterns.
+
+## Code Navigation Guidelines
+Specific guidance for navigating this codebase using the actual architectural components listed above.
+
+## Common Patterns
+Show actual code patterns used in this project with examples. Use the specific component names and relationships from the symbol analysis above.
+
+## Interactive Examples
+Provide realistic examples for this CLI tool using the actual command classes and services identified in the symbol data.
+
+## Development Workflow
+Step-by-step guidance for adding features to this codebase, referencing the specific architectural components and patterns identified above.
+
+## Common Development Scenarios
+Real scenarios developers face with this codebase.
+
+## Performance Considerations
+Specific to this project's architecture.
+
+## Guidelines
+Specific rules for working with this codebase.
+
+Create a professional, comprehensive, and actionable document that helps developers work effectively with GitHub Copilot on this specific codebase. Include real TypeScript code examples and practical guidance throughout.
+
+IMPORTANT: Use the specific symbol data provided above (Key Components, Most Referenced Symbols, etc.) to make the documentation concrete and specific to this actual codebase. Reference real class names, service names, and architectural components from the symbol analysis.`,
+
+      comprehensive: `You are a senior technical architect. Create a comprehensive technical documentation file for this TypeScript/Node.js CLI project.
+
+${codebaseContext}
+
+${projectDetails}
+
+Generate a complete codebase-comprehensive.md file covering:
+
+# Complete Codebase Analysis
+
+## Overview
+Detailed project overview including purpose, architecture, and scale.
+
+## Project Statistics
+File counts, language distribution, complexity metrics.
+
+## Technical Architecture
+- Service-oriented architecture analysis
+- Component relationships
+- Design patterns implementation
+- Integration points
+
+## Code Quality Assessment
+- SOLID principles adherence
+- Design pattern usage
+- Technical debt analysis
+- Maintainability concerns
+
+## Scalability Analysis
+- Current architecture limitations
+- Growth opportunities
+- Performance bottlenecks
+- Scaling strategies
+
+## Integration Patterns
+- Service communication
+- Data flow analysis
+- Error handling strategies
+- Monitoring and observability
+
+## Testing Strategy
+- Current test coverage
+- Testing patterns
+- Recommended improvements
+- Quality assurance
+
+## Security Considerations
+- API security
+- Data protection
+- Authentication patterns
+- Vulnerability assessment
+
+## Deployment Architecture
+- Build process
+- Distribution strategy
+- Environment management
+- CI/CD recommendations
+
+## Future Roadmap
+- Technical evolution
+- Architecture improvements
+- Technology upgrades
+- Strategic recommendations
+
+Provide strategic insights that help technical stakeholders understand the system's current state and future potential.`,
+
+      minimal: `You are a technical writer specializing in concise documentation. Create a minimal but effective project context file for this TypeScript/Node.js CLI project.
+
+${codebaseContext}
+
+${projectDetails}
+
+Generate a complete codebase-minimal.md file that includes:
+
+# TypeScript CLI Project Context
+
+## Quick Overview
+Project type, language, and core purpose in 2-3 sentences.
+
+## Key Statistics
+- File count
+- Primary language
+- Architecture type
+- Entry points
+
+## Essential Components
+List only the most critical files and components.
+
+## Core Commands
+The main CLI commands available.
+
+## Quick Start
+Essential commands to get started:
+\`\`\`bash
+npm install
+npm run build
+npm start
+\`\`\`
+
+## Development Essentials
+Key files developers need to know about.
+
+## Architecture Summary
+One paragraph explaining the architecture.
+
+Keep it concise but complete - essential information only.`,
+
+      architecture: `You are a solutions architect. Create a detailed architecture documentation file for this TypeScript/Node.js CLI project.
+
+${codebaseContext}
+
+${projectDetails}
+
+Generate a complete codebase-architecture.md file covering:
+
+# Architecture Analysis
+
+## Executive Summary
+High-level architectural overview and key decisions.
+
+## System Architecture
+- Overall system design
+- Component organization
+- Service boundaries
+- Data flow
+
+## Design Patterns
+- Implemented patterns (Service-Oriented, Command, Factory, etc.)
+- Pattern justification
+- Benefits and trade-offs
+- Implementation examples
+
+## Component Architecture
+- Core services and their responsibilities
+- Interface definitions and contracts
+- Dependency relationships
+- Communication patterns
+
+## Data Architecture
+- Data models
+- Storage patterns
+- Persistence strategies
+- State management
+
+## Security Architecture
+- Authentication and authorization
+- Data protection
+- API security
+- Security patterns
+
+## Performance Architecture
+- Performance considerations
+- Optimization strategies
+- Monitoring and metrics
+- Scalability patterns
+
+## Integration Architecture
+- External integrations
+- API design
+- Event handling
+- Message patterns
+
+## Deployment Architecture
+- Packaging strategy
+- Distribution model
+- Environment configuration
+- Infrastructure requirements
+
+## Architecture Evolution
+- Current limitations
+- Planned improvements
+- Migration strategies
+- Future vision
+
+Focus on architectural decisions, patterns, and their rationale.`,
+
+      'dev-focused': `You are a development team lead. Create a practical developer guide for this TypeScript/Node.js CLI project.
+
+${codebaseContext}
+
+${projectDetails}
+
+Generate a complete codebase-dev-focused.md file covering:
+
+# Developer Guide
+
+## Quick Start
+Get developers productive immediately:
+- Setup instructions
+- Essential tools
+- First commands to run
+- Basic workflow
+
+## Development Environment
+- IDE recommendations
+- Extensions and plugins
+- Debug configuration
+- Environment variables
+
+## Project Structure
+- Directory organization
+- File naming conventions
+- Code organization patterns
+- Where to find what
+
+## Core Development Workflows
+- Adding new features
+- Modifying existing components
+- Testing strategies
+- Code review process
+
+## Common Tasks
+Step-by-step guides for:
+- Adding a new CLI command
+- Creating a new service
+- Implementing interfaces
+- Error handling
+
+## Debugging Guide
+- Common issues and solutions
+- Debugging tools and techniques
+- Error patterns
+- Troubleshooting checklist
+
+## Testing Guidelines
+- Unit testing patterns
+- Integration testing
+- Test file organization
+- Mocking strategies
+
+## Code Contribution Guidelines
+- Coding standards
+- Git workflow
+- Pull request checklist
+- Documentation requirements
+
+## Performance Tips
+- Optimization techniques
+- Profiling tools
+- Memory management
+- Best practices
+
+## Troubleshooting
+- Common problems
+- Error messages
+- Quick fixes
+- When to ask for help
+
+Make this practical and actionable - focus on day-to-day development needs.`,
+    };
+
+    return prompts[promptType] || prompts['copilot-instructions'];
+  }
+
+  /**
+   * Build detailed project context for AI generation
+   */
+  private buildProjectDetails(): string {
+    return `**Project Context:**
+- Name: AIA CLI (AI Assistant Command Line Interface)
+- Type: TypeScript Node.js CLI Application
+- Architecture: Service-Oriented Architecture with Dependency Injection
+- Purpose: AI-powered development tool for code analysis, optimization, and assistance
+- Scale: 158 files, 85 classes, 56 functions
+- Testing: 30 test files
+- Main Technologies: TypeScript, Node.js, CLI frameworks, AI integrations
+- Key Features: Command execution, AI queries, memory management, codebase analysis
+- Development Status: Active development with advanced performance optimizations
+
+**Available Commands:**
+- agent - AI-powered task execution with reasoning
+- ask - Direct AI queries
+- config - Configuration management
+- context - Context information display
+- execute - Command execution
+- index - Codebase indexing and analysis
+- memory - Memory management
+
+**Key Services:**
+- AIService: AI model interactions
+- MemoryService: Conversation and command memory
+- ConfigurationService: System configuration
+- CommandService: Command execution
+- ContextService: Environment awareness
+- CodeIndexService: Codebase analysis
+
+**Architecture Characteristics:**
+- Dependency injection throughout
+- Interface-driven design
+- Command pattern implementation
+- Service-oriented composition
+- Plugin extensibility
+- Performance optimization focus`;
+  }
+
+  /**
+   * Build context summary for AI analysis
+   */
+  private buildCodebaseContext(symbolData: any): string {
+    let context = `**Codebase Profile:**\n`;
+    context += `- Total Symbols: ${symbolData.totalSymbols || 0}\n`;
+    context += `- Classes: ${symbolData.symbolCounts?.classes || 0}\n`;
+    context += `- Functions: ${symbolData.symbolCounts?.functions || 0}\n`;
+    context += `- Interfaces: ${symbolData.symbolCounts?.interfaces || 0}\n\n`;
+
+    // Debug: Log actual symbol data
+    console.log(chalk.cyan('🔍 DEBUG: Symbol data being passed to AI:'));
+    console.log(`  Total Symbols: ${symbolData.totalSymbols || 0}`);
+    console.log(
+      `  Key Components: ${symbolData.keyArchitecturalComponents?.length || 0}`
+    );
+    console.log(
+      `  Most Used Symbols: ${symbolData.mostUsedSymbols?.length || 0}`
+    );
+
+    if (symbolData.keyArchitecturalComponents?.length > 0) {
+      console.log(
+        `  Sample Components: ${symbolData.keyArchitecturalComponents
+          .slice(0, 3)
+          .join(', ')}`
+      );
+    }
+
+    if (symbolData.keyArchitecturalComponents?.length > 0) {
+      context += `**Key Components:**\n`;
+      symbolData.keyArchitecturalComponents
+        .slice(0, 8)
+        .forEach((component: string) => {
+          const relationship = symbolData.symbolRelationships?.[component];
+          if (relationship) {
+            context += `- ${component}: ${
+              relationship.references
+            } references in ${relationship.files?.length || 0} files\n`;
+          }
+        });
+      context += '\n';
+    }
+
+    if (symbolData.mostUsedSymbols?.length > 0) {
+      context += `**Most Referenced Symbols:**\n`;
+      symbolData.mostUsedSymbols.slice(0, 5).forEach((symbol: string) => {
+        const usage = symbolData.usagePatterns?.[symbol];
+        if (usage) {
+          context += `- ${symbol}: ${usage.totalUsages} usages across ${usage.filesUsedIn} files\n`;
+        }
+      });
+      context += '\n';
+    }
+
+    // Add project type indicators
+    const projectIndicators = this.detectProjectCharacteristics(symbolData);
+    if (projectIndicators.length > 0) {
+      context += `**Project Characteristics:** ${projectIndicators.join(
+        ', '
+      )}\n\n`;
+    }
+
+    return context;
+  }
+
+  /**
+   * Detect project characteristics from symbol data
+   */
+  private detectProjectCharacteristics(symbolData: any): string[] {
+    const characteristics = [];
+
+    if (
+      symbolData.keyArchitecturalComponents?.some((c: string) =>
+        c.includes('Service')
+      )
+    ) {
+      characteristics.push('Service-Oriented Architecture');
+    }
+
+    if (
+      symbolData.keyArchitecturalComponents?.some((c: string) =>
+        c.includes('Command')
+      )
+    ) {
+      characteristics.push('Command Pattern');
+    }
+
+    if (
+      symbolData.keyArchitecturalComponents?.some(
+        (c: string) => c.includes('Interface') || c.startsWith('I')
+      )
+    ) {
+      characteristics.push('Interface-Driven Design');
+    }
+
+    if (
+      symbolData.keyArchitecturalComponents?.some((c: string) =>
+        c.includes('Factory')
+      )
+    ) {
+      characteristics.push('Factory Pattern');
+    }
+
+    if (
+      symbolData.keyArchitecturalComponents?.some(
+        (c: string) => c.includes('Container') || c.includes('DI')
+      )
+    ) {
+      characteristics.push('Dependency Injection');
+    }
+
+    if (symbolData.symbolCounts?.classes > 50) {
+      characteristics.push('Large-Scale Application');
+    }
+
+    return characteristics;
   }
 }

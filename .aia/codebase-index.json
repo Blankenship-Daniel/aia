@@ -1,19 +1,19 @@
 {
   "metadata": {
-    "totalFiles": 262,
-    "totalClasses": 123,
-    "totalFunctions": 70,
-    "totalTodos": 8,
+    "totalFiles": 273,
+    "totalClasses": 122,
+    "totalFunctions": 74,
+    "totalTodos": 7,
     "languages": {
-      "json": 20,
-      "markdown": 34,
-      "javascript": 41,
-      "typescript": 167
+      "json": 19,
+      "markdown": 40,
+      "javascript": 46,
+      "typescript": 168
     },
     "largestFiles": [
       {
         "path": ".aia/codebase-index.json",
-        "size": 653060
+        "size": 689951
       },
       {
         "path": "package-lock.json",
@@ -29,7 +29,7 @@
       },
       {
         "path": "src/commands/IndexCommand.ts",
-        "size": 78005
+        "size": 78071
       },
       {
         "path": "src/services/AgentPresenter.ts",
@@ -66,136 +66,16 @@
         "count": 1
       }
     ],
-    "indexedAt": "2025-06-22T00:15:24.497Z"
+    "indexedAt": "2025-06-22T01:54:40.443Z"
   },
   "files": [
-    [
-      ".aia/backups/config-2025-06-21T23-02-12-960Z.json",
-      {
-        "path": ".aia/backups/config-2025-06-21T23-02-12-960Z.json",
-        "size": 410,
-        "hash": "232c4f2e52b4d3a0",
-        "lastModified": "2025-06-21T23:02:12.963Z",
-        "type": "config",
-        "language": "json",
-        "symbols": [
-          {
-            "type": "function",
-            "name": "preferredModel"
-          },
-          {
-            "type": "function",
-            "name": "autoExecute"
-          },
-          {
-            "type": "function",
-            "name": "plugins"
-          },
-          {
-            "type": "function",
-            "name": "profiles"
-          },
-          {
-            "type": "function",
-            "name": "outputDirectories"
-          },
-          {
-            "type": "function",
-            "name": "preferredProvider"
-          }
-        ],
-        "imports": [],
-        "exports": [],
-        "dependencies": []
-      }
-    ],
-    [
-      ".aia/backups/config-2025-06-21T23-02-12-965Z.json",
-      {
-        "path": ".aia/backups/config-2025-06-21T23-02-12-965Z.json",
-        "size": 410,
-        "hash": "232c4f2e52b4d3a0",
-        "lastModified": "2025-06-21T23:02:12.970Z",
-        "type": "config",
-        "language": "json",
-        "symbols": [
-          {
-            "type": "function",
-            "name": "preferredModel"
-          },
-          {
-            "type": "function",
-            "name": "autoExecute"
-          },
-          {
-            "type": "function",
-            "name": "plugins"
-          },
-          {
-            "type": "function",
-            "name": "profiles"
-          },
-          {
-            "type": "function",
-            "name": "outputDirectories"
-          },
-          {
-            "type": "function",
-            "name": "preferredProvider"
-          }
-        ],
-        "imports": [],
-        "exports": [],
-        "dependencies": []
-      }
-    ],
-    [
-      ".aia/backups/config-2025-06-21T23-02-12-971Z.json",
-      {
-        "path": ".aia/backups/config-2025-06-21T23-02-12-971Z.json",
-        "size": 410,
-        "hash": "232c4f2e52b4d3a0",
-        "lastModified": "2025-06-21T23:02:12.975Z",
-        "type": "config",
-        "language": "json",
-        "symbols": [
-          {
-            "type": "function",
-            "name": "preferredModel"
-          },
-          {
-            "type": "function",
-            "name": "autoExecute"
-          },
-          {
-            "type": "function",
-            "name": "plugins"
-          },
-          {
-            "type": "function",
-            "name": "profiles"
-          },
-          {
-            "type": "function",
-            "name": "outputDirectories"
-          },
-          {
-            "type": "function",
-            "name": "preferredProvider"
-          }
-        ],
-        "imports": [],
-        "exports": [],
-        "dependencies": []
-      }
-    ],
     [
       ".aia/codebase-index.json",
       {
         "path": ".aia/codebase-index.json",
-        "size": 653060,
-        "hash": "fd755f38fad2a050",
-        "lastModified": "2025-06-22T00:12:47.125Z",
+        "size": 689951,
+        "hash": "aa70e0fc8c66fff0",
+        "lastModified": "2025-06-22T01:54:08.771Z",
         "type": "config",
         "language": "json",
         "symbols": [
@@ -329,32 +209,96 @@
       }
     ],
     [
-      ".github/copilot-instructions.md",
+      ".github/copilot-context.md",
       {
-        "path": ".github/copilot-instructions.md",
-        "size": 6607,
-        "hash": "ba887a32143fca38",
-        "lastModified": "2025-06-22T00:13:20.153Z",
+        "path": ".github/copilot-context.md",
+        "size": 2383,
+        "hash": "2012470b1cb3bf52",
+        "lastModified": "2025-06-22T01:48:15.013Z",
         "type": "documentation",
         "language": "markdown",
         "symbols": [
           {
             "type": "header",
             "level": 1,
-            "text": "GitHub Copilot Instructions - AIA CLI",
-            "name": "GitHub Copilot Instructions - AIA CLI"
+            "text": "Project Symbol Context",
+            "name": "Project Symbol Context"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Table of Contents",
-            "name": "Table of Contents"
+            "text": "Architecture Overview",
+            "name": "Architecture Overview"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Core Classes (20)\\n\\n- **HelloPlugin**: examples/simple-plugin/index.js\\n- **module**: examples/simple-plugin/index.js\\n- **name**: src/SemanticCodeAnalyzer.ts\\n- **AgenticReasoningEngine**: src/AgenticReasoningEngine.ts\\n- **AgenticSearchEngine**: src/AgenticSearchEngine.ts\\n- **CLIFormatter**: src/CLIFormatter.ts\\n- **CodebaseSummarizer**: src/CodebaseSummarizer.ts\\n- **import**: src/CommandHandler.ts\\n- **CommandHandler**: src/CommandHandler.ts\\n- **CommandIntelligence**: src/CommandIntelligence.ts\\n- **ConfigurationManager**: src/ConfigurationManager.ts\\n- **ContextAnalyzer**: src/ContextAnalyzer.ts\\n- **ConversationContextManager**: src/ConversationContextManager.ts\\n- **DomainSpecialist**: src/DomainSpecialist.ts\\n- **ErrorHandler**: src/ErrorHandler.ts\\n- **MemoryManager**: src/MemoryManager.ts\\n- **NLPEngine**: src/NLPEngine.ts\\n- **PerformanceOptimizer**: src/PerformanceOptimizer.ts\\n- **PluginManager**: src/PluginManager.ts\\n- **QueryProcessor**: src/QueryProcessor.ts",
+            "name": "Core Classes (20)\\n\\n- **HelloPlugin**: examples/simple-plugin/index.js\\n- **module**: examples/simple-plugin/index.js\\n- **name**: src/SemanticCodeAnalyzer.ts\\n- **AgenticReasoningEngine**: src/AgenticReasoningEngine.ts\\n- **AgenticSearchEngine**: src/AgenticSearchEngine.ts\\n- **CLIFormatter**: src/CLIFormatter.ts\\n- **CodebaseSummarizer**: src/CodebaseSummarizer.ts\\n- **import**: src/CommandHandler.ts\\n- **CommandHandler**: src/CommandHandler.ts\\n- **CommandIntelligence**: src/CommandIntelligence.ts\\n- **ConfigurationManager**: src/ConfigurationManager.ts\\n- **ContextAnalyzer**: src/ContextAnalyzer.ts\\n- **ConversationContextManager**: src/ConversationContextManager.ts\\n- **DomainSpecialist**: src/DomainSpecialist.ts\\n- **ErrorHandler**: src/ErrorHandler.ts\\n- **MemoryManager**: src/MemoryManager.ts\\n- **NLPEngine**: src/NLPEngine.ts\\n- **PerformanceOptimizer**: src/PerformanceOptimizer.ts\\n- **PluginManager**: src/PluginManager.ts\\n- **QueryProcessor**: src/QueryProcessor.ts"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Role",
-            "name": "Role"
+            "text": "Key Symbols (O(1) Lookup Available)",
+            "name": "Key Symbols (O(1) Lookup Available)"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Symbol Relationships",
+            "name": "Symbol Relationships"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Performance Hints",
+            "name": "Performance Hints"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Quick Symbol Queries",
+            "name": "Quick Symbol Queries"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Code Generation Guidelines",
+            "name": "Code Generation Guidelines"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Performance Benefits",
+            "name": "Performance Benefits"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Direct O(1) symbol lookup examples\nconst AgenticReasoningEngine = symbolIndex.get('AgenticReasoningEngine');\nconst MemoryManager = symbolIndex.get('MemoryManager');\nconst CommandFactoryV2 = symbolIndex.get('CommandFactoryV2');\n\n// Find all implementations\nconst commandImplementations = symbolIndex.getImplementations('ICommand');\n\n// Get dependency graph\nconst serviceDependencies = symbolIndex.getDependencies('ServiceFactory');",
+            "name": "CodeBlock_typescript"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/copilot-instructions-auto.md",
+      {
+        "path": ".github/copilot-instructions-auto.md",
+        "size": 4364,
+        "hash": "4ef1264fc3840b7e",
+        "lastModified": "2025-06-22T01:51:53.719Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Codebase Analysis",
+            "name": "Codebase Analysis"
           },
           {
             "type": "header",
@@ -364,231 +308,465 @@
           },
           {
             "type": "header",
-            "level": 3,
-            "text": "Core Information",
-            "name": "Core Information"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Core Capabilities",
-            "name": "Core Capabilities"
+            "level": 2,
+            "text": "Codebase Statistics",
+            "name": "Codebase Statistics"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Architecture Patterns",
-            "name": "Architecture Patterns"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Service-Oriented Architecture",
-            "name": "Service-Oriented Architecture"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Key Engine Components",
-            "name": "Key Engine Components"
+            "text": "Language Distribution",
+            "name": "Language Distribution"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Directory Structure",
-            "name": "Directory Structure"
+            "text": "Entry Points",
+            "name": "Entry Points"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Key Components & Relationships",
-            "name": "Key Components & Relationships"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Core Managers",
-            "name": "Core Managers"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Service Integration",
-            "name": "Service Integration"
+            "text": "Key Components",
+            "name": "Key Components"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Code Navigation Guidelines",
-            "name": "Code Navigation Guidelines"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Service Location",
-            "name": "Service Location"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Adding New Features",
-            "name": "Adding New Features"
+            "text": "Classes",
+            "name": "Classes"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Common Patterns",
-            "name": "Common Patterns"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Command Implementation",
-            "name": "Command Implementation"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Service Pattern",
-            "name": "Service Pattern"
+            "text": "Functions",
+            "name": "Functions"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Interactive Examples",
-            "name": "Interactive Examples"
+            "text": "TODO Items",
+            "name": "TODO Items"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Usage Instructions",
+            "name": "Usage Instructions"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Command Usage",
-            "name": "Command Usage"
+            "text": "For Copilot Instructions:",
+            "name": "For Copilot Instructions:"
           },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "For Prompts:",
+            "name": "For Prompts:"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/copilot-instructions-test.md",
+      {
+        "path": ".github/copilot-instructions-test.md",
+        "size": 4364,
+        "hash": "525eb02bf27075fb",
+        "lastModified": "2025-06-22T01:50:34.973Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
           {
             "type": "header",
             "level": 1,
-            "text": "AI-powered analysis",
-            "name": "AI-powered analysis"
+            "text": "Codebase Analysis",
+            "name": "Codebase Analysis"
           },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Project Overview",
+            "name": "Project Overview"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Codebase Statistics",
+            "name": "Codebase Statistics"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Language Distribution",
+            "name": "Language Distribution"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Entry Points",
+            "name": "Entry Points"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Key Components",
+            "name": "Key Components"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Classes",
+            "name": "Classes"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Functions",
+            "name": "Functions"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "TODO Items",
+            "name": "TODO Items"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Usage Instructions",
+            "name": "Usage Instructions"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "For Copilot Instructions:",
+            "name": "For Copilot Instructions:"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "For Prompts:",
+            "name": "For Prompts:"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/copilot-instructions.md",
+      {
+        "path": ".github/copilot-instructions.md",
+        "size": 6275,
+        "hash": "78f5e9dae2dd4b44",
+        "lastModified": "2025-06-22T01:54:38.794Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
           {
             "type": "header",
             "level": 1,
-            "text": "Context management",
-            "name": "Context management"
-          },
-          {
-            "type": "header",
-            "level": 1,
-            "text": "Memory operations",
-            "name": "Memory operations"
+            "text": "GitHub Copilot Instructions - AIA CLI Project",
+            "name": "GitHub Copilot Instructions - AIA CLI Project"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Development Workflow",
-            "name": "Development Workflow"
+            "text": "🎯 Project Context",
+            "name": "🎯 Project Context"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "📊 Current Codebase Statistics",
+            "name": "📊 Current Codebase Statistics"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Common Development Scenarios",
-            "name": "Common Development Scenarios"
+            "text": "🧠 Symbol Index Integration",
+            "name": "🧠 Symbol Index Integration"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Scenario 1: Adding AI Capability",
-            "name": "Scenario 1: Adding AI Capability"
+            "text": "Performance Benefits",
+            "name": "Performance Benefits"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Available Symbols",
+            "name": "Available Symbols"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Performance Considerations",
-            "name": "Performance Considerations"
+            "text": "🏗️ Architecture Patterns",
+            "name": "🏗️ Architecture Patterns"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Core Services Pattern",
+            "name": "Core Services Pattern"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Command Pattern Implementation",
+            "name": "Command Pattern Implementation"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Key Service Relationships",
+            "name": "Key Service Relationships"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Guidelines",
-            "name": "Guidelines"
+            "text": "🚀 Development Guidelines",
+            "name": "🚀 Development Guidelines"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Code Organization",
-            "name": "Code Organization"
+            "text": "Import Patterns",
+            "name": "Import Patterns"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Best Practices",
-            "name": "Best Practices"
+            "text": "Service Creation Template",
+            "name": "Service Creation Template"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Documentation",
-            "name": "Documentation"
+            "text": "Adding New Commands",
+            "name": "Adding New Commands"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "📁 Directory Structure & File Organization",
+            "name": "📁 Directory Structure & File Organization"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🎯 Code Generation Best Practices",
+            "name": "🎯 Code Generation Best Practices"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "1. **Symbol-Aware Suggestions**",
+            "name": "1. **Symbol-Aware Suggestions**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "2. **Type Safety First**",
+            "name": "2. **Type Safety First**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "3. **Performance Considerations**",
+            "name": "3. **Performance Considerations**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "4. **Testing Integration**",
+            "name": "4. **Testing Integration**"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🔧 Common Development Scenarios",
+            "name": "🔧 Common Development Scenarios"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Adding AI Provider Integration",
+            "name": "Adding AI Provider Integration"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Creating Memory-Aware Commands",
+            "name": "Creating Memory-Aware Commands"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Service Integration Examples",
+            "name": "Service Integration Examples"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "⚡ Real-Time Updates",
+            "name": "⚡ Real-Time Updates"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🎯 Usage Examples",
+            "name": "🎯 Usage Examples"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Quick Symbol Lookup",
+            "name": "Quick Symbol Lookup"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Dependency Injection Examples",
+            "name": "Dependency Injection Examples"
           },
           {
             "type": "codeblock",
-            "language": "markdown",
-            "content": "# GitHub Copilot Instructions - AIA CLI\n\n## Table of Contents\n1. [Role](#role)\n2. [Project Overview](#project-overview)\n3. [Architecture Patterns](#architecture-patterns)\n4. [Directory Structure](#directory-structure)\n5. [Key Components & Relationships](#key-components--relationships)\n6. [Code Navigation Guidelines](#code-navigation-guidelines)\n7. [Common Patterns](#common-patterns)\n8. [Interactive Examples](#interactive-examples)\n9. [Development Workflow](#development-workflow)\n10. [Common Development Scenarios](#common-development-scenarios)\n11. [Performance Considerations](#performance-considerations)\n12. [Guidelines](#guidelines)\n\n## Role\nWhen working with this codebase, GitHub Copilot should:\n- Understand and maintain the service-oriented architecture\n- Follow the established dependency injection patterns\n- Implement command pattern structures for new CLI features\n- Maintain consistency with existing TypeScript patterns\n- Support AI-driven development workflows\n- Optimize for large-scale application performance\n\n## Project Overview\n\n### Core Information\n- **Project Name**: AIA CLI (AI Assistant Command Line Interface)\n- **Type**: TypeScript Node.js CLI Application\n- **Scale**: 158 files, 85 classes, 56 functions\n- **Testing Coverage**: 30 test files\n\n### Core Capabilities\n- AI-powered task execution\n- Command-line interface\n- Memory management\n- Context-aware operations\n- Codebase analysis\n- Configuration management\n\n## Architecture Patterns\n\n### Service-Oriented Architecture\nThe application is built around core services:",
-            "name": "CodeBlock_markdown"
+            "language": "typescript",
+            "content": "// All services follow dependency injection pattern\nclass ServiceName implements IServiceInterface {\n  constructor(\n    private dependencyA: IDependencyA,\n    private dependencyB: IDependencyB\n  ) {}\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Commands extend BaseCommand\nclass NewCommand extends BaseCommand {\n  async execute(context: ContextInfo): Promise<void> {\n    const aiProvider = this.aiProvider.createProvider('gpt4');\n    const memory = await this.memoryManager.getMemory();\n    // Command logic here\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Use these standard import patterns\nimport { MemoryManager } from '../managers/MemoryManager';\nimport { ConfigurationManager } from '../managers/ConfigurationManager';\nimport { AIProviderFactory } from '../factories/AIProviderFactory';",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// New service template\nexport class NewService implements INewService {\n  constructor(\n    private memoryManager: MemoryManager,\n    private configManager: ConfigurationManager\n  ) {}\n\n  async execute(context: ContextInfo): Promise<ResultType> {\n    // Implementation using injected dependencies\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// New command template\nexport class NewCommand extends BaseCommand {\n  constructor(\n    memoryManager: MemoryManager,\n    aiProvider: AIProviderFactory,\n    configManager: ConfigurationManager\n  ) {\n    super(memoryManager, aiProvider);\n  }\n\n  async execute(context: ContextInfo): Promise<void> {\n    // Command implementation\n  }\n}",
+            "name": "CodeBlock_typescript"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "### Key Engine Components\n- `AgenticReasoningEngine`: Handles AI-powered decision making\n- `AgenticSearchEngine`: Manages intelligent search operations\n- `NLPEngine`: Natural language processing capabilities\n- `ResponseAdaptationEngine`: Adapts AI responses for CLI output\n\n## Directory Structure",
+            "content": "src/\n├── commands/          # Command implementations (extends BaseCommand)\n├── services/          # Core business logic services\n├── managers/          # State and lifecycle management\n├── factories/         # Object creation and DI\n├── interfaces/        # TypeScript interface definitions\n├── analyzers/         # Code analysis and symbol extraction\n└── utils/            # Shared utilities and helpers",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
-            "language": "unknown",
-            "content": "## Key Components & Relationships\n\n### Core Managers",
-            "name": "CodeBlock_unknown"
+            "language": "typescript",
+            "content": "class NewAIProvider implements IAIProvider {\n  constructor(private config: ConfigurationManager) {}\n  \n  async generate(prompt: string): Promise<string> {\n    // Provider implementation\n  }\n}",
+            "name": "CodeBlock_typescript"
           },
           {
             "type": "codeblock",
-            "language": "unknown",
-            "content": "### Service Integration",
-            "name": "CodeBlock_unknown"
+            "language": "typescript",
+            "content": "class MemoryCommand extends BaseCommand {\n  async execute(context: ContextInfo): Promise<void> {\n    const memories = await this.memoryManager.searchMemories(context.query);\n    // Use retrieved memories in command logic\n  }\n}",
+            "name": "CodeBlock_typescript"
           },
           {
             "type": "codeblock",
-            "language": "unknown",
-            "content": "## Code Navigation Guidelines\n\n### Service Location\n- AI-related services: `src/services/ai/`\n- Memory management: `src/services/memory/`\n- Configuration: `src/services/config/`\n- Command handling: `src/services/command/`\n\n### Adding New Features\n1. Identify target service layer\n2. Implement interface\n3. Register with dependency injection\n4. Add command handler if CLI-exposed\n\n## Common Patterns\n\n### Command Implementation",
-            "name": "CodeBlock_unknown"
+            "language": "typescript",
+            "content": "// Service with multiple dependencies\nclass ComplexService {\n  constructor(\n    private symbolIndex: SymbolIndexService,\n    private aiProvider: AIProviderFactory,\n    private memory: MemoryManager\n  ) {}\n}",
+            "name": "CodeBlock_typescript"
           },
           {
             "type": "codeblock",
-            "language": "unknown",
-            "content": "### Service Pattern",
-            "name": "CodeBlock_unknown"
+            "language": "typescript",
+            "content": "// These symbols are available for instant completion:\nconst engine = new AgenticReasoningEngine(/*...*/);\nconst memory = new MemoryManager(/*...*/);\nconst config = new ConfigurationManager(/*...*/);",
+            "name": "CodeBlock_typescript"
           },
           {
             "type": "codeblock",
-            "language": "unknown",
-            "content": "## Interactive Examples\n\n### Command Usage",
-            "name": "CodeBlock_unknown"
+            "language": "typescript",
+            "content": "// ServiceFactory pattern usage\nconst serviceFactory = new ServiceFactory();\nconst memoryService = serviceFactory.createMemoryService();",
+            "name": "CodeBlock_typescript"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/copilot-relationships.json",
+      {
+        "path": ".github/copilot-relationships.json",
+        "size": 121,
+        "hash": "6eef005ed3528d2a",
+        "lastModified": "2025-06-22T01:48:15.015Z",
+        "type": "config",
+        "language": "json",
+        "symbols": [
+          {
+            "type": "function",
+            "name": "nodes"
           },
           {
-            "type": "codeblock",
-            "language": "unknown",
-            "content": "## Development Workflow\n\n1. **Feature Addition**",
-            "name": "CodeBlock_unknown"
+            "type": "function",
+            "name": "edges"
           },
           {
-            "type": "codeblock",
-            "language": "unknown",
-            "content": "## Common Development Scenarios\n\n### Scenario 1: Adding AI Capability",
-            "name": "CodeBlock_unknown"
+            "type": "function",
+            "name": "stats"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/copilot-symbols.json",
+      {
+        "path": ".github/copilot-symbols.json",
+        "size": 208,
+        "hash": "790570bf774078a5",
+        "lastModified": "2025-06-22T01:48:15.013Z",
+        "type": "config",
+        "language": "json",
+        "symbols": [
+          {
+            "type": "function",
+            "name": "version"
           },
           {
-            "type": "codeblock",
-            "language": "unknown",
-            "content": "## Performance Considerations\n\n1. **Memory Management**\n- Use `MemoryManager` for state caching\n- Implement cleanup in `dispose()` methods\n- Monitor memory usage patterns\n\n2. **Service Optimization**\n- Lazy loading for heavy services\n- Connection pooling in `AIService`\n- Caching in `ConfigurationManager`\n\n## Guidelines\n\n### Code Organization\n1. Place services in appropriate directories\n2. Follow interface-first development\n3. Use dependency injection consistently\n4. Implement command pattern for CLI features\n\n### Best Practices\n1. Always implement interfaces\n2. Use managers for state handling\n3. Leverage existing engines\n4. Follow established patterns\n\n### Documentation\n1. Document public APIs\n2. Include usage examples\n3. Maintain architecture diagrams\n4. Update command documentation",
-            "name": "CodeBlock_unknown"
+            "type": "function",
+            "name": "generated"
+          },
+          {
+            "type": "function",
+            "name": "stats"
+          },
+          {
+            "type": "function",
+            "name": "topLevelSymbols"
+          },
+          {
+            "type": "function",
+            "name": "patterns"
           }
         ],
         "imports": [],
@@ -1163,6 +1341,548 @@
             "level": 2,
             "text": "Priority Order",
             "name": "Priority Order"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      "AIA-CLI-VSCODE-INTEGRATION-FINAL.md",
+      {
+        "path": "AIA-CLI-VSCODE-INTEGRATION-FINAL.md",
+        "size": 6655,
+        "hash": "4fbb4f5d342d7a37",
+        "lastModified": "2025-06-22T01:54:13.316Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "AIA CLI Integration for VSCode Extension - FINAL IMPLEMENTATION ✅",
+            "name": "AIA CLI Integration for VSCode Extension - FINAL IMPLEMENTATION ✅"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🎯 **Optimal Solution Implemented**",
+            "name": "🎯 **Optimal Solution Implemented**"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🚀 **Key Benefits Achieved**",
+            "name": "🚀 **Key Benefits Achieved**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "1. **Zero Code Duplication**",
+            "name": "1. **Zero Code Duplication**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "2. **Consistent Performance**",
+            "name": "2. **Consistent Performance**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "3. **Leveraged Existing Infrastructure**",
+            "name": "3. **Leveraged Existing Infrastructure**"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🔧 **Implementation Details**",
+            "name": "🔧 **Implementation Details**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "VSCode Extension Architecture",
+            "name": "VSCode Extension Architecture"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "File Watching Integration",
+            "name": "File Watching Integration"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Commands Available",
+            "name": "Commands Available"
+          },
+          {
+            "type": "header",
+            "level": 1,
+            "text": "VSCode Command Palette:",
+            "name": "VSCode Command Palette:"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "📁 **File Structure**",
+            "name": "📁 **File Structure**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "VSCode Extension (Simplified)",
+            "name": "VSCode Extension (Simplified)"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Configuration Files",
+            "name": "Configuration Files"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "⚡ **Real-Time Auto-Updates**",
+            "name": "⚡ **Real-Time Auto-Updates**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "How It Works",
+            "name": "How It Works"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Configuration Options",
+            "name": "Configuration Options"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🎯 **Benefits for GitHub Copilot**",
+            "name": "🎯 **Benefits for GitHub Copilot**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Enhanced Context Files",
+            "name": "Enhanced Context Files"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Developer Experience",
+            "name": "Developer Experience"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🔄 **Installation & Usage**",
+            "name": "🔄 **Installation & Usage**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Install Extension",
+            "name": "Install Extension"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Test Auto-Updates",
+            "name": "Test Auto-Updates"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Monitor Performance",
+            "name": "Monitor Performance"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "📊 **Validation Results**",
+            "name": "📊 **Validation Results**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Integration Test ✅",
+            "name": "Integration Test ✅"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🏁 **Final Status**",
+            "name": "🏁 **Final Status**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "✅ **IMPLEMENTATION COMPLETE**",
+            "name": "✅ **IMPLEMENTATION COMPLETE**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "🚀 **PRODUCTION READY**",
+            "name": "🚀 **PRODUCTION READY**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "🎯 **BUSINESS IMPACT**",
+            "name": "🎯 **BUSINESS IMPACT**"
+          },
+          {
+            "type": "codeblock",
+            "language": "bash",
+            "content": "📊 Test Results:\n- Symbol index build: 649ms (via AIA CLI)\n- Copilot instructions: 544ms (via AIA CLI)\n- VSCode overhead: <50ms (file watching only)",
+            "name": "CodeBlock_bash"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// .vscode/aia-copilot-bridge/src/autoUpdateService.ts\nclass AutoUpdateService {\n  async performUpdate() {\n    // Use existing AIA CLI commands instead of reimplementing\n    await execAsync('node main.js index build --force');\n    await execAsync(\n      'node main.js index export --type copilot-instructions --output .github/copilot-instructions.md'\n    );\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "bash",
+            "content": "# VSCode Command Palette:\nAIA: Rebuild Symbol Index          # Triggers: node main.js index build --force\nAIA: Update Copilot Instructions   # Triggers: node main.js index export --type copilot-instructions\nAIA: Toggle Auto-Update           # Enable/disable file watching\nAIA: Show Performance Report      # Display timing metrics",
+            "name": "CodeBlock_bash"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": ".vscode/aia-copilot-bridge/\n├── src/\n│   ├── extension.ts              # Main activation, uses AIA CLI\n│   ├── autoUpdateService.ts      # File watching + AIA CLI calls\n│   ├── symbolProvider.ts         # Reads existing .aia/codebase-index.json\n│   └── performanceMonitor.ts     # Tracks AIA CLI performance\n├── package.json                  # Extension manifest\n└── out/                          # Compiled JavaScript",
+            "name": "CodeBlock_unknown"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": ".vscode/\n├── settings.json                 # Auto-update configuration\n└── tasks.json                    # Build and maintenance tasks\n\n.github/\n├── copilot-instructions.md       # Auto-generated via AIA CLI\n├── copilot-context.md           # Symbol summaries\n└── copilot-symbols.json         # Machine-readable context",
+            "name": "CodeBlock_unknown"
+          },
+          {
+            "type": "codeblock",
+            "language": "json",
+            "content": "{\n  \"aia.symbolIndex\": {\n    \"autoUpdate\": true,\n    \"updateInterval\": 300000,\n    \"debounceDelay\": 2000,\n    \"showUpdateNotifications\": false,\n    \"watchFileTypes\": [\"ts\", \"js\", \"tsx\", \"jsx\", \"md\"]\n  }\n}",
+            "name": "CodeBlock_json"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Type \"Agentic\" and see intelligent suggestions:\nconst engine = new AgenticReasoningEngine(); // ← Auto-completed with full context\nconst memory = new MemoryManager(); // ← Knows constructor parameters\nconst config = new ConfigurationManager(); // ← Understands service relationships",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "bash",
+            "content": "🧪 Testing AIA CLI Integration for VSCode Extension...\n\n📊 Test 1: Building symbol index...\n✅ Symbol index built in 649ms\n\n📊 Test 2: Generating copilot instructions...\n✅ Copilot instructions generated in 544ms (4364 bytes)\n\n🎯 Benefits of using existing AIA CLI:\n- ✅ No code duplication\n- ✅ Leverages existing O(1) symbol lookup\n- ✅ Consistent symbol index across CLI and VSCode\n- ✅ Automatic updates when AIA CLI improves\n- ✅ Full AI-enhanced symbol relationship detection\n\n✨ Integration test completed successfully! ✨",
+            "name": "CodeBlock_bash"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      "COPILOT-INTEGRATION.md",
+      {
+        "path": "COPILOT-INTEGRATION.md",
+        "size": 6481,
+        "hash": "9e5be63f8c1ebf3b",
+        "lastModified": "2025-06-22T01:23:43.373Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "AIA Symbol Index + GitHub Copilot Integration Guide",
+            "name": "AIA Symbol Index + GitHub Copilot Integration Guide"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Quick Start",
+            "name": "Quick Start"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Features",
+            "name": "Features"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "⚡ Lightning-Fast Symbol Lookup",
+            "name": "⚡ Lightning-Fast Symbol Lookup"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "🧠 Enhanced Copilot Context",
+            "name": "🧠 Enhanced Copilot Context"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "📊 Performance Monitoring",
+            "name": "📊 Performance Monitoring"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Usage",
+            "name": "Usage"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Symbol Completion",
+            "name": "Symbol Completion"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Quick Commands",
+            "name": "Quick Commands"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Performance Metrics",
+            "name": "Performance Metrics"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Architecture",
+            "name": "Architecture"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Extension Structure",
+            "name": "Extension Structure"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Integration Points",
+            "name": "Integration Points"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Configuration",
+            "name": "Configuration"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "VSCode Settings",
+            "name": "VSCode Settings"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "GitHub Copilot Integration",
+            "name": "GitHub Copilot Integration"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Performance Benchmarks",
+            "name": "Performance Benchmarks"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Troubleshooting",
+            "name": "Troubleshooting"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Symbol index not updating",
+            "name": "Symbol index not updating"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Extension not working",
+            "name": "Extension not working"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Performance issues",
+            "name": "Performance issues"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Development",
+            "name": "Development"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Building the Extension",
+            "name": "Building the Extension"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Testing",
+            "name": "Testing"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Debugging",
+            "name": "Debugging"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Best Practices",
+            "name": "Best Practices"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Example Workflows",
+            "name": "Example Workflows"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Rapid Architecture Analysis",
+            "name": "Rapid Architecture Analysis"
+          },
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Build index once",
+            "name": "Build index once"
+          },
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Then use AI agent with 10-40x speed improvement",
+            "name": "Then use AI agent with 10-40x speed improvement"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Code Navigation Enhancement",
+            "name": "Code Navigation Enhancement"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Advanced Features",
+            "name": "Advanced Features"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Custom Symbol Providers",
+            "name": "Custom Symbol Providers"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Performance Optimization",
+            "name": "Performance Optimization"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Integration with GitHub Copilot",
+            "name": "Integration with GitHub Copilot"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Support",
+            "name": "Support"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Future Enhancements",
+            "name": "Future Enhancements"
+          },
+          {
+            "type": "codeblock",
+            "language": "bash",
+            "content": "./setup-vscode-integration.sh",
+            "name": "CodeBlock_bash"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Type \"Agentic\" and immediately see:\n// - AgenticReasoningEngine\n// - AgenticExecution\n// - AgenticPlan\n// All with full context and relationships",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": "⚡ AIA Symbol Lookup: 3.2ms avg (15.6x faster)",
+            "name": "CodeBlock_unknown"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": ".vscode/aia-copilot-bridge/\n├── src/\n│   ├── extension.ts              # Main extension entry point\n│   ├── symbolProvider.ts         # Symbol completion provider\n│   ├── performanceMonitor.ts     # Performance tracking\n│   └── copilotContextProvider.ts # GitHub Copilot enhancement\n├── package.json                  # Extension manifest\n└── tsconfig.json                 # TypeScript configuration",
+            "name": "CodeBlock_unknown"
+          },
+          {
+            "type": "codeblock",
+            "language": "json",
+            "content": "{\n  \"aia.symbolIndex\": {\n    \"autoUpdate\": true,\n    \"updateInterval\": 300000,\n    \"includeInCopilotContext\": true,\n    \"performanceTracking\": true\n  }\n}",
+            "name": "CodeBlock_json"
+          },
+          {
+            "type": "codeblock",
+            "language": "bash",
+            "content": "cd .vscode/aia-copilot-bridge\nnpm install\nnpm run compile",
+            "name": "CodeBlock_bash"
+          },
+          {
+            "type": "codeblock",
+            "language": "bash",
+            "content": "node test-vscode-integration.js",
+            "name": "CodeBlock_bash"
+          },
+          {
+            "type": "codeblock",
+            "language": "bash",
+            "content": "# Build index once\naia index symbols:build --force\n\n# Then use AI agent with 10-40x speed improvement\naia agent \"analyze the service layer architecture\"\naia agent \"find circular dependencies\"\naia agent \"suggest interface improvements\"",
+            "name": "CodeBlock_bash"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "export class CustomSymbolProvider extends AIASymbolIndexProvider {\n  async provideCompletionItems(document, position) {\n    const items = await super.provideCompletionItems(document, position);\n    // Add custom logic here\n    return items;\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "const monitor = new SymbolIndexPerformanceMonitor();\nmonitor.trackLookup('MySymbol', duration);\nconst metrics = monitor.getMetrics();",
+            "name": "CodeBlock_typescript"
           }
         ],
         "imports": [],
@@ -1994,6 +2714,172 @@
             "type": "codeblock",
             "language": "bash",
             "content": "aia index <action> [query]\naia idx build",
+            "name": "CodeBlock_bash"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      "VSCode-Integration-COMPLETE.md",
+      {
+        "path": "VSCode-Integration-COMPLETE.md",
+        "size": 4878,
+        "hash": "c6742636df188aea",
+        "lastModified": "2025-06-22T01:31:09.708Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "AIA Symbol Index + VSCode Extension Integration - COMPLETED ✅",
+            "name": "AIA Symbol Index + VSCode Extension Integration - COMPLETED ✅"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Summary",
+            "name": "Summary"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "✅ Implementation Status",
+            "name": "✅ Implementation Status"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Core Components Implemented",
+            "name": "Core Components Implemented"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Performance Achievements",
+            "name": "Performance Achievements"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Files Created/Modified",
+            "name": "Files Created/Modified"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🚀 Key Features",
+            "name": "🚀 Key Features"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "1. O(1) Symbol Lookup",
+            "name": "1. O(1) Symbol Lookup"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "2. Enhanced Copilot Context",
+            "name": "2. Enhanced Copilot Context"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "3. Performance Monitoring",
+            "name": "3. Performance Monitoring"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "4. VSCode Integration",
+            "name": "4. VSCode Integration"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🔧 Installation & Usage",
+            "name": "🔧 Installation & Usage"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Install Extension",
+            "name": "Install Extension"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Available Commands",
+            "name": "Available Commands"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Test Features",
+            "name": "Test Features"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "📊 Validation Results",
+            "name": "📊 Validation Results"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Test Results ✅",
+            "name": "Test Results ✅"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🎯 Business Impact",
+            "name": "🎯 Business Impact"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Developer Experience",
+            "name": "Developer Experience"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Code Quality",
+            "name": "Code Quality"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Productivity Gains",
+            "name": "Productivity Gains"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "🏁 Next Steps",
+            "name": "🏁 Next Steps"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": "/.vscode/aia-copilot-bridge/\n├── package.json                    # Extension manifest\n├── tsconfig.json                   # TypeScript config\n├── src/\n│   ├── extension.ts               # Main extension entry\n│   ├── symbolProvider.ts          # O(1) symbol completion\n│   ├── performanceMonitor.ts      # Performance tracking\n│   └── copilotContextProvider.ts  # Copilot enhancement\n└── out/                           # Compiled JavaScript\n\n/.vscode/\n├── tasks.json                     # Build and maintenance tasks\n└── settings.json                  # Symbol index configuration\n\n/.github/\n├── copilot-instructions.md        # Updated with symbol index\n├── copilot-context.md             # Generated context\n└── copilot-symbols.json           # Symbol summaries",
+            "name": "CodeBlock_unknown"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Instant symbol completion\nconst engine = new AgenticReasoningEngine(); // ← Auto-completed from index",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "bash",
+            "content": "📊 Index metadata: 262 files indexed\n📊 Total symbols: 2,043 symbols\n📊 Symbols by type: {\n  function: 193,\n  class: 136,\n  header: 1,389,\n  codeblock: 325\n}\n\n✅ Found symbol: AgenticReasoningEngine in src/AgenticReasoningEngine.ts\n✅ Found symbol: MemoryManager in src/MemoryManager.ts\n✅ Found symbol: ConfigurationManager in src/ConfigurationManager.ts\n\n✅ VSCode Extension: All files compiled successfully\n✅ Copilot Integration: Context files generated",
             "name": "CodeBlock_bash"
           }
         ],
@@ -5506,9 +6392,9 @@
       "docs/architecture/codebase-architecture.md",
       {
         "path": "docs/architecture/codebase-architecture.md",
-        "size": 6161,
-        "hash": "c4e0b791aa7eb8f9",
-        "lastModified": "2025-06-22T00:14:20.922Z",
+        "size": 5993,
+        "hash": "d8814845d7c25340",
+        "lastModified": "2025-06-22T01:05:58.769Z",
         "type": "documentation",
         "language": "markdown",
         "symbols": [
@@ -5523,12 +6409,6 @@
             "level": 2,
             "text": "Executive Summary",
             "name": "Executive Summary"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Core Architecture Principles",
-            "name": "Core Architecture Principles"
           },
           {
             "type": "header",
@@ -5575,8 +6455,8 @@
           {
             "type": "header",
             "level": 3,
-            "text": "Service Interfaces",
-            "name": "Service Interfaces"
+            "text": "Service Responsibilities",
+            "name": "Service Responsibilities"
           },
           {
             "type": "header",
@@ -5683,14 +6563,32 @@
           {
             "type": "header",
             "level": 3,
-            "text": "Future Improvements",
-            "name": "Future Improvements"
+            "text": "Planned Improvements",
+            "name": "Planned Improvements"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Migration Strategy",
-            "name": "Migration Strategy"
+            "text": "Future Vision",
+            "name": "Future Vision"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Best Practices",
+            "name": "Best Practices"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Code Organization",
+            "name": "Code Organization"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Development Guidelines",
+            "name": "Development Guidelines"
           },
           {
             "type": "header",
@@ -5701,49 +6599,43 @@
           {
             "type": "codeblock",
             "language": "markdown",
-            "content": "# AIA CLI Architecture Documentation\n\n## Executive Summary\n\nThe AIA CLI (AI Assistant Command Line Interface) is a sophisticated TypeScript/Node.js application designed to provide AI-powered development assistance through a command-line interface. The system employs a service-oriented architecture with strong emphasis on dependency injection, interface-driven design, and the command pattern.\n\nKey architectural characteristics:\n- Modular service composition\n- Pluggable architecture\n- High extensibility\n- Strong separation of concerns\n- Performance-optimized design\n\n### Core Architecture Principles\n- Interface-first design\n- Loose coupling\n- High cohesion\n- Single responsibility\n- Open/closed principle\n\n## System Architecture\n\n### Overall Design\nThe system is structured in layers:\n\n1. **Presentation Layer**\n   - CLI Interface\n   - Command Processors\n   - Response Formatters\n\n2. **Application Layer**\n   - Command Handlers\n   - Service Orchestration\n   - Plugin Management\n\n3. **Domain Layer**\n   - Core Business Logic\n   - Domain Models\n   - Service Interfaces\n\n4. **Infrastructure Layer**\n   - External Integrations\n   - Persistence\n   - Configuration\n\n### Component Organization",
+            "content": "# AIA CLI Architecture Documentation\n\n## Executive Summary\n\nThe AIA CLI is a sophisticated TypeScript/Node.js command-line application designed to provide AI-powered development assistance. The system implements a service-oriented architecture with strong emphasis on dependency injection, modularity, and extensibility.\n\nKey architectural characteristics:\n- Service-oriented design with clear component boundaries\n- Command pattern implementation for operation handling\n- Factory pattern usage for object creation\n- Robust memory management and context awareness\n- Plugin-based extensibility\n- Performance-optimized request handling\n\n## System Architecture\n\n### Overall Design\nThe system is structured in layers:\n\n1. **Presentation Layer**\n   - CLI interface\n   - Command parsing\n   - User interaction\n\n2. **Application Layer**\n   - Command processing\n   - Workflow management\n   - Service orchestration\n\n3. **Domain Layer**\n   - Core business logic\n   - AI interactions\n   - Memory management\n\n4. **Infrastructure Layer**\n   - Configuration management\n   - Plugin system\n   - External integrations\n\n### Component Organization",
             "name": "CodeBlock_markdown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "## Design Patterns\n\n### Implemented Patterns\n\n1. **Service-Oriented Architecture (SOA)**\n   - Purpose: Modular service composition\n   - Implementation: Independent service components\n   - Example:",
+            "content": "## Design Patterns\n\n### Implemented Patterns\n\n1. **Service-Oriented Architecture (SOA)**\n   - Loose coupling between components\n   - Clear service boundaries\n   - Interface-based communication\n\n2. **Command Pattern**",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "2. **Command Pattern**\n   - Purpose: Encapsulate command execution\n   - Implementation: Command handlers and processors\n   - Example:",
+            "content": "3. **Factory Pattern**",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "3. **Factory Pattern**\n   - Purpose: Dynamic object creation\n   - Implementation: Service and command factories\n   - Example:",
+            "content": "4. **Dependency Injection**",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "## Component Architecture\n\n### Core Services\n\n1. **AgenticReasoningEngine**\n   - Purpose: AI-powered reasoning and decision making\n   - Responsibilities:\n     - Task analysis\n     - Decision optimization\n     - Action planning\n\n2. **MemoryManager**\n   - Purpose: State and context management\n   - Responsibilities:\n     - Conversation history\n     - Context persistence\n     - State management\n\n3. **ConfigurationManager**\n   - Purpose: System configuration\n   - Responsibilities:\n     - Config loading\n     - Environment management\n     - Settings validation\n\n### Service Interfaces",
+            "content": "## Component Architecture\n\n### Core Services\n\n1. **ConfigurationManager**\n   - Configuration loading\n   - Environment management\n   - Settings validation\n\n2. **MemoryManager**\n   - Conversation history\n   - Context persistence\n   - State management\n\n3. **PluginManager**\n   - Plugin discovery\n   - Extension loading\n   - Feature management\n\n4. **ResponseAdaptationEngine**\n   - Response formatting\n   - Output customization\n   - Template processing\n\n### Service Responsibilities\n\n| Service | Primary Responsibility | Dependencies |\n|---------|----------------------|--------------|\n| AIProviderFactory | AI provider instantiation | ConfigurationManager |\n| CommandValidationService | Command validation | ContextInfo |\n| WorkflowManager | Process orchestration | MemoryManager, AIService |\n\n## Data Architecture\n\n### Data Models",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "## Data Architecture\n\n### Data Models\n\n1. **Command Models**",
+            "content": "### Storage Patterns\n- In-memory storage for active sessions\n- File-based persistence for configuration\n- Cached results for performance optimization\n\n## Security Architecture\n\n### Authentication\n- API key management for AI services\n- Secure configuration storage\n- Environment-based security controls\n\n### Data Protection\n- Local storage encryption\n- Sensitive data masking\n- Secure memory management\n\n## Performance Architecture\n\n### Optimization Strategies\n1. **Request Optimization**\n   - Response caching\n   - Batch processing\n   - Lazy loading\n\n2. **Memory Management**\n   - Efficient data structures\n   - Resource pooling\n   - Garbage collection optimization\n\n### Monitoring\n- Performance metrics collection\n- Response time tracking\n- Resource usage monitoring\n\n## Integration Architecture\n\n### External Integrations\n1. **AI Providers**\n   - OpenAI\n   - Azure AI\n   - Custom providers\n\n2. **Development Tools**\n   - Git integration\n   - IDE plugins\n   - Build tools\n\n### API Design",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "2. **Memory Models**",
-            "name": "CodeBlock_unknown"
-          },
-          {
-            "type": "codeblock",
-            "language": "unknown",
-            "content": "### Storage Patterns\n\n1. **In-Memory Storage**\n   - Purpose: Quick access to runtime data\n   - Implementation: Memory cache with TTL\n\n2. **Persistent Storage**\n   - Purpose: Long-term data retention\n   - Implementation: File-based storage with indexing\n\n## Security Architecture\n\n### Authentication\n- CLI-level authentication\n- API key management\n- Token-based security\n\n### Data Protection\n- Encryption at rest\n- Secure configuration storage\n- Sensitive data handling\n\n## Performance Architecture\n\n### Optimization Strategies\n\n1. **Command Execution**\n   - Lazy loading\n   - Command pooling\n   - Result caching\n\n2. **Memory Management**\n   - Efficient state management\n   - Memory bounds\n   - Garbage collection optimization\n\n### Monitoring\n- Command execution metrics\n- Performance tracking\n- Resource utilization\n\n## Integration Architecture\n\n### External Integrations\n\n1. **AI Services**\n   - API integration\n   - Response handling\n   - Error management\n\n2. **Plugin System**\n   - Dynamic loading\n   - Version management\n   - Dependency resolution\n\n### API Design\n- RESTful principles\n- Strong typing\n- Version control\n\n## Deployment Architecture\n\n### Distribution\n- NPM package\n- Global installation\n- Version management\n\n### Requirements\n- Node.js runtime\n- TypeScript support\n- Configuration files\n\n## Architecture Evolution\n\n### Current Limitations\n- Synchronous command execution\n- Limited parallel processing\n- Memory constraints\n\n### Future Improvements\n1. **Short Term**\n   - Async command execution\n   - Enhanced error handling\n   - Performance optimization\n\n2. **Long Term**\n   - Distributed processing\n   - Cloud integration\n   - Advanced AI capabilities\n\n### Migration Strategy\n1. Gradual service migration\n2. Interface versioning\n3. Backward compatibility\n4. Feature flags\n\n## Conclusion\n\nThe AIA CLI architecture provides a robust foundation for AI-powered development assistance through careful consideration of patterns, practices, and principles. The system's modular design and strong separation of concerns enable future growth and enhancement while maintaining maintainability and performance.",
+            "content": "## Deployment Architecture\n\n### Distribution\n- NPM package\n- Docker container\n- Standalone executable\n\n### Requirements\n- Node.js runtime\n- Configuration file\n- API credentials\n\n## Architecture Evolution\n\n### Current Limitations\n1. Single-threaded execution model\n2. Limited concurrent processing\n3. Memory constraints for large datasets\n\n### Planned Improvements\n1. Worker thread implementation\n2. Distributed processing support\n3. Enhanced caching mechanisms\n4. Improved plugin architecture\n\n### Future Vision\n- Microservices architecture\n- Cloud-native deployment\n- Real-time collaboration\n- Extended AI capabilities\n\n## Best Practices\n\n### Code Organization\n- Feature-based folder structure\n- Clear separation of concerns\n- Interface-driven development\n- Comprehensive documentation\n\n### Development Guidelines\n1. Use dependency injection\n2. Follow SOLID principles\n3. Write unit tests\n4. Document public APIs\n5. Implement error handling\n\n## Conclusion\n\nThe AIA CLI architecture provides a robust foundation for AI-powered development assistance. Its service-oriented design, coupled with strong patterns and practices, ensures maintainability, extensibility, and performance.\n\n---\n\nLast Updated: [Current Date]\nVersion: 1.0",
             "name": "CodeBlock_unknown"
           }
         ],
@@ -6060,47 +6952,29 @@
       "docs/comprehensive/codebase-comprehensive.md",
       {
         "path": "docs/comprehensive/codebase-comprehensive.md",
-        "size": 5752,
-        "hash": "6661237727882a36",
-        "lastModified": "2025-06-22T00:13:45.729Z",
+        "size": 5466,
+        "hash": "b5d2566f46e677be",
+        "lastModified": "2025-06-22T01:05:24.302Z",
         "type": "documentation",
         "language": "markdown",
         "symbols": [
           {
             "type": "header",
             "level": 1,
-            "text": "AIA CLI - Technical Documentation",
-            "name": "AIA CLI - Technical Documentation"
+            "text": "AIA CLI Technical Documentation",
+            "name": "AIA CLI Technical Documentation"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Executive Summary",
-            "name": "Executive Summary"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "1. System Overview",
-            "name": "1. System Overview"
+            "text": "1. Executive Summary",
+            "name": "1. Executive Summary"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "1.1 Purpose",
-            "name": "1.1 Purpose"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "1.2 Project Statistics",
-            "name": "1.2 Project Statistics"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "1.3 Key Components",
-            "name": "1.3 Key Components"
+            "text": "Key Metrics",
+            "name": "Key Metrics"
           },
           {
             "type": "header",
@@ -6111,271 +6985,253 @@
           {
             "type": "header",
             "level": 3,
-            "text": "2.1 Core Services",
-            "name": "2.1 Core Services"
+            "text": "2.1 Core Components",
+            "name": "2.1 Core Components"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "Command Layer",
+            "name": "Command Layer"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "AI Integration Layer",
+            "name": "AI Integration Layer"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "System Services",
+            "name": "System Services"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "2.2 Command Structure",
-            "name": "2.2 Command Structure"
+            "text": "2.2 Architectural Patterns",
+            "name": "2.2 Architectural Patterns"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "3. Implementation Patterns",
-            "name": "3. Implementation Patterns"
+            "text": "3. Implementation Details",
+            "name": "3. Implementation Details"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "3.1 Dependency Injection",
-            "name": "3.1 Dependency Injection"
+            "text": "3.1 Service Layer Architecture",
+            "name": "3.1 Service Layer Architecture"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "3.2 Plugin Architecture",
-            "name": "3.2 Plugin Architecture"
+            "text": "3.2 Command Structure",
+            "name": "3.2 Command Structure"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "4. Data Flow Architecture",
-            "name": "4. Data Flow Architecture"
+            "text": "4. Quality Assessment",
+            "name": "4. Quality Assessment"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "4.1 Request Processing Pipeline",
-            "name": "4.1 Request Processing Pipeline"
+            "text": "4.1 Code Quality Metrics",
+            "name": "4.1 Code Quality Metrics"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "4.2 Memory Management",
-            "name": "4.2 Memory Management"
+            "text": "4.2 Testing Coverage",
+            "name": "4.2 Testing Coverage"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "5. Security Architecture",
-            "name": "5. Security Architecture"
+            "text": "5. Scalability Analysis",
+            "name": "5. Scalability Analysis"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "5.1 Authentication",
-            "name": "5.1 Authentication"
+            "text": "5.1 Current Architecture Limitations",
+            "name": "5.1 Current Architecture Limitations"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "5.2 Data Protection",
-            "name": "5.2 Data Protection"
+            "text": "5.2 Scaling Strategies",
+            "name": "5.2 Scaling Strategies"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "6. Testing Strategy",
-            "name": "6. Testing Strategy"
+            "text": "6. Security Considerations",
+            "name": "6. Security Considerations"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "6.1 Test Coverage",
-            "name": "6.1 Test Coverage"
+            "text": "6.1 Security Measures",
+            "name": "6.1 Security Measures"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "6.2 Testing Patterns",
-            "name": "6.2 Testing Patterns"
+            "text": "6.2 Data Protection",
+            "name": "6.2 Data Protection"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "7. Performance Optimization",
-            "name": "7. Performance Optimization"
+            "text": "7. Deployment Architecture",
+            "name": "7. Deployment Architecture"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "7.1 Current Metrics",
-            "name": "7.1 Current Metrics"
+            "text": "7.1 Build Process",
+            "name": "7.1 Build Process"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "7.2 Optimization Strategies",
-            "name": "7.2 Optimization Strategies"
+            "text": "7.2 CI/CD Pipeline",
+            "name": "7.2 CI/CD Pipeline"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "8. Deployment Architecture",
-            "name": "8. Deployment Architecture"
+            "text": "8. Integration Patterns",
+            "name": "8. Integration Patterns"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "8.1 Build Process",
-            "name": "8.1 Build Process"
+            "text": "8.1 Service Communication",
+            "name": "8.1 Service Communication"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "8.2 Distribution",
-            "name": "8.2 Distribution"
+            "text": "8.2 Plugin System",
+            "name": "8.2 Plugin System"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "9. Future Roadmap",
-            "name": "9. Future Roadmap"
+            "text": "9. Performance Optimization",
+            "name": "9. Performance Optimization"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "9.1 Technical Improvements",
-            "name": "9.1 Technical Improvements"
+            "text": "9.1 Current Optimizations",
+            "name": "9.1 Current Optimizations"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "9.2 Architecture Evolution",
-            "name": "9.2 Architecture Evolution"
+            "text": "9.2 Bottlenecks",
+            "name": "9.2 Bottlenecks"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "10. Development Guidelines",
-            "name": "10. Development Guidelines"
+            "text": "10. Future Roadmap",
+            "name": "10. Future Roadmap"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "10.1 Code Standards",
-            "name": "10.1 Code Standards"
+            "text": "10.1 Short-term Improvements",
+            "name": "10.1 Short-term Improvements"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "10.2 Contribution Process",
-            "name": "10.2 Contribution Process"
+            "text": "10.2 Long-term Vision",
+            "name": "10.2 Long-term Vision"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "11. Monitoring and Logging",
-            "name": "11. Monitoring and Logging"
+            "text": "11. Maintenance Guidelines",
+            "name": "11. Maintenance Guidelines"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "11.1 Metrics Collection",
-            "name": "11.1 Metrics Collection"
+            "text": "11.1 Code Standards",
+            "name": "11.1 Code Standards"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "11.2 Logging Strategy",
-            "name": "11.2 Logging Strategy"
+            "text": "11.2 Contributing",
+            "name": "11.2 Contributing"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "12. Maintenance Procedures",
-            "name": "12. Maintenance Procedures"
+            "text": "12. Technical Debt",
+            "name": "12. Technical Debt"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "12.1 Regular Tasks",
-            "name": "12.1 Regular Tasks"
+            "text": "12.1 Current Technical Debt",
+            "name": "12.1 Current Technical Debt"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "12.2 Emergency Procedures",
-            "name": "12.2 Emergency Procedures"
+            "text": "12.2 Mitigation Strategy",
+            "name": "12.2 Mitigation Strategy"
           },
           {
             "type": "header",
             "level": 2,
-            "text": "Appendix",
-            "name": "Appendix"
+            "text": "13. Appendix",
+            "name": "13. Appendix"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "A. Command Reference",
-            "name": "A. Command Reference"
+            "text": "13.1 Technology Stack",
+            "name": "13.1 Technology Stack"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "B. Configuration Reference",
-            "name": "B. Configuration Reference"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "C. Error Codes",
-            "name": "C. Error Codes"
+            "text": "13.2 Reference Documentation",
+            "name": "13.2 Reference Documentation"
           },
           {
             "type": "codeblock",
             "language": "markdown",
-            "content": "# AIA CLI - Technical Documentation\nVersion: 1.0.0\nLast Updated: [Current Date]\n\n## Executive Summary\nAIA CLI is a sophisticated TypeScript/Node.js command-line interface application designed for AI-powered development assistance. The system employs a service-oriented architecture with robust dependency injection patterns, focusing on extensibility and maintainability.\n\n## 1. System Overview\n\n### 1.1 Purpose\nAIA CLI serves as an intelligent development assistant, providing:\n- AI-powered code analysis and optimization\n- Context-aware development assistance\n- Memory-persistent conversation handling\n- Automated task execution with reasoning capabilities\n\n### 1.2 Project Statistics\n- Total Files: 158\n- Source Files: 128\n- Test Files: 30\n- Total Classes: 118\n- Total Functions: 70\n- Code Coverage: [TBD]%\n\n### 1.3 Key Components",
+            "content": "# AIA CLI Technical Documentation\nVersion: 1.0.0\nLast Updated: [Current Date]\n\n## 1. Executive Summary\n\nAIA CLI is an advanced AI-powered development tool built with TypeScript and Node.js, implementing a service-oriented architecture with robust dependency injection. The system provides intelligent code analysis, optimization, and development assistance through a command-line interface.\n\n### Key Metrics\n- Total Files: 158\n- Classes: 85\n- Functions: 56\n- Test Files: 30\n- Interfaces: 315\n- Total Symbols: 447\n\n## 2. Technical Architecture\n\n### 2.1 Core Components\n\n#### Command Layer\n- **CommandFactoryV2**: Central command creation and routing\n- **CommandValidationService**: Input validation and sanitization\n- **WorkflowManager**: Command execution orchestration\n\n#### AI Integration Layer\n- **AIProviderFactory**: AI service provider abstraction\n- **ResponseAdaptationEngine**: AI response processing and formatting\n- **AIService**: Core AI interaction management\n\n#### System Services\n- **ConfigurationManager**: System settings and environment management\n- **MemoryManager**: Conversation and state persistence\n- **PluginManager**: Extension and plugin system\n- **ContextService**: Environment and execution context management\n\n### 2.2 Architectural Patterns",
             "name": "CodeBlock_markdown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "## 2. Technical Architecture\n\n### 2.1 Core Services",
+            "content": "## 3. Implementation Details\n\n### 3.1 Service Layer Architecture",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "### 2.2 Command Structure",
+            "content": "### 3.2 Command Structure\n\nAvailable Commands:\n- `agent`: AI-powered task execution\n- `ask`: Direct AI queries\n- `config`: Configuration management\n- `context`: Context information\n- `execute`: Command execution\n- `index`: Codebase indexing\n- `memory`: Memory management\n\n## 4. Quality Assessment\n\n### 4.1 Code Quality Metrics\n- SOLID Principles Adherence: High\n- Design Pattern Implementation: Strong\n- Technical Debt: Low\n- Maintainability Index: Good\n\n### 4.2 Testing Coverage\n- Unit Tests: 30 files\n- Integration Tests: Present\n- E2E Tests: Limited\n- Mock Coverage: Comprehensive\n\n## 5. Scalability Analysis\n\n### 5.1 Current Architecture Limitations\n- Single-threaded command execution\n- Memory constraints for large codebases\n- Synchronous plugin loading\n\n### 5.2 Scaling Strategies\n- Implement worker threads for parallel processing\n- Introduce caching layer for frequent operations\n- Adopt microservices for heavy computational tasks\n\n## 6. Security Considerations\n\n### 6.1 Security Measures\n- Input validation at command layer\n- Secure configuration management\n- API key encryption\n- Rate limiting implementation\n\n### 6.2 Data Protection\n- Memory encryption for sensitive data\n- Secure storage for credentials\n- Session management\n\n## 7. Deployment Architecture\n\n### 7.1 Build Process",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "## 3. Implementation Patterns\n\n### 3.1 Dependency Injection",
-            "name": "CodeBlock_unknown"
-          },
-          {
-            "type": "codeblock",
-            "language": "unknown",
-            "content": "### 3.2 Plugin Architecture",
-            "name": "CodeBlock_unknown"
-          },
-          {
-            "type": "codeblock",
-            "language": "unknown",
-            "content": "## 4. Data Flow Architecture\n\n### 4.1 Request Processing Pipeline\n1. Command Input\n2. Context Resolution\n3. Memory Integration\n4. AI Processing\n5. Response Adaptation\n6. Output Formatting\n\n### 4.2 Memory Management\n- Persistent Storage\n- Cache Management\n- Context Integration\n- Query Optimization\n\n## 5. Security Architecture\n\n### 5.1 Authentication\n- API Key Management\n- Token-based Authentication\n- Permission Management\n\n### 5.2 Data Protection\n- Encryption at Rest\n- Secure Communication\n- Access Control\n\n## 6. Testing Strategy\n\n### 6.1 Test Coverage\n- Unit Tests: [TBD]%\n- Integration Tests: [TBD]%\n- E2E Tests: [TBD]%\n\n### 6.2 Testing Patterns",
-            "name": "CodeBlock_unknown"
-          },
-          {
-            "type": "codeblock",
-            "language": "unknown",
-            "content": "## 7. Performance Optimization\n\n### 7.1 Current Metrics\n- Average Response Time: [TBD]ms\n- Memory Usage: [TBD]MB\n- Concurrent Operations: [TBD]\n\n### 7.2 Optimization Strategies\n- Response Caching\n- Lazy Loading\n- Query Optimization\n- Memory Management\n\n## 8. Deployment Architecture\n\n### 8.1 Build Process",
-            "name": "CodeBlock_unknown"
-          },
-          {
-            "type": "codeblock",
-            "language": "unknown",
-            "content": "### 8.2 Distribution\n- NPM Package\n- Docker Container\n- Binary Distribution\n\n## 9. Future Roadmap\n\n### 9.1 Technical Improvements\n1. Enhanced AI Model Integration\n2. Improved Context Management\n3. Extended Plugin System\n4. Performance Optimization\n\n### 9.2 Architecture Evolution\n1. Microservices Migration\n2. Cloud Integration\n3. Real-time Processing\n4. Advanced Caching\n\n## 10. Development Guidelines\n\n### 10.1 Code Standards\n- TypeScript Strict Mode\n- ESLint Configuration\n- Documentation Requirements\n- Testing Requirements\n\n### 10.2 Contribution Process\n1. Fork Repository\n2. Create Feature Branch\n3. Implement Changes\n4. Submit Pull Request\n\n## 11. Monitoring and Logging\n\n### 11.1 Metrics Collection\n- Performance Metrics\n- Error Rates\n- Usage Statistics\n- System Health\n\n### 11.2 Logging Strategy\n- Error Logging\n- Activity Tracking\n- Performance Monitoring\n- Security Auditing\n\n## 12. Maintenance Procedures\n\n### 12.1 Regular Tasks\n- Dependency Updates\n- Security Audits\n- Performance Reviews\n- Code Quality Checks\n\n### 12.2 Emergency Procedures\n- Error Resolution\n- System Recovery\n- Data Backup\n- Incident Response\n\n## Appendix\n\n### A. Command Reference\n- agent: AI-powered task execution\n- ask: Direct AI queries\n- config: Configuration management\n- context: Context information\n- execute: Command execution\n- index: Codebase analysis\n- memory: Memory management\n\n### B. Configuration Reference",
-            "name": "CodeBlock_unknown"
-          },
-          {
-            "type": "codeblock",
-            "language": "unknown",
-            "content": "### C. Error Codes\n- E001: Authentication Error\n- E002: Processing Error\n- E003: Memory Error\n- E004: Plugin Error\n\n---\nEnd of Documentation",
+            "content": "### 7.2 CI/CD Pipeline\n- Source Control: Git\n- Build: TypeScript Compiler\n- Testing: Jest\n- Packaging: npm\n- Distribution: npm registry\n\n## 8. Integration Patterns\n\n### 8.1 Service Communication\n- Event-driven architecture\n- Promise-based async operations\n- Strong typing with interfaces\n- Error boundary implementation\n\n### 8.2 Plugin System\n- Dynamic loading\n- Version compatibility checking\n- Sandboxed execution\n- Hot-reload capability\n\n## 9. Performance Optimization\n\n### 9.1 Current Optimizations\n- Lazy loading of heavy components\n- Memory management optimization\n- Command caching\n- Response streaming\n\n### 9.2 Bottlenecks\n- AI service response time\n- Large codebase indexing\n- Memory usage in long sessions\n\n## 10. Future Roadmap\n\n### 10.1 Short-term Improvements\n- Enhanced error handling\n- Expanded test coverage\n- Performance optimization\n- Plugin ecosystem expansion\n\n### 10.2 Long-term Vision\n- Distributed architecture support\n- Cloud integration capabilities\n- Real-time collaboration features\n- Advanced AI model integration\n\n## 11. Maintenance Guidelines\n\n### 11.1 Code Standards\n- TypeScript strict mode\n- ESLint configuration\n- Documentation requirements\n- Testing requirements\n\n### 11.2 Contributing\n- Branch strategy\n- PR guidelines\n- Code review process\n- Release procedure\n\n## 12. Technical Debt\n\n### 12.1 Current Technical Debt\n- Legacy command patterns\n- Incomplete error handling\n- Documentation gaps\n- Test coverage gaps\n\n### 12.2 Mitigation Strategy\n- Regular refactoring cycles\n- Technical debt tracking\n- Documentation sprints\n- Test coverage improvements\n\n## 13. Appendix\n\n### 13.1 Technology Stack\n- TypeScript\n- Node.js\n- Jest\n- AI Integration Libraries\n\n### 13.2 Reference Documentation\n- API Documentation\n- Command Reference\n- Configuration Guide\n- Plugin Development Guide",
             "name": "CodeBlock_unknown"
           }
         ],
@@ -7386,9 +8242,9 @@
       "docs/developer/codebase-dev-focused.md",
       {
         "path": "docs/developer/codebase-dev-focused.md",
-        "size": 6391,
-        "hash": "cc818e530141dde7",
-        "lastModified": "2025-06-22T00:14:51.129Z",
+        "size": 5980,
+        "hash": "98079a710c7bfc49",
+        "lastModified": "2025-06-22T01:06:25.515Z",
         "type": "documentation",
         "language": "markdown",
         "symbols": [
@@ -7431,50 +8287,32 @@
           {
             "type": "header",
             "level": 1,
-            "text": "Setup development environment",
-            "name": "Setup development environment"
+            "text": "Set up environment",
+            "name": "Set up environment"
           },
           {
             "type": "header",
             "level": 1,
-            "text": "Build project",
-            "name": "Build project"
-          },
-          {
-            "type": "header",
-            "level": 1,
-            "text": "Run tests to verify setup",
-            "name": "Run tests to verify setup"
+            "text": "Verify installation",
+            "name": "Verify installation"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Essential Commands",
-            "name": "Essential Commands"
+            "text": "First Commands",
+            "name": "First Commands"
           },
           {
             "type": "header",
             "level": 1,
-            "text": "Development mode",
-            "name": "Development mode"
+            "text": "Start in development mode",
+            "name": "Start in development mode"
           },
           {
             "type": "header",
             "level": 1,
-            "text": "Run specific tests",
-            "name": "Run specific tests"
-          },
-          {
-            "type": "header",
-            "level": 1,
-            "text": "Build production",
-            "name": "Build production"
-          },
-          {
-            "type": "header",
-            "level": 1,
-            "text": "Lint code",
-            "name": "Lint code"
+            "text": "Run CLI locally",
+            "name": "Run CLI locally"
           },
           {
             "type": "header",
@@ -7509,8 +8347,8 @@
           {
             "type": "header",
             "level": 3,
-            "text": "Key Directories",
-            "name": "Key Directories"
+            "text": "Key Files",
+            "name": "Key Files"
           },
           {
             "type": "header",
@@ -7526,39 +8364,9 @@
           },
           {
             "type": "header",
-            "level": 1,
-            "text": "Create test file",
-            "name": "Create test file"
-          },
-          {
-            "type": "header",
-            "level": 1,
-            "text": "Create implementation",
-            "name": "Create implementation"
-          },
-          {
-            "type": "header",
             "level": 3,
             "text": "Code Review Process",
             "name": "Code Review Process"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Changes",
-            "name": "Changes"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Testing",
-            "name": "Testing"
-          },
-          {
-            "type": "header",
-            "level": 2,
-            "text": "Documentation",
-            "name": "Documentation"
           },
           {
             "type": "header",
@@ -7587,20 +8395,20 @@
           {
             "type": "header",
             "level": 3,
-            "text": "Unit Test Structure",
-            "name": "Unit Test Structure"
-          },
-          {
-            "type": "header",
-            "level": 3,
-            "text": "Mocking Strategies",
-            "name": "Mocking Strategies"
+            "text": "Unit Testing Pattern",
+            "name": "Unit Testing Pattern"
           },
           {
             "type": "header",
             "level": 2,
             "text": "Performance Tips",
             "name": "Performance Tips"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Memory Management",
+            "name": "Memory Management"
           },
           {
             "type": "header",
@@ -7623,55 +8431,85 @@
           {
             "type": "header",
             "level": 1,
-            "text": "Clear build cache",
-            "name": "Clear build cache"
+            "text": "Verify config",
+            "name": "Verify config"
           },
           {
             "type": "header",
             "level": 1,
-            "text": "Run with verbose logging",
-            "name": "Run with verbose logging"
+            "text": "Reset to defaults",
+            "name": "Reset to defaults"
           },
           {
             "type": "header",
             "level": 1,
-            "text": "Update snapshots",
-            "name": "Update snapshots"
+            "text": "Clear memory",
+            "name": "Clear memory"
           },
           {
             "type": "header",
             "level": 1,
-            "text": "Run with increased memory",
-            "name": "Run with increased memory"
+            "text": "View memory usage",
+            "name": "View memory usage"
+          },
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Reset context",
+            "name": "Reset context"
+          },
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Verify context",
+            "name": "Verify context"
           },
           {
             "type": "header",
             "level": 3,
-            "text": "Debug Checklist",
-            "name": "Debug Checklist"
-          },
-          {
-            "type": "header",
-            "level": 2,
             "text": "Getting Help",
             "name": "Getting Help"
           },
           {
+            "type": "header",
+            "level": 2,
+            "text": "Code Style Guide",
+            "name": "Code Style Guide"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "TypeScript Best Practices",
+            "name": "TypeScript Best Practices"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Naming Conventions",
+            "name": "Naming Conventions"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Error Handling",
+            "name": "Error Handling"
+          },
+          {
             "type": "codeblock",
             "language": "markdown",
-            "content": "# AIA CLI Developer Guide\n\n## Quick Start\n\n### Prerequisites\n- Node.js 16+ \n- TypeScript 4.8+\n- Git\n- VS Code (recommended)\n\n### Initial Setup",
+            "content": "# AIA CLI Developer Guide\n\n## Quick Start\n\n### Prerequisites\n- Node.js 16+\n- TypeScript 4.8+\n- VS Code (recommended)\n- Git\n\n### Initial Setup",
             "name": "CodeBlock_markdown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "### Essential Commands",
+            "content": "### First Commands",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "## Development Environment\n\n### IDE Setup (VS Code)\nRequired extensions:\n- ESLint\n- Prettier\n- TypeScript Hero\n- Debug for Chrome\n\n### VS Code Settings",
+            "content": "## Development Environment\n\n### IDE Setup (VS Code)\nRequired extensions:\n- ESLint\n- Prettier\n- TypeScript IDE Support\n- Debug for Node.js\n\n### VS Code Settings",
             "name": "CodeBlock_unknown"
           },
           {
@@ -7689,37 +8527,19 @@
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "### Key Directories\n- `commands/`: CLI command implementations\n- `services/`: Core service classes\n- `engines/`: Processing and reasoning engines\n- `interfaces/`: TypeScript interfaces\n- `utils/`: Shared utility functions\n\n## Core Development Workflows\n\n### Adding New Features\n\n1. Create feature branch:",
+            "content": "### Key Files\n- `src/index.ts` - Application entry point\n- `src/di-container.ts` - Dependency injection setup\n- `src/config/default.ts` - Default configuration\n\n## Core Development Workflows\n\n### Adding New Features\n\n1. Create feature branch:",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "2. Implement changes following TDD:",
+            "content": "2. Implement following pattern:\n   - Interface definition\n   - Service implementation\n   - Factory registration\n   - Command integration\n   - Tests\n\n3. Update documentation\n\n### Code Review Process\n1. Self-review checklist:\n   - Tests passing\n   - Lint checks clean\n   - Documentation updated\n   - Performance impact considered\n   \n2. Create pull request with:\n   - Feature description\n   - Testing steps\n   - Breaking changes\n   - Performance implications\n\n## Common Tasks\n\n### Adding a New CLI Command\n\n1. Create command class:",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "3. Run tests:",
-            "name": "CodeBlock_unknown"
-          },
-          {
-            "type": "codeblock",
-            "language": "unknown",
-            "content": "4. Submit PR with:\n- Implementation\n- Tests\n- Documentation\n- Changelog update\n\n### Code Review Process\n\n1. Self-review checklist:\n- [ ] Tests passing\n- [ ] Lint clean\n- [ ] Documentation updated\n- [ ] No console.logs\n- [ ] Error handling implemented\n- [ ] Performance considered\n\n2. PR template:",
-            "name": "CodeBlock_unknown"
-          },
-          {
-            "type": "codeblock",
-            "language": "unknown",
-            "content": "## Common Tasks\n\n### Adding a New CLI Command\n\n1. Create command file:",
-            "name": "CodeBlock_unknown"
-          },
-          {
-            "type": "codeblock",
-            "language": "unknown",
-            "content": "2. Register command:",
+            "content": "2. Register in factory:",
             "name": "CodeBlock_unknown"
           },
           {
@@ -7737,55 +8557,43 @@
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "## Testing Guidelines\n\n### Unit Test Structure",
+            "content": "3. Register in DI container:",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "### Mocking Strategies",
+            "content": "## Testing Guidelines\n\n### Unit Testing Pattern",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "## Performance Tips\n\n### Optimization Techniques\n1. Lazy loading:",
+            "content": "## Performance Tips\n\n### Memory Management\n- Use `MemoryManager` for conversation state\n- Implement cleanup in service destructors\n- Monitor memory usage with `process.memoryUsage()`\n\n### Optimization Techniques\n1. Lazy loading for heavy services\n2. Caching frequently used data\n3. Batch operations where possible\n4. Use streams for large data processing\n\n## Troubleshooting\n\n### Common Issues\n\n1. Configuration errors:",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "2. Caching:",
+            "content": "2. Memory issues:",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "3. Batch processing:",
+            "content": "3. Context problems:",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "## Troubleshooting\n\n### Common Issues\n\n1. Build Errors",
+            "content": "### Getting Help\n1. Check existing issues\n2. Run diagnostics: `./bin/aia doctor`\n3. Create issue with:\n   - Command output\n   - Error message\n   - Environment details\n   - Steps to reproduce\n\n## Code Style Guide\n\n### TypeScript Best Practices\n- Use strict type checking\n- Prefer interfaces over types\n- Implement error handling\n- Document public APIs\n\n### Naming Conventions\n- PascalCase for classes\n- camelCase for methods\n- UPPER_CASE for constants\n- I-prefix for interfaces\n\n### Error Handling",
             "name": "CodeBlock_unknown"
           },
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "2. Test Failures",
-            "name": "CodeBlock_unknown"
-          },
-          {
-            "type": "codeblock",
-            "language": "unknown",
-            "content": "3. Memory Issues",
-            "name": "CodeBlock_unknown"
-          },
-          {
-            "type": "codeblock",
-            "language": "unknown",
-            "content": "### Debug Checklist\n1. Check logs: `debug.log`\n2. Verify configuration: `config/default.json`\n3. Confirm dependencies: `package.json`\n4. Test in isolation: `npm test -- --grep \"specific test\"`\n5. Check memory usage: `process.memoryUsage()`\n\n## Getting Help\n1. Check documentation first\n2. Search existing issues\n3. Ask in team chat\n4. Create detailed issue with:\n   - Error message\n   - Steps to reproduce\n   - Environment details\n   - Relevant code snippets",
+            "content": "Remember to maintain this guide as the project evolves.",
             "name": "CodeBlock_unknown"
           }
         ],
@@ -9012,9 +9820,9 @@
       "docs/minimal/codebase-minimal.md",
       {
         "path": "docs/minimal/codebase-minimal.md",
-        "size": 2039,
-        "hash": "6b47ddda5f41d9ac",
-        "lastModified": "2025-06-22T00:13:55.665Z",
+        "size": 1858,
+        "hash": "b257b574b7cee32a",
+        "lastModified": "2025-06-22T01:05:34.749Z",
         "type": "documentation",
         "language": "markdown",
         "symbols": [
@@ -9069,7 +9877,7 @@
           {
             "type": "codeblock",
             "language": "markdown",
-            "content": "# AIA CLI Project Context\n\n## Quick Overview\nTypeScript/Node.js CLI application providing AI-powered development assistance. Built with service-oriented architecture, focusing on code analysis and AI-driven task execution. Implements command pattern with dependency injection for extensibility.\n\n## Key Statistics\n- Files: 158 source files\n- Language: TypeScript\n- Architecture: Service-Oriented\n- Entry Point: src/index.ts\n\n## Essential Components\n- AIService: Core AI interaction handler\n- CommandService: CLI command executor\n- MemoryService: Context retention\n- ConfigurationService: System settings\n- ContextService: Environment manager\n- CodeIndexService: Codebase analyzer\n\n## Core Commands",
+            "content": "# AIA CLI Project Context\n\n## Quick Overview\nTypeScript/Node.js CLI application providing AI-powered development assistance. Built with service-oriented architecture, focusing on code analysis and AI-driven task execution. Implements command pattern for extensible operations.\n\n## Key Statistics\n- Files: 158 (including 30 test files)\n- Language: TypeScript\n- Architecture: Service-Oriented with DI\n- Entry Point: `src/index.ts`\n\n## Essential Components\n- `AIProviderFactory` - AI service integration\n- `MemoryManager` - Conversation state handling\n- `ConfigurationManager` - System settings\n- `CommandFactoryV2` - Command processing\n- `ResponseAdaptationEngine` - Output formatting\n\n## Core Commands",
             "name": "CodeBlock_markdown"
           },
           {
@@ -9081,7 +9889,7 @@
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "## Development Essentials\n- src/services/     # Core service implementations\n- src/commands/     # CLI command definitions\n- src/types/        # TypeScript type definitions\n- src/config/       # Configuration schemas\n- tests/           # Test suites\n\n## Architecture Summary\nService-oriented architecture using dependency injection for loose coupling. Commands implement Command pattern, delegating to specialized services. Plugin system allows extending functionality. Memory management preserves context across sessions. AI services integrate with external models for reasoning and code analysis.",
+            "content": "## Development Essentials\nKey files:\n- `/src/commands/` - Command implementations\n- `/src/services/` - Core services\n- `/src/types/` - TypeScript interfaces\n- `/src/config/` - Configuration\n- `tsconfig.json` - TypeScript settings\n\n## Architecture Summary\nService-oriented architecture using dependency injection and command pattern. Core services (AI, Memory, Configuration, Command) communicate through interfaces. Plugin system allows extending functionality. Performance-optimized with robust type safety through TypeScript.",
             "name": "CodeBlock_unknown"
           }
         ],
@@ -11748,6 +12556,28 @@
       }
     ],
     [
+      "final-integration-test.js",
+      {
+        "path": "final-integration-test.js",
+        "size": 3446,
+        "hash": "fd9dbe87a0b79054",
+        "lastModified": "2025-06-22T01:30:33.478Z",
+        "type": "source",
+        "language": "javascript",
+        "symbols": [
+          {
+            "type": "function",
+            "name": "runFinalTest"
+          }
+        ],
+        "imports": [
+          "fs-extra"
+        ],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
       "format-check.js",
       {
         "path": "format-check.js",
@@ -11939,6 +12769,29 @@
         "imports": [
           "perf_hooks",
           "fs"
+        ],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      "quick-test.js",
+      {
+        "path": "quick-test.js",
+        "size": 2623,
+        "hash": "149764f570d459ec",
+        "lastModified": "2025-06-22T01:29:50.149Z",
+        "type": "source",
+        "language": "javascript",
+        "symbols": [
+          {
+            "type": "function",
+            "name": "testSymbolIndex"
+          }
+        ],
+        "imports": [
+          "fs-extra",
+          "path"
         ],
         "exports": [],
         "dependencies": []
@@ -12551,6 +13404,48 @@
       }
     ],
     [
+      "src/analyzers/TypeScriptSymbolAnalyzer.ts",
+      {
+        "path": "src/analyzers/TypeScriptSymbolAnalyzer.ts",
+        "size": 25549,
+        "hash": "2a024e8a0dbdb0bc",
+        "lastModified": "2025-06-22T00:38:50.885Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [
+          {
+            "type": "class",
+            "name": "TypeScriptSymbolAnalyzer"
+          },
+          {
+            "type": "function",
+            "name": "visit"
+          },
+          {
+            "type": "function",
+            "name": "visit"
+          },
+          {
+            "type": "function",
+            "name": "walk"
+          }
+        ],
+        "imports": [
+          ";\n    }\n    if (ts.isHeritageClause(parent)) {\n      return parent.token === ts.SyntaxKind.ExtendsKeyword ? ",
+          ") && lineContent.includes(identifier)) {\n      return ",
+          ";\n    }\n    if (lineContent.includes(",
+          ", "
+        ],
+        "exports": [
+          "TypeScriptSymbolAnalyzer",
+          "class",
+          "interface",
+          "type"
+        ],
+        "dependencies": []
+      }
+    ],
+    [
       "src/cli/CLIApplication.ts",
       {
         "path": "src/cli/CLIApplication.ts",
@@ -12834,9 +13729,9 @@
       "src/commands/IndexCommand.ts",
       {
         "path": "src/commands/IndexCommand.ts",
-        "size": 78005,
-        "hash": "11266f6a0b0fc460",
-        "lastModified": "2025-06-22T00:03:09.554Z",
+        "size": 78071,
+        "hash": "b425cc06f6e6d8ac",
+        "lastModified": "2025-06-22T00:48:36.100Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -13871,9 +14766,9 @@
       "src/interfaces/ISymbolIndex.ts",
       {
         "path": "src/interfaces/ISymbolIndex.ts",
-        "size": 2991,
-        "hash": "52fefd93f01a3d9b",
-        "lastModified": "2025-06-21T22:00:43.046Z",
+        "size": 3014,
+        "hash": "3966e7ebc90caa12",
+        "lastModified": "2025-06-22T00:44:53.116Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -15098,9 +15993,9 @@
       "src/services/SymbolIndexService.ts",
       {
         "path": "src/services/SymbolIndexService.ts",
-        "size": 32822,
-        "hash": "1053e3baf204bc04",
-        "lastModified": "2025-06-22T00:15:19.737Z",
+        "size": 31921,
+        "hash": "7fc8ea09bb35dec0",
+        "lastModified": "2025-06-22T01:10:27.343Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -15109,36 +16004,12 @@
             "name": "SymbolIndexService"
           },
           {
-            "type": "class",
-            "name": "information"
-          },
-          {
-            "type": "class",
-            "name": "symbol"
-          },
-          {
             "type": "function",
             "name": "traverse"
           },
           {
             "type": "function",
             "name": "walkDir"
-          },
-          {
-            "type": "function",
-            "name": "visit"
-          },
-          {
-            "type": "function",
-            "name": "information"
-          },
-          {
-            "type": "function",
-            "name": "visit"
-          },
-          {
-            "type": "function",
-            "name": "symbol"
           }
         ],
         "imports": [],
@@ -15644,6 +16515,31 @@
       }
     ],
     [
+      "test-aia-cli-integration.js",
+      {
+        "path": "test-aia-cli-integration.js",
+        "size": 1990,
+        "hash": "6fea8e51f3a0a9a9",
+        "lastModified": "2025-06-22T01:51:47.673Z",
+        "type": "source",
+        "language": "javascript",
+        "symbols": [
+          {
+            "type": "function",
+            "name": "testAIAIntegration"
+          }
+        ],
+        "imports": [
+          "child_process",
+          "util",
+          "fs-extra",
+          "path"
+        ],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
       "test-cli-integration.js",
       {
         "path": "test-cli-integration.js",
@@ -15661,6 +16557,30 @@
         "imports": [
           "./dist/container/DIContainer",
           "./dist/container/ServiceFactory"
+        ],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      "test-copilot-context.js",
+      {
+        "path": "test-copilot-context.js",
+        "size": 1056,
+        "hash": "e91aa3b1c4f7183f",
+        "lastModified": "2025-06-22T01:30:06.680Z",
+        "type": "source",
+        "language": "javascript",
+        "symbols": [
+          {
+            "type": "function",
+            "name": "testCopilotContext"
+          }
+        ],
+        "imports": [
+          "./.vscode/aia-copilot-bridge/out/copilotContextProvider",
+          "path",
+          "fs-extra"
         ],
         "exports": [],
         "dependencies": []
@@ -15852,6 +16772,31 @@
           }
         ],
         "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      "test-vscode-integration.js",
+      {
+        "path": "test-vscode-integration.js",
+        "size": 5386,
+        "hash": "ca332c3567c4a1d6",
+        "lastModified": "2025-06-22T01:22:31.894Z",
+        "type": "source",
+        "language": "javascript",
+        "symbols": [
+          {
+            "type": "function",
+            "name": "runPerformanceTests"
+          }
+        ],
+        "imports": [
+          "child_process",
+          "util",
+          "fs-extra",
+          "path"
+        ],
         "exports": [],
         "dependencies": []
       }
@@ -17294,6 +18239,50 @@
           },
           {
             "name": "Map",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          }
+        ]
+      }
+    ],
+    [
+      "TypeScriptSymbolAnalyzer",
+      {
+        "file": "src/analyzers/TypeScriptSymbolAnalyzer.ts",
+        "methods": [
+          {
+            "name": "initialize",
+            "async": true,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "findTsConfig",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "if",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "readConfigFile",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "if",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "Error",
             "async": false,
             "static": false,
             "visibility": "public"
@@ -18871,39 +19860,18 @@
             "visibility": "public"
           },
           {
+            "name": "TypeScriptSymbolAnalyzer",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
             "name": "createEmptyLookupTable",
             "async": false,
             "static": false,
             "visibility": "public"
           }
         ]
-      }
-    ],
-    [
-      "information",
-      {
-        "file": "src/services/SymbolIndexService.ts",
-        "methods": [
-          {
-            "name": "for",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          },
-          {
-            "name": "extractClassSymbolInfo",
-            "async": false,
-            "static": false,
-            "visibility": "public"
-          }
-        ]
-      }
-    ],
-    [
-      "symbol",
-      {
-        "file": "src/services/SymbolIndexService.ts",
-        "methods": []
       }
     ],
     [
@@ -19343,6 +20311,13 @@
       }
     ],
     [
+      "runFinalTest",
+      {
+        "file": "final-integration-test.js",
+        "async": false
+      }
+    ],
+    [
       "checkFormatting",
       {
         "file": "format-check.js",
@@ -19360,6 +20335,13 @@
       "measureFileOperations",
       {
         "file": "perf-check.js",
+        "async": false
+      }
+    ],
+    [
+      "testSymbolIndex",
+      {
+        "file": "quick-test.js",
         "async": false
       }
     ],
@@ -19431,6 +20413,20 @@
       {
         "file": "src/TestRunner.ts",
         "async": false
+      }
+    ],
+    [
+      "visit",
+      {
+        "file": "src/analyzers/TypeScriptSymbolAnalyzer.ts",
+        "async": false
+      }
+    ],
+    [
+      "walk",
+      {
+        "file": "src/analyzers/TypeScriptSymbolAnalyzer.ts",
+        "async": true
       }
     ],
     [
@@ -19540,27 +20536,6 @@
     ],
     [
       "traverse",
-      {
-        "file": "src/services/SymbolIndexService.ts",
-        "async": false
-      }
-    ],
-    [
-      "visit",
-      {
-        "file": "src/services/SymbolIndexService.ts",
-        "async": false
-      }
-    ],
-    [
-      "information",
-      {
-        "file": "src/services/SymbolIndexService.ts",
-        "async": false
-      }
-    ],
-    [
-      "symbol",
       {
         "file": "src/services/SymbolIndexService.ts",
         "async": false
@@ -19700,9 +20675,23 @@
       }
     ],
     [
+      "testAIAIntegration",
+      {
+        "file": "test-aia-cli-integration.js",
+        "async": false
+      }
+    ],
+    [
       "testCLIIntegration",
       {
         "file": "test-cli-integration.js",
+        "async": false
+      }
+    ],
+    [
+      "testCopilotContext",
+      {
+        "file": "test-copilot-context.js",
         "async": false
       }
     ],
@@ -19752,6 +20741,13 @@
       "testSymbolIndexIntegration",
       {
         "file": "test-symbol-integration.js",
+        "async": false
+      }
+    ],
+    [
+      "runPerformanceTests",
+      {
+        "file": "test-vscode-integration.js",
         "async": false
       }
     ],
@@ -19807,11 +20803,6 @@
       "file": "src/services/PluginService.ts",
       "line": 254,
       "text": "This is a simplified method. In a real-world scenario,"
-    },
-    {
-      "file": "src/services/SymbolIndexService.ts",
-      "line": 656,
-      "text": "Add interface, enum, type, variable, etc."
     },
     {
       "file": "tests/ai-security-analyzer-integration.test.ts",

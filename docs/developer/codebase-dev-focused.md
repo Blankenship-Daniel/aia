@@ -1,60 +1,42 @@
-I'll create a comprehensive developer guide that's practical and focused on daily development needs.
+I'll create a comprehensive developer guide based on the project profile you've provided.
 
 ```markdown
-# AIA CLI Developer Guide
+# AIA-CLI Developer Guide
 
 ## Quick Start
 
 ### Prerequisites
-- Node.js 16+
-- TypeScript 4.8+
-- VS Code (recommended)
+- Node.js (v14+)
+- TypeScript (v4.5+)
 - Git
 
 ### Initial Setup
 ```bash
-# Clone and install
+# Clone the repository
 git clone [repository-url]
-cd aia
+cd aia-cli
+
+# Install dependencies
 npm install
 
-# Set up environment
-cp .env.example .env
-npm run setup
-
-# Verify installation
-npm run test
+# Build the project
 npm run build
-```
 
-### First Commands
-```bash
-# Start development server
-npm run dev
-
-# Run CLI locally
-./bin/run ask "How can I help?"
+# Run tests
+npm test
 ```
 
 ## Development Environment
 
-### IDE Setup (VS Code)
-Required extensions:
+### IDE Setup
+Recommended: Visual Studio Code
+
+#### Essential VS Code Extensions
 - ESLint
 - Prettier
 - TypeScript Hero
-- Debug for Node.js
-
-### VS Code Settings
-```json
-{
-  "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
-  },
-  "typescript.preferences.importModuleSpecifier": "relative"
-}
-```
+- Jest Runner
+- GitLens
 
 ### Debug Configuration
 ```json
@@ -64,10 +46,10 @@ Required extensions:
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug CLI",
-      "program": "${workspaceFolder}/src/index.ts",
-      "args": ["ask", "test query"],
-      "preLaunchTask": "tsc: build"
+      "name": "Debug Program",
+      "program": "${workspaceFolder}/src/main.js",
+      "preLaunchTask": "tsc: build - tsconfig.json",
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     }
   ]
 }
@@ -76,241 +58,162 @@ Required extensions:
 ## Project Structure
 
 ```
-aia/
+aia-cli/
 ├── src/
-│   ├── commands/        # CLI commands
-│   ├── services/        # Core services
-│   ├── interfaces/      # TypeScript interfaces
-│   ├── providers/       # AI providers
-│   ├── utils/          # Shared utilities
-│   └── types/          # Type definitions
-├── tests/              # Test files
-├── config/             # Configuration
-└── docs/              # Documentation
+│   ├── main.js           # Application entry point
+│   ├── services/         # Service implementations
+│   ├── interfaces/       # TypeScript interfaces
+│   ├── components/       # Reusable components
+│   └── utils/           # Utility functions
+├── tests/               # Test files
+├── docs/               # Documentation
+└── package.json
 ```
 
-### Key Directories
-- `commands/`: Each CLI command as separate module
-- `services/`: Core service implementations
-- `interfaces/`: TypeScript interface definitions
-- `providers/`: AI provider implementations
-- `utils/`: Shared utility functions
+### Naming Conventions
+- Files: kebab-case.ts
+- Classes: PascalCase
+- Interfaces: IPascalCase
+- Functions: camelCase
+- Constants: UPPER_SNAKE_CASE
 
 ## Core Development Workflows
 
-### Adding New Features
-
-1. Create feature branch:
-```bash
-git checkout -b feature/new-feature-name
-```
-
-2. Implement changes following TDD:
-```bash
-# Create test first
-touch tests/services/NewFeature.test.ts
-# Implement feature
-touch src/services/NewFeature.ts
-```
-
-3. Test and lint:
-```bash
-npm run test
-npm run lint
-```
+### Feature Development Process
+1. Create feature branch from main
+   ```bash
+   git checkout -b feature/feature-name
+   ```
+2. Implement feature following TDD
+3. Write tests
+4. Update documentation
+5. Create pull request
 
 ### Code Review Process
-1. Self-review checklist:
-   - Tests passing
-   - Lint clean
-   - Documentation updated
-   - Performance considered
-   
-2. Create PR with template:
-   - Feature description
-   - Testing approach
-   - Breaking changes
-   - Performance impact
+- All changes require PR review
+- Must pass automated tests
+- Must maintain 80% test coverage
+- Documentation updates required
 
 ## Common Tasks
 
-### Adding a New CLI Command
+### Adding New Components
+1. Create component file in appropriate directory
+2. Define interface (if applicable)
+3. Implement component
+4. Add unit tests
+5. Update documentation
 
-1. Create command file:
 ```typescript
-// src/commands/newCommand.ts
-import { Command } from '../interfaces/Command';
+// Example component structure
+export interface IMyComponent {
+  method(): void;
+}
 
-export class NewCommand implements Command {
-  public static description = 'Command description';
-  
-  public async run(): Promise<void> {
+export class MyComponent implements IMyComponent {
+  method(): void {
     // Implementation
   }
 }
 ```
 
-2. Register in command index:
+### Error Handling
 ```typescript
-// src/commands/index.ts
-export { NewCommand } from './newCommand';
-```
-
-### Creating a New Service
-
-1. Define interface:
-```typescript
-// src/interfaces/INewService.ts
-export interface INewService {
-  execute(): Promise<void>;
-}
-```
-
-2. Implement service:
-```typescript
-// src/services/NewService.ts
-import { injectable } from 'inversify';
-import { INewService } from '../interfaces/INewService';
-
-@injectable()
-export class NewService implements INewService {
-  public async execute(): Promise<void> {
-    // Implementation
+try {
+  // Operation
+} catch (error) {
+  if (error instanceof CustomError) {
+    // Handle specific error
   }
+  // Log error
+  throw new ApplicationError('Operation failed', error);
 }
-```
-
-3. Register in container:
-```typescript
-// src/container.ts
-container.bind<INewService>('NewService').to(NewService);
 ```
 
 ## Testing Guidelines
 
-### Unit Testing Pattern
+### Test Structure
 ```typescript
-describe('NewService', () => {
-  let service: NewService;
-  let mockDependency: jest.Mocked<IDependency>;
-
+describe('Component', () => {
   beforeEach(() => {
-    mockDependency = {
-      method: jest.fn()
-    };
-    service = new NewService(mockDependency);
+    // Setup
   });
 
-  it('should execute successfully', async () => {
-    await expect(service.execute()).resolves.not.toThrow();
+  it('should perform expected behavior', () => {
+    // Arrange
+    // Act
+    // Assert
   });
 });
 ```
 
-### Mocking Strategy
-```typescript
-// Create mock implementation
-const mockAIProvider: jest.Mocked<IAIProvider> = {
-  query: jest.fn().mockResolvedValue('response'),
-  initialize: jest.fn().mockResolvedValue(undefined)
-};
-
-// Verify interactions
-expect(mockAIProvider.query).toHaveBeenCalledWith('test query');
-```
-
-## Performance Tips
-
-### Optimization Techniques
-1. Lazy loading:
-```typescript
-const service = await import('./services/HeavyService');
-```
-
-2. Caching:
-```typescript
-@injectable()
-class CacheableService {
-  private cache = new Map<string, any>();
-  
-  async getData(key: string): Promise<any> {
-    if (this.cache.has(key)) {
-      return this.cache.get(key);
-    }
-    const data = await this.fetchData(key);
-    this.cache.set(key, data);
-    return data;
-  }
-}
-```
-
-3. Memory management:
-```typescript
-class MemoryEfficientService {
-  private cleanup(): void {
-    // Clear temporary data
-    this.tempData = null;
-    global.gc && global.gc();
-  }
-}
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. Dependency Injection Errors
-```
-Error: No matching bindings found for serviceIdentifier: Symbol(IService)
-```
-Solution: Check container registration in `src/container.ts`
-
-2. Type Errors
-```
-TS2339: Property 'x' does not exist on type 'Y'
-```
-Solution: Implement missing interface members or check type definitions
-
-3. Memory Leaks
-- Use Chrome DevTools Memory Profiler
-- Check for unsubscribed observables
-- Monitor heap usage with `process.memoryUsage()`
-
-### When to Ask for Help
-1. After checking:
-   - Documentation
-   - Existing issues
-   - Debug logs
-   - Stack trace
-2. Provide:
-   - Steps to reproduce
-   - Environment details
-   - Relevant logs
-   - Attempted solutions
+### Coverage Requirements
+- Statements: 80%
+- Branches: 75%
+- Functions: 80%
+- Lines: 80%
 
 ## Code Contribution Guidelines
 
 ### Pull Request Checklist
-- [ ] Tests added/updated
+- [ ] Tests written and passing
 - [ ] Documentation updated
-- [ ] Lint passes
-- [ ] Branch up-to-date
-- [ ] Performance impact considered
-- [ ] Breaking changes documented
+- [ ] Code follows style guide
+- [ ] No linting errors
+- [ ] Successful build
+- [ ] Peer review completed
 
-### Commit Message Format
-```
-type(scope): summary
-
-Description
-```
-Types: feat, fix, docs, style, refactor, test, chore
-
-### Code Style
-- Follow existing patterns
-- Use TypeScript features appropriately
-- Document public APIs
-- Keep functions focused and small
+### Git Workflow
+```bash
+git checkout main
+git pull
+git checkout -b feature/name
+# Make changes
+git add .
+git commit -m "feat: description"
+git push origin feature/name
 ```
 
-This guide should give developers a solid foundation for working with the codebase while focusing on practical, day-to-day development needs.
+## Performance Tips
+
+### Optimization Guidelines
+- Use interface segregation
+- Implement lazy loading
+- Minimize dependencies
+- Use proper typing
+
+### Memory Management
+- Clean up subscriptions
+- Proper resource disposal
+- Avoid memory leaks
+- Use WeakMap/WeakSet when appropriate
+
+## Troubleshooting
+
+### Common Issues
+1. Build Failures
+   - Check TypeScript version
+   - Verify dependencies
+   - Clear node_modules and reinstall
+
+2. Test Failures
+   - Check test environment
+   - Verify mocks
+   - Check async operations
+
+### When to Seek Help
+- Build issues lasting >30 minutes
+- Security concerns
+- Architecture decisions
+- Performance problems
+
+## Additional Resources
+- TypeScript Documentation
+- Jest Testing Framework
+- ESLint Documentation
+- Project Wiki
+
+Remember to keep this guide updated as the project evolves. For questions or suggestions, contact the team lead.
+```
+
+This guide provides a practical foundation for developers working on the AIA-CLI project. It focuses on day-to-day development needs while maintaining good software engineering practices. The guide should be treated as a living document and updated regularly based on team feedback and project evolution.

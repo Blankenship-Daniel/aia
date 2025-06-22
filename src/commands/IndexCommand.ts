@@ -127,7 +127,7 @@ interface FileInfo {
 
 /**
  * IndexCommand class
- * 
+ *
  * TODO: Add class description
  */
 export class IndexCommand implements ICommand {
@@ -238,9 +238,9 @@ export class IndexCommand implements ICommand {
 
   /**
    * Builds index
-   * 
+   *
    * @param options - Parameter description
-   * 
+   *
    * @returns Promise<CommandResult> - Return value description
    */
   private async buildIndex(options: CommandOptions): Promise<CommandResult> {
@@ -380,9 +380,9 @@ export class IndexCommand implements ICommand {
 
   /**
    * Handles showStats operation
-   * 
+   *
    * @param options - Parameter description
-   * 
+   *
    * @returns Promise<CommandResult> - Return value description
    */
   private async showStats(options: CommandOptions): Promise<CommandResult> {
@@ -437,9 +437,9 @@ export class IndexCommand implements ICommand {
 
   /**
    * Handles showSummary operation
-   * 
+   *
    * @param options - Parameter description
-   * 
+   *
    * @returns Promise<CommandResult> - Return value description
    */
   private async showSummary(options: CommandOptions): Promise<CommandResult> {
@@ -731,9 +731,9 @@ export class IndexCommand implements ICommand {
 
   /**
    * Handles refreshIndex operation
-   * 
+   *
    * @param options - Parameter description
-   * 
+   *
    * @returns Promise<CommandResult> - Return value description
    */
   private async refreshIndex(options: CommandOptions): Promise<CommandResult> {
@@ -746,9 +746,9 @@ export class IndexCommand implements ICommand {
 
   /**
    * Analyzes code
-   * 
+   *
    * @param options - Parameter description
-   * 
+   *
    * @returns Promise<CommandResult> - Return value description
    */
   private async analyzeCode(options: CommandOptions): Promise<CommandResult> {
@@ -1410,7 +1410,7 @@ export class IndexCommand implements ICommand {
 
   /**
    * Gets definition
-   * 
+   *
    * @returns CommandDefinition - Return value description
    */
   getDefinition(): CommandDefinition {
@@ -1458,7 +1458,7 @@ export class IndexCommand implements ICommand {
 
   /**
    * Gets name
-   * 
+   *
    * @returns string - Return value description
    */
   getName(): string {
@@ -1467,7 +1467,7 @@ export class IndexCommand implements ICommand {
 
   /**
    * Gets aliases
-   * 
+   *
    * @returns string[] - Return value description
    */
   getAliases(): string[] {
@@ -1476,9 +1476,9 @@ export class IndexCommand implements ICommand {
 
   /**
    * Validates args
-   * 
+   *
    * @param args - Parameter description
-   * 
+   *
    * @returns  - Return value description
    */
   validateArgs(args: string[]): { valid: boolean; errors: string[] } {
@@ -1530,7 +1530,7 @@ export class IndexCommand implements ICommand {
 
   /**
    * Gets help
-   * 
+   *
    * @returns string - Return value description
    */
   getHelp(): string {
@@ -1843,148 +1843,158 @@ export class IndexCommand implements ICommand {
   }
 
   /**
-   * Gather enhanced symbol data for prompt generation
+   * Build fallback project details when dynamic analysis fails
    */
-  private async gatherSymbolEnhancements(): Promise<any> {
+  private buildFallbackProjectDetails(): string {
+    return `**Project Context:**
+- Name: ${this.getProjectName()}
+- Type: Unknown Project Type
+- Architecture: Standard Project Structure
+- Purpose: Software Development Project
+- Scale: Analysis pending
+
+**Note:** Dynamic project analysis failed. Run 'aia index build' to enable detailed analysis.`;
+  }
+
+  /**
+   * Get project name from package.json or directory name
+   */
+  private getProjectName(): string {
     try {
-      // Get all symbol types for cross-reference mapping
-      const classes = this.symbolIndexService.findSymbolsByType('class');
-      const functions = this.symbolIndexService.findSymbolsByType('function');
-      const interfaces = this.symbolIndexService.findSymbolsByType('interface');
-      const types = this.symbolIndexService.findSymbolsByType('type');
-
-      // Build relationship maps
-      const symbolRelationships: Record<string, any> = {};
-      const crossReferences: Record<string, string[]> = {};
-      const usagePatterns: Record<string, any> = {};
-
-      // Gather detailed symbol information
-      for (const symbolName of [
-        ...classes,
-        ...functions,
-        ...interfaces,
-        ...types,
-      ]) {
-        const symbolInfo = this.symbolIndexService.getSymbol(symbolName);
-        if (symbolInfo) {
-          // Debug: log symbol info for first few symbols
-          if (symbolName === classes[0] || symbolName === functions[0]) {
-            console.log(
-              chalk.cyan(
-                `    🔍 Sample symbol "${symbolName}": ${
-                  symbolInfo.references?.length || 0
-                } references, ${
-                  symbolInfo.definitions?.length || 0
-                } definitions`
-              )
-            );
-          }
-
-          symbolRelationships[symbolName] = {
-            type: symbolInfo.type,
-            definitions: symbolInfo.definitions?.length || 0,
-            references: symbolInfo.references?.length || 0,
-            files:
-              symbolInfo.definitions?.map((def) => def.location.file) || [],
-            usageContext:
-              symbolInfo.references?.slice(0, 5).map((ref) => ({
-                file: ref.location.file,
-                context: ref.context || 'usage',
-              })) || [],
-          };
-
-          // Build cross-references
-          const relatedSymbols =
-            symbolInfo.references
-              ?.map((ref) => ref.location.file)
-              .filter((file, index, arr) => arr.indexOf(file) === index) || [];
-          crossReferences[symbolName] = relatedSymbols;
-
-          // Analyze usage patterns
-          if (symbolInfo.references && symbolInfo.references.length > 0) {
-            usagePatterns[symbolName] = {
-              totalUsages: symbolInfo.references.length,
-              filesUsedIn: relatedSymbols.length,
-              averageUsagePerFile:
-                symbolInfo.references.length /
-                Math.max(relatedSymbols.length, 1),
-              commonContexts: symbolInfo.references
-                .map((ref) => ref.context)
-                .filter(Boolean)
-                .reduce((acc: Record<string, number>, context: string) => {
-                  acc[context] = (acc[context] || 0) + 1;
-                  return acc;
-                }, {}),
-            };
-          }
+      const packageJsonPath = path.join(process.cwd(), 'package.json');
+      if (fs.existsSync(packageJsonPath)) {
+        const packageJson = JSON.parse(
+          fs.readFileSync(packageJsonPath, 'utf8')
+        );
+        if (packageJson.name) {
+          return packageJson.name;
         }
       }
-
-      // Debug: log usage patterns found
-      console.log(
-        chalk.cyan(
-          `    📊 Usage patterns found: ${Object.keys(usagePatterns).length}`
-        )
-      );
-      if (Object.keys(usagePatterns).length > 0) {
-        const topUsed = Object.entries(usagePatterns)
-          .sort(
-            ([, a], [, b]) => (b as any).totalUsages - (a as any).totalUsages
-          )
-          .slice(0, 3);
-        console.log(
-          chalk.cyan(
-            `    🔝 Top used: ${topUsed
-              .map(([name, data]) => `${name}(${(data as any).totalUsages})`)
-              .join(', ')}`
-          )
-        );
-      }
-
-      return {
-        totalSymbols:
-          classes.length + functions.length + interfaces.length + types.length,
-        symbolCounts: {
-          classes: classes.length,
-          functions: functions.length,
-          interfaces: interfaces.length,
-          types: types.length,
-        },
-        symbolRelationships,
-        crossReferences,
-        usagePatterns,
-        mostUsedSymbols: Object.entries(usagePatterns)
-          .sort(
-            ([, a], [, b]) => (b as any).totalUsages - (a as any).totalUsages
-          )
-          .slice(0, 10)
-          .map(([name]) => name),
-        keyArchitecturalComponents: classes.filter(
-          (name) =>
-            name.includes('Service') ||
-            name.includes('Manager') ||
-            name.includes('Controller') ||
-            name.includes('Engine') ||
-            name.includes('Factory') ||
-            name.includes('Provider')
-        ),
-      };
     } catch (error) {
-      console.warn(
-        chalk.yellow(
-          '⚠️  Could not gather symbol enhancements, falling back to basic data'
-        )
-      );
-      return {
-        totalSymbols: 0,
-        symbolCounts: { classes: 0, functions: 0, interfaces: 0, types: 0 },
-        symbolRelationships: {},
-        crossReferences: {},
-        usagePatterns: {},
-        mostUsedSymbols: [],
-        keyArchitecturalComponents: [],
-      };
+      // Ignore parsing errors
     }
+
+    // Fallback to directory name
+    return path.basename(process.cwd());
+  }
+
+  /**
+   * Find test files in the index
+   */
+  private findTestFiles(index: any): string[] {
+    const files = Array.from(index.files.keys()) as string[];
+    return files.filter((file: string) => {
+      const filePath = file.toLowerCase();
+      return (
+        filePath.includes('test') ||
+        filePath.includes('spec') ||
+        filePath.includes('__tests__') ||
+        filePath.endsWith('.test.js') ||
+        filePath.endsWith('.test.ts') ||
+        filePath.endsWith('.spec.js') ||
+        filePath.endsWith('.spec.ts')
+      );
+    });
+  }
+
+  /**
+   * Extract key technologies from dependencies
+   */
+  private extractKeyTechnologies(
+    dependencies: Record<string, string>
+  ): string[] {
+    const keyTechs: string[] = [];
+    const techMap: Record<string, string> = {
+      react: 'React',
+      vue: 'Vue.js',
+      angular: 'Angular',
+      next: 'Next.js',
+      express: 'Express.js',
+      fastify: 'Fastify',
+      typescript: 'TypeScript',
+      webpack: 'Webpack',
+      vite: 'Vite',
+      jest: 'Jest',
+      mocha: 'Mocha',
+      commander: 'CLI Framework',
+      inquirer: 'Interactive CLI',
+      chalk: 'Terminal Styling',
+      mongoose: 'MongoDB/Mongoose',
+      prisma: 'Prisma ORM',
+      graphql: 'GraphQL',
+      apollo: 'Apollo GraphQL',
+      'socket.io': 'WebSocket/Socket.io',
+    };
+
+    for (const [dep, version] of Object.entries(dependencies)) {
+      const techName = techMap[dep.toLowerCase()];
+      if (techName) {
+        keyTechs.push(techName);
+      }
+    }
+
+    // Add language detection
+    if (dependencies['typescript'] || dependencies['@types/node']) {
+      keyTechs.unshift('TypeScript');
+    } else if (Object.keys(dependencies).length > 0) {
+      keyTechs.unshift('JavaScript');
+    }
+
+    return [...new Set(keyTechs)]; // Remove duplicates
+  }
+
+  /**
+   * Extract architectural characteristics from the summary
+   */
+  private extractArchitecturalCharacteristics(summary: any): string[] {
+    const characteristics: string[] = [];
+
+    // Check architecture type
+    if (summary.overview.architecture) {
+      const arch = summary.overview.architecture.toLowerCase();
+      if (arch.includes('service')) {
+        characteristics.push('Service-oriented architecture');
+      }
+      if (arch.includes('mvc')) {
+        characteristics.push('Model-View-Controller pattern');
+      }
+      if (arch.includes('component')) {
+        characteristics.push('Component-based architecture');
+      }
+    }
+
+    // Check for patterns from key components
+    const componentFiles =
+      summary.keyComponents?.map((c: any) => c.file.toLowerCase()) || [];
+
+    if (
+      componentFiles.some(
+        (f: string) => f.includes('interface') || f.includes('i')
+      )
+    ) {
+      characteristics.push('Interface-driven design');
+    }
+
+    if (componentFiles.some((f: string) => f.includes('command'))) {
+      characteristics.push('Command pattern implementation');
+    }
+
+    if (componentFiles.some((f: string) => f.includes('factory'))) {
+      characteristics.push('Factory pattern');
+    }
+
+    if (componentFiles.some((f: string) => f.includes('service'))) {
+      characteristics.push('Service layer architecture');
+    }
+
+    // Check project scale
+    if (summary.overview.size.files > 100) {
+      characteristics.push('Large-scale application');
+    } else if (summary.overview.size.files > 50) {
+      characteristics.push('Medium-scale application');
+    }
+
+    return characteristics;
   }
 
   /**
@@ -2065,7 +2075,7 @@ export class IndexCommand implements ICommand {
   ): Promise<string> {
     try {
       // Create a comprehensive generation prompt for the AI
-      const generationPrompt = this.createCompleteGenerationPrompt(
+      const generationPrompt = await this.createCompleteGenerationPrompt(
         symbolData,
         promptType
       );
@@ -2083,8 +2093,8 @@ export class IndexCommand implements ICommand {
         user: process.env.USER || 'unknown',
         shell: process.env.SHELL || 'unknown',
         timestamp: new Date().toISOString(),
-        projectType: 'typescript-nodejs',
-        projectInfo: { name: 'AIA CLI', type: 'typescript' },
+        projectType: 'detected-dynamically',
+        projectInfo: { name: this.getProjectName(), type: 'auto-detected' },
         gitStatus: 'unknown',
         environmentScore: 100,
       };
@@ -2127,15 +2137,15 @@ export class IndexCommand implements ICommand {
   /**
    * Create comprehensive generation prompts for complete AI-driven file creation
    */
-  private createCompleteGenerationPrompt(
+  private async createCompleteGenerationPrompt(
     symbolData: any,
     promptType: string
-  ): string {
+  ): Promise<string> {
     const codebaseContext = this.buildCodebaseContext(symbolData);
-    const projectDetails = this.buildProjectDetails();
+    const projectDetails = await this.buildProjectDetails();
 
     const prompts: Record<string, string> = {
-      'copilot-instructions': `You are a technical documentation expert. Create a comprehensive GitHub Copilot instructions file for this TypeScript/Node.js CLI project.
+      'copilot-instructions': `You are a technical documentation expert. Create a comprehensive GitHub Copilot instructions file for this software project.
 
 ${codebaseContext}
 
@@ -2153,15 +2163,14 @@ Define the AI assistant's role for this specific codebase.
 
 ## Project Overview
 - Project name, type, and purpose
-- Architecture summary (Service-Oriented Architecture with Dependency Injection)
+- Architecture summary
 - Scale and statistics
 - Core capabilities
 
 ## Architecture Patterns
-- Service-Oriented Architecture details
-- Dependency Injection patterns
-- Command Pattern implementation
-- Key architectural components
+- Architectural design details
+- Key patterns implementation
+- Major architectural components
 
 ## Directory Structure
 Provide the actual directory structure based on the project type.
@@ -2176,7 +2185,7 @@ Specific guidance for navigating this codebase using the actual architectural co
 Show actual code patterns used in this project with examples. Use the specific component names and relationships from the symbol analysis above.
 
 ## Interactive Examples
-Provide realistic examples for this CLI tool using the actual command classes and services identified in the symbol data.
+Provide realistic examples for this project using the actual command classes and services identified in the symbol data.
 
 ## Development Workflow
 Step-by-step guidance for adding features to this codebase, referencing the specific architectural components and patterns identified above.
@@ -2190,11 +2199,11 @@ Specific to this project's architecture.
 ## Guidelines
 Specific rules for working with this codebase.
 
-Create a professional, comprehensive, and actionable document that helps developers work effectively with GitHub Copilot on this specific codebase. Include real TypeScript code examples and practical guidance throughout.
+Create a professional, comprehensive, and actionable document that helps developers work effectively with GitHub Copilot on this specific codebase. Include real code examples and practical guidance throughout.
 
 IMPORTANT: Use the specific symbol data provided above (Key Components, Most Referenced Symbols, etc.) to make the documentation concrete and specific to this actual codebase. Reference real class names, service names, and architectural components from the symbol analysis.`,
 
-      comprehensive: `You are a senior technical architect. Create a comprehensive technical documentation file for this TypeScript/Node.js CLI project.
+      comprehensive: `You are a senior technical architect. Create a comprehensive technical documentation file for this software project.
 
 ${codebaseContext}
 
@@ -2211,13 +2220,13 @@ Detailed project overview including purpose, architecture, and scale.
 File counts, language distribution, complexity metrics.
 
 ## Technical Architecture
-- Service-oriented architecture analysis
+- Architectural analysis
 - Component relationships
 - Design patterns implementation
 - Integration points
 
 ## Code Quality Assessment
-- SOLID principles adherence
+- Design principles adherence
 - Design pattern usage
 - Technical debt analysis
 - Maintainability concerns
@@ -2229,79 +2238,80 @@ File counts, language distribution, complexity metrics.
 - Scaling strategies
 
 ## Integration Patterns
-- Service communication
-- Data flow analysis
-- Error handling strategies
-- Monitoring and observability
-
-## Testing Strategy
-- Current test coverage
-- Testing patterns
-- Recommended improvements
-- Quality assurance
+- External dependencies
+- API design patterns
+- Data flow patterns
+- Communication protocols
 
 ## Security Considerations
-- API security
-- Data protection
-- Authentication patterns
-- Vulnerability assessment
+- Security patterns implemented
+- Authentication/authorization
+- Data protection strategies
+- Security best practices
 
-## Deployment Architecture
-- Build process
-- Distribution strategy
-- Environment management
-- CI/CD recommendations
+## Performance Optimization
+- Current optimizations
+- Performance bottlenecks
+- Optimization opportunities
+- Monitoring strategies
 
-## Future Roadmap
-- Technical evolution
-- Architecture improvements
-- Technology upgrades
-- Strategic recommendations
+## Testing Strategy
+- Testing approach
+- Coverage analysis
+- Testing patterns
+- Quality assurance
 
-Provide strategic insights that help technical stakeholders understand the system's current state and future potential.`,
+## Documentation Standards
+- Code documentation
+- API documentation
+- Architecture documentation
+- User documentation
 
-      minimal: `You are a technical writer specializing in concise documentation. Create a minimal but effective project context file for this TypeScript/Node.js CLI project.
+Focus on providing actionable insights specific to this codebase.`,
+
+      minimal: `You are a concise technical writer. Create a minimal but essential documentation file for this software project.
 
 ${codebaseContext}
 
 ${projectDetails}
 
-Generate a complete codebase-minimal.md file that includes:
+Generate a complete codebase-minimal.md file covering:
 
-# TypeScript CLI Project Context
+# Essential Project Guide
 
 ## Quick Overview
-Project type, language, and core purpose in 2-3 sentences.
+- What this project does
+- Key technologies used
+- Architecture approach
 
-## Key Statistics
-- File count
-- Primary language
-- Architecture type
-- Entry points
+## Getting Started
+- Setup requirements
+- Installation steps
+- Basic usage
 
-## Essential Components
-List only the most critical files and components.
+## Project Structure
+- Directory organization
+- Key files and their purpose
+- Navigation guide
 
-## Core Commands
-The main CLI commands available.
-
-## Quick Start
-Essential commands to get started:
-\`\`\`bash
-npm install
-npm run build
-npm start
-\`\`\`
+## Core Components
+- Main architectural pieces
+- Key interfaces/contracts
+- Important services
 
 ## Development Essentials
-Key files developers need to know about.
+- How to add features
+- Testing approach
+- Build process
 
-## Architecture Summary
-One paragraph explaining the architecture.
+## Common Tasks
+- Frequent development operations
+- Debugging tips
+- Performance considerations
 
 Keep it concise but complete - essential information only.`,
 
-      architecture: `You are a solutions architect. Create a detailed architecture documentation file for this TypeScript/Node.js CLI project.
+      architecture: `You are a solutions architect. Create a detailed architecture documentation file for this software project.
 
 ${codebaseContext}
 
@@ -2321,7 +2331,7 @@ High-level architectural overview and key decisions.
 - Data flow
 
 ## Design Patterns
-- Implemented patterns (Service-Oriented, Command, Factory, etc.)
+- Implemented patterns
 - Pattern justification
 - Benefits and trade-offs
 - Implementation examples
@@ -2370,7 +2380,7 @@ High-level architectural overview and key decisions.
 
 Focus on architectural decisions, patterns, and their rationale.`,
 
-      'dev-focused': `You are a development team lead. Create a practical developer guide for this TypeScript/Node.js CLI project.
+      'dev-focused': `You are a development team lead. Create a practical developer guide for this software project.
 
 ${codebaseContext}
 
@@ -2407,8 +2417,8 @@ Get developers productive immediately:
 
 ## Common Tasks
 Step-by-step guides for:
-- Adding a new CLI command
-- Creating a new service
+- Adding new components
+- Creating new services
 - Implementing interfaces
 - Error handling
 
@@ -2419,10 +2429,10 @@ Step-by-step guides for:
 - Troubleshooting checklist
 
 ## Testing Guidelines
-- Unit testing patterns
-- Integration testing
-- Test file organization
+- Testing patterns
+- Test organization
 - Mocking strategies
+- Coverage expectations
 
 ## Code Contribution Guidelines
 - Coding standards
@@ -2449,44 +2459,82 @@ Make this practical and actionable - focus on day-to-day development needs.`,
   }
 
   /**
-   * Build detailed project context for AI generation
+   * Build project details dynamically from codebase analysis
    */
-  private buildProjectDetails(): string {
-    return `**Project Context:**
-- Name: AIA CLI (AI Assistant Command Line Interface)
-- Type: TypeScript Node.js CLI Application
-- Architecture: Service-Oriented Architecture with Dependency Injection
-- Purpose: AI-powered development tool for code analysis, optimization, and assistance
-- Scale: 158 files, 85 classes, 56 functions
-- Testing: 30 test files
-- Main Technologies: TypeScript, Node.js, CLI frameworks, AI integrations
-- Key Features: Command execution, AI queries, memory management, codebase analysis
-- Development Status: Active development with advanced performance optimizations
+  private async buildProjectDetails(): Promise<string> {
+    try {
+      // Use the existing codebase index to get dynamic project information
+      const index = await this.codeIndexService.loadIndex();
+      if (!index) {
+        return this.buildFallbackProjectDetails();
+      }
 
-**Available Commands:**
-- agent - AI-powered task execution with reasoning
-- ask - Direct AI queries
-- config - Configuration management
-- context - Context information display
-- execute - Command execution
-- index - Codebase indexing and analysis
-- memory - Memory management
+      const codebaseIndex = this.convertToCodebaseIndex(index);
+      const summaryData = await this.codebaseSummarizer.generateAISummary(
+        codebaseIndex as any
+      );
 
-**Key Services:**
-- AIService: AI model interactions
-- MemoryService: Conversation and command memory
-- ConfigurationService: System configuration
-- CommandService: Command execution
-- ContextService: Environment awareness
-- CodeIndexService: Codebase analysis
+      const summary = summaryData.summary;
 
-**Architecture Characteristics:**
-- Dependency injection throughout
-- Interface-driven design
-- Command pattern implementation
-- Service-oriented composition
-- Plugin extensibility
-- Performance optimization focus`;
+      let details = `**Project Context:**\n`;
+      details += `- Name: ${this.getProjectName()}\n`;
+      details += `- Type: ${summary.overview.projectType}\n`;
+      details += `- Primary Language: ${summary.overview.primaryLanguage}\n`;
+      details += `- Architecture: ${summary.overview.architecture}\n`;
+      details += `- Purpose: ${summary.overview.purpose}\n`;
+      details += `- Scale: ${summary.overview.size.files} files, ${summary.overview.size.components} components\n`;
+
+      // Add test information if available
+      const testFiles = this.findTestFiles(index);
+      if (testFiles.length > 0) {
+        details += `- Testing: ${testFiles.length} test files\n`;
+      }
+
+      // Add main technologies from dependencies
+      const keyDeps = this.extractKeyTechnologies(
+        summary.dependencies.external
+      );
+      if (keyDeps.length > 0) {
+        details += `- Main Technologies: ${keyDeps.join(', ')}\n`;
+      }
+
+      // Add entry points
+      if (summary.entryPoints.length > 0) {
+        details += `\n**Entry Points:**\n`;
+        summary.entryPoints.forEach((entry: any) => {
+          details += `- ${entry.file}: ${entry.purpose}\n`;
+        });
+      }
+
+      // Add key components
+      if (summary.keyComponents.length > 0) {
+        details += `\n**Key Components:**\n`;
+        summary.keyComponents.slice(0, 8).forEach((component: any) => {
+          details += `- ${component.file}: ${component.purpose}\n`;
+        });
+      }
+
+      // Add architecture characteristics
+      const archCharacteristics =
+        this.extractArchitecturalCharacteristics(summary);
+      if (archCharacteristics.length > 0) {
+        details += `\n**Architecture Characteristics:**\n`;
+        archCharacteristics.forEach((char: string) => {
+          details += `- ${char}\n`;
+        });
+      }
+
+      return details;
+    } catch (error) {
+      console.warn(
+        chalk.yellow(
+          `⚠️  Failed to build dynamic project details: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`
+        )
+      );
+      return this.buildFallbackProjectDetails();
+    }
   }
 
   /**
@@ -2602,6 +2650,176 @@ Make this practical and actionable - focus on day-to-day development needs.`,
 
     if (symbolData.symbolCounts?.classes > 50) {
       characteristics.push('Large-Scale Application');
+    }
+
+    return characteristics;
+  }
+
+  /**
+   * Gather enhanced symbol data for prompt generation
+   */
+  private async gatherSymbolEnhancements(): Promise<any> {
+    try {
+      // Load the main index
+      const index = await this.codeIndexService.loadIndex();
+      if (!index) {
+        return this.createEmptySymbolData();
+      }
+
+      // Convert to codebase index format for analysis
+      const codebaseIndex = this.convertToCodebaseIndex(index);
+      const summaryData = await this.codebaseSummarizer.generateAISummary(
+        codebaseIndex as any
+      );
+
+      // Build symbol data from the analysis
+      const symbolData = {
+        totalSymbols: index.classes.size + index.functions.size,
+        symbolCounts: {
+          classes: index.classes.size,
+          functions: index.functions.size,
+          interfaces: Array.from(index.files.values()).reduce(
+            (count, file: any) => {
+              return (
+                count +
+                (file.exports?.filter(
+                  (exp: any) => exp.startsWith('I') || exp.includes('Interface')
+                ).length || 0)
+              );
+            },
+            0
+          ),
+        },
+        keyArchitecturalComponents: this.extractKeyArchitecturalComponents(
+          summaryData.summary
+        ),
+        mostUsedSymbols: this.extractMostUsedSymbols(index),
+        symbolRelationships: this.buildSymbolRelationships(index),
+        usagePatterns: this.buildUsagePatterns(index),
+        projectCharacteristics: this.extractProjectCharacteristics(
+          summaryData.summary
+        ),
+      };
+
+      return symbolData;
+    } catch (error) {
+      console.warn(
+        chalk.yellow(
+          `⚠️  Failed to gather symbol enhancements: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`
+        )
+      );
+      return this.createEmptySymbolData();
+    }
+  }
+
+  /**
+   * Create empty symbol data structure
+   */
+  private createEmptySymbolData(): any {
+    return {
+      totalSymbols: 0,
+      symbolCounts: { classes: 0, functions: 0, interfaces: 0 },
+      keyArchitecturalComponents: [],
+      mostUsedSymbols: [],
+      symbolRelationships: {},
+      usagePatterns: {},
+      projectCharacteristics: [],
+    };
+  }
+
+  /**
+   * Extract key architectural components from summary
+   */
+  private extractKeyArchitecturalComponents(summary: any): string[] {
+    const components: string[] = [];
+
+    if (summary.keyComponents) {
+      summary.keyComponents.forEach((component: any) => {
+        if (component.file && component.type) {
+          // Extract class/component names from file paths
+          const fileName = path.basename(
+            component.file,
+            path.extname(component.file)
+          );
+          components.push(fileName);
+        }
+      });
+    }
+
+    return components.slice(0, 15); // Limit to top 15
+  }
+
+  /**
+   * Extract most used symbols from index
+   */
+  private extractMostUsedSymbols(index: any): string[] {
+    const symbolUsage = new Map<string, number>();
+
+    // Count class usage
+    index.classes.forEach((classInfo: any, className: string) => {
+      symbolUsage.set(className, (symbolUsage.get(className) || 0) + 1);
+    });
+
+    // Count function usage
+    index.functions.forEach((funcInfo: any, funcName: string) => {
+      symbolUsage.set(funcName, (symbolUsage.get(funcName) || 0) + 1);
+    });
+
+    // Sort by usage and return top symbols
+    return Array.from(symbolUsage.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([symbol]) => symbol);
+  }
+
+  /**
+   * Build symbol relationships data
+   */
+  private buildSymbolRelationships(index: any): Record<string, any> {
+    const relationships: Record<string, any> = {};
+
+    index.classes.forEach((classInfo: any, className: string) => {
+      relationships[className] = {
+        references: 1,
+        files: [classInfo.file || 'unknown'],
+      };
+    });
+
+    return relationships;
+  }
+
+  /**
+   * Build usage patterns data
+   */
+  private buildUsagePatterns(index: any): Record<string, any> {
+    const patterns: Record<string, any> = {};
+
+    // Build patterns for symbols
+    const allSymbols = [...index.classes.keys(), ...index.functions.keys()];
+    allSymbols.forEach((symbol: string) => {
+      patterns[symbol] = {
+        totalUsages: 1,
+        filesUsedIn: 1,
+      };
+    });
+
+    return patterns;
+  }
+
+  /**
+   * Extract project characteristics from summary
+   */
+  private extractProjectCharacteristics(summary: any): string[] {
+    const characteristics: string[] = [];
+
+    if (summary.overview?.architecture) {
+      characteristics.push(summary.overview.architecture);
+    }
+
+    if (summary.overview?.projectType) {
+      characteristics.push(summary.overview.projectType);
     }
 
     return characteristics;

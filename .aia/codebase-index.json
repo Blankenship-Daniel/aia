@@ -66,7 +66,7 @@
         "count": 1
       }
     ],
-    "indexedAt": "2025-06-22T02:16:25.398Z"
+    "indexedAt": "2025-06-22T02:33:25.733Z"
   },
   "files": [
     [
@@ -74,8 +74,8 @@
       {
         "path": ".aia/codebase-index.json",
         "size": 695041,
-        "hash": "f69b3b3ad7c27ab6",
-        "lastModified": "2025-06-22T02:15:53.684Z",
+        "hash": "87bd89373b0caf72",
+        "lastModified": "2025-06-22T02:32:54.044Z",
         "type": "config",
         "language": "json",
         "symbols": [
@@ -465,8 +465,8 @@
       {
         "path": ".github/copilot-instructions.md",
         "size": 6275,
-        "hash": "ebb76b3fa09b5825",
-        "lastModified": "2025-06-22T02:16:23.709Z",
+        "hash": "e141b26892233f18",
+        "lastModified": "2025-06-22T02:33:24.070Z",
         "type": "documentation",
         "language": "markdown",
         "symbols": [

@@ -38,6 +38,7 @@ interface AIAConfig {
     memory: string;
     plugins: string;
   };
+  suggestPromptsDirectory: string;
 }
 
 interface UserProfile {
@@ -56,7 +57,7 @@ interface SecurityValidator {
 
 /**
  * ConfigurationManager class
- * 
+ *
  * TODO: Add class description
  */
 class ConfigurationManager {
@@ -72,7 +73,7 @@ class ConfigurationManager {
 
   /**
    * Creates an instance of the class
-   * 
+   *
    * @param configDirOrFile? - Parameter description
    * @param isFilePath - Parameter description
    */
@@ -122,6 +123,7 @@ class ConfigurationManager {
         memory: './memory',
         plugins: './plugins',
       },
+      suggestPromptsDirectory: './suggested-prompts',
     };
   }
 
@@ -135,7 +137,7 @@ class ConfigurationManager {
   // Load all configuration files
   /**
    * Handles loadAllConfigs operation
-   * 
+   *
    * @returns Promise<void> - Return value description
    */
   private async loadAllConfigs(): Promise<void> {
@@ -147,7 +149,7 @@ class ConfigurationManager {
   // Load main configuration
   /**
    * Handles loadMainConfig operation
-   * 
+   *
    * @returns Promise<void> - Return value description
    */
   private async loadMainConfig(): Promise<void> {
@@ -222,7 +224,7 @@ class ConfigurationManager {
   // Method to get the current config file path, useful for debugging or tests
   /**
    * Gets activeconfigfile
-   * 
+   *
    * @returns string - Return value description
    */
   public getActiveConfigFile(): string {
@@ -232,7 +234,7 @@ class ConfigurationManager {
   // Load user profiles
   /**
    * Handles loadProfiles operation
-   * 
+   *
    * @returns Promise<void> - Return value description
    */
   private async loadProfiles(): Promise<void> {
@@ -254,7 +256,7 @@ class ConfigurationManager {
   // Load user-specific configuration
   /**
    * Handles loadUserConfig operation
-   * 
+   *
    * @returns Promise<void> - Return value description
    */
   private async loadUserConfig(): Promise<void> {
@@ -279,7 +281,7 @@ class ConfigurationManager {
   // Interactive configuration setup
   /**
    * Sets upinteractiveconfig
-   * 
+   *
    * @returns Promise<void> - Return value description
    */
   async setupInteractiveConfig(): Promise<void> {
@@ -319,7 +321,7 @@ class ConfigurationManager {
   // Quick setup for API keys
   /**
    * Handles quickSetup operation
-   * 
+   *
    * @returns Promise<void> - Return value description
    */
   private async quickSetup(): Promise<void> {
@@ -378,7 +380,7 @@ class ConfigurationManager {
   // Full configuration setup
   /**
    * Handles fullSetup operation
-   * 
+   *
    * @returns Promise<void> - Return value description
    */
   private async fullSetup(): Promise<void> {
@@ -469,7 +471,7 @@ class ConfigurationManager {
   // Profile management
   /**
    * Handles profileManagement operation
-   * 
+   *
    * @returns Promise<void> - Return value description
    */
   private async profileManagement(): Promise<void> {
@@ -516,7 +518,7 @@ class ConfigurationManager {
   // Advanced configuration
   /**
    * Handles advancedSetup operation
-   * 
+   *
    * @returns Promise<void> - Return value description
    */
   private async advancedSetup(): Promise<void> {
@@ -558,7 +560,7 @@ class ConfigurationManager {
   // Output directory configuration
   /**
    * Configures outputdirectories
-   * 
+   *
    * @returns Promise<void> - Return value description
    */
   private async configureOutputDirectories(): Promise<void> {
@@ -596,18 +598,29 @@ class ConfigurationManager {
         message: 'Plugins directory:',
         default: currentDirs.plugins,
       },
+      {
+        type: 'input',
+        name: 'suggestPromptsDirectory',
+        message: 'Suggest-prompts output directory:',
+        default: this.config.suggestPromptsDirectory,
+      },
     ]);
 
     this.config.outputDirectories = answers;
+    // Handle suggestPromptsDirectory separately since it's not part of outputDirectories
+    if (answers.suggestPromptsDirectory !== undefined) {
+      this.config.suggestPromptsDirectory = answers.suggestPromptsDirectory;
+      delete answers.suggestPromptsDirectory;
+    }
     await this.saveMainConfig();
   }
 
   // Configuration validation
   /**
    * Validates andmergeconfig
-   * 
+   *
    * @param rawConfig - Parameter description
-   * 
+   *
    * @returns AIAConfig - Return value description
    */
   private validateAndMergeConfig(rawConfig: Partial<AIAConfig>): AIAConfig {
@@ -624,7 +637,7 @@ class ConfigurationManager {
   // Save configurations
   /**
    * Handles saveMainConfig operation
-   * 
+   *
    * @returns Promise<void> - Return value description
    */
   private async saveMainConfig(): Promise<void> {
@@ -644,7 +657,7 @@ class ConfigurationManager {
 
   /**
    * Handles saveProfiles operation
-   * 
+   *
    * @returns Promise<void> - Return value description
    */
   private async saveProfiles(): Promise<void> {
@@ -661,7 +674,7 @@ class ConfigurationManager {
 
   /**
    * Handles saveUserConfig operation
-   * 
+   *
    * @returns Promise<void> - Return value description
    */
   private async saveUserConfig(): Promise<void> {
@@ -694,7 +707,7 @@ class ConfigurationManager {
   // Helper methods
   /**
    * Gets defaultconfig
-   * 
+   *
    * @returns AIAConfig - Return value description
    */
   private getDefaultConfig(): AIAConfig {
@@ -703,7 +716,7 @@ class ConfigurationManager {
 
   /**
    * Gets defaultprofile
-   * 
+   *
    * @returns UserProfile - Return value description
    */
   private getDefaultProfile(): UserProfile {
@@ -718,7 +731,7 @@ class ConfigurationManager {
 
   /**
    * Creates profile
-   * 
+   *
    * @returns Promise<void> - Return value description
    */
   private async createProfile(): Promise<void> {
@@ -749,7 +762,7 @@ class ConfigurationManager {
 
   /**
    * Handles editProfile operation
-   * 
+   *
    * @returns Promise<void> - Return value description
    */
   private async editProfile(): Promise<void> {
@@ -773,7 +786,7 @@ class ConfigurationManager {
 
   /**
    * Handles deleteProfile operation
-   * 
+   *
    * @returns Promise<void> - Return value description
    */
   private async deleteProfile(): Promise<void> {
@@ -816,7 +829,7 @@ class ConfigurationManager {
   // Public getters
   /**
    * Gets config
-   * 
+   *
    * @returns AIAConfig - Return value description
    */
   public getConfig(): AIAConfig {
@@ -829,7 +842,7 @@ class ConfigurationManager {
 
   /**
    * Gets profiles
-   * 
+   *
    * @returns Record<string, UserProfile> - Return value description
    */
   public getProfiles(): Record<string, UserProfile> {
@@ -838,7 +851,7 @@ class ConfigurationManager {
 
   /**
    * Gets userconfig
-   * 
+   *
    * @returns Record<string, unknown> - Return value description
    */
   public getUserConfig(): Record<string, unknown> {
@@ -847,7 +860,7 @@ class ConfigurationManager {
 
   /**
    * Sets userconfig
-   * 
+   *
    * @param key - Parameter description
    * @param value - Parameter description
    */
@@ -857,10 +870,10 @@ class ConfigurationManager {
 
   /**
    * Handles saveUserConfigValue operation
-   * 
+   *
    * @param key - Parameter description
    * @param value - Parameter description
-   * 
+   *
    * @returns Promise<void> - Return value description
    */
   public async saveUserConfigValue(key: string, value: unknown): Promise<void> {

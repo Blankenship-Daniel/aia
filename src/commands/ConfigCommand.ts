@@ -9,7 +9,7 @@ import inquirer from 'inquirer';
 
 /**
  * ConfigCommand class
- * 
+ *
  * TODO: Add class description
  */
 export class ConfigCommand implements ICommand {
@@ -20,7 +20,7 @@ export class ConfigCommand implements ICommand {
 
   /**
    * Creates an instance of the class
-   * 
+   *
    * @param private configurationService - Parameter description
    */
   constructor(private configurationService: IConfigurationService) {}
@@ -58,9 +58,9 @@ export class ConfigCommand implements ICommand {
 
   /**
    * Handles set
-   * 
+   *
    * @param keyValue - Parameter description
-   * 
+   *
    * @returns Promise<CommandResult> - Return value description
    */
   private async handleSet(keyValue: string): Promise<CommandResult> {
@@ -96,9 +96,9 @@ export class ConfigCommand implements ICommand {
 
   /**
    * Handles get
-   * 
+   *
    * @param key - Parameter description
-   * 
+   *
    * @returns Promise<CommandResult> - Return value description
    */
   private async handleGet(key: string): Promise<CommandResult> {
@@ -131,7 +131,7 @@ export class ConfigCommand implements ICommand {
 
   /**
    * Handles list
-   * 
+   *
    * @returns Promise<CommandResult> - Return value description
    */
   private async handleList(): Promise<CommandResult> {
@@ -165,7 +165,7 @@ export class ConfigCommand implements ICommand {
 
   /**
    * Handles interactive
-   * 
+   *
    * @returns Promise<CommandResult> - Return value description
    */
   private async handleInteractive(): Promise<CommandResult> {
@@ -259,6 +259,12 @@ export class ConfigCommand implements ICommand {
             name: 'outputDirectories.developer',
             message: 'Directory for developer reference files:',
             default: './developer',
+          },
+          {
+            type: 'input',
+            name: 'suggestPromptsDirectory',
+            message: 'Directory for suggest-prompts command output:',
+            default: './suggested-prompts',
           },
         ];
       }
@@ -369,7 +375,7 @@ export class ConfigCommand implements ICommand {
   // ICommand interface methods
   /**
    * Gets definition
-   * 
+   *
    * @returns CommandDefinition - Return value description
    */
   public getDefinition(): CommandDefinition {
@@ -416,7 +422,7 @@ export class ConfigCommand implements ICommand {
 
   /**
    * Gets name
-   * 
+   *
    * @returns string - Return value description
    */
   public getName(): string {
@@ -425,7 +431,7 @@ export class ConfigCommand implements ICommand {
 
   /**
    * Gets aliases
-   * 
+   *
    * @returns string[] - Return value description
    */
   public getAliases(): string[] {
@@ -434,9 +440,9 @@ export class ConfigCommand implements ICommand {
 
   /**
    * Validates args
-   * 
+   *
    * @param args - Parameter description
-   * 
+   *
    * @returns  - Return value description
    */
   public validateArgs(args: string[]): { valid: boolean; errors: string[] } {
@@ -449,7 +455,7 @@ export class ConfigCommand implements ICommand {
 
   /**
    * Gets help
-   * 
+   *
    * @returns string - Return value description
    */
   public getHelp(): string {

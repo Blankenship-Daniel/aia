@@ -1,23 +1,23 @@
 {
   "metadata": {
-    "totalFiles": 240,
-    "totalClasses": 143,
-    "totalFunctions": 67,
+    "totalFiles": 251,
+    "totalClasses": 145,
+    "totalFunctions": 71,
     "totalTodos": 7,
     "languages": {
-      "json": 17,
-      "markdown": 17,
+      "json": 19,
+      "markdown": 25,
       "javascript": 24,
-      "typescript": 182
+      "typescript": 183
     },
     "largestFiles": [
       {
-        "path": "package-lock.json",
-        "size": 382801
+        "path": ".aia/codebase-index.json",
+        "size": 398414
       },
       {
-        "path": ".aia/codebase-index.json",
-        "size": 351376
+        "path": "package-lock.json",
+        "size": 382801
       },
       {
         "path": "src/services/CodeIndexService.ts",
@@ -36,20 +36,20 @@
         "size": 62507
       },
       {
+        "path": "src/commands/SuggestPromptsCommand.ts",
+        "size": 56391
+      },
+      {
         "path": "src/services/AgentExecutionEngine.ts",
         "size": 48711
       },
       {
         "path": "src/commands/AgentCommand.ts",
-        "size": 38487
+        "size": 38770
       },
       {
         "path": "src/services/PlanningTemplateSystem.ts",
         "size": 35200
-      },
-      {
-        "path": "src/commands/LearnCommand.ts",
-        "size": 34959
       }
     ],
     "mostImported": [
@@ -62,16 +62,16 @@
         "count": 1
       }
     ],
-    "indexedAt": "2025-06-22T07:30:19.736Z"
+    "indexedAt": "2025-06-22T09:36:24.123Z"
   },
   "files": [
     [
       ".aia/codebase-index.json",
       {
         "path": ".aia/codebase-index.json",
-        "size": 351376,
-        "hash": "d3765e9469ed3c9d",
-        "lastModified": "2025-06-22T07:29:05.386Z",
+        "size": 398414,
+        "hash": "3dcbd718f3a33c03",
+        "lastModified": "2025-06-22T09:23:25.792Z",
         "type": "config",
         "language": "json",
         "symbols": [
@@ -105,9 +105,9 @@
       ".aia/config.json",
       {
         "path": ".aia/config.json",
-        "size": 410,
-        "hash": "232c4f2e52b4d3a0",
-        "lastModified": "2025-06-21T23:02:12.975Z",
+        "size": 460,
+        "hash": "97a1fcfb6e0edd81",
+        "lastModified": "2025-06-22T09:01:41.868Z",
         "type": "config",
         "language": "json",
         "symbols": [
@@ -130,6 +130,10 @@
           {
             "type": "function",
             "name": "outputDirectories"
+          },
+          {
+            "type": "function",
+            "name": "suggestPromptsDirectory"
           },
           {
             "type": "function",
@@ -197,6 +201,146 @@
           {
             "type": "function",
             "name": "rules"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/copilot-context.md",
+      {
+        "path": ".github/copilot-context.md",
+        "size": 2448,
+        "hash": "156ed99ef5e7de24",
+        "lastModified": "2025-06-22T09:36:19.564Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Project Symbol Context",
+            "name": "Project Symbol Context"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Architecture Overview",
+            "name": "Architecture Overview"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Core Classes (20)\\n\\n- **HelloPlugin**: examples/simple-plugin/index.js\\n- **module**: examples/simple-plugin/index.js\\n- **name**: src/SemanticCodeAnalyzer.ts\\n- **description**: src/services/providers/OpenAIProvider.ts\\n- **DocumentationLinter**: scripts/documentation-linter.ts\\n- **declaration**: scripts/documentation-linter.ts\\n- **without**: scripts/documentation-linter.ts\\n- **ErrorHandlingAnalyzer**: scripts/error-handling-integration.ts\\n- **AgenticReasoningEngine**: src/AgenticReasoningEngine.ts\\n- **AgenticSearchEngine**: src/AgenticSearchEngine.ts\\n- **CLIFormatter**: src/CLIFormatter.ts\\n- **CodebaseSummarizer**: src/CodebaseSummarizer.ts\\n- **import**: src/CommandHandler.ts\\n- **CommandHandler**: src/CommandHandler.ts\\n- **CommandIntelligence**: src/CommandIntelligence.ts\\n- **ConfigurationManager**: src/ConfigurationManager.ts\\n- **ContextAnalyzer**: src/ContextAnalyzer.ts\\n- **ConversationContextManager**: src/ConversationContextManager.ts\\n- **DomainSpecialist**: src/DomainSpecialist.ts\\n- **ErrorHandler**: src/ErrorHandler.ts",
+            "name": "Core Classes (20)\\n\\n- **HelloPlugin**: examples/simple-plugin/index.js\\n- **module**: examples/simple-plugin/index.js\\n- **name**: src/SemanticCodeAnalyzer.ts\\n- **description**: src/services/providers/OpenAIProvider.ts\\n- **DocumentationLinter**: scripts/documentation-linter.ts\\n- **declaration**: scripts/documentation-linter.ts\\n- **without**: scripts/documentation-linter.ts\\n- **ErrorHandlingAnalyzer**: scripts/error-handling-integration.ts\\n- **AgenticReasoningEngine**: src/AgenticReasoningEngine.ts\\n- **AgenticSearchEngine**: src/AgenticSearchEngine.ts\\n- **CLIFormatter**: src/CLIFormatter.ts\\n- **CodebaseSummarizer**: src/CodebaseSummarizer.ts\\n- **import**: src/CommandHandler.ts\\n- **CommandHandler**: src/CommandHandler.ts\\n- **CommandIntelligence**: src/CommandIntelligence.ts\\n- **ConfigurationManager**: src/ConfigurationManager.ts\\n- **ContextAnalyzer**: src/ContextAnalyzer.ts\\n- **ConversationContextManager**: src/ConversationContextManager.ts\\n- **DomainSpecialist**: src/DomainSpecialist.ts\\n- **ErrorHandler**: src/ErrorHandler.ts"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Key Symbols (O(1) Lookup Available)",
+            "name": "Key Symbols (O(1) Lookup Available)"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Symbol Relationships",
+            "name": "Symbol Relationships"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Performance Hints",
+            "name": "Performance Hints"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Quick Symbol Queries",
+            "name": "Quick Symbol Queries"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Code Generation Guidelines",
+            "name": "Code Generation Guidelines"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Performance Benefits",
+            "name": "Performance Benefits"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Direct O(1) symbol lookup examples\nconst AgenticReasoningEngine = symbolIndex.get('AgenticReasoningEngine');\nconst MemoryManager = symbolIndex.get('MemoryManager');\nconst CommandFactoryV2 = symbolIndex.get('CommandFactoryV2');\n\n// Find all implementations\nconst commandImplementations = symbolIndex.getImplementations('ICommand');\n\n// Get dependency graph\nconst serviceDependencies = symbolIndex.getDependencies('ServiceFactory');",
+            "name": "CodeBlock_typescript"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/copilot-relationships.json",
+      {
+        "path": ".github/copilot-relationships.json",
+        "size": 121,
+        "hash": "6eef005ed3528d2a",
+        "lastModified": "2025-06-22T09:36:19.564Z",
+        "type": "config",
+        "language": "json",
+        "symbols": [
+          {
+            "type": "function",
+            "name": "nodes"
+          },
+          {
+            "type": "function",
+            "name": "edges"
+          },
+          {
+            "type": "function",
+            "name": "stats"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/copilot-symbols.json",
+      {
+        "path": ".github/copilot-symbols.json",
+        "size": 208,
+        "hash": "cbe4c12e7649fe0c",
+        "lastModified": "2025-06-22T09:36:19.565Z",
+        "type": "config",
+        "language": "json",
+        "symbols": [
+          {
+            "type": "function",
+            "name": "version"
+          },
+          {
+            "type": "function",
+            "name": "generated"
+          },
+          {
+            "type": "function",
+            "name": "stats"
+          },
+          {
+            "type": "function",
+            "name": "topLevelSymbols"
+          },
+          {
+            "type": "function",
+            "name": "patterns"
           }
         ],
         "imports": [],
@@ -356,6 +500,586 @@
         "type": "documentation",
         "language": "markdown",
         "symbols": [],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/prompts/jest-test-coverage-improvement-for-typescript-serv.prompt.md",
+      {
+        "path": ".github/prompts/jest-test-coverage-improvement-for-typescript-serv.prompt.md",
+        "size": 971,
+        "hash": "e8ce8f2a61cf1733",
+        "lastModified": "2025-06-22T09:15:19.549Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Jest Test Coverage Improvement for TypeScript Services",
+            "name": "Jest Test Coverage Improvement for TypeScript Services"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Metadata",
+            "name": "Metadata"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Project Context",
+            "name": "Project Context"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Description",
+            "name": "Description"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Prompt",
+            "name": "Prompt"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": "Review our current Jest test coverage for TypeScript services and generate: 1) Test cases for common edge cases 2) Integration test templates for service interactions 3) Mock strategies for external dependencies 4) TypeScript-specific test utilities. Focus on improving our medium test coverage to meet industry standards.",
+            "name": "CodeBlock_unknown"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/prompts/microservices-pattern-implementation-in-nodejstype.prompt.md",
+      {
+        "path": ".github/prompts/microservices-pattern-implementation-in-nodejstype.prompt.md",
+        "size": 925,
+        "hash": "c786e531008bb6cd",
+        "lastModified": "2025-06-22T09:15:19.549Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Microservices Pattern Implementation in Node.js/TypeScript",
+            "name": "Microservices Pattern Implementation in Node.js/TypeScript"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Metadata",
+            "name": "Metadata"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Project Context",
+            "name": "Project Context"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Description",
+            "name": "Description"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Prompt",
+            "name": "Prompt"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": "Based on our microservices architecture, provide patterns for: 1) Service boundary definition 2) Inter-service communication 3) Type sharing between services 4) Error handling strategies 5) Service discovery implementation. Include TypeScript interfaces and concrete examples.",
+            "name": "CodeBlock_unknown"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/prompts/nodejs-performance-optimization-for-typescript-ser.prompt.md",
+      {
+        "path": ".github/prompts/nodejs-performance-optimization-for-typescript-ser.prompt.md",
+        "size": 912,
+        "hash": "9bbacc338823c75e",
+        "lastModified": "2025-06-22T09:15:19.550Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Node.js Performance Optimization for TypeScript Services",
+            "name": "Node.js Performance Optimization for TypeScript Services"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Metadata",
+            "name": "Metadata"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Project Context",
+            "name": "Project Context"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Description",
+            "name": "Description"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Prompt",
+            "name": "Prompt"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": "Analyze our TypeScript services for performance optimization opportunities: 1) Memory usage patterns 2) Async operation efficiency 3) Type system overhead 4) Service response times. Provide specific recommendations with code examples that maintain our existing type safety.",
+            "name": "CodeBlock_unknown"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/prompts/prompt-index.md",
+      {
+        "path": ".github/prompts/prompt-index.md",
+        "size": 1952,
+        "hash": "bee9b4fbcf5fa648",
+        "lastModified": "2025-06-22T09:15:19.551Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "AI Prompts Index",
+            "name": "AI Prompts Index"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Project Overview",
+            "name": "Project Overview"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Generated Prompt Files",
+            "name": "Generated Prompt Files"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Refactoring Prompts",
+            "name": "Refactoring Prompts"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Testing Prompts",
+            "name": "Testing Prompts"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Architecture Prompts",
+            "name": "Architecture Prompts"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Performance Prompts",
+            "name": "Performance Prompts"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Documentation Prompts",
+            "name": "Documentation Prompts"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/prompts/suggest-prompts.prompt.md",
+      {
+        "path": ".github/prompts/suggest-prompts.prompt.md",
+        "size": 14734,
+        "hash": "401f5d688d7a3ab8",
+        "lastModified": "2025-06-22T07:42:35.770Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Prompt: Implement `suggest-prompts` Command for AIA CLI",
+            "name": "Prompt: Implement `suggest-prompts` Command for AIA CLI"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Objective",
+            "name": "Objective"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Command Overview",
+            "name": "Command Overview"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Implementation Requirements",
+            "name": "Implementation Requirements"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "1. Create Command Class: `SuggestPromptsCommand`",
+            "name": "1. Create Command Class: `SuggestPromptsCommand`"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "2. Core Functionality Implementation",
+            "name": "2. Core Functionality Implementation"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "a) Analyze the Codebase",
+            "name": "a) Analyze the Codebase"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "b) Generate Context-Aware Prompts Using GenAI",
+            "name": "b) Generate Context-Aware Prompts Using GenAI"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "c) Prompt Categories",
+            "name": "c) Prompt Categories"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "d) Deep Analysis Features",
+            "name": "d) Deep Analysis Features"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "3. Output Generation",
+            "name": "3. Output Generation"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "4. Integration with Existing Systems",
+            "name": "4. Integration with Existing Systems"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "a) Register in CommandFactoryV2",
+            "name": "a) Register in CommandFactoryV2"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "b) Memory Integration",
+            "name": "b) Memory Integration"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "5. Example Generated Prompts",
+            "name": "5. Example Generated Prompts"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Refactor Service Dependencies",
+            "name": "Refactor Service Dependencies"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Debug Async Command Execution",
+            "name": "Debug Async Command Execution"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Generate Integration Tests",
+            "name": "Generate Integration Tests"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "6. Advanced Features",
+            "name": "6. Advanced Features"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "a) Learning from Usage",
+            "name": "a) Learning from Usage"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "b) Context-Aware Suggestions",
+            "name": "b) Context-Aware Suggestions"
+          },
+          {
+            "type": "header",
+            "level": 4,
+            "text": "c) Prompt Templates",
+            "name": "c) Prompt Templates"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "7. Error Handling and Validation",
+            "name": "7. Error Handling and Validation"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "8. Testing Requirements",
+            "name": "8. Testing Requirements"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "9. Documentation",
+            "name": "9. Documentation"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "`suggest-prompts` / `sp`, `prompts`",
+            "name": "`suggest-prompts` / `sp`, `prompts`"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Success Criteria",
+            "name": "Success Criteria"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Additional Considerations",
+            "name": "Additional Considerations"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Additional Considerations",
+            "name": "Additional Considerations"
+          },
+          {
+            "type": "codeblock",
+            "language": "bash",
+            "content": "aia suggest-prompts [options]\naia sp\naia prompts --category refactoring --count 10",
+            "name": "CodeBlock_bash"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "import { ICommand, CommandDefinition } from '../interfaces/ICommand';\nimport { IAIService } from '../interfaces/IAIService';\nimport { ICodeIndexService } from '../interfaces/ICodeIndexService';\nimport { IContextService } from '../interfaces/IContextService';\nimport { CommandResult, CommandOptions } from '../types/index';\n// ... other imports\n\nexport class SuggestPromptsCommand implements ICommand {\n  public readonly name = 'suggest-prompts';\n  public readonly description =\n    'Generate reusable AI prompts tailored to your codebase';\n\n  constructor(\n    private aiService: IAIService,\n    private codeIndexService: ICodeIndexService,\n    private contextService: IContextService,\n    private memoryService: IMemoryService\n  ) {}\n\n  getDefinition(): CommandDefinition {\n    return {\n      name: 'suggest-prompts',\n      description: 'Generate reusable AI prompts tailored to your codebase',\n      usage: 'aia suggest-prompts [options]',\n      examples: [\n        'aia suggest-prompts',\n        'aia suggest-prompts --category refactoring',\n        'aia sp --count 10 --output prompts.md',\n        'aia prompts --analyze-deep --include-examples',\n      ],\n      aliases: ['sp', 'prompts'],\n      options: [\n        {\n          name: 'category',\n          description:\n            'Filter prompts by category (refactoring, debugging, testing, documentation, security, performance)',\n          type: 'string',\n        },\n        {\n          name: 'count',\n          description: 'Number of prompts to generate per category',\n          type: 'number',\n          default: 5,\n        },\n        {\n          name: 'output',\n          description: 'Output file path for generated prompts',\n          type: 'string',\n        },\n        {\n          name: 'analyze-deep',\n          description:\n            'Perform deep analysis including git history and patterns',\n          type: 'boolean',\n          default: false,\n        },\n        {\n          name: 'include-examples',\n          description: 'Include code examples with each prompt',\n          type: 'boolean',\n          default: true,\n        },\n        {\n          name: 'format',\n          description: 'Output format (markdown, json, yaml)',\n          type: 'string',\n          default: 'markdown',\n        },\n      ],\n    };\n  }\n\n  async execute(\n    context: Record<string, unknown>,\n    args: string[],\n    options: CommandOptions\n  ): Promise<CommandResult> {\n    // Implementation details below\n  }\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "private async generatePromptsWithAI(\n  codebaseAnalysis: CodebaseAnalysis,\n  category: string | undefined,\n  count: number,\n  includeExamples: boolean\n): Promise<GeneratedPrompts> {\n  const aiPrompt = `You are an expert software engineer analyzing a ${codebaseAnalysis.projectType} codebase.\n\nCODEBASE CONTEXT:\n- Project Type: ${codebaseAnalysis.projectType}\n- Primary Language: ${codebaseAnalysis.primaryLanguage}\n- Architecture: ${codebaseAnalysis.architecture}\n- Key Technologies: ${codebaseAnalysis.technologies.join(', ')}\n- Total Files: ${codebaseAnalysis.fileCount}\n- Key Components: ${codebaseAnalysis.keyComponents.join(', ')}\n\nTASK: Generate ${count} highly specific, reusable prompts that developers can use with AI assistants when working on this codebase.\n\n${category ? `Focus on ${category} prompts only.` : 'Generate prompts across all categories.'}\n\nCATEGORIES TO CONSIDER:\n1. Refactoring - Improve code quality, patterns, and structure\n2. Debugging - Troubleshoot issues and analyze problems\n3. Testing - Write tests, improve coverage, test strategies\n4. Documentation - Generate docs, comments, and explanations\n5. Security - Identify vulnerabilities and improve security\n6. Performance - Optimize code and identify bottlenecks\n7. Architecture - Design patterns and structural improvements\n8. Code Review - Review guidelines and quality checks\n\nFor each prompt, provide:\n{\n  \"id\": \"unique-id\",\n  \"category\": \"category-name\",\n  \"title\": \"Short descriptive title\",\n  \"prompt\": \"The actual prompt text that developers would use\",\n  \"description\": \"Brief explanation of when to use this prompt\",\n  \"tags\": [\"relevant\", \"tags\"],\n  ${includeExamples ? '\"exampleUsage\": \"Example of how to use this prompt with context\",' : ''}\n  \"expectedOutcome\": \"What the AI should provide\",\n  \"bestPractices\": [\"Tips for using this prompt effectively\"]\n}\n\nIMPORTANT GUIDELINES:\n- Make prompts specific to this codebase's technologies and patterns\n- Include references to actual components, services, or patterns found\n- Prompts should be reusable across different parts of the codebase\n- Focus on real-world development scenarios\n- Ensure prompts encourage best practices for this tech stack\n\nGenerate prompts as a JSON array.`;\n\n  const response = await this.aiService.queryAI(\n    aiPrompt,\n    await this.contextService.gatherContext()\n  );\n\n  return this.parseAIResponse(response.content);\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "private formatOutput(\n  prompts: GeneratedPrompt[],\n  format: string,\n  outputPath?: string\n): string {\n  switch (format) {\n    case 'markdown':\n      return this.generateMarkdownOutput(prompts);\n    case 'json':\n      return JSON.stringify(prompts, null, 2);\n    case 'yaml':\n      return this.generateYamlOutput(prompts);\n    default:\n      return this.generateMarkdownOutput(prompts);\n  }\n}\n\nprivate generateMarkdownOutput(prompts: GeneratedPrompt[]): string {\n  let output = '# AI Prompts for Your Codebase\\n\\n';\n  output += `Generated on: ${new Date().toISOString()}\\n\\n`;\n\n  const categories = [...new Set(prompts.map(p => p.category))];\n\n  for (const category of categories) {\n    output += `## ${category} Prompts\\n\\n`;\n    const categoryPrompts = prompts.filter(p => p.category === category);\n\n    for (const prompt of categoryPrompts) {\n      output += `### ${prompt.title}\\n\\n`;\n      output += `**Description:** ${prompt.description}\\n\\n`;\n      output += `**Prompt:**\\n\\`\\`\\`\\n${prompt.prompt}\\n\\`\\`\\`\\n\\n`;\n      if (prompt.exampleUsage) {\n        output += `**Example Usage:**\\n${prompt.exampleUsage}\\n\\n`;\n      }\n      output += `**Expected Outcome:** ${prompt.expectedOutcome}\\n\\n`;\n      output += `**Best Practices:**\\n`;\n      prompt.bestPractices.forEach(bp => {\n        output += `- ${bp}\\n`;\n      });\n      output += `\\n**Tags:** ${prompt.tags.join(', ')}\\n\\n---\\n\\n`;\n    }\n  }\n\n  return output;\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// In createCommandRegistry method\nregistry.set(\n  'suggest-prompts',\n  () =>\n    new SuggestPromptsCommand(\n      this.serviceRegistry.get<IAIService>('ai')!,\n      this.serviceRegistry.get<ICodeIndexService>('codeIndex')!,\n      this.serviceRegistry.get<IContextService>('context')!,\n      this.serviceRegistry.get<IMemoryService>('memory')!\n    )\n);",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "// Store successful prompt generation\nawait this.memoryService.addConversation({\n  timestamp: new Date().toISOString(),\n  question: `Generated ${\n    prompts.length\n  } prompts for categories: ${categories.join(', ')}`,\n  answer: `Successfully generated context-aware prompts for the codebase`,\n  context: {\n    command: 'suggest-prompts',\n    promptCount: prompts.length,\n    categories: categories,\n  },\n});",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "markdown",
+            "content": "### Refactor Service Dependencies\n\n**Prompt:** \"Analyze the dependency injection pattern in [ServiceName] and suggest refactoring to reduce coupling. Consider the existing IService interfaces and the service registry pattern used throughout the codebase.\"\n\n### Debug Async Command Execution\n\n**Prompt:** \"Help me debug why the [CommandName] command is hanging during async execution. The command implements ICommand interface and uses the standard execute() pattern. Include checks for proper promise handling and timeout configuration.\"\n\n### Generate Integration Tests\n\n**Prompt:** \"Create integration tests for the [FeatureName] functionality that follows the existing test patterns in tests/integration/. Use the established mock services and test utilities.\"",
+            "name": "CodeBlock_markdown"
+          },
+          {
+            "type": "codeblock",
+            "language": "typescript",
+            "content": "try {\n  // Ensure codebase is indexed\n  const index = await this.codeIndexService.loadIndex();\n  if (!index) {\n    console.log(chalk.yellow('No index found. Building index first...'));\n    // Trigger index build\n  }\n\n  // Validate AI service is configured\n  if (!this.aiService.isConfigured()) {\n    return {\n      success: false,\n      error: 'AI service not configured. Run \"aia config\" first.',\n    };\n  }\n\n  // Generate prompts with retry logic\n  const prompts = await this.generateWithRetry(analysis, options);\n} catch (error) {\n  return {\n    success: false,\n    error: `Failed to generate prompts: ${error.message}`,\n  };\n}",
+            "name": "CodeBlock_typescript"
+          },
+          {
+            "type": "codeblock",
+            "language": "markdown",
+            "content": "### `suggest-prompts` / `sp`, `prompts`\n\n**Description:** Generate reusable AI prompts tailored to your codebase using GenAI analysis.\n\n**Usage:**",
+            "name": "CodeBlock_markdown"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": "",
+            "name": "CodeBlock_unknown"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": "## Success Criteria\n\n1. Command successfully analyzes the codebase using existing index\n2. GenAI generates contextually relevant prompts based on:\n   - Project type and technologies\n   - Code patterns and architecture\n   - Common development tasks\n3. Prompts are specific to the codebase, not generic\n4. Output is well-formatted and immediately usable\n5. Integration with existing AIA systems (memory, context, etc.)\n6. Robust error handling and user feedback\n7. Performance optimization for large codebases\n\n## Additional Considerations\n\n- Cache generated prompts to avoid redundant AI calls\n- Allow filtering and searching through generated prompts\n- Consider prompt versioning as codebase evolves\n- Integration with VSCode extension for in-editor prompt suggestions\n- Export prompts in formats compatible with other AI tools\n- Track prompt effectiveness through user feedback\n\nThis implementation fully leverages GenAI to provide intelligent, context-aware prompt suggestions that help developers work more effectively with their specific codebase.## Success Criteria\n\n1. Command successfully analyzes the codebase using existing index\n2. GenAI generates contextually relevant prompts based on:\n   - Project type and technologies\n   - Code patterns and architecture\n   - Common development tasks\n3. Prompts are specific to the codebase, not generic\n4. Output is well-formatted and immediately usable\n5. Integration with existing AIA systems (memory, context, etc.)\n6. Robust error handling and user feedback\n7. Performance optimization for large codebases\n\n## Additional Considerations\n\n- Cache generated prompts to avoid redundant AI calls\n- Allow filtering and searching through generated prompts\n- Consider prompt versioning as codebase evolves\n- Integration with VSCode extension for in-editor prompt suggestions\n- Export prompts in formats compatible with other AI tools\n- Track prompt effectiveness through user feedback\n\nThis implementation fully leverages GenAI to provide intelligent, context-aware prompt suggestions that help developers work more effectively with their specific codebase.",
+            "name": "CodeBlock_unknown"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/prompts/typescript-service-documentation-generation.prompt.md",
+      {
+        "path": ".github/prompts/typescript-service-documentation-generation.prompt.md",
+        "size": 900,
+        "hash": "06103f07ea43ba4b",
+        "lastModified": "2025-06-22T09:15:19.551Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "TypeScript Service Documentation Generation",
+            "name": "TypeScript Service Documentation Generation"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Metadata",
+            "name": "Metadata"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Project Context",
+            "name": "Project Context"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Description",
+            "name": "Description"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Prompt",
+            "name": "Prompt"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": "Generate comprehensive documentation for our TypeScript services including: 1) Interface definitions 2) Service responsibilities 3) Type hierarchies 4) Usage examples 5) Jest test coverage reports. Follow our existing documentation patterns and TypeScript conventions.",
+            "name": "CodeBlock_unknown"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/prompts/typescript-service-layer-modularization-strategy.prompt.md",
+      {
+        "path": ".github/prompts/typescript-service-layer-modularization-strategy.prompt.md",
+        "size": 1025,
+        "hash": "ec9d1f2118bec250",
+        "lastModified": "2025-06-22T09:15:19.548Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "TypeScript Service Layer Modularization Strategy",
+            "name": "TypeScript Service Layer Modularization Strategy"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Metadata",
+            "name": "Metadata"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Project Context",
+            "name": "Project Context"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Description",
+            "name": "Description"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Prompt",
+            "name": "Prompt"
+          },
+          {
+            "type": "codeblock",
+            "language": "unknown",
+            "content": "Analyze our TypeScript service layer and suggest a modularization strategy that: 1) Breaks down large services into smaller, focused modules 2) Implements clear interface boundaries 3) Maintains type safety across module boundaries 4) Considers our existing Jest test structure. Include specific code examples for implementing the modularization pattern.",
+            "name": "CodeBlock_unknown"
+          }
+        ],
         "imports": [],
         "exports": [],
         "dependencies": []
@@ -2629,9 +3353,9 @@
       "docs/testing/jest-esm-fixes-summary.md",
       {
         "path": "docs/testing/jest-esm-fixes-summary.md",
-        "size": 4597,
-        "hash": "cb427d9922bb7b47",
-        "lastModified": "2025-06-22T07:30:16.764Z",
+        "size": 4608,
+        "hash": "790224c4a4a175c1",
+        "lastModified": "2025-06-22T07:30:33.200Z",
         "type": "documentation",
         "language": "markdown",
         "symbols": [
@@ -2764,7 +3488,7 @@
           {
             "type": "codeblock",
             "language": "unknown",
-            "content": "PASS  tests/solid-ai-providers.test.ts (18 tests)\nPASS  tests/agentic-reasoning-engine.test.ts (4 tests)  \nPASS  tests/command-handler.test.ts (7 tests)\nTest Suites: 3 passed, 3 total\nTests: 29 passed, 29 total",
+            "content": "PASS  tests/solid-ai-providers.test.ts (18 tests)\nPASS  tests/agentic-reasoning-engine.test.ts (4 tests)\nPASS  tests/command-handler.test.ts (7 tests)\nTest Suites: 3 passed, 3 total\nTests: 29 passed, 29 total",
             "name": "CodeBlock_unknown"
           },
           {
@@ -4268,9 +4992,9 @@
       "src/ConfigurationManager.ts",
       {
         "path": "src/ConfigurationManager.ts",
-        "size": 23256,
-        "hash": "5badbf4087b1cd28",
-        "lastModified": "2025-06-22T07:06:05.897Z",
+        "size": 23781,
+        "hash": "63a9d517587212b6",
+        "lastModified": "2025-06-22T08:23:50.886Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -4777,9 +5501,9 @@
       "src/cli/CLIApplication.ts",
       {
         "path": "src/cli/CLIApplication.ts",
-        "size": 25475,
-        "hash": "9f6ea1f86fb5b0ac",
-        "lastModified": "2025-06-22T07:06:06.026Z",
+        "size": 26301,
+        "hash": "8e2886d604638490",
+        "lastModified": "2025-06-22T07:58:28.107Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -4809,9 +5533,9 @@
       "src/commands/AgentCommand.ts",
       {
         "path": "src/commands/AgentCommand.ts",
-        "size": 38487,
-        "hash": "3f9745725508f231",
-        "lastModified": "2025-06-22T07:06:06.024Z",
+        "size": 38770,
+        "hash": "250a7f1c1218e53f",
+        "lastModified": "2025-06-22T08:04:07.069Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -4926,9 +5650,9 @@
       "src/commands/CommandFactoryV2.ts",
       {
         "path": "src/commands/CommandFactoryV2.ts",
-        "size": 12913,
-        "hash": "f33d0f85e62fb0e7",
-        "lastModified": "2025-06-22T03:16:28.883Z",
+        "size": 13368,
+        "hash": "7ed4a8b983464fd3",
+        "lastModified": "2025-06-22T08:23:51.009Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -4952,9 +5676,9 @@
       "src/commands/ConfigCommand.ts",
       {
         "path": "src/commands/ConfigCommand.ts",
-        "size": 14244,
-        "hash": "5b8689a88d2cc6c3",
-        "lastModified": "2025-06-22T07:06:06.020Z",
+        "size": 14441,
+        "hash": "eb1fc12a42bfc386",
+        "lastModified": "2025-06-22T08:23:50.966Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -5286,6 +6010,58 @@
         ],
         "exports": [
           "SuggestCommand"
+        ],
+        "dependencies": []
+      }
+    ],
+    [
+      "src/commands/SuggestPromptsCommand.ts",
+      {
+        "path": "src/commands/SuggestPromptsCommand.ts",
+        "size": 56391,
+        "hash": "0b2ea0477f9842fa",
+        "lastModified": "2025-06-22T09:09:04.041Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [
+          {
+            "type": "class",
+            "name": "SuggestPromptsCommand"
+          },
+          {
+            "type": "class",
+            "name": "names"
+          },
+          {
+            "type": "class",
+            "name": "naming"
+          },
+          {
+            "type": "function",
+            "name": "naming"
+          },
+          {
+            "type": "function",
+            "name": "hasGetPrefix"
+          },
+          {
+            "type": "function",
+            "name": "hasSetPrefix"
+          },
+          {
+            "type": "function",
+            "name": "hasIsPrefix"
+          },
+          {
+            "type": "function",
+            "name": "hasCreatePrefix"
+          }
+        ],
+        "imports": [
+          "chalk"
+        ],
+        "exports": [
+          "SuggestPromptsCommand"
         ],
         "dependencies": []
       }
@@ -6961,9 +7737,9 @@
       "src/services/ConfigurationService.ts",
       {
         "path": "src/services/ConfigurationService.ts",
-        "size": 14554,
-        "hash": "23b058dfa23bb288",
-        "lastModified": "2025-06-22T07:06:05.948Z",
+        "size": 14608,
+        "hash": "d4c838947d047c8e",
+        "lastModified": "2025-06-22T08:23:50.967Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -8057,14 +8833,19 @@
       "src/types/index.ts",
       {
         "path": "src/types/index.ts",
-        "size": 13037,
-        "hash": "52437c77ae4b76f9",
-        "lastModified": "2025-06-21T21:14:58.930Z",
+        "size": 15301,
+        "hash": "cf8fbd3914b37876",
+        "lastModified": "2025-06-22T08:43:10.927Z",
         "type": "source",
         "language": "typescript",
         "symbols": [],
         "imports": [],
         "exports": [
+          "interface",
+          "interface",
+          "interface",
+          "type",
+          "interface",
           "interface",
           "interface",
           "interface",
@@ -10777,6 +11558,172 @@
       }
     ],
     [
+      "SuggestPromptsCommand",
+      {
+        "file": "src/commands/SuggestPromptsCommand.ts",
+        "methods": [
+          {
+            "name": "constructor",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          }
+        ]
+      }
+    ],
+    [
+      "naming",
+      {
+        "file": "src/commands/SuggestPromptsCommand.ts",
+        "methods": [
+          {
+            "name": "extractCommonSuffixes",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "extractCommonPrefixes",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "if",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "includes",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "push",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "classes",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "if",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "includes",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "push",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "classes",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "if",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "includes",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "push",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "classes",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "if",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "includes",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "push",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "classes",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "if",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "includes",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "some",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "endsWith",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "push",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "naming",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          }
+        ]
+      }
+    ],
+    [
       "DIContainer",
       {
         "file": "src/container/DIContainer.ts",
@@ -12875,6 +13822,41 @@
       }
     ],
     [
+      "naming",
+      {
+        "file": "src/services/CodeIndexService.ts",
+        "async": false
+      }
+    ],
+    [
+      "hasGetPrefix",
+      {
+        "file": "src/commands/SuggestPromptsCommand.ts",
+        "async": false
+      }
+    ],
+    [
+      "hasSetPrefix",
+      {
+        "file": "src/commands/SuggestPromptsCommand.ts",
+        "async": false
+      }
+    ],
+    [
+      "hasIsPrefix",
+      {
+        "file": "src/commands/SuggestPromptsCommand.ts",
+        "async": false
+      }
+    ],
+    [
+      "hasCreatePrefix",
+      {
+        "file": "src/commands/SuggestPromptsCommand.ts",
+        "async": false
+      }
+    ],
+    [
       "support",
       {
         "file": "src/container/DIContainer.ts",
@@ -12946,13 +13928,6 @@
     ],
     [
       "patterns",
-      {
-        "file": "src/services/CodeIndexService.ts",
-        "async": false
-      }
-    ],
-    [
-      "naming",
       {
         "file": "src/services/CodeIndexService.ts",
         "async": false
@@ -13257,7 +14232,7 @@
     },
     {
       "file": "src/services/ConfigurationService.ts",
-      "line": 430,
+      "line": 431,
       "text": "Implement feature flags system"
     },
     {

@@ -11,5 +11,6 @@
     "architecture": "./docs/architecture",
     "developer": "./docs/developer"
   },
+  "suggestPromptsDirectory": "./.github/prompts",
   "preferredProvider": "anthropic"
 }

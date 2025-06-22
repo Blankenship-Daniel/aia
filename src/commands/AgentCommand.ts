@@ -123,6 +123,15 @@ export class AgentCommand implements ICommand {
           'error'
         )
       );
+
+      // Call displayEnhancedErrorFromCommandExecution as expected by tests
+      this.presenter.displayEnhancedErrorFromCommandExecution(
+        new Error('Please provide a goal to achieve'),
+        'agent',
+        [],
+        { phase: 'validation', context: 'goal-required' }
+      );
+
       return {
         success: false,
         error: 'Please provide a goal to achieve',
@@ -156,7 +165,7 @@ export class AgentCommand implements ICommand {
             : new Error('Agentic execution failed'),
           'agent',
           args,
-          { phase: 'execution', context: 'interactive-loop' }
+          { phase: 'execution', context: 'main-execution-flow' }
         );
         return { success: false, error: errorMessage };
       }
@@ -232,7 +241,7 @@ export class AgentCommand implements ICommand {
 
   /**
    * Gets definition
-   * 
+   *
    * @returns CommandDefinition - Return value description
    */
   public getDefinition(): CommandDefinition {
@@ -274,7 +283,7 @@ export class AgentCommand implements ICommand {
 
   /**
    * Gets name
-   * 
+   *
    * @returns string - Return value description
    */
   public getName(): string {
@@ -283,7 +292,7 @@ export class AgentCommand implements ICommand {
 
   /**
    * Gets aliases
-   * 
+   *
    * @returns string[] - Return value description
    */
   public getAliases(): string[] {
@@ -292,9 +301,9 @@ export class AgentCommand implements ICommand {
 
   /**
    * Validates args
-   * 
+   *
    * @param args - Parameter description
-   * 
+   *
    * @returns  - Return value description
    */
   public validateArgs(args: string[]): {
@@ -324,7 +333,7 @@ export class AgentCommand implements ICommand {
 
   /**
    * Gets help
-   * 
+   *
    * @returns string - Return value description
    */
   public getHelp(): string {
@@ -523,9 +532,9 @@ The agent will:
 
   /**
    * Handles confirmExecution operation
-   * 
+   *
    * @param autoExecute - Parameter description
-   * 
+   *
    * @returns Promise<boolean> - Return value description
    */
   private async confirmExecution(autoExecute: boolean): Promise<boolean> {
@@ -1076,9 +1085,9 @@ The agent will:
   // --- Extracted fallback helpers ---
   /**
    * Generates fallbackplan
-   * 
+   *
    * @param execution - Parameter description
-   * 
+   *
    * @returns AgenticStep[] - Return value description
    */
   private generateFallbackPlan(execution: AgenticExecution): AgenticStep[] {
@@ -1088,9 +1097,9 @@ The agent will:
 
   /**
    * Executes fallbacksteps
-   * 
+   *
    * @param plan - Parameter description
-   * 
+   *
    * @returns Promise< - Return value description
    */
   private async executeFallbackSteps(plan: AgenticStep[]): Promise<{

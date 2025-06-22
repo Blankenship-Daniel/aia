@@ -298,6 +298,7 @@ export class ConfigurationService implements IConfigurationService {
         minimal: './minimal',
         developer: './developer',
       },
+      suggestPromptsDirectory: './suggested-prompts',
     };
   }
 

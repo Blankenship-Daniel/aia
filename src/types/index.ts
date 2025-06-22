@@ -9,6 +9,97 @@ export * from '../interfaces/ISymbolIndex';
 // Export utility interfaces
 export * from '../interfaces/ICodeHighlightService';
 
+// Prompt suggestion types for SuggestPromptsCommand
+export interface GeneratedPrompt {
+  id: string;
+  title: string;
+  category: PromptCategory;
+  prompt: string;
+  description: string;
+  example?: string;
+  tags: string[];
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  codebaseSpecific: boolean;
+  usageCount?: number;
+  lastUsed?: Date;
+}
+
+export interface GeneratedPrompts {
+  prompts: GeneratedPrompt[];
+  metadata: {
+    totalGenerated: number;
+    categories: PromptCategory[];
+    codebaseAnalysis: CodebaseAnalysis;
+    generatedAt: Date;
+    aiModel: string;
+  };
+}
+
+export interface CodebaseAnalysis {
+  projectType: string;
+  primaryLanguage: string;
+  architecture: string;
+  technologies: string[];
+  fileCount: number;
+  keyComponents: string[];
+  patterns: string[];
+  frameworks: string[];
+  testingFrameworks: string[];
+  buildTools: string[];
+  gitHistory?: {
+    totalCommits: number;
+    frequentlyModifiedFiles: string[];
+    commonChangePatterns: string[];
+  };
+  // Enhanced analysis fields
+  semanticPatterns?: string[];
+  namingConventions?: {
+    classPatterns: string[];
+    functionPatterns: string[];
+    filePatterns: string[];
+    commonPrefixes: string[];
+    commonSuffixes: string[];
+  };
+  codeQualityIndicators?: {
+    complexity: 'low' | 'medium' | 'high';
+    testCoverage: 'low' | 'medium' | 'high';
+    documentation: 'sparse' | 'moderate' | 'comprehensive';
+    maintainabilityScore: number;
+    issues: string[];
+  };
+  projectMaturity?: {
+    level: 'early' | 'developing' | 'mature' | 'legacy';
+    indicators: string[];
+    suggestedImprovements: string[];
+  };
+  domainContext?: {
+    businessDomain: string[];
+    technicalDomain: string[];
+    integrationPatterns: string[];
+    apiStyles: string[];
+  };
+}
+
+export type PromptCategory =
+  | 'refactoring'
+  | 'debugging'
+  | 'testing'
+  | 'documentation'
+  | 'security'
+  | 'performance'
+  | 'architecture'
+  | 'code-review';
+
+export interface PromptGenerationOptions {
+  category?: PromptCategory;
+  count?: number;
+  includeExamples?: boolean;
+  analyzeDeep?: boolean;
+  outputFormat?: 'markdown' | 'json' | 'yaml';
+  outputPath?: string;
+  useCache?: boolean;
+}
+
 // Core application types
 export interface AIAConfig {
   preferredModel: string;
@@ -28,6 +119,8 @@ export interface AIAConfig {
     minimal?: string;
     developer?: string;
   };
+  // Directory for suggest-prompts command output
+  suggestPromptsDirectory?: string;
 }
 
 export interface ConfigProfile {

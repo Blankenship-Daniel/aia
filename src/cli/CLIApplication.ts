@@ -450,6 +450,29 @@ export default class CLIApplication {
           'Force reinstallation even if extension already exists'
         );
         break;
+
+      case 'suggest-prompts':
+        cmd.option(
+          '--category <category>',
+          'Filter by category (refactoring, debugging, testing, documentation, security, performance, architecture, code-review)'
+        );
+        cmd.option('--count <n>', 'Number of prompts per category', '5');
+        cmd.option('--output <file>', 'Save prompts to file');
+        cmd.option(
+          '--analyze-deep',
+          'Perform deep codebase analysis including git history'
+        );
+        cmd.option(
+          '--include-examples',
+          'Include usage examples in generated prompts'
+        );
+        cmd.option(
+          '--format <format>',
+          'Output format (markdown, json, yaml)',
+          'markdown'
+        );
+        cmd.option('--no-cache', 'Skip cache and force regeneration');
+        break;
     }
   }
 

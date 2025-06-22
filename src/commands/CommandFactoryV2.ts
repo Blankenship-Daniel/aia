@@ -33,6 +33,7 @@ import { CacheCommand } from './CacheCommand';
 import { AnalyticsCommand } from './AnalyticsCommand';
 import { ExplainCommand } from './ExplainCommand';
 import { SuggestCommand } from './SuggestCommand';
+import { SuggestPromptsCommand } from './SuggestPromptsCommand';
 import { LearnCommand } from './LearnCommand';
 import { CopilotCheckCommand } from './CopilotCheckCommand';
 
@@ -206,6 +207,20 @@ export class CommandFactoryV2 {
       'suggest',
       ['suggestCode', 'recommend'],
       () => new SuggestCommand(this.copilotService, this.contextService)
+    );
+
+    // Suggest Prompts Command - Generate AI prompts tailored to codebase (GenAI command)
+    this.registrar.register(
+      'suggest-prompts',
+      ['sp', 'prompts'],
+      () =>
+        new SuggestPromptsCommand(
+          this.aiService,
+          this.codeIndexService,
+          this.contextService,
+          this.memoryService,
+          this.configurationService
+        )
     );
 
     // Learn Command - Learn from user feedback and adapt (new Copilot command)

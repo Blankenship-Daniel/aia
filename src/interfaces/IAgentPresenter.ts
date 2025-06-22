@@ -36,7 +36,7 @@ export interface IAgentPresenter {
   /**
    * Display the planning phase to the user
    */
-  showPlanningPhase(goal: string, verbose?: boolean): void;
+  showPlanningPhase(goal: string): void;
 
   /**
    * Update planning progress indicators
@@ -48,15 +48,12 @@ export interface IAgentPresenter {
   /**
    * Display the generated execution plan
    */
-  displayExecutionPlan(plan: ExecutionStep[], verbose?: boolean): void;
+  displayExecutionPlan(plan: ExecutionStep[]): void;
 
   /**
    * Show execution progress for a step
    */
-  showExecutionStep(
-    step: ExecutionStep,
-    verbose?: boolean
-  ): {
+  showExecutionStep(step: ExecutionStep): {
     succeed: (message?: string) => void;
     fail: (message?: string) => void;
     stop: () => void;
@@ -66,20 +63,17 @@ export interface IAgentPresenter {
   /**
    * Show iteration progress
    */
-  showIteration(current: number, max: number, verbose?: boolean): void;
+  showIteration(current: number, max: number): void;
 
   /**
    * Display step output
    */
-  displayStepOutput(output: string, verbose?: boolean): void;
+  displayStepOutput(output: string): void;
 
   /**
    * Show execution summary
    */
-  displayExecutionSummary(
-    execution: AgenticExecution,
-    verbose?: boolean
-  ): Promise<void>;
+  displayExecutionSummary(execution: AgenticExecution): Promise<void>;
 
   /**
    * Display error messages

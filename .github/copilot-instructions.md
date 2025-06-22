@@ -1,7 +1,9 @@
-# GitHub Copilot Instructions - AIA CLI Project
+Here's a comprehensive copilot-instructions.md file tailored to your codebase:
+
+```markdown
+# GitHub Copilot Instructions - AIA CLI
 
 ## Table of Contents
-
 1. [Role](#role)
 2. [Project Overview](#project-overview)
 3. [Architecture Patterns](#architecture-patterns)
@@ -16,246 +18,264 @@
 12. [Guidelines](#guidelines)
 
 ## Role
-
-You are an AI assistant helping developers work with the AIA CLI project, a TypeScript/Node.js command-line interface for AI-powered development assistance. Focus on maintaining the service-oriented architecture, following established patterns, and leveraging the existing component structure.
+You are assisting with the AIA CLI (AI Assistant Command Line Interface) project, a TypeScript/Node.js application implementing a Service-Oriented Architecture. Focus on maintaining clean architecture patterns, proper dependency injection, and optimal performance while suggesting code completions and solutions.
 
 ## Project Overview
 
-- **Project Name**: AIA CLI (AI Assistant Command Line Interface)
-- **Type**: TypeScript/Node.js CLI Application
-- **Architecture**: Service-Oriented Architecture with Dependency Injection
-- **Scale**:
-  - 458 Total Symbols
-  - 38 Classes
-  - 87 Functions
-  - 312 Interfaces
-- **Core Capabilities**:
-  - AI-powered task execution
-  - Command management
-  - Memory persistence
-  - Codebase analysis
-  - Context awareness
+### Core Information
+- **Project Name**: AIA CLI
+- **Type**: TypeScript Node.js CLI Application
+- **Scale**: 458 total symbols, 38 classes, 87 functions, 312 interfaces
+- **Testing Coverage**: 30 test files
+
+### Core Capabilities
+- AI-powered task execution
+- Command pattern implementation
+- Memory management
+- Codebase analysis
+- Configuration management
+- Context-aware operations
 
 ## Architecture Patterns
 
-### Service Layer
+### Service-Oriented Architecture
+The project follows a strict service-oriented approach with these key services:
 
 ```typescript
-interface ServiceName {
-  // Core service interface pattern
-  execute(): Promise<void>;
-  configure(options: ServiceOptions): void;
+interface AutoUpdateService {
+    checkForUpdates(): Promise<void>;
+    applyUpdate(): Promise<void>;
 }
 
-class ComplexService implements ServiceName {
-  constructor(
-    private autoUpdateService: AutoUpdateService,
-    private pluginManager: PluginManager
-  ) {}
+interface ResponseAdaptationEngine {
+    adapt(response: AIResponse): Promise<AdaptedResponse>;
+    validate(context: ExecutionContext): boolean;
+}
 
-  async execute(): Promise<void> {
-    // Implementation following SOA patterns
-  }
+interface PluginManager {
+    loadPlugins(): Promise<void>;
+    registerPlugin(plugin: Plugin): void;
 }
 ```
 
 ### Dependency Injection Pattern
-
 ```typescript
-class NewService {
-  constructor(
-    private responseEngine: ResponseAdaptationEngine,
-    private workflowManager: WorkflowManager
-  ) {}
+class ComplexService {
+    constructor(
+        private autoUpdateService: AutoUpdateService,
+        private responseEngine: ResponseAdaptationEngine,
+        private workflowManager: WorkflowManager
+    ) {}
 }
 ```
 
 ## Directory Structure
-
 ```
 src/
-├── commands/          # CLI command implementations
-├── services/          # Core services (AutoUpdateService, etc.)
-├── providers/         # AI providers and integrations
-├── managers/          # System managers (PluginManager, WorkflowManager)
-├── engines/           # Processing engines (ResponseAdaptationEngine)
-├── interfaces/        # Type definitions and interfaces
-├── utils/            # Utility functions
-└── index.ts          # Main entry point
+├── commands/          # CLI commands
+├── services/          # Core services
+├── providers/         # AI providers
+├── adapters/         # Response adapters
+├── workflows/        # Workflow definitions
+├── plugins/          # Plugin system
+└── utils/            # Shared utilities
 ```
 
 ## Key Components & Relationships
 
 ### Core Services
-
-1. **AutoUpdateService** (14 references)
-
-   - Primary service for system updates
-   - Used by ComplexService and NewService
-
-2. **PluginManager** (2 references)
-
-   - Manages plugin lifecycle
-   - Integrated with ComplexService
-
-3. **ResponseAdaptationEngine** (3 references)
-   - Handles AI response processing
-   - Used by NewService
-
-### Command Structure
-
 ```typescript
-interface CommandDefinition {
-  name: string;
-  execute(context: ExecutionContext): Promise<void>;
+// Most referenced service
+class AutoUpdateService implements IAutoUpdateService {
+    // 14 references across 2 files
+    async checkForUpdates(): Promise<void> {
+        // Implementation
+    }
+}
+
+class ResponseAdaptationEngine {
+    // 3 references in codebase
+    adapt(response: AIResponse): Promise<AdaptedResponse> {
+        // Implementation
+    }
+}
+```
+
+### Service Relationships
+```typescript
+class WorkflowManager {
+    constructor(
+        private pluginManager: PluginManager,
+        private responseEngine: ResponseAdaptationEngine
+    ) {}
 }
 ```
 
 ## Code Navigation Guidelines
 
-### Symbol Usage Patterns
+### Service Location Patterns
+- Services are defined in `src/services/{ServiceName}.ts`
+- Implementations follow the pattern: `{ServiceName}Impl.ts`
+- Interfaces are in `src/interfaces/{ServiceName}.interface.ts`
 
-- Most referenced symbols indicate core functionality:
-  - `definitions` (57 usages across 13 files)
-  - Type parameter `T` (129 usages across 15 files)
-  - Service identifiers `a`, `b` (>120 usages each)
-
-### Service Location
-
-```typescript
-// Service instantiation pattern
-const newAIProvider = new NewAIProvider(
-  container.get(AutoUpdateService),
-  container.get(ResponseAdaptationEngine)
-);
-```
+### Common Symbol References
+Based on symbol analysis:
+- `definitions` (57 usages across 13 files) - Used for service and command definitions
+- Type parameter `T` (129 usages) - Generic type implementations
+- Interface implementations (312 total) - Strong typing throughout
 
 ## Common Patterns
 
-### Service Implementation
-
+### Service Registration
 ```typescript
 class NewService implements ServiceName {
-  constructor(
-    private autoUpdate: AutoUpdateService,
-    private responseEngine: ResponseAdaptationEngine
-  ) {}
+    constructor(
+        private dependencies: Dependencies
+    ) {}
+}
 
-  async execute(): Promise<void> {
-    await this.autoUpdate.check();
-    await this.responseEngine.process();
-  }
+class NewAIProvider implements AIProvider {
+    // Implementation
+}
+```
+
+### Command Pattern Implementation
+```typescript
+interface Command {
+    execute(context: ExecutionContext): Promise<void>;
+}
+
+class AgentCommand implements Command {
+    constructor(
+        private autoUpdateService: AutoUpdateService,
+        private workflowManager: WorkflowManager
+    ) {}
 }
 ```
 
 ## Interactive Examples
 
 ### Command Execution
-
 ```typescript
-// Example command usage
-await cli.execute('agent', {
-  task: 'analyze-code',
-  context: currentContext,
+// Using the command pattern
+const command = new AgentCommand(autoUpdateService, workflowManager);
+await command.execute({
+    context: executionContext,
+    parameters: commandParameters
 });
+```
 
-// Memory management
-await cli.execute('memory', {
-  action: 'store',
-  data: contextData,
-});
+### Service Integration
+```typescript
+const responseEngine = new ResponseAdaptationEngine();
+const pluginManager = new PluginManager();
+const workflowManager = new WorkflowManager(pluginManager, responseEngine);
 ```
 
 ## Development Workflow
 
-1. **Service Addition**
-
+1. **Service Implementation**
 ```typescript
-// 1. Define interface
 interface NewFeatureService {
-  execute(): Promise<void>;
+    process(): Promise<void>;
 }
 
-// 2. Implement service
-class NewFeatureImplementation implements NewFeatureService {
-  constructor(
-    private autoUpdate: AutoUpdateService,
-    private pluginManager: PluginManager
-  ) {}
+class NewFeatureServiceImpl implements NewFeatureService {
+    constructor(
+        private autoUpdateService: AutoUpdateService,
+        private responseEngine: ResponseAdaptationEngine
+    ) {}
 }
 ```
 
-2. **Command Integration**
-
+2. **Command Addition**
 ```typescript
-// Register new command
-class NewCommand implements CommandDefinition {
-  constructor(private service: NewFeatureService) {}
+class NewCommand implements Command {
+    constructor(
+        private newFeatureService: NewFeatureService
+    ) {}
 
-  async execute(context: ExecutionContext): Promise<void> {
-    await this.service.execute();
-  }
+    async execute(context: ExecutionContext): Promise<void> {
+        // Implementation
+    }
 }
 ```
 
 ## Common Development Scenarios
 
-### 1. Adding New AI Provider
-
+### Adding a New Service
 ```typescript
-class NewAIProvider implements AIProvider {
-  constructor(
-    private autoUpdate: AutoUpdateService,
-    private responseEngine: ResponseAdaptationEngine
-  ) {}
+// 1. Define interface
+interface NewService {
+    operation(): Promise<void>;
+}
+
+// 2. Implement service
+class NewServiceImpl implements NewService {
+    constructor(
+        private dependencyA: ServiceName,
+        private dependencyB: ComplexService
+    ) {}
 }
 ```
 
-### 2. Extending Service Functionality
-
+### Extending Plugin System
 ```typescript
-class ExtendedService extends ComplexService {
-  constructor(
-    autoUpdateService: AutoUpdateService,
-    pluginManager: PluginManager,
-    private workflowManager: WorkflowManager
-  ) {
-    super(autoUpdateService, pluginManager);
-  }
+class CustomPlugin implements Plugin {
+    constructor(
+        private pluginManager: PluginManager
+    ) {}
+
+    register(): void {
+        // Registration logic
+    }
 }
 ```
 
 ## Performance Considerations
 
-1. **Service Initialization**
+1. **Service Instantiation**
+- Use singleton pattern for heavy services
+- Implement lazy loading where appropriate
+- Consider memory usage in the ResponseAdaptationEngine
 
-   - Use lazy loading for heavy services
-   - Leverage the AutoUpdateService for optimized updates
-
-2. **Memory Management**
-   - Follow established patterns for context handling
-   - Utilize WorkflowManager for process optimization
+2. **Command Execution**
+- Implement caching in the AutoUpdateService
+- Optimize WorkflowManager execution paths
 
 ## Guidelines
 
-1. **Service Development**
+### Code Organization
+1. Follow the established service pattern:
+```typescript
+interface IService {
+    // Interface definition
+}
 
-   - Always implement corresponding interfaces
-   - Use dependency injection via constructor
-   - Follow AutoUpdateService pattern for updatable components
-
-2. **Command Implementation**
-
-   - Extend CommandDefinition interface
-   - Use ResponseAdaptationEngine for AI responses
-   - Integrate with PluginManager for extensibility
-
-3. **Code Organization**
-   - Place services in appropriate directories
-   - Follow established naming conventions
-   - Maintain consistent dependency injection pattern
-
+class ServiceImpl implements IService {
+    // Implementation
+}
 ```
 
-This documentation is specifically tailored to the codebase based on the provided symbol analysis and architectural components. It provides concrete examples using actual class names and relationships from the project.
+### Dependency Injection
+1. Always use constructor injection:
+```typescript
+class NewFeature {
+    constructor(
+        private autoUpdateService: AutoUpdateService,
+        private workflowManager: WorkflowManager
+    ) {}
+}
 ```
+
+### Error Handling
+```typescript
+try {
+    await this.autoUpdateService.checkForUpdates();
+} catch (error) {
+    // Structured error handling
+}
+```
+```
+
+This documentation provides specific, actionable guidance based on your actual codebase structure and symbols. It uses real component names and relationships from your symbol analysis to create concrete examples and patterns.

@@ -784,6 +784,25 @@ export class ServiceFactory {
       return new PerformanceOptimizer();
     });
 
+    // SpinnerService (no dependencies - foundational UI component)
+    container.registerFactory('spinner', (container) => {
+      const { SpinnerService } = require('../../dist/services/SpinnerService');
+      return new SpinnerService();
+    });
+
+    // UIService (depends on SpinnerService)
+    container.registerFactory(
+      'ui',
+      (container) => {
+        const { UIService } = require('../../dist/services/UIService');
+        const spinnerService = container.resolve('spinner');
+        return new UIService(spinnerService);
+      },
+      {
+        dependencies: ['spinner'],
+      }
+    );
+
     // Code Highlight Service
     container.registerFactory('codeHighlight', (container) => {
       const {

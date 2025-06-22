@@ -24,13 +24,16 @@ import {
 } from '../interfaces/IPerformanceMonitor';
 import { IAIService } from '../interfaces/IAIService';
 import { ICodeHighlightService } from '../interfaces/ICodeHighlightService';
+import {
+  ISpinnerService,
+  SpinnerInstance,
+} from '../interfaces/SpinnerService.interface';
 import chalk from 'chalk';
-import ora, { Ora } from 'ora';
 import inquirer from 'inquirer';
 import os from 'os';
 
 export class AgentPresenter implements IAgentPresenter {
-  private activeSpinner: Ora | null = null;
+  private activeSpinner: SpinnerInstance | null = null;
   private startTime: number = Date.now();
   private stepStartTime: number = Date.now();
   private resourceMonitor: NodeJS.Timeout | null = null;
@@ -41,6 +44,7 @@ export class AgentPresenter implements IAgentPresenter {
   private performanceMonitor?: IPerformanceMonitor;
   private aiService?: IAIService;
   private codeHighlight?: ICodeHighlightService;
+  private spinnerService?: ISpinnerService;
   private executionHistory: AgenticExecution[] = [];
 
   // Enhanced performance tracking
@@ -56,20 +60,29 @@ export class AgentPresenter implements IAgentPresenter {
     resilienceService?: IResilienceService,
     performanceMonitor?: IPerformanceMonitor,
     aiService?: IAIService,
-    codeHighlight?: ICodeHighlightService
+    codeHighlight?: ICodeHighlightService,
+    spinnerService?: ISpinnerService
   ) {
     this.resilienceService = resilienceService;
     this.performanceMonitor = performanceMonitor;
     this.aiService = aiService;
     this.codeHighlight = codeHighlight;
+    this.spinnerService = spinnerService;
   }
 
-  showPlanningPhase(goal: string, verbose: boolean = false): void {
+  showPlanningPhase(goal: string): void {
     // Clean, professional output
     console.log(chalk.blue('🤖 AIA Agent'));
     console.log(chalk.cyan(`🎯 ${goal}`));
 
-    if (verbose) {
+    // Smart disclosure: show more detail for complex goals
+    const isComplexGoal =
+      goal.length > 50 ||
+      goal.toLowerCase().includes('debug') ||
+      goal.toLowerCase().includes('analyze') ||
+      goal.toLowerCase().includes('refactor');
+
+    if (isComplexGoal) {
       console.log(chalk.gray('Analyzing task and creating execution plan...'));
     } else {
       console.log(chalk.gray('Planning...'));
@@ -101,11 +114,17 @@ export class AgentPresenter implements IAgentPresenter {
     );
   }
 
-  displayExecutionPlan(plan: ExecutionStep[], verbose: boolean = false): void {
+  displayExecutionPlan(plan: ExecutionStep[]): void {
     // Clean, concise display
     console.log(chalk.green(`✓ Plan ready (${plan.length} steps)`));
 
-    if (verbose) {
+    // Smart disclosure: show execution plan for complex tasks or when debugging
+    const shouldShowPlan =
+      plan.length > 3 ||
+      plan.some((step) => step.risks && step.risks.length > 0) ||
+      plan.some((step) => step.description.toLowerCase().includes('debug'));
+
+    if (shouldShowPlan) {
       console.log(chalk.blue('\n📋 Execution Plan:'));
       plan.forEach((step, index) => {
         console.log(
@@ -119,10 +138,7 @@ export class AgentPresenter implements IAgentPresenter {
     }
   }
 
-  showExecutionStep(
-    step: ExecutionStep,
-    verbose: boolean = false
-  ): {
+  showExecutionStep(step: ExecutionStep): {
     succeed: (message?: string) => void;
     fail: (message?: string) => void;
     stop: () => void;
@@ -130,25 +146,27 @@ export class AgentPresenter implements IAgentPresenter {
   } {
     this.stepStartTime = Date.now();
 
-    if (!verbose) {
-      // Concise mode - simple spinner with step description
-      const spinnerText = `${chalk.blue('⚡')} ${step.description}`;
-      this.activeSpinner = ora(spinnerText).start();
+    // ========== Consolidated Smart UX ==========
+    const stepDescription = step.description;
 
+    if (this.spinnerService) {
+      // Use the SpinnerService if available
+      this.activeSpinner = this.spinnerService.start(stepDescription, {
+        showTimer: true,
+      });
+
+      // Return interface that adapts SpinnerInstance to the expected return type
       return {
-        updateProgress: () => {}, // No-op in concise mode
         succeed: (message?: string) => {
           if (this.activeSpinner) {
-            this.activeSpinner.stop();
+            this.activeSpinner.succeed(message);
             this.activeSpinner = null;
-            console.log(chalk.green(`✓ ${step.description}`));
           }
         },
         fail: (message?: string) => {
           if (this.activeSpinner) {
-            this.activeSpinner.stop();
+            this.activeSpinner.fail(message);
             this.activeSpinner = null;
-            console.log(chalk.red(`✗ ${step.description}`));
           }
         },
         stop: () => {
@@ -157,93 +175,83 @@ export class AgentPresenter implements IAgentPresenter {
             this.activeSpinner = null;
           }
         },
+        updateProgress: (elapsed: number, details?: string) => {
+          // Update spinner text with progress details for long-running operations
+          if (this.activeSpinner && details && elapsed > 2000) {
+            this.activeSpinner.text(
+              `${stepDescription} ${chalk.gray(`- ${details}`)}`
+            );
+          }
+        },
+      };
+    } else {
+      // Fallback to simple console output
+      const spinnerText = `${chalk.blue('⚡')} ${stepDescription}`;
+      console.log(spinnerText);
+
+      // Return a console-based implementation
+      return {
+        succeed: (message?: string) => {
+          console.log(chalk.green(`✓ ${message || stepDescription}`));
+          this.activeSpinner = null;
+        },
+        fail: (message?: string) => {
+          console.log(chalk.red(`✗ ${message || stepDescription}`));
+          this.activeSpinner = null;
+        },
+        stop: () => {
+          this.activeSpinner = null;
+        },
+        updateProgress: (elapsed: number, details?: string) => {
+          // Smart update - show details only for significant progress
+          if (details && elapsed > 2000) {
+            console.log(
+              `${chalk.blue('⚡')} ${stepDescription} ${chalk.gray(
+                `- ${details}`
+              )}`
+            );
+          }
+        },
       };
     }
 
-    // Verbose mode - original detailed output
-
-    // ========== Enhanced Phase Separation ==========
-    console.log(chalk.blue('\n🔄 Execution Phase'));
-    console.log(chalk.gray('━'.repeat(60)));
-    console.log(
-      `${chalk.blue('⚡')} Executing: ${chalk.bold(step.description)}`
-    );
-    console.log(`${chalk.gray('   Command:')} ${chalk.yellow(step.command)}`);
-    console.log(`${chalk.gray('   Expected:')} ${step.expectedOutcome}`);
-
-    const timeoutSec = (step.timeout || 30000) / 1000;
-    console.log(`${chalk.gray('   Timeout:')} ${timeoutSec}s`);
-
-    // ========== Enhanced Memory Usage Display ==========
+    // Track performance metrics for smart disclosure
     const stepStartMemory = process.memoryUsage().heapUsed / 1024 / 1024;
-    console.log(
-      chalk.dim(`   Starting Memory: ${stepStartMemory.toFixed(1)}MB`)
-    );
+    const progressBarLength = 20;
+    const timeoutMs = step.timeout || 30000;
+    const timeoutSec = timeoutMs / 1000;
 
-    // ========== Enhanced Progress Indicators ==========
-    const progressBarLength = 30;
-    const spinnerText = `${chalk.blue('⚡')} Executing...`;
-    this.activeSpinner = ora(spinnerText).start();
-
-    // Real-time progress tracking with enhanced metrics
+    // Smart progress tracking - shows performance details for slow operations
     const progressInterval = setInterval(() => {
       if (this.activeSpinner) {
         const elapsed = Date.now() - this.stepStartTime;
         const elapsedSec = Math.floor(elapsed / 1000);
-        const timeoutMs = step.timeout || 30000;
         const progress = Math.min(elapsed / timeoutMs, 1);
 
-        // ========== Enhanced Visual Progress Bar ==========
-        const filled = Math.floor(progress * progressBarLength);
-        const remaining = progressBarLength - filled;
-        const bar = '█'.repeat(filled) + '░'.repeat(remaining);
+        // Show progress bar for operations longer than 3 seconds
+        if (elapsed > 3000) {
+          const filled = Math.floor(progress * progressBarLength);
+          const remaining = progressBarLength - filled;
+          const bar = '█'.repeat(filled) + '░'.repeat(remaining);
 
-        // ========== Real-time Resource Monitoring ==========
-        const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
-        const memoryDelta = currentMemory - stepStartMemory;
-        this.performance.peakMemoryMB = Math.max(
-          this.performance.peakMemoryMB,
-          currentMemory
-        );
+          const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
+          const memoryDelta = currentMemory - stepStartMemory;
+          const memoryDisplay =
+            memoryDelta > 0.1 ? `+${memoryDelta.toFixed(1)}MB` : 'stable';
 
-        // Enhanced progress display with memory delta
-        const memoryDisplay =
-          memoryDelta > 0
-            ? `${currentMemory.toFixed(1)}MB (+${memoryDelta.toFixed(1)}MB)`
-            : `${currentMemory.toFixed(1)}MB`;
-
-        const progressText = `${chalk.blue('⚡')} [${chalk.cyan(
-          bar
-        )}] ${chalk.gray(`${elapsedSec}s/${timeoutSec}s | ${memoryDisplay}`)}`;
-        this.activeSpinner.text = progressText;
+          const progressText = `${chalk.blue('⚡')} [${chalk.cyan(bar)}] ${
+            step.description
+          } ${chalk.gray(`${elapsedSec}s | ${memoryDisplay}`)}`;
+          this.activeSpinner.text(progressText);
+        }
       }
-    }, 500);
+    }, 1000);
 
     return {
       updateProgress: (elapsed: number, details?: string) => {
-        if (this.activeSpinner) {
-          const elapsedSec = Math.floor(elapsed / 1000);
-          const timeoutMs = step.timeout || 30000;
-          const timeoutSec = Math.floor(timeoutMs / 1000);
-          const progress = Math.min(elapsed / timeoutMs, 1);
-
-          // ========== Enhanced Visual Progress Bar ==========
-          const filled = Math.floor(progress * progressBarLength);
-          const bar =
-            '█'.repeat(filled) + '░'.repeat(progressBarLength - filled);
-
-          // ========== Real-time Memory Tracking ==========
-          const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
-          const progressText = details
-            ? `${chalk.blue('⚡')} [${chalk.cyan(bar)}] ${details} ${chalk.gray(
-                `${elapsedSec}s | ${currentMemory.toFixed(1)}MB`
-              )}`
-            : `${chalk.blue('⚡')} [${chalk.cyan(
-                bar
-              )}] Executing... ${chalk.gray(
-                `${elapsedSec}s/${timeoutSec}s | ${currentMemory.toFixed(1)}MB`
-              )}`;
-          this.activeSpinner.text = progressText;
+        // Smart update - show details only for significant progress
+        if (this.activeSpinner && details && elapsed > 2000) {
+          this.activeSpinner.text(details);
         }
       },
       succeed: (message?: string) => {
@@ -252,32 +260,24 @@ export class AgentPresenter implements IAgentPresenter {
           const duration = Date.now() - this.stepStartTime;
           const durationSec = (duration / 1000).toFixed(2);
 
-          // ========== Enhanced Memory Usage Reporting ==========
+          // Smart success display - show timing for operations > 1 second
           const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
           const memoryDelta = currentMemory - stepStartMemory;
 
-          const successMessage = message || step.description;
+          let successMessage = chalk.green(`✓ ${step.description}`);
 
-          // ========== Enhanced Timing and Performance Display ==========
-          const performanceRating =
-            duration < 1000 ? 'Fast' : duration < 5000 ? 'Good' : 'Slow';
-          const memoryDisplay =
-            memoryDelta > 0
-              ? `+${memoryDelta.toFixed(1)}MB`
-              : memoryDelta < -0.1
-              ? `${memoryDelta.toFixed(1)}MB`
-              : 'stable';
+          // Progressive disclosure: show performance details for slower operations
+          if (duration > 1000) {
+            const performanceRating =
+              duration < 3000 ? 'Fast' : duration < 10000 ? 'Good' : 'Slow';
+            const memoryDisplay =
+              memoryDelta > 0.1 ? `+${memoryDelta.toFixed(1)}MB` : 'stable';
+            successMessage += chalk.gray(
+              ` (${durationSec}s | ${memoryDisplay}) - ${performanceRating}`
+            );
+          }
 
-          this.activeSpinner.succeed(
-            `${chalk.green('✓')} ${successMessage} ${chalk.gray(
-              `(${durationSec}s | ${currentMemory.toFixed(
-                1
-              )}MB ${memoryDisplay}) - ${performanceRating}`
-            )}`
-          );
-          this.activeSpinner = null;
-
-          // Track performance
+          this.activeSpinner.succeed(successMessage);
           this.performance.filesProcessed++;
         }
       },
@@ -286,298 +286,139 @@ export class AgentPresenter implements IAgentPresenter {
         if (this.activeSpinner) {
           const duration = Date.now() - this.stepStartTime;
           const durationSec = (duration / 1000).toFixed(2);
-
-          // ========== Enhanced Memory Usage Reporting ==========
           const currentMemory = process.memoryUsage().heapUsed / 1024 / 1024;
           const memoryDelta = currentMemory - stepStartMemory;
 
-          const errorMessage = message || `${step.description} failed`;
+          const failMessage = message || step.description;
+          const errorDisplay = `${chalk.red('✗')} ${failMessage} ${chalk.gray(
+            `(${durationSec}s | ${
+              memoryDelta > 0 ? '+' : ''
+            }${memoryDelta.toFixed(1)}MB)`
+          )}`;
 
-          // ========== Enhanced Error Timing Display ==========
-          const memoryDisplay =
-            memoryDelta > 0
-              ? `+${memoryDelta.toFixed(1)}MB`
-              : memoryDelta < -0.1
-              ? `${memoryDelta.toFixed(1)}MB`
-              : 'stable';
-
-          this.activeSpinner.fail(
-            `${chalk.red('✗')} ${errorMessage} ${chalk.gray(
-              `(${durationSec}s | ${currentMemory.toFixed(
-                1
-              )}MB ${memoryDisplay})`
-            )}`
-          );
-          this.activeSpinner = null;
+          this.activeSpinner.fail(errorDisplay);
         }
       },
       stop: () => {
         clearInterval(progressInterval);
         if (this.activeSpinner) {
           this.activeSpinner.stop();
-          this.activeSpinner = null;
         }
       },
     };
   }
 
-  showIteration(current: number, max: number, verbose: boolean = false): void {
+  showIteration(current: number, max: number): void {
     console.log(chalk.yellow(`\n🔄 Iteration ${current}/${max}`));
   }
 
-  displayStepOutput(output: string, verbose: boolean = false): void {
+  displayStepOutput(output: string): void {
     if (output && output.trim()) {
-      if (!verbose) {
-        // Concise mode - just show key results if any
-        const keyResult = this.identifyKeyResult(output);
-        if (keyResult) {
-          console.log(chalk.dim('Output:'));
-          console.log(chalk.green.bold(`  🎯 ${keyResult}`));
-          console.log(chalk.cyan.dim('    ↳ Key result detected'));
-          console.log();
-        }
-        return;
-      }
-
-      // Verbose mode - enhanced output with syntax highlighting
-      console.log(chalk.dim('Output:'));
-
-      // Try to detect if output contains code and highlight it
-      const highlightedOutput = this.enhanceOutputDisplay(output);
-      console.log(highlightedOutput);
-
-      // Check if this looks like a key result
+      // Smart disclosure: always show key results, and full output for errors or complex data
       const keyResult = this.identifyKeyResult(output);
+      const hasError = this.looksLikeError(output);
+      const isComplexOutput =
+        output.length > 200 || output.split('\n').length > 5;
+
       if (keyResult) {
+        console.log(chalk.dim('Output:'));
+        console.log(chalk.green.bold(`  🎯 ${keyResult}`));
         console.log(chalk.cyan.dim('    ↳ Key result detected'));
+        console.log();
       }
 
-      console.log(); // Add spacing
+      // Show full output for errors or when it's complex and contains valuable information
+      if (hasError || (isComplexOutput && !keyResult)) {
+        console.log(chalk.dim('Output:'));
+        const highlightedOutput = this.enhanceOutputDisplay(output);
+        console.log(highlightedOutput);
+        console.log(); // Add spacing
+      }
     }
   }
 
-  async displayExecutionSummary(
-    execution: AgenticExecution,
-    verbose: boolean = false
-  ): Promise<void> {
+  async displayExecutionSummary(execution: AgenticExecution): Promise<void> {
+    // Always use simplified summary for analysis tasks
     if (this.isSimpleAnalysisExecution(execution)) {
       await this.displaySimplifiedAnalysisSummary(execution);
       return;
     }
 
-    if (!verbose) {
-      // Concise mode - show completion and result with better flow
-      const statusIcon = execution.success
-        ? chalk.green('✅')
-        : chalk.red('❌');
-      const statusText = execution.success ? 'Completed' : 'Failed';
+    // ========== Consolidated Smart Summary ==========
+    // Always show essential completion status
+    const statusIcon = execution.success ? chalk.green('✅') : chalk.red('❌');
+    const statusText = execution.success ? 'Completed' : 'Failed';
+    console.log(`\n${statusIcon} ${statusText}: ${execution.goal}`);
 
-      console.log(`\n${statusIcon} ${statusText}: ${execution.goal}`);
-
-      // Show final result if available with better formatting
-      const finalResult = await this.extractFinalResult(execution);
-      if (finalResult) {
-        const processedResult = this.processMarkdownCodeBlocks(finalResult);
-        console.log(chalk.cyan(`\n💡 ${processedResult}`));
-      }
-
-      return;
+    // Show AI-powered final result (primary value)
+    const finalResult = await this.extractFinalResult(execution);
+    if (finalResult) {
+      const processedResult = this.processMarkdownCodeBlocks(finalResult);
+      console.log(chalk.cyan(`\n💡 ${processedResult}`));
     }
 
-    // Original complex summary for non-analysis tasks
-    // Stop resource monitoring
-    this.stopResourceMonitoring();
-
+    // Smart performance disclosure - show metrics for complex executions
     const totalTime = Date.now() - this.startTime;
+    const hasSignificantWork = execution.plan.length > 2 || totalTime > 5000;
 
-    // Add current execution to history for performance comparison
-    this.addToExecutionHistory(execution);
+    if (hasSignificantWork) {
+      this.stopResourceMonitoring();
+      this.addToExecutionHistory(execution);
+      await this.displaySmartPerformanceSummary(execution, totalTime);
+    }
+  }
 
-    // ========== Enhanced Phase Separation ==========
-    console.log(chalk.blue('\n📊 Execution Summary'));
-    console.log(chalk.gray('━'.repeat(60)));
+  /**
+   * Smart performance summary - shows key metrics without overwhelming details
+   */
+  private async displaySmartPerformanceSummary(
+    execution: AgenticExecution,
+    totalTime: number
+  ): Promise<void> {
+    console.log(chalk.blue('\n📊 Performance Summary'));
+    console.log(chalk.gray('━'.repeat(40)));
 
-    // Goal and status
-    console.log(`🎯 ${chalk.cyan('Goal:')} ${execution.goal}`);
-
-    // Status with visual indicator
-    const statusIcon = execution.success ? chalk.green('✅') : chalk.red('❌');
-    const statusText = execution.success
-      ? chalk.green('Completed')
-      : chalk.red('Failed');
-    console.log(`${statusIcon} ${chalk.cyan('Status:')} ${statusText}`);
-
-    // ========== Enhanced Timing Display ==========
-    const totalTimeSec = (totalTime / 1000).toFixed(2);
-    const timeRating = this.getPerformanceRating(totalTime);
-    console.log(
-      `⏱️  ${chalk.cyan('Total Time:')} ${chalk.yellow(
-        totalTimeSec
-      )}s (${timeRating})`
-    );
-
-    // Add execution timestamp
-    const completedAt = new Date().toLocaleTimeString();
-    console.log(chalk.dim(`   Completed at: ${completedAt}`));
-
-    // Step statistics
+    // Essential metrics only
+    const totalTimeSec = (totalTime / 1000).toFixed(1);
     const successfulSteps = execution.executionResults.filter(
       (r) => r.success
     ).length;
-    const totalSteps = execution.plan.length;
     const successRate =
-      totalSteps > 0 ? ((successfulSteps / totalSteps) * 100).toFixed(1) : '0';
+      execution.plan.length > 0
+        ? ((successfulSteps / execution.plan.length) * 100).toFixed(0)
+        : '0';
 
+    console.log(`⏱️  Duration: ${chalk.yellow(totalTimeSec)}s`);
     console.log(
-      `🔢 ${chalk.cyan('Steps:')} ${chalk.yellow(
-        successfulSteps
-      )}/${chalk.yellow(totalSteps)} (${chalk.green(successRate)}% success)`
+      `🔢 Steps: ${chalk.yellow(successfulSteps)}/${
+        execution.plan.length
+      } (${chalk.green(successRate)}% success)`
     );
 
-    // Iteration information
-    if (execution.iterations > 1) {
-      console.log(
-        `🔄 ${chalk.cyan('Iterations:')} ${chalk.yellow(
-          execution.iterations
-        )} (intelligent retry enabled)`
-      );
-    }
-
-    // ========== Enhanced Memory Usage Display ==========
+    // Memory usage if significant
     const finalMemory = process.memoryUsage().heapUsed / 1024 / 1024;
     const memoryGrowth = finalMemory - this.initialMemory;
-    const memoryUsage =
-      memoryGrowth > 0
-        ? `${finalMemory.toFixed(1)}MB (+${memoryGrowth.toFixed(1)}MB growth)`
-        : `${finalMemory.toFixed(1)}MB (stable)`;
-
-    console.log(`💾 ${chalk.cyan('Memory:')} ${chalk.yellow(memoryUsage)}`);
-
-    if (this.performance.peakMemoryMB > finalMemory) {
-      console.log(
-        chalk.dim(
-          `   Peak Usage: ${this.performance.peakMemoryMB.toFixed(1)}MB`
-        )
-      );
+    if (memoryGrowth > 5) {
+      // Only show if > 5MB growth
+      console.log(`💾 Memory: +${memoryGrowth.toFixed(0)}MB used`);
     }
 
-    // Performance insights
-    if (this.performance.filesProcessed > 0) {
-      console.log(
-        `📁 ${chalk.cyan('Files Processed:')} ${chalk.yellow(
-          this.performance.filesProcessed
-        )}`
-      );
-    }
-
-    // ========== Phase 1 Enhancements ==========
-
-    // Show resilience service status
-    if (this.resilienceService) {
-      const failureStats = this.resilienceService.getFailureStats();
-      if (Object.keys(failureStats).length > 0) {
-        this.displayResilienceStatus(failureStats);
-      }
-    }
-
-    // Show performance comparison if we have previous data
-    const performanceComparison = this.getExecutionComparison(execution);
-    if (performanceComparison && this.performanceMonitor) {
-      // Get additional performance data
+    // Show performance comparison if available
+    const comparison = this.getExecutionComparison(execution);
+    if (comparison && this.performanceMonitor) {
       this.performanceMonitor
         .getPerformanceReport()
         .then((report) => {
           this.displayPerformanceComparison(
-            performanceComparison,
-            report.topSlowMethods.slice(0, 3),
-            report.recentAlerts.slice(0, 3)
+            comparison,
+            report.topSlowMethods.slice(0, 2),
+            []
           );
         })
-        .catch((err) => {
-          // Fallback to basic performance comparison
-          this.displayPerformanceComparison(performanceComparison);
+        .catch(() => {
+          this.displayPerformanceComparison(comparison);
         });
     }
-
-    console.log(chalk.gray('━'.repeat(60)));
-
-    // Detailed results breakdown if there were failures
-    if (!execution.success && execution.executionResults.length > 0) {
-      console.log(chalk.yellow('\n⚠️  Issues Encountered:'));
-
-      execution.executionResults
-        .filter((result) => !result.success)
-        .forEach((result, index) => {
-          console.log(chalk.red(`${index + 1}. ${result.step.description}`));
-          if (result.error) {
-            console.log(chalk.gray(`   Error: ${result.error}`));
-          }
-
-          // Suggest potential solutions
-          const suggestions = this.generateSuggestions(result);
-          if (suggestions.length > 0) {
-            console.log(chalk.blue(`   💡 Suggestions:`));
-            suggestions.forEach((suggestion: string) => {
-              console.log(chalk.gray(`   • ${suggestion}`));
-            });
-          }
-          console.log();
-        });
-    }
-
-    // Key learnings if available
-    if (execution.learnings && execution.learnings.length > 0) {
-      console.log(chalk.blue('\n📚 Key Learnings:'));
-      execution.learnings.slice(0, 3).forEach((learning, index) => {
-        console.log(`${index + 1}. ${learning}`);
-      });
-
-      if (execution.learnings.length > 3) {
-        console.log(
-          chalk.gray(
-            `   ... and ${execution.learnings.length - 3} more learnings stored`
-          )
-        );
-      }
-    }
-
-    // Next steps recommendations
-    if (execution.success) {
-      console.log(chalk.green('\n🎉 Execution completed successfully!'));
-
-      // Generate contextual next steps
-      const nextSteps = this.generateNextSteps(execution);
-      if (nextSteps.length > 0) {
-        console.log(chalk.blue('\n💡 Suggested Next Steps:'));
-        nextSteps.forEach((step: string, index: number) => {
-          console.log(`${index + 1}. ${step}`);
-        });
-      }
-    } else {
-      console.log(chalk.red('\n❌ Execution encountered issues'));
-      console.log(
-        chalk.yellow('💡 You can retry with: ') +
-          chalk.cyan(`aia agent "${execution.goal}"`)
-      );
-      console.log(
-        chalk.gray(
-          '   The agent will learn from this attempt and try a different approach.'
-        )
-      );
-    }
-
-    // ========== FINAL RESULT HIGHLIGHT ==========
-    const finalResult = await this.extractFinalResult(execution);
-    if (finalResult) {
-      console.log(chalk.bgGreen.black.bold('\n🎯 FINAL RESULT '));
-      console.log(chalk.green('━'.repeat(60)));
-      console.log(chalk.green.bold(`📋 ${execution.goal}`));
-      const processedResult = this.processMarkdownCodeBlocks(finalResult);
-      console.log(chalk.white.bold(`💡 Answer: ${processedResult}`));
-      console.log(chalk.green('━'.repeat(60)));
-    }
-
-    console.log(chalk.gray('━'.repeat(60)));
   }
 
   displayError(error: string, context?: Record<string, unknown>): void {

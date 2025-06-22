@@ -15,6 +15,13 @@ export class EnhancedUIService {
   private readonly terminalWidth: number;
   private codeHighlightService?: ICodeHighlightService;
 
+  private gradients = {
+    success: gradient(['#00ff00', '#00cc00']),
+    error: gradient(['#ff0000', '#cc0000']),
+    info: gradient(['#00aaff', '#0088cc']),
+    ai: gradient(['#ff00ff', '#00ffff']), // AI-themed gradient
+  };
+
   constructor(codeHighlightService?: ICodeHighlightService) {
     const size = terminalSize();
     this.terminalWidth = Math.min(size.columns || 80, 120);
@@ -470,5 +477,74 @@ export class EnhancedUIService {
     if (currentLine) lines.push(currentLine.trim());
 
     return lines.map((line) => ' '.repeat(indent) + line).join('\n');
+  }
+
+  /**
+   * Create a rich AI-themed header.
+   */
+  createAIHeader(title: string): string {
+    const width = this.terminalWidth;
+    // Ensure padding is not negative
+    const paddingWidth = Math.max(
+      0,
+      Math.floor((width - title.length - 4) / 2)
+    );
+    const padding = '═'.repeat(paddingWidth);
+    return this.gradients.ai(` ${padding} ${title} ${padding} `);
+  }
+
+  /**
+   * Create an enhanced step display with a progress bar.
+   */
+  createStepDisplay(step: number, total: number, description: string): string {
+    const progress = `[${step}/${total}]`;
+    const progressBar = this.createProgressBar(step / total);
+    return `${chalk.cyan(progress)} ${progressBar} ${description}`;
+  }
+
+  private createProgressBar(percentage: number, length: number = 20): string {
+    const filledLength = Math.round(length * percentage);
+    const emptyLength = length - filledLength;
+    const filled = '█'.repeat(filledLength);
+    const empty = '░'.repeat(emptyLength);
+    return `[${this.gradients.success(filled)}${chalk.gray(empty)}]`;
+  }
+
+  showEnhancedPlanSummary(plan: {
+    goal: string;
+    strategy: string;
+    steps: { description: string }[];
+  }): void {
+    const planBox = boxen(
+      `${gradient.rainbow('🤖 AI Execution Plan')}\n\n` +
+        `${chalk.bold('Goal:')} ${plan.goal}\n` +
+        `${chalk.bold('Strategy:')} ${plan.strategy}\n` +
+        `${chalk.bold('Steps:')} ${plan.steps.length} planned actions`,
+      {
+        padding: 1,
+        margin: 1,
+        borderStyle: 'double',
+        borderColor: 'cyan',
+        backgroundColor: '#1a1a1a',
+      }
+    );
+
+    console.log(planBox);
+
+    const table = new Table({
+      head: [chalk.cyan('Step'), chalk.cyan('Action'), chalk.cyan('Status')],
+      style: {
+        head: [],
+        border: ['grey'],
+        'padding-left': 2,
+        'padding-right': 2,
+      },
+    });
+
+    plan.steps.forEach((step, i) => {
+      table.push([chalk.white(i + 1), step.description, chalk.gray('Pending')]);
+    });
+
+    console.log(table.toString());
   }
 }

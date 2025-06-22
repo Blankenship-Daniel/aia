@@ -42,7 +42,12 @@ import {
   AgenticStep,
   ExecutionStep,
 } from '../types/index.js';
-import inquirer from 'inquirer';
+import prompts from 'prompts';
+import { AnimationService } from '../services/AnimationService';
+import { AIPromptService } from '../services/AIPromptService';
+import { InteractiveAIService } from '../services/InteractiveAIService';
+import { TaskListPresenter } from '../services/TaskListPresenter';
+import { ListrTask } from 'listr2';
 
 /**
  * AgentCommand - Advanced agentic reasoning command for complex goal achievement.
@@ -77,6 +82,10 @@ export class AgentCommand implements ICommand {
   // Timeout configuration
   private readonly EXECUTION_TIMEOUT_MS = 300000; // 5 minutes for full execution
   private uiService: EnhancedUIService;
+  private animationService: AnimationService;
+  private aiPromptService: AIPromptService;
+  private interactiveAIService: InteractiveAIService;
+  private taskListPresenter: TaskListPresenter;
 
   constructor(
     private executionEngine: IAgentExecutionEngine,
@@ -87,6 +96,10 @@ export class AgentCommand implements ICommand {
     private codeHighlightService: ICodeHighlightService
   ) {
     this.uiService = new EnhancedUIService(codeHighlightService);
+    this.animationService = new AnimationService();
+    this.aiPromptService = new AIPromptService();
+    this.interactiveAIService = new InteractiveAIService();
+    this.taskListPresenter = new TaskListPresenter();
   }
 
   public async execute(
@@ -149,19 +162,25 @@ export class AgentCommand implements ICommand {
         this.uiService.createStyledPrompt('What would you like to do next?')
       );
 
-      const { nextInput } = await inquirer.prompt([
-        {
-          type: 'input',
-          name: 'nextInput',
-          message: chalk.cyan("Enter your next goal or type 'exit' to quit:"),
-          validate: (input: string) => {
-            if (!input.trim()) {
-              return 'Please provide a goal or type "exit" to quit';
-            }
-            return true;
-          },
-        },
-      ]);
+      const response = await prompts({
+        type: 'text',
+        name: 'nextInput',
+        message: chalk.cyan("Enter your next goal or type 'exit' to quit:"),
+        validate: (input: string) =>
+          input.trim() ? true : 'Please provide a goal or type "exit" to quit',
+      });
+
+      if (!response || !response.nextInput) {
+        console.log(
+          this.uiService.createAlertBox(
+            'Interactive session cancelled.',
+            'warning'
+          )
+        );
+        break;
+      }
+      const { nextInput } = response;
+
       if (nextInput.trim().toLowerCase() === 'exit') {
         console.log(
           this.uiService.createAlertBox(
@@ -241,14 +260,6 @@ export class AgentCommand implements ICommand {
           required: false,
           default: false,
         },
-        {
-          name: 'verbose',
-          description:
-            'Show detailed output including planning, execution steps, and performance metrics',
-          type: 'boolean',
-          required: false,
-          default: false,
-        },
       ],
     };
   }
@@ -304,7 +315,6 @@ Options:
   --auto-execute    Execute without confirmation prompts
   --max-iterations  Maximum number of iterations (default: 5)
   --no-iteration    Disable iteration on failures
-  --verbose         Show detailed output including planning, execution steps, and performance metrics
 
 The agent will:
 1. Analyze your goal and current context
@@ -320,15 +330,13 @@ The agent will:
     goal: string,
     options: CommandOptions
   ): Promise<CommandResult> {
-    const verbose = Boolean(options.verbose);
-
     try {
       // 1. Gather context and history
       const { contextInfo, previousExecutions } =
         await this.gatherExecutionContext(goal);
 
       // 2. Plan
-      this.presenter.showPlanningPhase(goal, verbose);
+      this.presenter.showPlanningPhase(goal);
 
       // Show AI classification loading
       const classificationSpinner = this.uiService.createLoadingSpinner(
@@ -390,7 +398,7 @@ The agent will:
       this.presenter.updatePlanningProgress('ready');
 
       // Show the execution plan
-      this.presenter.displayExecutionPlan(planResult.plan, verbose);
+      this.presenter.displayExecutionPlan(planResult.plan);
 
       const autoExecute = Boolean(
         options.autoExecute || options['auto-execute'] || options.auto
@@ -411,7 +419,6 @@ The agent will:
           options['max-iterations'] ||
           5) as number,
         noIteration: Boolean(options.noIteration || options['no-iteration']),
-        verbose,
       };
       const executionResult = await this.executeWithEnhancedResilience(
         () => this.executePlanWithProgress(execution, executionOptions),
@@ -433,7 +440,7 @@ The agent will:
       await this.storeExecutionHistory(execution);
 
       // 7. Show summary
-      await this.handleExecutionResult(execution, executionResult, verbose);
+      await this.handleExecutionResult(execution, executionResult);
       const output = this.presenter.formatExecutionSummary(execution);
       return {
         success: execution.success || false,
@@ -505,10 +512,9 @@ The agent will:
 
   private async handleExecutionResult(
     execution: AgenticExecution,
-    executionResult: any,
-    verbose: boolean
+    executionResult: any
   ): Promise<void> {
-    await this.presenter.displayExecutionSummary(execution, verbose);
+    await this.presenter.displayExecutionSummary(execution);
   }
 
   private convertToAgenticSteps(
@@ -534,7 +540,6 @@ The agent will:
       autoExecute: boolean;
       maxIterations: number;
       noIteration: boolean;
-      verbose: boolean;
     }
   ): Promise<{
     success: boolean;
@@ -604,7 +609,7 @@ The agent will:
     execution: AgenticExecution,
     learnings: string[],
     currentPlan: AgenticStep[],
-    options: { maxIterations: number; verbose: boolean }
+    options: { maxIterations: number }
   ): Promise<AgenticStep[]> {
     if (iteration === 1) return currentPlan;
     this.presenter.showIteration(iteration, options.maxIterations);
@@ -638,17 +643,14 @@ The agent will:
     step: AgenticStep,
     execution: AgenticExecution,
     iteration: number,
-    options: { autoExecute: boolean; verbose: boolean; noIteration: boolean },
+    options: { autoExecute: boolean; noIteration: boolean },
     learnings: string[]
   ): Promise<{
     success: boolean;
     resultForResultsArray: unknown;
     executionResult: any;
   }> {
-    const stepPresentation = this.presenter.showExecutionStep(
-      step,
-      options.verbose
-    );
+    const stepPresentation = this.presenter.showExecutionStep(step);
     try {
       const result = await this.executionEngine.executeStep(
         step,
@@ -666,7 +668,7 @@ The agent will:
       if (result.success) {
         stepPresentation.succeed();
         if (result.output) {
-          this.presenter.displayStepOutput(result.output, options.verbose);
+          this.presenter.displayStepOutput(result.output);
         }
       } else {
         stepPresentation.fail();
@@ -1058,17 +1060,14 @@ The agent will:
     );
     for (let i = 0; i < plan.length; i++) {
       const step = plan[i];
-      const stepPresentation = this.presenter.showExecutionStep(
-        step,
-        false // concise mode
-      );
+      const stepPresentation = this.presenter.showExecutionStep(step);
       try {
         const result = await this.executionEngine.executeStep(step, true);
         results.push(result);
         if (result.success) {
           stepPresentation.succeed();
           if (result.output) {
-            this.presenter.displayStepOutput(result.output, false);
+            this.presenter.displayStepOutput(result.output);
           }
         } else {
           stepPresentation.fail();

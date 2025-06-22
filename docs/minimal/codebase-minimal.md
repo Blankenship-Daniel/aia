@@ -1,35 +1,34 @@
-I'll create a minimal but comprehensive codebase-minimal.md file based on the provided information.
+I'll create a minimal but informative codebase-minimal.md file based on the provided context:
 
 ```markdown
 # AIA CLI Project Context
 
 ## Quick Overview
-AIA CLI is a TypeScript/Node.js command-line interface for AI-powered development assistance. It provides code analysis, optimization, and AI-driven task execution through a service-oriented architecture.
+TypeScript/Node.js CLI application providing AI-powered development assistance. Built with service-oriented architecture, focusing on code analysis, AI interactions, and development workflow optimization.
 
 ## Key Statistics
 - Files: 158 source files
-- Language: TypeScript
+- Language: TypeScript 
 - Architecture: Service-Oriented with DI
 - Entry Point: src/index.ts
-- Components: 38 classes, 312 interfaces
+- Test Coverage: 30 test files
 
 ## Essential Components
-- `AIService`: Core AI interaction handler
-- `CommandService`: CLI command execution
-- `ContextService`: Environment management
-- `MemoryService`: Conversation state
-- `AutoUpdateService`: System updates
-- `PluginManager`: Extension system
+- `AIService` - Core AI model interactions
+- `CommandService` - CLI command execution
+- `ContextService` - Environment management
+- `MemoryService` - Conversation state
+- `AutoUpdateService` - System updates
+- `PluginManager` - Extension handling
 
 ## Core Commands
 ```bash
 aia agent   # AI-powered task execution
 aia ask     # Direct AI queries
-aia config  # Manage configuration
+aia config  # Manage settings
 aia context # Show environment info
 aia execute # Run commands
 aia index   # Analyze codebase
-aia memory  # Manage conversation state
 ```
 
 ## Quick Start
@@ -37,21 +36,17 @@ aia memory  # Manage conversation state
 npm install
 npm run build
 npm start
-
-# First-time setup
-aia config init
-aia index
 ```
 
 ## Development Essentials
-- `/src/services/` - Core service implementations
-- `/src/commands/` - CLI command definitions
-- `/src/interfaces/` - Type definitions
-- `/src/config/` - System configuration
-- `tsconfig.json` - TypeScript configuration
+- `src/services/` - Core service implementations
+- `src/commands/` - CLI command definitions
+- `src/interfaces/` - Type definitions
+- `src/config/` - System configuration
+- `tests/` - Test suite
 
 ## Architecture Summary
-The system uses a service-oriented architecture with dependency injection. Core functionality is distributed across specialized services that communicate through well-defined interfaces. Commands follow the Command pattern, with a plugin system for extensibility. All components are loosely coupled through DI containers, enabling easy testing and modification.
+Service-oriented architecture using dependency injection and command pattern. Core services handle AI interactions, command execution, and state management. Plugin system enables extensibility. Interface-driven design with strong typing throughout. Performance optimized for large codebases.
 ```
 
-This documentation provides essential information for developers while maintaining brevity and focusing on the most critical aspects of the codebase.
+This minimal context file provides essential information for developers to understand and work with the project, while avoiding unnecessary details. It focuses on the most critical components and commands while maintaining clarity and brevity.

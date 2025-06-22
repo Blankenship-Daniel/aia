@@ -6,18 +6,16 @@ I'll create a comprehensive developer guide that's practical and focused on dail
 ## Quick Start
 
 ### Prerequisites
-- Node.js 16+ 
+- Node.js 16+
 - TypeScript 4.8+
-- Git
 - VS Code (recommended)
+- Git
 
 ### Initial Setup
 ```bash
-# Clone repository
+# Clone and install
 git clone [repository-url]
 cd aia
-
-# Install dependencies
 npm install
 
 # Set up development environment
@@ -29,14 +27,11 @@ npm run test
 
 ### First Commands
 ```bash
-# Start development server
+# Start in development mode
 npm run dev
 
 # Run CLI locally
-npm run cli -- ask "How can I help?"
-
-# Run tests
-npm run test:watch
+./bin/run ask "How can I help?"
 ```
 
 ## Development Environment
@@ -46,7 +41,7 @@ Required extensions:
 - ESLint
 - Prettier
 - TypeScript Hero
-- Debug for TypeScript
+- Debug Extension Pack
 
 ### VS Code Settings
 ```json
@@ -55,17 +50,15 @@ Required extensions:
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.preferences.importModuleSpecifier": "relative"
 }
 ```
 
 ### Environment Variables
-Create `.env.development`:
 ```env
-NODE_ENV=development
-LOG_LEVEL=debug
-AI_PROVIDER=openai
-AI_API_KEY=your_key_here
+AIA_ENV=development
+AIA_LOG_LEVEL=debug
+AIA_CONFIG_PATH=./config/dev
 ```
 
 ## Project Structure
@@ -73,22 +66,22 @@ AI_API_KEY=your_key_here
 ```
 aia/
 ├── src/
-│   ├── commands/        # CLI commands
-│   ├── services/        # Core services
-│   ├── interfaces/      # TypeScript interfaces
-│   ├── providers/       # AI providers
-│   ├── utils/          # Shared utilities
-│   └── types/          # TypeScript types
-├── tests/
-│   ├── unit/           # Unit tests
-│   └── integration/    # Integration tests
-└── config/             # Configuration files
+│   ├── commands/     # CLI commands
+│   ├── services/     # Core services
+│   ├── interfaces/   # TypeScript interfaces
+│   ├── providers/    # AI providers
+│   ├── utils/        # Shared utilities
+│   └── types/        # Type definitions
+├── test/            # Test files
+├── config/          # Configuration
+└── docs/            # Documentation
 ```
 
-### Key Files
-- `src/index.ts` - Application entry point
-- `src/di-container.ts` - Dependency injection setup
-- `src/config/default.ts` - Default configuration
+### Key Directories
+- `commands/`: Each command is a separate module
+- `services/`: Service implementations
+- `interfaces/`: TypeScript interface definitions
+- `providers/`: AI provider implementations
 
 ## Core Development Workflows
 
@@ -96,33 +89,42 @@ aia/
 
 1. Create feature branch:
 ```bash
-git checkout -b feature/name
+git checkout -b feature/feature-name
 ```
 
-2. Implement using TDD:
-```bash
-# Create test file
-touch tests/unit/feature-name.test.ts
+2. Implement following pattern:
+```typescript
+// 1. Define interface
+interface NewFeature {
+  method(): Promise<void>;
+}
 
-# Create implementation
-touch src/feature-name.ts
+// 2. Create service
+@injectable()
+class NewFeatureService implements NewFeature {
+  constructor(
+    @inject(TYPES.Dependencies) private deps: Dependencies
+  ) {}
+}
 
-# Run tests in watch mode
-npm run test:watch
+// 3. Add tests
+describe('NewFeatureService', () => {
+  // tests
+});
 ```
-
-3. Update documentation
-4. Create pull request
 
 ### Code Review Process
 1. Self-review checklist:
    - Tests passing
    - Lint clean
    - Documentation updated
-   - Performance considered
-2. Request review from team lead
-3. Address feedback
-4. Merge when approved
+   - Performance impact considered
+
+2. PR template requirements:
+   - Feature description
+   - Testing approach
+   - Breaking changes
+   - Dependencies added
 
 ## Common Tasks
 
@@ -133,10 +135,12 @@ npm run test:watch
 // src/commands/new-command.ts
 import { Command } from '../interfaces/command';
 
+@injectable()
 export class NewCommand implements Command {
-  public readonly name = 'new-command';
-  
-  async execute(args: string[]): Promise<void> {
+  public static command = 'new-command';
+  public static description = 'Description';
+
+  async run(): Promise<void> {
     // Implementation
   }
 }
@@ -144,42 +148,24 @@ export class NewCommand implements Command {
 
 2. Register in container:
 ```typescript
-// src/di-container.ts
-container.register('NewCommand', {
-  useClass: NewCommand
-});
-```
-
-3. Add tests:
-```typescript
-// tests/unit/commands/new-command.test.ts
-describe('NewCommand', () => {
-  it('should execute successfully', async () => {
-    // Test implementation
-  });
-});
+container.bind<Command>(TYPES.Command)
+  .to(NewCommand)
+  .inSingletonScope();
 ```
 
 ### Creating a New Service
 
-1. Define interface:
-```typescript
-// src/interfaces/new-service.interface.ts
-export interface INewService {
-  methodName(): Promise<void>;
-}
-```
-
-2. Implement service:
 ```typescript
 // src/services/new-service.ts
 @injectable()
 export class NewService implements INewService {
   constructor(
-    @inject('Logger') private logger: ILogger
+    @inject(TYPES.Logger) private logger: ILogger,
+    @inject(TYPES.Config) private config: IConfig
   ) {}
 
-  async methodName(): Promise<void> {
+  async initialize(): Promise<void> {
+    this.logger.debug('Initializing NewService');
     // Implementation
   }
 }
@@ -189,19 +175,20 @@ export class NewService implements INewService {
 
 ### Common Issues
 
-1. AI Provider Connection:
+1. Service Initialization Failures
 ```typescript
-// Check configuration
-const config = await this.configService.get('ai.provider');
-this.logger.debug('AI Provider Config:', config);
+// Add debug logging
+this.logger.debug({
+  service: 'NewService',
+  state: 'initializing',
+  config: this.config
+});
 ```
 
-2. Memory Management:
-```typescript
-// Monitor memory usage
-const used = process.memoryUsage();
-this.logger.debug(`Memory usage: ${used.heapUsed / 1024 / 1024} MB`);
-```
+2. Memory Leaks
+- Use `--inspect` flag for Node.js debugging
+- Monitor heap snapshots
+- Check for unsubscribed events
 
 ### Debug Configuration
 ```json
@@ -209,19 +196,19 @@ this.logger.debug(`Memory usage: ${used.heapUsed / 1024 / 1024} MB`);
   "type": "node",
   "request": "launch",
   "name": "Debug CLI",
-  "program": "${workspaceFolder}/dist/index.js",
-  "preLaunchTask": "tsc: build",
+  "program": "${workspaceFolder}/bin/run",
+  "args": ["ask", "test query"],
   "outFiles": ["${workspaceFolder}/dist/**/*.js"]
 }
 ```
 
 ## Testing Guidelines
 
-### Unit Test Pattern
+### Unit Test Structure
 ```typescript
 describe('ServiceName', () => {
   let service: ServiceName;
-  let mockDependency: jest.Mocked<IDependency>;
+  let mockDependency: jest.Mocked<Dependency>;
 
   beforeEach(() => {
     mockDependency = {
@@ -230,73 +217,61 @@ describe('ServiceName', () => {
     service = new ServiceName(mockDependency);
   });
 
-  it('should handle successful case', async () => {
+  it('should handle expected behavior', async () => {
     // Arrange
-    mockDependency.method.mockResolvedValue('result');
-
-    // Act
-    const result = await service.method();
-
-    // Assert
-    expect(result).toBe('expected');
-  });
-});
-```
-
-### Integration Test Pattern
-```typescript
-describe('Command Integration', () => {
-  let container: Container;
-
-  beforeAll(async () => {
-    container = await createTestContainer();
-  });
-
-  it('should execute end-to-end flow', async () => {
-    // Arrange
-    const command = container.get<ICommand>('CommandName');
+    mockDependency.method.mockResolvedValue(result);
     
     // Act
-    const result = await command.execute(['arg1', 'arg2']);
-
+    const result = await service.method();
+    
     // Assert
     expect(result).toBeDefined();
   });
 });
 ```
 
+### Mocking Strategies
+```typescript
+// Service mocks
+const mockService = {
+  method: jest.fn().mockResolvedValue(expected)
+};
+
+// AI provider mocks
+const mockAIProvider = {
+  generate: jest.fn().mockResolvedValue({
+    content: 'mocked response'
+  })
+};
+```
+
 ## Performance Tips
 
-### Memory Management
-- Use streams for large data
-- Implement cleanup in services
-- Monitor memory usage
+### Optimization Techniques
 
+1. Service Caching
 ```typescript
-class OptimizedService {
-  private cleanup(): void {
-    // Clear caches
-    this.cache.clear();
-    
-    // Force garbage collection if needed
-    if (global.gc) {
-      global.gc();
+@injectable()
+class CachedService {
+  private cache = new Map<string, any>();
+
+  async getData(key: string): Promise<any> {
+    if (this.cache.has(key)) {
+      return this.cache.get(key);
     }
+    const data = await this.fetchData(key);
+    this.cache.set(key, data);
+    return data;
   }
 }
 ```
 
-### Async Operations
-- Use Promise.all for parallel operations
-- Implement proper error handling
-- Consider batch processing
-
+2. Batch Processing
 ```typescript
-async function batchProcess(items: string[]): Promise<void> {
-  const batchSize = 100;
+async processBatch<T>(items: T[], batchSize = 100): Promise<void> {
   for (let i = 0; i < items.length; i += batchSize) {
     const batch = items.slice(i, i + batchSize);
-    await Promise.all(batch.map(item => processItem(item)));
+    await Promise.all(batch.map(item => this.process(item)));
   }
 }
 ```
@@ -305,33 +280,33 @@ async function batchProcess(items: string[]): Promise<void> {
 
 ### Common Error Patterns
 
-1. Service Connection Errors:
+1. Service Initialization
+```typescript
+// Check service dependencies
+if (!this.dependency) {
+  throw new Error('Missing required dependency');
+}
+```
+
+2. AI Provider Errors
 ```typescript
 try {
-  await service.connect();
+  await this.aiProvider.generate(prompt);
 } catch (error) {
-  this.logger.error('Connection failed:', {
-    service: service.name,
+  this.logger.error({
+    message: 'AI provider error',
     error: error.message,
-    stack: error.stack
+    prompt
   });
+  throw new AIProviderError(error);
 }
 ```
 
-2. Configuration Issues:
-```typescript
-// Validate configuration
-const config = await this.configService.validate();
-if (!config.isValid) {
-  throw new ConfigurationError('Invalid configuration', config.errors);
-}
-```
-
-### When to Ask for Help
-1. After checking documentation
-2. After searching error logs
-3. After trying common solutions
-4. When stuck > 30 minutes
+### When to Escalate
+- Performance degradation > 20%
+- Memory usage spikes
+- Unhandled promise rejections
+- Security vulnerabilities
 
 ## Code Contribution Guidelines
 
@@ -339,7 +314,7 @@ if (!config.isValid) {
 - [ ] Tests added/updated
 - [ ] Documentation updated
 - [ ] Lint passes
-- [ ] Branch up to date
+- [ ] Type checks pass
 - [ ] Performance impact considered
 - [ ] Breaking changes documented
 
@@ -352,14 +327,8 @@ type(scope): description
 [optional footer]
 ```
 
-Types:
-- feat: New feature
-- fix: Bug fix
-- docs: Documentation
-- style: Formatting
-- refactor: Code restructuring
-- test: Tests
-- chore: Maintenance
+Types: feat, fix, docs, style, refactor, test, chore
+
 ```
 
-This guide provides a practical foundation for daily development tasks while maintaining code quality and consistency. Adjust based on team feedback and evolving needs.
+This developer guide provides practical, actionable information focused on daily development tasks while maintaining high code quality and performance standards. Let me know if you need any section expanded or clarified.

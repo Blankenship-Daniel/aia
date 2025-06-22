@@ -9,6 +9,7 @@ import { IAgentPresenter } from '../src/interfaces/IAgentPresenter';
 import { IResilienceService } from '../src/interfaces/IResilienceService';
 import { IContextService } from '../src/interfaces/IContextService';
 import { IMemoryService } from '../src/interfaces/IMemoryService';
+import { ICodeHighlightService } from '../src/interfaces/ICodeHighlightService';
 import {
   ContextInfo,
   ExecutionStep,
@@ -21,6 +22,7 @@ describe('AgentCommand - SOLID Compliance', () => {
   let mockResilienceService: jest.Mocked<IResilienceService>;
   let mockContextService: jest.Mocked<IContextService>;
   let mockMemoryService: jest.Mocked<IMemoryService>;
+  let mockCodeHighlightService: jest.Mocked<ICodeHighlightService>;
   let agentCommand: AgentCommand;
 
   const mockContext: ContextInfo = {
@@ -59,6 +61,7 @@ describe('AgentCommand - SOLID Compliance', () => {
 
     mockPresenter = {
       showPlanningPhase: jest.fn(),
+      updatePlanningProgress: jest.fn(),
       displayExecutionPlan: jest.fn(),
       showExecutionStep: jest.fn((step: ExecutionStep) => ({
         succeed: jest.fn(),
@@ -142,13 +145,26 @@ describe('AgentCommand - SOLID Compliance', () => {
       getPreferences: jest.fn(),
     };
 
+    mockCodeHighlightService = {
+      highlightCode: jest.fn(),
+      displayCodeBlock: jest.fn(),
+      highlightInline: jest.fn(),
+      getSupportedLanguages: jest.fn(),
+      isLanguageSupported: jest.fn(),
+      detectLanguage: jest.fn(),
+      formatError: jest.fn(),
+      createThemedSnippet: jest.fn(),
+      looksLikeCode: jest.fn(),
+    };
+
     // Create AgentCommand with mocked dependencies
     agentCommand = new AgentCommand(
       mockExecutionEngine,
       mockPresenter,
       mockResilienceService,
       mockContextService,
-      mockMemoryService
+      mockMemoryService,
+      mockCodeHighlightService
     );
   });
 

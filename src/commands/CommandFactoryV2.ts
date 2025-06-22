@@ -28,6 +28,7 @@ import { ConfigCommand } from './ConfigCommand';
 import { AgentCommand } from './AgentCommand';
 import { IndexCommand } from './IndexCommand';
 import { InitCommand } from './InitCommand';
+import { InstallVSCodeCommand } from './InstallVSCodeCommand';
 import { CacheCommand } from './CacheCommand';
 import { AnalyticsCommand } from './AnalyticsCommand';
 import { ExplainCommand } from './ExplainCommand';
@@ -165,6 +166,13 @@ export class CommandFactoryV2 {
 
     // Init Command - Project initialization
     this.registrar.register('init', ['i'], () => new InitCommand());
+
+    // Install VSCode Extension Command - Install AIA VSCode extension in existing projects
+    this.registrar.register(
+      'install-vscode-extension',
+      ['install-ext', 'vscode'],
+      () => new InstallVSCodeCommand()
+    );
 
     // Cache Command - Advanced cache management (only if service is available)
     if (this.enhancedCachingService) {

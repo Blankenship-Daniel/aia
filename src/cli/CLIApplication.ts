@@ -425,6 +425,25 @@ export default class CLIApplication {
           'Disable AI fallback when Copilot is unavailable'
         );
         break;
+
+      case 'init':
+        cmd.option('--skip-vscode', 'Skip VSCode extension installation');
+        cmd.option(
+          '--auto-setup',
+          'Automatically install dependencies and compile the extension'
+        );
+        break;
+
+      case 'install-vscode-extension':
+        cmd.option(
+          '--auto-setup',
+          'Automatically install dependencies and compile the extension'
+        );
+        cmd.option(
+          '--force',
+          'Force reinstallation even if extension already exists'
+        );
+        break;
     }
   }
 

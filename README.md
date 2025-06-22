@@ -445,17 +445,71 @@ Below are all core commands available in the AIA CLI. Each command includes its 
 **Usage:**
 
 ```bash
-aia init
+aia init [--skip-vscode] [--auto-setup]
 # or
-aia i
+aia i [--skip-vscode] [--auto-setup]
 ```
+
+**Options:**
+
+- `--skip-vscode`: Skip VSCode extension installation
+- `--auto-setup`: Automatically install dependencies and compile the extension
 
 **What it does:**
 
 - Sets up the `.aia/` directory in your project root
 - Copies default `config.json`, `profiles.json`, `user.json`, and `codebase-index.json` into `.aia/`
 - Copies documentation templates to configured output directories
+- Installs VSCode AIA extension (unless `--skip-vscode` is used)
+- Installs VSCode settings and tasks for optimal integration
+- Optionally runs automatic setup with `--auto-setup`
 - Skips files that already exist
+
+**Examples:**
+
+- `aia init` - Initialize with VSCode extension (manual setup)
+- `aia init --auto-setup` - Initialize with VSCode extension (automatic setup)
+- `aia init --skip-vscode` - Initialize without VSCode extension
+
+---
+
+### `install-vscode-extension` / `install-ext`, `vscode`
+
+**Description:** Install AIA VSCode extension in an existing project.
+
+**Usage:**
+
+```bash
+aia install-vscode-extension [--auto-setup] [--force]
+# or
+aia install-ext [--auto-setup] [--force]
+```
+
+**Options:**
+
+- `--auto-setup`: Automatically install dependencies and compile the extension
+- `--force`: Force reinstallation even if extension already exists
+
+**What it does:**
+
+- Installs the AIA VSCode extension files to `.vscode/aia-copilot-bridge/`
+- Installs VSCode settings and tasks for optimal integration
+- Merges AIA settings into existing `.vscode/settings.json` if it exists
+- Optionally runs automatic setup with `--auto-setup`
+- Can reinstall existing extension with `--force`
+
+**Features:**
+
+- O(1) symbol lookup for GitHub Copilot
+- Auto-updates symbol index when files change
+- Enhances Copilot with project-specific context
+- "AIA:" commands in Command Palette for manual control
+
+**Examples:**
+
+- `aia install-vscode-extension` - Install extension (manual setup)
+- `aia install-vscode-extension --auto-setup` - Install extension (automatic setup)
+- `aia install-vscode-extension --force` - Reinstall existing extension
 
 ---
 

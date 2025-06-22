@@ -1,19 +1,19 @@
 {
   "metadata": {
-    "totalFiles": 273,
-    "totalClasses": 122,
+    "totalFiles": 274,
+    "totalClasses": 123,
     "totalFunctions": 74,
     "totalTodos": 7,
     "languages": {
       "json": 19,
       "markdown": 40,
       "javascript": 46,
-      "typescript": 168
+      "typescript": 169
     },
     "largestFiles": [
       {
         "path": ".aia/codebase-index.json",
-        "size": 689951
+        "size": 695041
       },
       {
         "path": "package-lock.json",
@@ -66,16 +66,16 @@
         "count": 1
       }
     ],
-    "indexedAt": "2025-06-22T01:54:40.443Z"
+    "indexedAt": "2025-06-22T02:16:25.398Z"
   },
   "files": [
     [
       ".aia/codebase-index.json",
       {
         "path": ".aia/codebase-index.json",
-        "size": 689951,
-        "hash": "aa70e0fc8c66fff0",
-        "lastModified": "2025-06-22T01:54:08.771Z",
+        "size": 695041,
+        "hash": "f69b3b3ad7c27ab6",
+        "lastModified": "2025-06-22T02:15:53.684Z",
         "type": "config",
         "language": "json",
         "symbols": [
@@ -465,8 +465,8 @@
       {
         "path": ".github/copilot-instructions.md",
         "size": 6275,
-        "hash": "78f5e9dae2dd4b44",
-        "lastModified": "2025-06-22T01:54:38.794Z",
+        "hash": "ebb76b3fa09b5825",
+        "lastModified": "2025-06-22T02:16:23.709Z",
         "type": "documentation",
         "language": "markdown",
         "symbols": [
@@ -1894,9 +1894,9 @@
       "README.md",
       {
         "path": "README.md",
-        "size": 18394,
-        "hash": "3ce39c78b5ec509d",
-        "lastModified": "2025-06-19T19:52:32.115Z",
+        "size": 20207,
+        "hash": "e3936ca929fbab2d",
+        "lastModified": "2025-06-22T02:14:58.609Z",
         "type": "documentation",
         "language": "markdown",
         "symbols": [
@@ -2491,6 +2491,18 @@
           {
             "type": "header",
             "level": 3,
+            "text": "`install-vscode-extension` / `install-ext`, `vscode`",
+            "name": "`install-vscode-extension` / `install-ext`, `vscode`"
+          },
+          {
+            "type": "header",
+            "level": 1,
+            "text": "or",
+            "name": "or"
+          },
+          {
+            "type": "header",
+            "level": 3,
             "text": "`ask` / `q`, `query`",
             "name": "`ask` / `q`, `query`"
           },
@@ -2671,7 +2683,13 @@
           {
             "type": "codeblock",
             "language": "bash",
-            "content": "aia init\n# or\naia i",
+            "content": "aia init [--skip-vscode] [--auto-setup]\n# or\naia i [--skip-vscode] [--auto-setup]",
+            "name": "CodeBlock_bash"
+          },
+          {
+            "type": "codeblock",
+            "language": "bash",
+            "content": "aia install-vscode-extension [--auto-setup] [--force]\n# or\naia install-ext [--auto-setup] [--force]",
             "name": "CodeBlock_bash"
           },
           {
@@ -13449,9 +13467,9 @@
       "src/cli/CLIApplication.ts",
       {
         "path": "src/cli/CLIApplication.ts",
-        "size": 24724,
-        "hash": "965eb9d178dfa1fb",
-        "lastModified": "2025-06-21T08:06:07.274Z",
+        "size": 25267,
+        "hash": "a1436c5d6c85027c",
+        "lastModified": "2025-06-22T02:13:14.116Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -13588,9 +13606,9 @@
       "src/commands/CommandFactoryV2.ts",
       {
         "path": "src/commands/CommandFactoryV2.ts",
-        "size": 12578,
-        "hash": "9f29a6fa2fb12876",
-        "lastModified": "2025-06-21T23:00:41.392Z",
+        "size": 12876,
+        "hash": "a087ee251ad7902c",
+        "lastModified": "2025-06-22T02:13:14.180Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -13771,9 +13789,9 @@
       "src/commands/InitCommand.ts",
       {
         "path": "src/commands/InitCommand.ts",
-        "size": 3525,
-        "hash": "24bbd131bcbe890f",
-        "lastModified": "2025-06-19T19:37:23.225Z",
+        "size": 14562,
+        "hash": "da1a4759476d6904",
+        "lastModified": "2025-06-22T02:07:40.740Z",
         "type": "source",
         "language": "typescript",
         "symbols": [
@@ -13782,9 +13800,37 @@
             "name": "InitCommand"
           }
         ],
-        "imports": [],
+        "imports": [
+          "child_process",
+          "util"
+        ],
         "exports": [
           "InitCommand"
+        ],
+        "dependencies": []
+      }
+    ],
+    [
+      "src/commands/InstallVSCodeCommand.ts",
+      {
+        "path": "src/commands/InstallVSCodeCommand.ts",
+        "size": 12892,
+        "hash": "35ce69c6cfb2ad46",
+        "lastModified": "2025-06-22T02:13:14.175Z",
+        "type": "source",
+        "language": "typescript",
+        "symbols": [
+          {
+            "type": "class",
+            "name": "InstallVSCodeCommand"
+          }
+        ],
+        "imports": [
+          "child_process",
+          "util"
+        ],
+        "exports": [
+          "InstallVSCodeCommand"
         ],
         "dependencies": []
       }
@@ -18564,7 +18610,177 @@
             "visibility": "public"
           },
           {
+            "name": "resolve",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "includes",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "Boolean",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "includes",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "ensureDir",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
             "name": "join",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "for",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "join",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "join",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "if",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "pathExists",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "copy",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "log",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "green",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          }
+        ]
+      }
+    ],
+    [
+      "InstallVSCodeCommand",
+      {
+        "file": "src/commands/InstallVSCodeCommand.ts",
+        "methods": [
+          {
+            "name": "execute",
+            "async": true,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "cwd",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "resolve",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "Boolean",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "includes",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "Boolean",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "includes",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "join",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "if",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "pathExists",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "log",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "yellow",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "log",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "white",
             "async": false,
             "static": false,
             "visibility": "public"

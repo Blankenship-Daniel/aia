@@ -1,5 +1,8 @@
 import prompts from 'prompts';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import gradient from 'gradient-string';
 
 // Dummy services for demonstration
@@ -25,6 +28,14 @@ const aiSuggestionService = {
       },
     ];
   },
+  /**
+   * Handles fuzzySearch operation
+   * 
+   * @param input - Parameter description
+   * @param choices - Parameter description
+   * 
+   * @returns Promise<any[]> - Return value description
+   */
   async fuzzySearch(input: string, choices: any[]): Promise<any[]> {
     if (!input) return choices;
     const fuse = new (require('fuse.js'))(choices, {
@@ -34,7 +45,17 @@ const aiSuggestionService = {
   },
 };
 
+/**
+ * AIPromptService class
+ * 
+ * TODO: Add class description
+ */
 export class AIPromptService {
+  /**
+   * Gets enhancedinput
+   * 
+   * @returns Promise<string> - Return value description
+   */
   async getEnhancedInput(): Promise<string> {
     const suggestions = await aiSuggestionService.getSuggestions();
 

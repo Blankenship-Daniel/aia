@@ -1,4 +1,7 @@
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 // @ts-ignore - No type declarations available
 import { extractJSON } from 'extract-first-json';
 // @ts-ignore - No type declarations available
@@ -64,6 +67,9 @@ export class RobustJSONParser {
   private parseAttempts: number;
   private debugMode: boolean;
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     this.parseAttempts = 0;
     this.debugMode = process.env.DEBUG_JSON_PARSER === 'true';

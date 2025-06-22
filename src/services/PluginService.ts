@@ -26,6 +26,11 @@ import { IConfigurationService } from '../interfaces/IConfigurationService';
 import { ICommandService } from '../interfaces/ICommandService';
 import { IMemoryService } from '../interfaces/IMemoryService';
 
+/**
+ * PluginService class
+ * 
+ * TODO: Add class description
+ */
 export class PluginService implements IPluginService {
   private configService: IConfigurationService;
   private commandService: ICommandService;
@@ -452,6 +457,11 @@ export class PluginService implements IPluginService {
   }
 
   // Private helper methods
+  /**
+   * Handles loadInstalledPlugins operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async loadInstalledPlugins(): Promise<void> {
     try {
       const entries = await fs.readdir(this.pluginDirectory);
@@ -472,6 +482,13 @@ export class PluginService implements IPluginService {
     }
   }
 
+  /**
+   * Handles groupPluginsByAuthor operation
+   * 
+   * @param plugins - Parameter description
+   * 
+   * @returns Record<string, number> - Return value description
+   */
   private groupPluginsByAuthor(plugins: PluginInfo[]): Record<string, number> {
     const groups: Record<string, number> = {};
 
@@ -483,6 +500,14 @@ export class PluginService implements IPluginService {
     return groups;
   }
 
+  /**
+   * Calculates searchscore
+   * 
+   * @param plugin - Parameter description
+   * @param query - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private calculateSearchScore(plugin: PluginInfo, query: string): number {
     const lowerQuery = query.toLowerCase();
     let score = 0;
@@ -494,6 +519,14 @@ export class PluginService implements IPluginService {
     return score;
   }
 
+  /**
+   * Gets matchedfields
+   * 
+   * @param plugin - Parameter description
+   * @param query - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private getMatchedFields(plugin: PluginInfo, query: string): string[] {
     const lowerQuery = query.toLowerCase();
     const matchedFields: string[] = [];
@@ -522,6 +555,11 @@ export class PluginService implements IPluginService {
  * Demonstrates advanced plugin capabilities
  */
 module.exports = {
+  /**
+   * Initializes the operation
+   * 
+   * @param context - Parameter description
+   */
   async initialize(context) {
     console.log('${name} plugin initializing');
     // Perform setup tasks, validate configuration, etc.
@@ -531,18 +569,33 @@ module.exports = {
     };
   },
 
+  /**
+   * Handles beforeCommand operation
+   * 
+   * @param context - Parameter description
+   */
   async beforeCommand(context) {
     console.log('Before command hook for ${name} plugin');
     // Intercepting and potentially modifying command execution
     return context;
   },
 
+  /**
+   * Handles afterCommand operation
+   * 
+   * @param context - Parameter description
+   */
   async afterCommand(context) {
     console.log('After command hook for ${name} plugin');
     // Perform logging, analysis, or additional processing
     return context;
   },
 
+  /**
+   * Cleans up the operation
+   * 
+   * @param context - Parameter description
+   */
   async cleanup(context) {
     console.log('${name} plugin cleaning up');
     // Perform cleanup tasks, release resources
@@ -552,6 +605,9 @@ module.exports = {
     };
   },
 
+  /**
+   * Gets metadata
+   */
   getMetadata() {
     return {
       name: '${name}',
@@ -568,16 +624,29 @@ module.exports = {
  * ${name} Plugin
  */
 module.exports = {
+  /**
+   * Initializes the operation
+   * 
+   * @param context - Parameter description
+   */
   async initialize(context) {
     console.log('${name} plugin initialized');
     return { success: true };
   },
 
+  /**
+   * Cleans up the operation
+   * 
+   * @param context - Parameter description
+   */
   async cleanup(context) {
     console.log('${name} plugin cleaned up');
     return { success: true };
   },
 
+  /**
+   * Gets metadata
+   */
   getMetadata() {
     return {
       name: '${name}',

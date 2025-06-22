@@ -4,7 +4,10 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { spawn, ChildProcess } from 'child_process';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 
 interface PluginManifest {
   name: string;
@@ -56,6 +59,11 @@ interface LoadResult {
 
 type HookHandler = (...args: any[]) => Promise<any> | any;
 
+/**
+ * PluginManager class
+ * 
+ * TODO: Add class description
+ */
 class PluginManager {
   private pluginDirectory: string;
   private plugins: Map<string, Plugin>;
@@ -64,6 +72,11 @@ class PluginManager {
   private pluginMetadata: Map<string, PluginManifest>;
   private sandboxConfig: SandboxConfig;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param pluginDirectory - Parameter description
+   */
   constructor(pluginDirectory: string) {
     this.pluginDirectory = pluginDirectory;
     this.plugins = new Map();
@@ -84,6 +97,9 @@ class PluginManager {
   }
 
   // Initialize plugin hook system
+  /**
+   * Initializes hooks
+   */
   private initializeHooks(): void {
     const hookTypes: string[] = [
       'beforeCommand',
@@ -106,6 +122,11 @@ class PluginManager {
   }
 
   // Load all available plugins
+  /**
+   * Handles loadAllPlugins operation
+   * 
+   * @returns Promise<LoadResult> - Return value description
+   */
   async loadAllPlugins(): Promise<LoadResult> {
     try {
       await fs.ensureDir(this.pluginDirectory);
@@ -141,6 +162,13 @@ class PluginManager {
   }
 
   // Load a specific plugin
+  /**
+   * Handles loadPlugin operation
+   * 
+   * @param pluginName - Parameter description
+   * 
+   * @returns Promise<Plugin> - Return value description
+   */
   async loadPlugin(pluginName: string): Promise<Plugin> {
     try {
       const pluginPath = path.join(this.pluginDirectory, pluginName);
@@ -207,6 +235,13 @@ class PluginManager {
   }
 
   // Unload a plugin
+  /**
+   * Handles unloadPlugin operation
+   * 
+   * @param pluginName - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async unloadPlugin(pluginName: string): Promise<void> {
     try {
       if (!this.loadedPlugins.has(pluginName)) {
@@ -242,6 +277,11 @@ class PluginManager {
   }
 
   // Validate plugin manifest
+  /**
+   * Validates manifest
+   * 
+   * @param manifest - Parameter description
+   */
   private validateManifest(manifest: PluginManifest): void {
     const required = ['name', 'version'];
     const missing = required.filter(
@@ -450,6 +490,12 @@ class PluginManager {
   }
 
   // Register plugin hooks from plugin object
+  /**
+   * Handles registerPluginHooks operation
+   * 
+   * @param pluginName - Parameter description
+   * @param plugin - Parameter description
+   */
   private registerPluginHooks(pluginName: string, plugin: Plugin): void {
     const hookTypes = Array.from(this.hooks.keys());
 
@@ -462,6 +508,11 @@ class PluginManager {
   }
 
   // Unregister all hooks for a plugin
+  /**
+   * Handles unregisterPluginHooks operation
+   * 
+   * @param pluginName - Parameter description
+   */
   private unregisterPluginHooks(pluginName: string): void {
     this.hooks.forEach((handlers, hookType) => {
       // Filter out handlers from this plugin
@@ -472,6 +523,14 @@ class PluginManager {
   }
 
   // Execute hooks
+  /**
+   * Executes hook
+   * 
+   * @param hookType - Parameter description
+   * @param ...args - Parameter description
+   * 
+   * @returns Promise<any[]> - Return value description
+   */
   async executeHook(hookType: string, ...args: any[]): Promise<any[]> {
     const handlers = this.hooks.get(hookType) || [];
     const results: any[] = [];
@@ -495,6 +554,13 @@ class PluginManager {
   }
 
   // Get plugin configuration
+  /**
+   * Gets pluginconfig
+   * 
+   * @param pluginName - Parameter description
+   * 
+   * @returns any - Return value description
+   */
   private getPluginConfig(pluginName: string): any {
     const configPath = path.join(
       this.pluginDirectory,
@@ -516,6 +582,11 @@ class PluginManager {
   }
 
   // List loaded plugins
+  /**
+   * Handles listPlugins operation
+   * 
+   * @returns  - Return value description
+   */
   listPlugins(): { name: string; version: string; description?: string }[] {
     return Array.from(this.loadedPlugins).map((name) => {
       const metadata = this.pluginMetadata.get(name);
@@ -582,6 +653,11 @@ class PluginManager {
 
 module.exports = {
   // Plugin initialization
+  /**
+   * Initializes the operation
+   * 
+   * @param api - Parameter description
+   */
   async initialize(api) {
     api.log('${pluginName} plugin initialized');
     
@@ -592,22 +668,40 @@ module.exports = {
   },
 
   // Plugin cleanup
+  /**
+   * Handles destroy operation
+   */
   async destroy() {
     console.log('${pluginName} plugin destroyed');
   },
 
   // Hook handlers
+  /**
+   * Handles beforeCommand operation
+   * 
+   * @param command - Parameter description
+   * @param args - Parameter description
+   */
   async beforeCommand(command, args) {
     // Called before any command execution
     return { command, args };
   },
 
+  /**
+   * Handles afterCommand operation
+   * 
+   * @param command - Parameter description
+   * @param result - Parameter description
+   */
   async afterCommand(command, result) {
     // Called after command execution
     return result;
   },
 
   // Custom functionality
+  /**
+   * Handles customFunction operation
+   */
   async customFunction() {
     return 'This is a custom function from ${pluginName}';
   },
@@ -668,6 +762,13 @@ MIT
   }
 
   // Utility function to convert string to PascalCase
+  /**
+   * Handles toPascalCase operation
+   * 
+   * @param str - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private toPascalCase(str: string): string {
     return str
       .split(/[-_\s]+/)

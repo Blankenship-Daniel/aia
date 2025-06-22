@@ -4,13 +4,21 @@
  * Integrates with CodeHighlightService for syntax highlighting
  */
 import boxen from 'boxen';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import gradient from 'gradient-string';
 import Table from 'cli-table3';
 import figures from 'figures';
 import terminalSize from 'terminal-size';
 import { ICodeHighlightService } from '../interfaces/ICodeHighlightService';
 
+/**
+ * EnhancedUIService class
+ *
+ * TODO: Add class description
+ */
 export class EnhancedUIService {
   private readonly terminalWidth: number;
   private codeHighlightService?: ICodeHighlightService;
@@ -22,6 +30,11 @@ export class EnhancedUIService {
     ai: gradient(['#ff00ff', '#00ffff']), // AI-themed gradient
   };
 
+  /**
+   * Creates an instance of the class
+   *
+   * @param codeHighlightService? - Parameter description
+   */
   constructor(codeHighlightService?: ICodeHighlightService) {
     const size = terminalSize();
     this.terminalWidth = Math.min(size.columns || 80, 120);
@@ -502,6 +515,14 @@ export class EnhancedUIService {
     return `${chalk.cyan(progress)} ${progressBar} ${description}`;
   }
 
+  /**
+   * Creates progressbar
+   *
+   * @param percentage - Parameter description
+   * @param length - Parameter description
+   *
+   * @returns string - Return value description
+   */
   private createProgressBar(percentage: number, length: number = 20): string {
     const filledLength = Math.round(length * percentage);
     const emptyLength = length - filledLength;

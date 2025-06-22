@@ -1,19 +1,41 @@
 import prompts from 'prompts';
 import logUpdate from 'log-update';
 import cliSpinners from 'cli-spinners';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import gradient from 'gradient-string';
 import boxen from 'boxen';
 
 // Dummy AI service for demonstration
 const aiService = {
+  /**
+   * Processes the operation
+   * 
+   * @param prompt - Parameter description
+   * 
+   * @returns Promise<string> - Return value description
+   */
   async process(prompt: string): Promise<string> {
     await new Promise((resolve) => setTimeout(resolve, 2000));
     return `This is a simulated AI response to your prompt: "${prompt}". It demonstrates the typewriter effect.`;
   },
 };
 
+/**
+ * InteractiveAIService class
+ * 
+ * TODO: Add class description
+ */
 export class InteractiveAIService {
+  /**
+   * Gets airesponse
+   * 
+   * @param prompt - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async getAIResponse(prompt: string): Promise<void> {
     const spinner = cliSpinners.dots12;
     let i = 0;
@@ -34,6 +56,14 @@ export class InteractiveAIService {
     await this.typewriterEffect(response);
   }
 
+  /**
+   * Handles typewriterEffect operation
+   * 
+   * @param text - Parameter description
+   * @param delay = 20 - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async typewriterEffect(text: string, delay = 20): Promise<void> {
     const words = text.split(' ');
     let output = '';

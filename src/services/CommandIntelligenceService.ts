@@ -17,8 +17,16 @@ import { IMemoryService } from '../interfaces/IMemoryService.js';
 import { IConfigurationService } from '../interfaces/IConfigurationService.js';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 
+/**
+ * CommandIntelligenceService class
+ * 
+ * TODO: Add class description
+ */
 export class CommandIntelligenceService implements ICommandIntelligenceService {
   private commandUsageHistory: Map<string, CommandUsagePattern> = new Map();
   private projectTypeCommandMapping: Map<string, string[]> = new Map();
@@ -506,6 +514,13 @@ export class CommandIntelligenceService implements ICommandIntelligenceService {
   }
 
   // Helper methods
+  /**
+   * Gets commanddescription
+   * 
+   * @param command - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private getCommandDescription(command: string): string {
     if (command.startsWith('agent'))
       return 'AI-powered task execution with reasoning';
@@ -515,6 +530,13 @@ export class CommandIntelligenceService implements ICommandIntelligenceService {
     return 'Command execution';
   }
 
+  /**
+   * Gets commandusage
+   * 
+   * @param command - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private getCommandUsage(command: string): string {
     return `aia ${command}`;
   }
@@ -530,12 +552,22 @@ export class CommandIntelligenceService implements ICommandIntelligenceService {
     return 'development';
   }
 
+  /**
+   * Gets frequentcommands
+   * 
+   * @returns CommandUsagePattern[] - Return value description
+   */
   private getFrequentCommands(): CommandUsagePattern[] {
     return Array.from(this.commandUsageHistory.values()).sort(
       (a, b) => b.frequency - a.frequency
     );
   }
 
+  /**
+   * Gets defaultsuggestions
+   * 
+   * @returns CommandSuggestion[] - Return value description
+   */
   private getDefaultSuggestions(): CommandSuggestion[] {
     return [
       {

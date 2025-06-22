@@ -1,9 +1,17 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import { ICommand, CommandDefinition } from '../interfaces/ICommand';
 import { CommandResult, CommandOptions } from '../types/index';
 
+/**
+ * InitCommand class
+ * 
+ * TODO: Add class description
+ */
 export class InitCommand implements ICommand {
   public readonly name = 'init';
   public readonly description =
@@ -343,6 +351,13 @@ The extension automatically activates when VSCode opens and monitors file change
     }
   }
 
+  /**
+   * Handles runExtensionSetup operation
+   * 
+   * @param extensionDir - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async runExtensionSetup(extensionDir: string): Promise<void> {
     const { exec } = require('child_process');
     const { promisify } = require('util');
@@ -373,6 +388,11 @@ The extension automatically activates when VSCode opens and monitors file change
   }
 
   // Add required ICommand methods
+  /**
+   * Gets definition
+   * 
+   * @returns CommandDefinition - Return value description
+   */
   public getDefinition(): CommandDefinition {
     return {
       name: this.name,
@@ -401,19 +421,41 @@ The extension automatically activates when VSCode opens and monitors file change
     };
   }
 
+  /**
+   * Gets name
+   * 
+   * @returns string - Return value description
+   */
   public getName(): string {
     return this.name;
   }
 
+  /**
+   * Gets aliases
+   * 
+   * @returns string[] - Return value description
+   */
   public getAliases(): string[] {
     return this.aliases;
   }
 
+  /**
+   * Validates args
+   * 
+   * @param args - Parameter description
+   * 
+   * @returns  - Return value description
+   */
   public validateArgs(args: string[]): { valid: boolean; errors: string[] } {
     // No specific arguments for init
     return { valid: true, errors: [] };
   }
 
+  /**
+   * Gets help
+   * 
+   * @returns string - Return value description
+   */
   public getHelp(): string {
     return `
 Usage: ${this.name} [--skip-vscode] [--auto-setup]

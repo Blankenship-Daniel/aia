@@ -13,6 +13,11 @@ interface ValidationResult {
   warnings: string[];
 }
 
+/**
+ * ServiceFactory class
+ * 
+ * TODO: Add class description
+ */
 export class ServiceFactory {
   /**
    * Create and configure DI container with all services

@@ -13,14 +13,33 @@ import {
   ModelCapabilities,
 } from '../../interfaces/IAIProvider';
 
+/**
+ * GeminiProvider class
+ * 
+ * TODO: Add class description
+ */
 export class GeminiProvider implements IAIProvider {
   name = 'gemini';
   private model: string;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param private apiKey - Parameter description
+   * @param model - Parameter description
+   */
   constructor(private apiKey: string, model: string) {
     this.model = model;
   }
 
+  /**
+   * Handles call operation
+   * 
+   * @param prompt - Parameter description
+   * @param options - Parameter description
+   * 
+   * @returns Promise<string> - Return value description
+   */
   async call(prompt: string, options: AICallOptions): Promise<string> {
     try {
       // For now, return a simulated response since Gemini SDK implementation varies
@@ -36,6 +55,13 @@ export class GeminiProvider implements IAIProvider {
     }
   }
 
+  /**
+   * Validates config
+   * 
+   * @param config - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   validateConfig(config: any): boolean {
     if (!config.apiKey || typeof config.apiKey !== 'string') {
       return false;
@@ -47,6 +73,11 @@ export class GeminiProvider implements IAIProvider {
     );
   }
 
+  /**
+   * Gets modelcapabilities
+   * 
+   * @returns ModelCapabilities - Return value description
+   */
   getModelCapabilities(): ModelCapabilities {
     return {
       maxTokens: 30720, // Gemini Pro context length
@@ -57,6 +88,13 @@ export class GeminiProvider implements IAIProvider {
     };
   }
 
+  /**
+   * Handles estimateTokens operation
+   * 
+   * @param text - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   estimateTokens(text: string): number {
     // Gemini tokenization estimation
     return Math.ceil(text.length / 4);

@@ -1,7 +1,20 @@
 import cliProgress from 'cli-progress';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 
+/**
+ * ProgressVisualization class
+ * 
+ * TODO: Add class description
+ */
 export class ProgressVisualization {
+  /**
+   * Handles showAIProcessing operation
+   * 
+   * @param steps - Parameter description
+   */
   showAIProcessing(steps: string[]): void {
     console.log(chalk.blue('🤖 AI Processing...'));
 

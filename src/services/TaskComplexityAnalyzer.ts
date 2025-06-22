@@ -63,6 +63,11 @@ export enum ValidationStrategy {
   MANUAL_REVIEW = 'manual_review',
 }
 
+/**
+ * TaskComplexityAnalyzer class
+ * 
+ * TODO: Add class description
+ */
 export class TaskComplexityAnalyzer {
   /**
    * Analyze a task description to determine its type, complexity, and requirements
@@ -262,6 +267,13 @@ export class TaskComplexityAnalyzer {
     },
   ];
 
+  /**
+   * Handles determineTaskType operation
+   * 
+   * @param task - Parameter description
+   * 
+   * @returns TaskType - Return value description
+   */
   private determineTaskType(task: string): TaskType {
     for (const def of TaskComplexityAnalyzer.taskTypeDefinitions) {
       if (this.matchesPatterns(task, def.patterns)) {
@@ -277,6 +289,14 @@ export class TaskComplexityAnalyzer {
     return TaskType.UNKNOWN;
   }
 
+  /**
+   * Handles assessComplexity operation
+   * 
+   * @param task - Parameter description
+   * @param taskType - Parameter description
+   * 
+   * @returns TaskComplexity - Return value description
+   */
   private assessComplexity(task: string, taskType: TaskType): TaskComplexity {
     let complexityScore = 0;
 
@@ -459,6 +479,13 @@ export class TaskComplexityAnalyzer {
     [TaskType.UNKNOWN]: ValidationStrategy.MANUAL_REVIEW,
   };
 
+  /**
+   * Handles determineValidationStrategy operation
+   * 
+   * @param taskType - Parameter description
+   * 
+   * @returns ValidationStrategy - Return value description
+   */
   private determineValidationStrategy(taskType: TaskType): ValidationStrategy {
     return (
       TaskComplexityAnalyzer.validationStrategyMap[taskType] ||
@@ -466,6 +493,14 @@ export class TaskComplexityAnalyzer {
     );
   }
 
+  /**
+   * Handles matchesPatterns operation
+   * 
+   * @param text - Parameter description
+   * @param patterns - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private matchesPatterns(text: string, patterns: string[]): boolean {
     return patterns.some((pattern) => text.includes(pattern));
   }

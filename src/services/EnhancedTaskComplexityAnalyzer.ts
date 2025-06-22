@@ -8,9 +8,20 @@ import { IAIService } from '../interfaces/IAIService';
 import { IContextService } from '../interfaces/IContextService';
 import { TaskAnalysis } from './TaskComplexityAnalyzer';
 
+/**
+ * EnhancedTaskComplexityAnalyzer class
+ * 
+ * TODO: Add class description
+ */
 export class EnhancedTaskComplexityAnalyzer {
   private aiClassifier: AITaskClassifier;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param aiService - Parameter description
+   * @param contextService - Parameter description
+   */
   constructor(aiService: IAIService, contextService: IContextService) {
     if (!aiService) {
       throw new Error(

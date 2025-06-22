@@ -12,7 +12,10 @@
  * @see MemoryService - Underlying memory search integration.
  */
 
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import fs from 'fs-extra';
 import path from 'path';
 import { CommandResult } from './types/index.js';
@@ -110,6 +113,11 @@ export default class AgenticSearchEngine {
   private searchCache: Map<string, unknown>;
   private contextCache: Map<string, unknown>;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param aia - Parameter description
+   */
   constructor(aia: any) {
     this.aia = aia;
     this.searchCache = new Map();
@@ -701,6 +709,14 @@ export default class AgenticSearchEngine {
     return [];
   }
 
+  /**
+   * Handles findRelatedSymbols operation
+   * 
+   * @param goal - Parameter description
+   * @param index - Parameter description
+   * 
+   * @returns Promise<any[]> - Return value description
+   */
   private async findRelatedSymbols(goal: string, index: any): Promise<any[]> {
     return [];
   }
@@ -712,6 +728,14 @@ export default class AgenticSearchEngine {
     return {};
   }
 
+  /**
+   * Generates contextualsuggestions
+   * 
+   * @param goal - Parameter description
+   * @param index - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private generateContextualSuggestions(goal: string, index: any): string[] {
     return [];
   }

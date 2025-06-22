@@ -4,7 +4,10 @@
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import inquirer from 'inquirer';
 
 interface AIAConfig {
@@ -51,6 +54,11 @@ interface SecurityValidator {
   validateAnthropicApiKey: (key: string) => Promise<boolean>;
 }
 
+/**
+ * ConfigurationManager class
+ * 
+ * TODO: Add class description
+ */
 class ConfigurationManager {
   private configDir: string;
   private configFile: string;
@@ -62,6 +70,12 @@ class ConfigurationManager {
   private userConfig: Record<string, unknown>;
   private securityValidator: SecurityValidator | null;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param configDirOrFile? - Parameter description
+   * @param isFilePath - Parameter description
+   */
   constructor(configDirOrFile?: string, isFilePath: boolean = false) {
     if (isFilePath && configDirOrFile) {
       this.configFile = configDirOrFile;
@@ -119,6 +133,11 @@ class ConfigurationManager {
   }
 
   // Load all configuration files
+  /**
+   * Handles loadAllConfigs operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async loadAllConfigs(): Promise<void> {
     await this.loadMainConfig();
     await this.loadProfiles();
@@ -126,6 +145,11 @@ class ConfigurationManager {
   }
 
   // Load main configuration
+  /**
+   * Handles loadMainConfig operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async loadMainConfig(): Promise<void> {
     try {
       await fs.ensureDir(this.configDir);
@@ -158,16 +182,17 @@ class ConfigurationManager {
       this.validateConfigAndFillMissing();
     } catch (error) {
       console.error(
-        chalk.red(
-          'Failed to load main configuration:',
-          (error as Error).message
-        )
+        chalk.red('Failed to load main configuration:'),
+        (error as Error).message
       );
       this.config = { ...this.defaultConfig };
     }
   }
 
   // Validate configuration and fill missing values
+  /**
+   * Validates configandfillmissing
+   */
   private validateConfigAndFillMissing(): void {
     // Ensure all required configuration keys exist with defaults
     const defaults = this.getDefaultConfig();
@@ -195,11 +220,21 @@ class ConfigurationManager {
   }
 
   // Method to get the current config file path, useful for debugging or tests
+  /**
+   * Gets activeconfigfile
+   * 
+   * @returns string - Return value description
+   */
   public getActiveConfigFile(): string {
     return this.configFile;
   }
 
   // Load user profiles
+  /**
+   * Handles loadProfiles operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async loadProfiles(): Promise<void> {
     try {
       if (await fs.pathExists(this.profilesFile)) {
@@ -217,6 +252,11 @@ class ConfigurationManager {
   }
 
   // Load user-specific configuration
+  /**
+   * Handles loadUserConfig operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async loadUserConfig(): Promise<void> {
     try {
       if (await fs.pathExists(this.userConfigFile)) {
@@ -237,6 +277,11 @@ class ConfigurationManager {
   }
 
   // Interactive configuration setup
+  /**
+   * Sets upinteractiveconfig
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async setupInteractiveConfig(): Promise<void> {
     console.log(chalk.blue('\n🔧 AIA Configuration Setup'));
     console.log(chalk.gray("Let's set up your AIA CLI configuration.\n"));
@@ -272,6 +317,11 @@ class ConfigurationManager {
   }
 
   // Quick setup for API keys
+  /**
+   * Handles quickSetup operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async quickSetup(): Promise<void> {
     console.log(chalk.yellow('\n⚡ Quick Setup - API Keys'));
 
@@ -326,6 +376,11 @@ class ConfigurationManager {
   }
 
   // Full configuration setup
+  /**
+   * Handles fullSetup operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async fullSetup(): Promise<void> {
     console.log(chalk.yellow('\n🔧 Full Setup - All Configuration Options'));
 
@@ -412,6 +467,11 @@ class ConfigurationManager {
   }
 
   // Profile management
+  /**
+   * Handles profileManagement operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async profileManagement(): Promise<void> {
     const profileNames = Object.keys(this.profiles);
 
@@ -454,6 +514,11 @@ class ConfigurationManager {
   }
 
   // Advanced configuration
+  /**
+   * Handles advancedSetup operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async advancedSetup(): Promise<void> {
     console.log(chalk.yellow('\n⚙️  Advanced Settings'));
 
@@ -491,6 +556,11 @@ class ConfigurationManager {
   }
 
   // Output directory configuration
+  /**
+   * Configures outputdirectories
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async configureOutputDirectories(): Promise<void> {
     console.log(chalk.yellow('\n📁 Output Directory Configuration'));
 
@@ -533,6 +603,13 @@ class ConfigurationManager {
   }
 
   // Configuration validation
+  /**
+   * Validates andmergeconfig
+   * 
+   * @param rawConfig - Parameter description
+   * 
+   * @returns AIAConfig - Return value description
+   */
   private validateAndMergeConfig(rawConfig: Partial<AIAConfig>): AIAConfig {
     const merged = { ...this.defaultConfig, ...rawConfig };
 
@@ -545,6 +622,11 @@ class ConfigurationManager {
   }
 
   // Save configurations
+  /**
+   * Handles saveMainConfig operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async saveMainConfig(): Promise<void> {
     try {
       await fs.ensureDir(this.configDir);
@@ -560,6 +642,11 @@ class ConfigurationManager {
     }
   }
 
+  /**
+   * Handles saveProfiles operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async saveProfiles(): Promise<void> {
     try {
       await fs.ensureDir(this.configDir);
@@ -572,6 +659,11 @@ class ConfigurationManager {
     }
   }
 
+  /**
+   * Handles saveUserConfig operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async saveUserConfig(): Promise<void> {
     try {
       await fs.ensureDir(this.configDir);
@@ -600,10 +692,20 @@ class ConfigurationManager {
   }
 
   // Helper methods
+  /**
+   * Gets defaultconfig
+   * 
+   * @returns AIAConfig - Return value description
+   */
   private getDefaultConfig(): AIAConfig {
     return { ...this.defaultConfig };
   }
 
+  /**
+   * Gets defaultprofile
+   * 
+   * @returns UserProfile - Return value description
+   */
   private getDefaultProfile(): UserProfile {
     return {
       name: 'default',
@@ -614,6 +716,11 @@ class ConfigurationManager {
     };
   }
 
+  /**
+   * Creates profile
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async createProfile(): Promise<void> {
     const answers = await inquirer.prompt([
       {
@@ -640,6 +747,11 @@ class ConfigurationManager {
     console.log(chalk.green(`✅ Profile '${answers.name}' created!`));
   }
 
+  /**
+   * Handles editProfile operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async editProfile(): Promise<void> {
     const profileNames = Object.keys(this.profiles);
 
@@ -659,6 +771,11 @@ class ConfigurationManager {
     );
   }
 
+  /**
+   * Handles deleteProfile operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async deleteProfile(): Promise<void> {
     const profileNames = Object.keys(this.profiles).filter(
       (name) => name !== 'default'
@@ -686,6 +803,9 @@ class ConfigurationManager {
     }
   }
 
+  /**
+   * Handles listProfiles operation
+   */
   private listProfiles(): void {
     console.log(chalk.blue('\n📋 Available Profiles:'));
     Object.values(this.profiles).forEach((profile) => {
@@ -694,6 +814,11 @@ class ConfigurationManager {
   }
 
   // Public getters
+  /**
+   * Gets config
+   * 
+   * @returns AIAConfig - Return value description
+   */
   public getConfig(): AIAConfig {
     return { ...this.config };
   }
@@ -702,18 +827,42 @@ class ConfigurationManager {
     return this.config[key];
   }
 
+  /**
+   * Gets profiles
+   * 
+   * @returns Record<string, UserProfile> - Return value description
+   */
   public getProfiles(): Record<string, UserProfile> {
     return { ...this.profiles };
   }
 
+  /**
+   * Gets userconfig
+   * 
+   * @returns Record<string, unknown> - Return value description
+   */
   public getUserConfig(): Record<string, unknown> {
     return { ...this.userConfig };
   }
 
+  /**
+   * Sets userconfig
+   * 
+   * @param key - Parameter description
+   * @param value - Parameter description
+   */
   public setUserConfig(key: string, value: unknown): void {
     this.userConfig[key] = value;
   }
 
+  /**
+   * Handles saveUserConfigValue operation
+   * 
+   * @param key - Parameter description
+   * @param value - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   public async saveUserConfigValue(key: string, value: unknown): Promise<void> {
     this.setUserConfig(key, value);
     await this.saveUserConfig();

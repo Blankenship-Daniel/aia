@@ -8,6 +8,11 @@ import {
   CircuitBreakerState,
 } from '../interfaces/IResilienceService';
 
+/**
+ * ResilienceService class
+ * 
+ * TODO: Add class description
+ */
 export class ResilienceService implements IResilienceService {
   private circuitBreakers = new Map<string, CircuitBreakerState>();
   private readonly circuitBreakerThreshold = 3;
@@ -142,6 +147,13 @@ export class ResilienceService implements IResilienceService {
     }
   }
 
+  /**
+   * Handles isCommandBlocked operation
+   * 
+   * @param commandName - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   isCommandBlocked(commandName: string): boolean {
     const state = this.circuitBreakers.get(commandName);
     if (!state) return false;
@@ -155,10 +167,22 @@ export class ResilienceService implements IResilienceService {
     return state.isBlocked;
   }
 
+  /**
+   * Gets circuitbreakerstate
+   * 
+   * @param commandName - Parameter description
+   * 
+   * @returns CircuitBreakerState | null - Return value description
+   */
   getCircuitBreakerState(commandName: string): CircuitBreakerState | null {
     return this.circuitBreakers.get(commandName) || null;
   }
 
+  /**
+   * Handles resetCircuitBreaker operation
+   * 
+   * @param commandName - Parameter description
+   */
   resetCircuitBreaker(commandName: string): void {
     const state = this.circuitBreakers.get(commandName);
     if (state) {
@@ -169,6 +193,11 @@ export class ResilienceService implements IResilienceService {
     }
   }
 
+  /**
+   * Gets failurestats
+   * 
+   * @returns Record<string, CircuitBreakerState> - Return value description
+   */
   getFailureStats(): Record<string, CircuitBreakerState> {
     const stats: Record<string, CircuitBreakerState> = {};
 

@@ -6,7 +6,10 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 // @ts-ignore - chalk doesn't have types available
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 
 interface TestConfig {
   timeout: number;
@@ -126,11 +129,19 @@ interface TestResults {
   summary: TestSummary;
 }
 
+/**
+ * TestRunner class
+ * 
+ * TODO: Add class description
+ */
 class TestRunner {
   private testSuites: Map<string, TestSuite>;
   private results: SuiteResult[];
   private config: TestConfig;
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     this.testSuites = new Map();
     this.results = [];
@@ -143,11 +154,24 @@ class TestRunner {
   }
 
   // Register test suite
+  /**
+   * Handles registerSuite operation
+   * 
+   * @param name - Parameter description
+   * @param suite - Parameter description
+   */
   registerSuite(name: string, suite: TestSuite): void {
     this.testSuites.set(name, suite);
   }
 
   // Run all tests
+  /**
+   * Handles runAllTests operation
+   * 
+   * @param options - Parameter description
+   * 
+   * @returns Promise<TestResults> - Return value description
+   */
   async runAllTests(options: Partial<TestConfig> = {}): Promise<TestResults> {
     const config = { ...this.config, ...options };
     const startTime = Date.now();
@@ -256,6 +280,14 @@ class TestRunner {
   }
 
   // Execute test function
+  /**
+   * Executes test
+   * 
+   * @param test - Parameter description
+   * @param testResult - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async executeTest(test: Test, testResult: TestResult): Promise<void> {
     const testContext = this.createTestContext(testResult);
 
@@ -273,6 +305,13 @@ class TestRunner {
   }
 
   // Create test context with utilities
+  /**
+   * Creates testcontext
+   * 
+   * @param testResult - Parameter description
+   * 
+   * @returns TestContext - Return value description
+   */
   private createTestContext(testResult: TestResult): TestContext {
     return {
       log: (message: string) => {
@@ -399,6 +438,11 @@ class TestRunner {
   }
 
   // Set up integration test environment
+  /**
+   * Sets upintegrationenvironment
+   * 
+   * @returns Promise<IntegrationTestEnvironment> - Return value description
+   */
   private async setupIntegrationEnvironment(): Promise<IntegrationTestEnvironment> {
     const tempDir = path.join(os.tmpdir(), `aia-integration-${Date.now()}`);
     await fs.ensureDir(tempDir);
@@ -499,6 +543,13 @@ class TestRunner {
     return { name: testName, stats, results };
   }
 
+  /**
+   * Calculates performancestats
+   * 
+   * @param results - Parameter description
+   * 
+   * @returns PerformanceStats - Return value description
+   */
   private calculatePerformanceStats(results: number[]): PerformanceStats {
     const sorted = [...results].sort((a, b) => a - b);
 
@@ -545,6 +596,11 @@ class TestRunner {
     return chunks;
   }
 
+  /**
+   * Handles printSummary operation
+   * 
+   * @param duration - Parameter description
+   */
   private printSummary(duration: number): void {
     const totalTests = this.results.reduce(
       (sum, suite) => sum + suite.tests.length,
@@ -585,6 +641,11 @@ class TestRunner {
     }
   }
 
+  /**
+   * Gets testresults
+   * 
+   * @returns TestResults - Return value description
+   */
   getTestResults(): TestResults {
     return {
       suites: this.results,

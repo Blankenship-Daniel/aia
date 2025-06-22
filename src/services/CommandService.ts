@@ -9,6 +9,11 @@ import { ICommandMemory } from '../interfaces/ICommandMemory';
 import { ContextInfo, CommandResult } from '../types/index';
 import { spawn } from 'child_process';
 
+/**
+ * CommandService class
+ * 
+ * TODO: Add class description
+ */
 export class CommandService implements ICommandService {
   private configService: IConfigurationService;
   private contextService: IContextService;

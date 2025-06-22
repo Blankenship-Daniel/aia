@@ -51,9 +51,17 @@ export interface SuccessCriterion {
   description: string;
 }
 
+/**
+ * PlanningTemplateSystem class
+ * 
+ * TODO: Add class description
+ */
 export class PlanningTemplateSystem {
   private templates: Map<TaskType, PlanningTemplate> = new Map();
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     this.initializeTemplates();
   }
@@ -95,6 +103,9 @@ export class PlanningTemplateSystem {
     return template?.validationSteps || [];
   }
 
+  /**
+   * Initializes templates
+   */
   private initializeTemplates(): void {
     // Documentation Template
     this.templates.set(TaskType.DOCUMENTATION, {
@@ -595,6 +606,9 @@ export class PlanningTemplateSystem {
     this.addSimpleTemplates();
   }
 
+  /**
+   * Handles addSimpleTemplates operation
+   */
   private addSimpleTemplates(): void {
     // File Operation Template
     this.templates.set(TaskType.FILE_OPERATION, {
@@ -800,6 +814,14 @@ export class PlanningTemplateSystem {
     return result;
   }
 
+  /**
+   * Handles interpolateCommand operation
+   * 
+   * @param command - Parameter description
+   * @param context - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private interpolateCommand(command: string, context: any): string {
     let result = command;
 

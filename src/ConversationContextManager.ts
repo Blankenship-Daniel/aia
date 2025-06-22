@@ -1,4 +1,7 @@
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import { ICoreferenceResolutionService } from './interfaces/ICoreferenceResolutionService.js';
 
 interface ConversationExchange {
@@ -310,11 +313,25 @@ export class ConversationContextManager {
   }
 
   // Helper methods
+  /**
+   * Gets recenthistory
+   * 
+   * @param sessionId - Parameter description
+   * 
+   * @returns ConversationExchange[] - Return value description
+   */
   private getRecentHistory(sessionId: string): ConversationExchange[] {
     const history = this.conversationHistory.get(sessionId) || [];
     return history.slice(-this.contextWindow);
   }
 
+  /**
+   * Gets currenttopic
+   * 
+   * @param sessionId - Parameter description
+   * 
+   * @returns Topic | null - Return value description
+   */
   private getCurrentTopic(sessionId: string): Topic | null {
     const topicStack = this.topicStack.get(sessionId) || [];
     return topicStack.length > 0 ? topicStack[topicStack.length - 1] : null;
@@ -338,6 +355,13 @@ export class ConversationContextManager {
     return context;
   }
 
+  /**
+   * Handles isMissingSubject operation
+   * 
+   * @param userInput - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private isMissingSubject(userInput: string): boolean {
     // Check if input starts with a verb without a clear subject
     const verbs = [
@@ -353,6 +377,13 @@ export class ConversationContextManager {
     return verbs.includes(firstWord);
   }
 
+  /**
+   * Handles isProjectRelated operation
+   * 
+   * @param userInput - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private isProjectRelated(userInput: string): boolean {
     const projectKeywords = [
       'file',
@@ -368,6 +399,13 @@ export class ConversationContextManager {
     );
   }
 
+  /**
+   * Handles hasProjectContext operation
+   * 
+   * @param userInput - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private hasProjectContext(userInput: string): boolean {
     const contextIndicators = ['in', 'within', 'for', 'inside'];
     return contextIndicators.some((indicator) =>
@@ -375,6 +413,11 @@ export class ConversationContextManager {
     );
   }
 
+  /**
+   * Gets currentprojectcontext
+   * 
+   * @returns Promise<string | null> - Return value description
+   */
   private async getCurrentProjectContext(): Promise<string | null> {
     try {
       // Get current project information
@@ -387,6 +430,13 @@ export class ConversationContextManager {
     }
   }
 
+  /**
+   * Handles isContinuation operation
+   * 
+   * @param userInput - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private isContinuation(userInput: string): boolean {
     const continuationWords = [
       'also',
@@ -425,6 +475,13 @@ export class ConversationContextManager {
     return null;
   }
 
+  /**
+   * Calculates enrichmentconfidence
+   * 
+   * @param enrichments - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private calculateEnrichmentConfidence(enrichments: string[]): number {
     if (enrichments.length === 0) return 1.0;
 
@@ -435,6 +492,13 @@ export class ConversationContextManager {
     return baseConfidence + enrichmentBonus;
   }
 
+  /**
+   * Handles extractKeywords operation
+   * 
+   * @param text - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private extractKeywords(text: string): string[] {
     // Simple keyword extraction
     const words = text
@@ -474,6 +538,12 @@ export class ConversationContextManager {
     return intersection.size / Math.max(set1.size, set2.size);
   }
 
+  /**
+   * Handles updateTopicTracking operation
+   * 
+   * @param sessionId - Parameter description
+   * @param userInput - Parameter description
+   */
   private updateTopicTracking(sessionId: string, userInput: string): void {
     const keywords = this.extractKeywords(userInput);
     const currentTopic = this.getCurrentTopic(sessionId);
@@ -511,6 +581,13 @@ export class ConversationContextManager {
     }
   }
 
+  /**
+   * Handles extractSubject operation
+   * 
+   * @param userInput - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private extractSubject(userInput: string): string {
     // Simple subject extraction
     const words = userInput.split(' ');
@@ -533,11 +610,25 @@ export class ConversationContextManager {
     return words[0] || 'topic';
   }
 
+  /**
+   * Handles hasAmbiguousReferences operation
+   * 
+   * @param input - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private hasAmbiguousReferences(input: string): boolean {
     const ambiguousTerms = ['it', 'this', 'that', 'they', 'them'];
     return ambiguousTerms.some((term) => input.toLowerCase().includes(term));
   }
 
+  /**
+   * Handles isTopicSpecific operation
+   * 
+   * @param input - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private isTopicSpecific(input: string): boolean {
     const specificTerms = ['specific', 'particular', 'certain', 'exact'];
     return specificTerms.some((term) => input.toLowerCase().includes(term));

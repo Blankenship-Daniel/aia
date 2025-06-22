@@ -12,7 +12,10 @@
  * - Real-time error prevention suggestions
  */
 
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import {
   IErrorDiagnosticService,
   ExecutionError,
@@ -34,6 +37,11 @@ import {
 } from '../interfaces/IErrorDiagnosticService.js';
 import { AIModel } from '../types/index.js';
 
+/**
+ * AIErrorDiagnosticService class
+ * 
+ * TODO: Add class description
+ */
 export class AIErrorDiagnosticService implements IErrorDiagnosticService {
   private aiService: any;
   private errorMemory: Map<string, ErrorCase> = new Map();
@@ -238,6 +246,11 @@ Respond with JSON:
 }
 `;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param aiService - Parameter description
+   */
   constructor(aiService: any) {
     this.aiService = aiService;
   }
@@ -458,6 +471,13 @@ Respond with JSON:
       );
   }
 
+  /**
+   * Builds recoverystrategyprompt
+   * 
+   * @param diagnosis - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private buildRecoveryStrategyPrompt(diagnosis: ErrorDiagnosis): string {
     return this.RECOVERY_STRATEGY_PROMPT.replace(
       '{diagnosis}',
@@ -495,6 +515,13 @@ Respond with JSON:
       .replace('{systemState}', JSON.stringify(context.systemInfo));
   }
 
+  /**
+   * Parses erroranalysisresponse
+   * 
+   * @param content - Parameter description
+   * 
+   * @returns any - Return value description
+   */
   private parseErrorAnalysisResponse(content: string): any {
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -539,6 +566,13 @@ Respond with JSON:
     }
   }
 
+  /**
+   * Handles mapCategory operation
+   * 
+   * @param category - Parameter description
+   * 
+   * @returns ErrorCategory - Return value description
+   */
   private mapCategory(category: string): ErrorCategory {
     const validCategories = [
       'system',
@@ -562,6 +596,13 @@ Respond with JSON:
     };
   }
 
+  /**
+   * Handles mapSeverity operation
+   * 
+   * @param severity - Parameter description
+   * 
+   * @returns ErrorSeverity - Return value description
+   */
   private mapSeverity(severity: string): ErrorSeverity {
     const validLevels = ['low', 'medium', 'high', 'critical'];
     const level = validLevels.includes(severity?.toLowerCase())
@@ -576,6 +617,13 @@ Respond with JSON:
     };
   }
 
+  /**
+   * Parses recoverystrategiesresponse
+   * 
+   * @param content - Parameter description
+   * 
+   * @returns RecoveryStrategy[] - Return value description
+   */
   private parseRecoveryStrategiesResponse(content: string): RecoveryStrategy[] {
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -592,6 +640,13 @@ Respond with JSON:
     }
   }
 
+  /**
+   * Parses patternanalysisresponse
+   * 
+   * @param content - Parameter description
+   * 
+   * @returns  - Return value description
+   */
   private parsePatternAnalysisResponse(content: string): {
     patterns: ErrorPattern[];
     insights: LearningInsights;
@@ -613,6 +668,13 @@ Respond with JSON:
     }
   }
 
+  /**
+   * Parses preventionresponse
+   * 
+   * @param content - Parameter description
+   * 
+   * @returns PreventionSuggestion[] - Return value description
+   */
   private parsePreventionResponse(content: string): PreventionSuggestion[] {
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -676,6 +738,13 @@ Respond with JSON:
     return `case_${timestamp}_${errorHash}`;
   }
 
+  /**
+   * Handles simpleHash operation
+   * 
+   * @param str - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private simpleHash(str: string): string {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
@@ -686,6 +755,13 @@ Respond with JSON:
     return Math.abs(hash).toString(36);
   }
 
+  /**
+   * Gets recentdiagnoses
+   * 
+   * @param timeframe - Parameter description
+   * 
+   * @returns ErrorDiagnosis[] - Return value description
+   */
   private getRecentDiagnoses(timeframe: number): ErrorDiagnosis[] {
     const cutoffDate = new Date(Date.now() - timeframe * 24 * 60 * 60 * 1000);
     return this.diagnosticHistory.filter(
@@ -693,6 +769,13 @@ Respond with JSON:
     );
   }
 
+  /**
+   * Gets recenterrors
+   * 
+   * @param days - Parameter description
+   * 
+   * @returns ExecutionError[] - Return value description
+   */
   private getRecentErrors(days: number): ExecutionError[] {
     const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
     return Array.from(this.errorMemory.values())
@@ -806,6 +889,11 @@ Respond with JSON:
     ];
   }
 
+  /**
+   * Gets defaultanalysis
+   * 
+   * @returns DiagnosisAnalysis - Return value description
+   */
   private getDefaultAnalysis(): DiagnosisAnalysis {
     return {
       errorClassification: {
@@ -834,6 +922,11 @@ Respond with JSON:
     };
   }
 
+  /**
+   * Gets defaultinsights
+   * 
+   * @returns LearningInsights - Return value description
+   */
   private getDefaultInsights(): LearningInsights {
     return {
       patternRecognition: [],

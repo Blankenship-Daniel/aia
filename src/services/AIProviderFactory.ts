@@ -18,6 +18,11 @@ export interface ProviderConfig {
   model: string;
 }
 
+/**
+ * AIProviderFactory class
+ * 
+ * TODO: Add class description
+ */
 export class AIProviderFactory {
   /**
    * Create an AI provider instance based on configuration

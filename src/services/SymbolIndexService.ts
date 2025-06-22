@@ -348,6 +348,11 @@ export class SymbolIndexService implements ISymbolIndex {
 
   // Private helper methods
 
+  /**
+   * Creates emptylookuptable
+   * 
+   * @returns SymbolLookupTable - Return value description
+   */
   private createEmptyLookupTable(): SymbolLookupTable {
     return {
       symbols: {},
@@ -652,6 +657,9 @@ export class SymbolIndexService implements ISymbolIndex {
     return crypto.createHash('md5').update(content).digest('hex');
   }
 
+  /**
+   * Builds relationships
+   */
   private buildRelationships(): void {
     console.log('🔗 Building symbol relationships...');
 
@@ -689,6 +697,9 @@ export class SymbolIndexService implements ISymbolIndex {
     }
   }
 
+  /**
+   * Builds patterns
+   */
   private buildPatterns(): void {
     console.log('🔍 Building architectural patterns...');
 
@@ -757,6 +768,11 @@ export class SymbolIndexService implements ISymbolIndex {
     return Math.min(weight, 1.0);
   }
 
+  /**
+   * Handles updateMetadata operation
+   * 
+   * @param startTime - Parameter description
+   */
   private updateMetadata(startTime: number): void {
     const endTime = Date.now();
     this.lookupTable.metadata.lastUpdated = new Date().toISOString();

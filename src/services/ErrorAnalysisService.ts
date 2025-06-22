@@ -4,7 +4,10 @@
  * Now powered by AI through the IErrorDiagnosticService
  */
 import { ExecutionStep } from '../types/index';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import {
   IErrorDiagnosticService,
   ErrorDiagnosis,
@@ -30,7 +33,17 @@ export interface ErrorAnalysis {
   relatedDocs?: string[];
 }
 
+/**
+ * ErrorAnalysisService class
+ * 
+ * TODO: Add class description
+ */
 export class ErrorAnalysisService {
+  /**
+   * Creates an instance of the class
+   * 
+   * @param private errorDiagnosticService - Parameter description
+   */
   constructor(private errorDiagnosticService: IErrorDiagnosticService) {}
 
   /**
@@ -122,6 +135,13 @@ export class ErrorAnalysisService {
     };
   }
 
+  /**
+   * Handles extractPossibleCauses operation
+   * 
+   * @param diagnosis - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private extractPossibleCauses(diagnosis: ErrorDiagnosis): string[] {
     const causes: string[] = [];
     causes.push(diagnosis.analysis.causality.directCause);
@@ -129,18 +149,39 @@ export class ErrorAnalysisService {
     return causes.filter(Boolean);
   }
 
+  /**
+   * Handles extractSuggestedFixes operation
+   * 
+   * @param diagnosis - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private extractSuggestedFixes(diagnosis: ErrorDiagnosis): string[] {
     return diagnosis.analysis.recommendations
       .filter((r) => r.type === 'immediate_action')
       .map((r) => r.description);
   }
 
+  /**
+   * Handles extractRecoveryStrategies operation
+   * 
+   * @param diagnosis - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private extractRecoveryStrategies(diagnosis: ErrorDiagnosis): string[] {
     return diagnosis.analysis.recommendations
       .filter((r) => r.type === 'investigation' || r.type === 'improvement')
       .map((r) => r.description);
   }
 
+  /**
+   * Handles extractRelatedDocs operation
+   * 
+   * @param diagnosis - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private extractRelatedDocs(diagnosis: ErrorDiagnosis): string[] {
     // Extract any URLs or documentation references from similar cases
     return diagnosis.similarCases
@@ -201,6 +242,13 @@ export class ErrorAnalysisService {
     };
   }
 
+  /**
+   * Formats erroranalysis
+   * 
+   * @param analysis - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   formatErrorAnalysis(analysis: ErrorAnalysis): string {
     const severityColor = {
       low: chalk.green,
@@ -276,6 +324,13 @@ export class ErrorAnalysisService {
     return output;
   }
 
+  /**
+   * Generates recoveryplan
+   * 
+   * @param analysis - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   generateRecoveryPlan(analysis: ErrorAnalysis): string[] {
     const plan: string[] = [];
 

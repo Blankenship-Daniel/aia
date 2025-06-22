@@ -12,7 +12,10 @@ import { ICommandService } from '../interfaces/ICommandService.js';
 import { IConfigurationService } from '../interfaces/IConfigurationService.js';
 import { ICommandRegistry } from '../interfaces/ICommandRegistry.js';
 import * as readline from 'readline';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
@@ -23,6 +26,11 @@ export interface InteractiveCLIOptions {
   maxSuggestions: number;
 }
 
+/**
+ * InteractiveCLIService class
+ * 
+ * TODO: Add class description
+ */
 export class InteractiveCLIService {
   private rl: readline.Interface | null = null;
   private isInteractive: boolean = false;
@@ -522,6 +530,11 @@ export class InteractiveCLIService {
   }
 
   // Helper methods
+  /**
+   * Gets recentcommands
+   * 
+   * @returns Promise<string[]> - Return value description
+   */
   private async getRecentCommands(): Promise<string[]> {
     try {
       // This would typically come from command history
@@ -564,6 +577,13 @@ export class InteractiveCLIService {
     }
   }
 
+  /**
+   * Gets gitstatus
+   * 
+   * @param workingDirectory - Parameter description
+   * 
+   * @returns Promise<any> - Return value description
+   */
   private async getGitStatus(workingDirectory: string): Promise<any> {
     try {
       const { execSync } = require('child_process');
@@ -587,6 +607,13 @@ export class InteractiveCLIService {
     }
   }
 
+  /**
+   * Gets packageinfo
+   * 
+   * @param workingDirectory - Parameter description
+   * 
+   * @returns Promise<any> - Return value description
+   */
   private async getPackageInfo(workingDirectory: string): Promise<any> {
     try {
       const packageJsonPath = path.join(workingDirectory, 'package.json');
@@ -610,6 +637,13 @@ export class InteractiveCLIService {
     }
   }
 
+  /**
+   * Gets prioritydisplay
+   * 
+   * @param priority - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private getPriorityDisplay(priority: string): string {
     switch (priority) {
       case 'high':
@@ -623,6 +657,14 @@ export class InteractiveCLIService {
     }
   }
 
+  /**
+   * Handles levenshteinDistance operation
+   * 
+   * @param a - Parameter description
+   * @param b - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private levenshteinDistance(a: string, b: string): number {
     const matrix = [];
 

@@ -34,7 +34,10 @@
  * const result = await engine.executeAgenticQuery('Optimize build process');
  */
 
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import inquirer from 'inquirer';
 import AgenticSearchEngine from './AgenticSearchEngine.js';
 import NLPEngine from './NLPEngine.js';
@@ -161,6 +164,12 @@ export class AgenticReasoningEngine {
   private circuitBreakerThreshold: number;
   private circuitBreakerResetTimeMs: number;
 
+  /**
+   * Creates an instance of the class
+   *
+   * @param aia - Parameter description
+   * @param conversationManager? - Parameter description
+   */
   constructor(aia: any, conversationManager?: ConversationContextManager) {
     this.aia = aia;
     this.maxIterations = 5;
@@ -588,6 +597,14 @@ export class AgenticReasoningEngine {
     return executionResult;
   }
 
+  /**
+   * Executes step
+   *
+   * @param step - Parameter description
+   * @param context - Parameter description
+   *
+   * @returns Promise<any> - Return value description
+   */
   async executeStep(step: any, context: AgenticExecutionContext): Promise<any> {
     const stepPrompt = this.buildStepPrompt(step, context);
 
@@ -764,6 +781,13 @@ export class AgenticReasoningEngine {
     }
   }
 
+  /**
+   * Builds planprompt
+   *
+   * @param context - Parameter description
+   *
+   * @returns string - Return value description
+   */
   buildPlanPrompt(context: AgenticExecutionContext): string {
     const { goal, enhancedGoal, nlpAnalysis, iterations } = context;
 
@@ -831,6 +855,14 @@ Focus on:
     return prompt;
   }
 
+  /**
+   * Builds stepprompt
+   *
+   * @param step - Parameter description
+   * @param context - Parameter description
+   *
+   * @returns string - Return value description
+   */
   buildStepPrompt(step: any, context: AgenticExecutionContext): string {
     return `Execute the following step as part of achieving the goal: "${
       context.goal
@@ -888,6 +920,14 @@ Please provide evaluation in this JSON format:
 }`;
   }
 
+  /**
+   * Builds recoveryprompt
+   *
+   * @param error - Parameter description
+   * @param context - Parameter description
+   *
+   * @returns string - Return value description
+   */
   buildRecoveryPrompt(error: Error, context: AgenticExecutionContext): string {
     return `Analyze the following error and determine if recovery is possible for goal: "${
       context.goal
@@ -915,6 +955,13 @@ Provide recovery analysis in this JSON format:
 }`;
   }
 
+  /**
+   * Handles promptForExecution operation
+   *
+   * @param command - Parameter description
+   *
+   * @returns Promise<boolean> - Return value description
+   */
   async promptForExecution(command: string): Promise<boolean> {
     const answer = await inquirer.prompt([
       {
@@ -927,6 +974,11 @@ Provide recovery analysis in this JSON format:
     return answer.execute;
   }
 
+  /**
+   * Handles displayExecutionSummary operation
+   *
+   * @param nlpAnalysis - Parameter description
+   */
   displayExecutionSummary(nlpAnalysis: NLPAnalysis): void {
     console.log(chalk.blue('\n📊 Execution Summary:'));
     console.log(chalk.gray('─'.repeat(60)));
@@ -1006,6 +1058,13 @@ Provide recovery analysis in this JSON format:
     };
   }
 
+  /**
+   * Handles extractFallbackCommands operation
+   *
+   * @param goal - Parameter description
+   *
+   * @returns string[] - Return value description
+   */
   private extractFallbackCommands(goal: string): string[] {
     const commands: string[] = [];
     const lowerGoal = goal.toLowerCase();

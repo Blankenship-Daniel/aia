@@ -1,4 +1,7 @@
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 
 interface IntentEmbedding {
   keywords: string[];
@@ -25,12 +28,18 @@ class SemanticAnalyzer {
   private intentEmbeddings: Map<string, IntentEmbedding>;
   private entityPatterns: Map<string, RegExp>;
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     this.intentEmbeddings = new Map();
     this.entityPatterns = new Map();
     this.initializeSemanticModels();
   }
 
+  /**
+   * Initializes semanticmodels
+   */
   private initializeSemanticModels(): void {
     // Pre-computed semantic vectors for common intents (simplified representation)
     this.intentEmbeddings.set('CREATE', {

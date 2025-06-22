@@ -77,6 +77,11 @@ interface CodebaseSummary {
   aiContext: AIContext;
 }
 
+/**
+ * CodebaseSummarizer class
+ * 
+ * TODO: Add class description
+ */
 class CodebaseSummarizer {
   async generateAISummary(
     index: CodebaseIndex
@@ -95,6 +100,13 @@ class CodebaseSummarizer {
     return { summary, rawSummary };
   }
 
+  /**
+   * Generates overview
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns ProjectOverview - Return value description
+   */
   private generateOverview(index: CodebaseIndex): ProjectOverview {
     return {
       projectType: this.detectProjectType(index),
@@ -109,6 +121,13 @@ class CodebaseSummarizer {
     };
   }
 
+  /**
+   * Handles identifyKeyComponents operation
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns KeyComponent[] - Return value description
+   */
   private identifyKeyComponents(index: CodebaseIndex): KeyComponent[] {
     const components: KeyComponent[] = [];
 
@@ -133,6 +152,13 @@ class CodebaseSummarizer {
     return components;
   }
 
+  /**
+   * Generates aicontext
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns AIContext - Return value description
+   */
   private generateAIContext(index: CodebaseIndex): AIContext {
     return {
       suggestedStartingPoints: this.suggestStartingPoints(index),
@@ -142,6 +168,13 @@ class CodebaseSummarizer {
     };
   }
 
+  /**
+   * Handles detectProjectType operation
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private detectProjectType(index: CodebaseIndex): string {
     const files = Array.from(index.files.keys());
 
@@ -215,6 +248,13 @@ class CodebaseSummarizer {
     return 'Unknown Project Type';
   }
 
+  /**
+   * Gets primarylanguage
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private getPrimaryLanguage(index: CodebaseIndex): string {
     const languages = index.metadata?.languages || {};
     const entries = Object.entries(languages);
@@ -242,6 +282,13 @@ class CodebaseSummarizer {
     return 'Unknown';
   }
 
+  /**
+   * Handles summarizeArchitecture operation
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private summarizeArchitecture(index: CodebaseIndex): string {
     const files = Array.from(index.files?.values() || []);
 
@@ -282,6 +329,13 @@ class CodebaseSummarizer {
     return 'Custom Architecture';
   }
 
+  /**
+   * Handles inferProjectPurpose operation
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private inferProjectPurpose(index: CodebaseIndex): string {
     const files = Array.from(index.files.keys());
 
@@ -331,6 +385,13 @@ class CodebaseSummarizer {
     }
   }
 
+  /**
+   * Gets keydependencies
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns Record<string, string> - Return value description
+   */
   private getKeyDependencies(index: CodebaseIndex): Record<string, string> {
     const files = Array.from(index.files.keys());
 
@@ -349,6 +410,13 @@ class CodebaseSummarizer {
     return {};
   }
 
+  /**
+   * Handles findEntryPoints operation
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns EntryPoint[] - Return value description
+   */
   private findEntryPoints(index: CodebaseIndex): EntryPoint[] {
     const entryPoints: EntryPoint[] = [];
     const files = Array.from(index.files.keys());
@@ -396,6 +464,13 @@ class CodebaseSummarizer {
     return entryPoints;
   }
 
+  /**
+   * Analyzes dataflow
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns DataFlowInfo - Return value description
+   */
   private analyzeDataFlow(index: CodebaseIndex): DataFlowInfo {
     const entryPoints = this.findEntryPoints(index);
     const dataFlow: string[] = [];
@@ -428,6 +503,13 @@ class CodebaseSummarizer {
     };
   }
 
+  /**
+   * Handles summarizeDependencies operation
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns DependencyInfo - Return value description
+   */
   private summarizeDependencies(index: CodebaseIndex): DependencyInfo {
     const external: Record<string, string> = {};
     const internal: string[] = [];
@@ -468,6 +550,13 @@ class CodebaseSummarizer {
     };
   }
 
+  /**
+   * Handles suggestStartingPoints operation
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private suggestStartingPoints(index: CodebaseIndex): string[] {
     const suggestions: string[] = [];
     const files = Array.from(index.files.keys());
@@ -497,6 +586,13 @@ class CodebaseSummarizer {
     return [...new Set(suggestions)]; // Remove duplicates
   }
 
+  /**
+   * Gets keydirectories
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private getKeyDirectories(index: CodebaseIndex): string[] {
     const dirs = new Set<string>();
     const files = Array.from(index.files.keys());
@@ -511,6 +607,13 @@ class CodebaseSummarizer {
     return Array.from(dirs).sort();
   }
 
+  /**
+   * Gets importantfiles
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private getImportantFiles(index: CodebaseIndex): string[] {
     const important: string[] = [];
     const files = Array.from(index.files.keys());
@@ -542,6 +645,13 @@ class CodebaseSummarizer {
     return [...new Set(important)];
   }
 
+  /**
+   * Generates quickreference
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns Record<string, string> - Return value description
+   */
   private generateQuickReference(index: CodebaseIndex): Record<string, string> {
     const reference: Record<string, string> = {};
     const files = Array.from(index.files.entries());
@@ -562,6 +672,13 @@ class CodebaseSummarizer {
     return reference;
   }
 
+  /**
+   * Handles identifyCoreLogicFiles operation
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private identifyCoreLogicFiles(index: CodebaseIndex): string[] {
     const files = Array.from(index.files.keys());
 
@@ -578,6 +695,13 @@ class CodebaseSummarizer {
     });
   }
 
+  /**
+   * Handles findConfigurationFiles operation
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private findConfigurationFiles(index: CodebaseIndex): string[] {
     const files = Array.from(index.files.keys());
 
@@ -595,6 +719,13 @@ class CodebaseSummarizer {
     });
   }
 
+  /**
+   * Handles findTestFiles operation
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private findTestFiles(index: CodebaseIndex): string[] {
     const files = Array.from(index.files.keys());
 
@@ -612,6 +743,13 @@ class CodebaseSummarizer {
     });
   }
 
+  /**
+   * Handles findCoreModules operation
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns KeyComponent[] - Return value description
+   */
   private findCoreModules(index: CodebaseIndex): KeyComponent[] {
     const components: KeyComponent[] = [];
     const files = Array.from(index.files.entries());
@@ -667,6 +805,13 @@ class CodebaseSummarizer {
     return searchIndex;
   }
 
+  /**
+   * Formats forai
+   * 
+   * @param summary - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private formatForAI(summary: CodebaseSummary): string {
     let formatted = '';
 

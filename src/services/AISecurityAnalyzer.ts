@@ -24,6 +24,11 @@ import {
 } from '../interfaces/IAISecurityAnalyzer';
 import { ContextInfo } from '../types/index';
 
+/**
+ * AISecurityAnalyzer class
+ * 
+ * TODO: Add class description
+ */
 export class AISecurityAnalyzer implements IAISecurityAnalyzer {
   private readonly ANALYSIS_TIMEOUT_MS = 5000; // 5 second timeout
   private readonly CONFIDENCE_THRESHOLD = 0.7; // Minimum confidence for AI analysis
@@ -168,6 +173,11 @@ export class AISecurityAnalyzer implements IAISecurityAnalyzer {
     }
   }
 
+  /**
+   * Handles isAvailable operation
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   async isAvailable(): Promise<boolean> {
     try {
       // Test with a simple, safe command
@@ -273,6 +283,13 @@ Respond with JSON array of strings:
 `;
   }
 
+  /**
+   * Parses securityresponse
+   * 
+   * @param aiResponse - Parameter description
+   * 
+   * @returns AISecurityAnalysis - Return value description
+   */
   private parseSecurityResponse(aiResponse: any): AISecurityAnalysis {
     try {
       let content = aiResponse.content || aiResponse;
@@ -329,6 +346,13 @@ Respond with JSON array of strings:
     }
   }
 
+  /**
+   * Parses alternativesresponse
+   * 
+   * @param aiResponse - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private parseAlternativesResponse(aiResponse: any): string[] {
     try {
       let content = aiResponse.content || aiResponse;
@@ -355,6 +379,14 @@ Respond with JSON array of strings:
     }
   }
 
+  /**
+   * Generates cachekey
+   * 
+   * @param command - Parameter description
+   * @param context - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private generateCacheKey(command: string, context: SecurityContext): string {
     const contextStr = JSON.stringify({
       wd: context.workingDirectory,
@@ -365,6 +397,13 @@ Respond with JSON array of strings:
     return `${command}:${contextStr}`;
   }
 
+  /**
+   * Gets fromcache
+   * 
+   * @param key - Parameter description
+   * 
+   * @returns AISecurityAnalysis | null - Return value description
+   */
   private getFromCache(key: string): AISecurityAnalysis | null {
     const cached = this.analysisCache.get(key);
     if (cached && Date.now() - cached.timestamp < this.CACHE_TTL_MS) {
@@ -376,6 +415,12 @@ Respond with JSON array of strings:
     return null;
   }
 
+  /**
+   * Handles cacheAnalysis operation
+   * 
+   * @param key - Parameter description
+   * @param analysis - Parameter description
+   */
   private cacheAnalysis(key: string, analysis: AISecurityAnalysis): void {
     this.analysisCache.set(key, {
       analysis,
@@ -393,6 +438,11 @@ Respond with JSON array of strings:
     }
   }
 
+  /**
+   * Handles clearRelatedCache operation
+   * 
+   * @param command - Parameter description
+   */
   private clearRelatedCache(command: string): void {
     for (const key of this.analysisCache.keys()) {
       if (key.startsWith(command + ':')) {

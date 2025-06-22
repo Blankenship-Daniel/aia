@@ -14,6 +14,11 @@ import {
   CacheStatistics,
 } from '../interfaces/ICachingService.js';
 
+/**
+ * MemoryCacheService class
+ * 
+ * TODO: Add class description
+ */
 export class MemoryCacheService implements ICachingService {
   private cache = new Map<string, CacheEntry<any>>();
   private statistics = {
@@ -106,6 +111,13 @@ export class MemoryCacheService implements ICachingService {
     }
   }
 
+  /**
+   * Handles has operation
+   * 
+   * @param key - Parameter description
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   async has(key: string): Promise<boolean> {
     const entry = this.cache.get(key);
 
@@ -121,6 +133,13 @@ export class MemoryCacheService implements ICachingService {
     return true;
   }
 
+  /**
+   * Handles delete operation
+   * 
+   * @param key - Parameter description
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   async delete(key: string): Promise<boolean> {
     const deleted = this.cache.delete(key);
     if (deleted) {
@@ -129,6 +148,13 @@ export class MemoryCacheService implements ICachingService {
     return deleted;
   }
 
+  /**
+   * Handles deletePattern operation
+   * 
+   * @param pattern - Parameter description
+   * 
+   * @returns Promise<number> - Return value description
+   */
   async deletePattern(pattern: string): Promise<number> {
     const regex = new RegExp(pattern.replace(/\*/g, '.*'));
     let deletedCount = 0;
@@ -152,11 +178,21 @@ export class MemoryCacheService implements ICachingService {
     return deletedCount;
   }
 
+  /**
+   * Handles clear operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async clear(): Promise<void> {
     this.cache.clear();
     this.statistics.memoryUsage = 0;
   }
 
+  /**
+   * Gets statistics
+   * 
+   * @returns Promise<CacheStatistics> - Return value description
+   */
   async getStatistics(): Promise<CacheStatistics> {
     const totalRequests = this.statistics.totalRequests || 1; // Avoid division by zero
     const entries = Array.from(this.cache.values());
@@ -177,16 +213,34 @@ export class MemoryCacheService implements ICachingService {
     };
   }
 
+  /**
+   * Handles keys operation
+   * 
+   * @returns Promise<string[]> - Return value description
+   */
   async keys(): Promise<string[]> {
     // Clean up expired keys before returning
     await this.cleanup();
     return Array.from(this.cache.keys());
   }
 
+  /**
+   * Handles size operation
+   * 
+   * @returns Promise<number> - Return value description
+   */
   async size(): Promise<number> {
     return this.statistics.memoryUsage;
   }
 
+  /**
+   * Handles refresh operation
+   * 
+   * @param key - Parameter description
+   * @param ttl? - Parameter description
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   async refresh(key: string, ttl?: number): Promise<boolean> {
     const entry = this.cache.get(key);
 
@@ -234,6 +288,11 @@ export class MemoryCacheService implements ICachingService {
     return value;
   }
 
+  /**
+   * Handles startCleanup operation
+   * 
+   * @param intervalMs - Parameter description
+   */
   startCleanup(intervalMs: number = 60000): void {
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval);
@@ -244,6 +303,9 @@ export class MemoryCacheService implements ICachingService {
     }, intervalMs);
   }
 
+  /**
+   * Handles stopCleanup operation
+   */
   stopCleanup(): void {
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval);
@@ -251,6 +313,11 @@ export class MemoryCacheService implements ICachingService {
     }
   }
 
+  /**
+   * Cleans up the operation
+   * 
+   * @returns Promise<number> - Return value description
+   */
   async cleanup(): Promise<number> {
     let removedCount = 0;
     const now = Date.now();
@@ -278,6 +345,11 @@ export class MemoryCacheService implements ICachingService {
     return now - entry.timestamp > entry.ttl;
   }
 
+  /**
+   * Handles evictOldest operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async evictOldest(): Promise<void> {
     // In a Map, the first entry is the oldest (insertion order)
     const firstEntry = Array.from(this.cache.entries())[0];
@@ -286,6 +358,9 @@ export class MemoryCacheService implements ICachingService {
     }
   }
 
+  /**
+   * Handles updateMemoryUsage operation
+   */
   private updateMemoryUsage(): void {
     // Rough estimate of memory usage
     let totalSize = 0;

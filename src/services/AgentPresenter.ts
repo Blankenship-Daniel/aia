@@ -28,10 +28,18 @@ import {
   ISpinnerService,
   SpinnerInstance,
 } from '../interfaces/SpinnerService.interface';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import inquirer from 'inquirer';
 import os from 'os';
 
+/**
+ * AgentPresenter class
+ * 
+ * TODO: Add class description
+ */
 export class AgentPresenter implements IAgentPresenter {
   private activeSpinner: SpinnerInstance | null = null;
   private startTime: number = Date.now();
@@ -70,6 +78,11 @@ export class AgentPresenter implements IAgentPresenter {
     this.spinnerService = spinnerService;
   }
 
+  /**
+   * Handles showPlanningPhase operation
+   * 
+   * @param goal - Parameter description
+   */
   showPlanningPhase(goal: string): void {
     // Clean, professional output
     console.log(chalk.blue('🤖 AIA Agent'));
@@ -114,6 +127,11 @@ export class AgentPresenter implements IAgentPresenter {
     );
   }
 
+  /**
+   * Handles displayExecutionPlan operation
+   * 
+   * @param plan - Parameter description
+   */
   displayExecutionPlan(plan: ExecutionStep[]): void {
     // Clean, concise display
     console.log(chalk.green(`✓ Plan ready (${plan.length} steps)`));
@@ -138,6 +156,13 @@ export class AgentPresenter implements IAgentPresenter {
     }
   }
 
+  /**
+   * Handles showExecutionStep operation
+   * 
+   * @param step - Parameter description
+   * 
+   * @returns  - Return value description
+   */
   showExecutionStep(step: ExecutionStep): {
     succeed: (message?: string) => void;
     fail: (message?: string) => void;
@@ -308,10 +333,21 @@ export class AgentPresenter implements IAgentPresenter {
     };
   }
 
+  /**
+   * Handles showIteration operation
+   * 
+   * @param current - Parameter description
+   * @param max - Parameter description
+   */
   showIteration(current: number, max: number): void {
     console.log(chalk.yellow(`\n🔄 Iteration ${current}/${max}`));
   }
 
+  /**
+   * Handles displayStepOutput operation
+   * 
+   * @param output - Parameter description
+   */
   displayStepOutput(output: string): void {
     if (output && output.trim()) {
       // Smart disclosure: always show key results, and full output for errors or complex data
@@ -337,6 +373,13 @@ export class AgentPresenter implements IAgentPresenter {
     }
   }
 
+  /**
+   * Handles displayExecutionSummary operation
+   * 
+   * @param execution - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async displayExecutionSummary(execution: AgenticExecution): Promise<void> {
     // Always use simplified summary for analysis tasks
     if (this.isSimpleAnalysisExecution(execution)) {
@@ -421,6 +464,13 @@ export class AgentPresenter implements IAgentPresenter {
     }
   }
 
+  /**
+   * Handles displayError operation
+   * 
+   * @param error - Parameter description
+   * @param context? - Parameter description
+   * @param unknown> - Parameter description
+   */
   displayError(error: string, context?: Record<string, unknown>): void {
     console.log(chalk.red(`❌ Error: ${error}`));
     if (context && Object.keys(context).length > 0) {
@@ -431,10 +481,20 @@ export class AgentPresenter implements IAgentPresenter {
     }
   }
 
+  /**
+   * Handles displayWarning operation
+   * 
+   * @param message - Parameter description
+   */
   displayWarning(message: string): void {
     console.log(chalk.yellow(`⚠️  Warning: ${message}`));
   }
 
+  /**
+   * Handles displaySuccess operation
+   * 
+   * @param message - Parameter description
+   */
   displaySuccess(message: string): void {
     console.log(chalk.green(`✅ ${message}`));
   }
@@ -454,6 +514,13 @@ export class AgentPresenter implements IAgentPresenter {
     return confirmed;
   }
 
+  /**
+   * Formats executionsummary
+   * 
+   * @param execution - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   formatExecutionSummary(execution: AgenticExecution): string {
     if (this.isSimpleAnalysisExecution(execution)) {
       const result = this.extractAnalysisAnswer(execution);
@@ -539,6 +606,11 @@ export class AgentPresenter implements IAgentPresenter {
     }
   }
 
+  /**
+   * Handles displayRetryAttempt operation
+   * 
+   * @param retryInfo - Parameter description
+   */
   displayRetryAttempt(retryInfo: RetryAttemptInfo): void {
     console.log(chalk.yellow('\n🔄 Retry Attempt'));
     console.log(chalk.gray('━'.repeat(40)));
@@ -571,6 +643,12 @@ export class AgentPresenter implements IAgentPresenter {
     }
   }
 
+  /**
+   * Handles displayTimeoutWarning operation
+   * 
+   * @param remainingSeconds - Parameter description
+   * @param operation - Parameter description
+   */
   displayTimeoutWarning(remainingSeconds: number, operation: string): void {
     if (remainingSeconds <= 30) {
       const urgency = remainingSeconds <= 10 ? chalk.red : chalk.yellow;
@@ -677,6 +755,12 @@ export class AgentPresenter implements IAgentPresenter {
     console.log(chalk.gray('━'.repeat(60)));
   }
 
+  /**
+   * Handles displayResilienceStatus operation
+   * 
+   * @param stats - Parameter description
+   * @param CircuitBreakerState> - Parameter description
+   */
   displayResilienceStatus(stats: Record<string, CircuitBreakerState>): void {
     const blockedCommands = Object.entries(stats).filter(
       ([_, state]) => state.isBlocked
@@ -802,6 +886,11 @@ export class AgentPresenter implements IAgentPresenter {
     };
   }
 
+  /**
+   * Handles addToExecutionHistory operation
+   * 
+   * @param execution - Parameter description
+   */
   private addToExecutionHistory(execution: AgenticExecution): void {
     this.executionHistory.push(execution);
 
@@ -813,6 +902,9 @@ export class AgentPresenter implements IAgentPresenter {
 
   // ========== Original Helper Methods ==========
 
+  /**
+   * Handles startResourceMonitoring operation
+   */
   private startResourceMonitoring(): void {
     this.initialMemory = process.memoryUsage().heapUsed / 1024 / 1024;
     this.performance.peakMemoryMB = this.initialMemory;
@@ -847,6 +939,9 @@ export class AgentPresenter implements IAgentPresenter {
     }, 2000);
   }
 
+  /**
+   * Handles stopResourceMonitoring operation
+   */
   private stopResourceMonitoring(): void {
     if (this.resourceMonitor) {
       clearInterval(this.resourceMonitor);
@@ -873,6 +968,13 @@ export class AgentPresenter implements IAgentPresenter {
     }));
   }
 
+  /**
+   * Gets risklevel
+   * 
+   * @param step - Parameter description
+   * 
+   * @returns 'low' | 'medium' | 'high' - Return value description
+   */
   private getRiskLevel(step: ExecutionStep): 'low' | 'medium' | 'high' {
     if (!step.risks || step.risks.length === 0) return 'low';
 
@@ -891,6 +993,13 @@ export class AgentPresenter implements IAgentPresenter {
     return 'low';
   }
 
+  /**
+   * Gets performancerating
+   * 
+   * @param totalTimeMs - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private getPerformanceRating(totalTimeMs: number): string {
     const timeRating =
       totalTimeMs < 30000
@@ -911,6 +1020,13 @@ export class AgentPresenter implements IAgentPresenter {
     return `${timeRating} (${memoryRating} memory usage)`;
   }
 
+  /**
+   * Generates suggestions
+   * 
+   * @param result - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private generateSuggestions(result: any): string[] {
     const suggestions: string[] = [];
     const error = result.error?.toLowerCase() || '';
@@ -956,6 +1072,13 @@ export class AgentPresenter implements IAgentPresenter {
     return suggestions;
   }
 
+  /**
+   * Generates nextsteps
+   * 
+   * @param execution - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private generateNextSteps(execution: AgenticExecution): string[] {
     const nextSteps: string[] = [];
     const goal = execution.goal.toLowerCase();

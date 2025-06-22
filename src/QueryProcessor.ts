@@ -1,5 +1,8 @@
 // @ts-ignore - chalk doesn't have types available
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 
 interface Correction {
   original: string;
@@ -46,12 +49,20 @@ class QueryProcessor {
   private corrections: Map<string, string>;
   private expansions: Map<string, string>;
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     this.abbreviations = this.initializeAbbreviations();
     this.corrections = this.initializeCommonCorrections();
     this.expansions = this.initializeQueryExpansions();
   }
 
+  /**
+   * Initializes abbreviations
+   * 
+   * @returns Map<string, string> - Return value description
+   */
   private initializeAbbreviations(): Map<string, string> {
     return new Map([
       // Development abbreviations
@@ -86,6 +97,11 @@ class QueryProcessor {
     ]);
   }
 
+  /**
+   * Initializes commoncorrections
+   * 
+   * @returns Map<string, string> - Return value description
+   */
   private initializeCommonCorrections(): Map<string, string> {
     return new Map([
       // Common typos
@@ -112,6 +128,11 @@ class QueryProcessor {
     ]);
   }
 
+  /**
+   * Initializes queryexpansions
+   * 
+   * @returns Map<string, string> - Return value description
+   */
   private initializeQueryExpansions(): Map<string, string> {
     return new Map([
       // Expand vague queries

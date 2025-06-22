@@ -18,11 +18,19 @@ export interface CommandValidationOptions {
   suggestAlternatives?: boolean;
 }
 
+/**
+ * CommandValidationService class
+ * 
+ * TODO: Add class description
+ */
 export class CommandValidationService {
   private knownCommands: Set<string>;
   private dangerousCommands: Set<string>;
   private commandAlternatives: Map<string, string[]>;
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     this.knownCommands = new Set([
       'ls',

@@ -7,8 +7,18 @@ import { IMemoryPersistence } from '../interfaces/IMemoryPersistence';
  * SOLID DIP: Depends on IMemoryPersistence abstraction
  */
 export class MemoryStatisticsService implements IMemoryStatistics {
+  /**
+   * Creates an instance of the class
+   * 
+   * @param private persistence - Parameter description
+   */
   constructor(private persistence: IMemoryPersistence) {}
 
+  /**
+   * Gets stats
+   * 
+   * @returns Promise< - Return value description
+   */
   async getStats(): Promise<{
     totalConversations: number;
     totalCommands: number;

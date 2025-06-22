@@ -2,7 +2,10 @@ import { ICommand, CommandDefinition } from '../interfaces/ICommand';
 import { IEnhancedCachingService } from '../interfaces/IEnhancedCachingService';
 import { IContextService } from '../interfaces/IContextService';
 import { CommandResult, CommandOptions } from '../types/index';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import Table from 'cli-table3';
 import boxen from 'boxen';
 import * as cliProgress from 'cli-progress';

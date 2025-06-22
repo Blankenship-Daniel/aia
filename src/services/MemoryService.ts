@@ -22,6 +22,11 @@ export class MemoryService implements IMemoryService {
   private semanticIndex: Map<string, number>;
   private initialized: boolean;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param private configService - Parameter description
+   */
   constructor(private configService: IConfigurationService) {
     this.memory = this.getDefaultMemory();
     this.memoryPath = path.join(os.homedir(), '.aia', 'memory.json');

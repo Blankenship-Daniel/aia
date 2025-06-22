@@ -9,11 +9,21 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as os from 'os';
 
+/**
+ * ContextService class
+ * 
+ * TODO: Add class description
+ */
 export class ContextService implements IContextService {
   private configService: IConfigurationService;
   private cache: Map<string, unknown> = new Map();
   private initialized: boolean = false;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param configurationService - Parameter description
+   */
   constructor(configurationService: IConfigurationService) {
     this.configService = configurationService;
   }

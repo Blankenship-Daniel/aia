@@ -3,9 +3,17 @@ import { ICommandService } from '../interfaces/ICommandService';
 import { IContextService } from '../interfaces/IContextService';
 import { IMemoryService } from '../interfaces/IMemoryService';
 import { CommandResult, CommandOptions, CommandOption } from '../types/index';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import { spawn } from 'child_process';
 
+/**
+ * ExecuteCommand class
+ * 
+ * TODO: Add class description
+ */
 export class ExecuteCommand implements ICommand {
   constructor(
     private commandService: ICommandService,
@@ -154,6 +162,14 @@ export class ExecuteCommand implements ICommand {
     });
   }
 
+  /**
+   * Validates the operation
+   * 
+   * @param args - Parameter description
+   * @param options - Parameter description
+   * 
+   * @returns string | null - Return value description
+   */
   public validate(args: string[], options: CommandOptions): string | null {
     if (args.length === 0) {
       return 'Command is required';
@@ -162,10 +178,18 @@ export class ExecuteCommand implements ICommand {
     return null;
   }
 
+  /**
+   * Gets usage
+   * 
+   * @returns string - Return value description
+   */
   public getUsage(): string {
     return 'exec <command> [options]';
   }
 
+  /**
+   * Gets options
+   */
   public getOptions() {
     return [
       {

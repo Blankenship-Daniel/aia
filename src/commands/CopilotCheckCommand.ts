@@ -20,10 +20,23 @@
 import { ICommand, CommandDefinition } from '../interfaces/ICommand';
 import { ICopilotDependencyService } from '../interfaces/ICopilotDependencyService';
 import { CommandResult, CommandOptions } from '../types/index';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import ora from 'ora';
 
+/**
+ * CopilotCheckCommand class
+ * 
+ * TODO: Add class description
+ */
 export class CopilotCheckCommand implements ICommand {
+  /**
+   * Creates an instance of the class
+   * 
+   * @param private copilotDependencyService - Parameter description
+   */
   constructor(private copilotDependencyService: ICopilotDependencyService) {}
 
   /**
@@ -217,6 +230,13 @@ export class CopilotCheckCommand implements ICommand {
     }
   }
 
+  /**
+   * Handles isFullyConfigured operation
+   * 
+   * @param status - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private isFullyConfigured(status: any): boolean {
     return (
       status.gh &&

@@ -3,9 +3,17 @@
  * Provides user control over agent execution flow
  */
 import { IExecutionController } from '../interfaces/IExecutionController';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import inquirer from 'inquirer';
 
+/**
+ * ExecutionController class
+ * 
+ * TODO: Add class description
+ */
 export class ExecutionController implements IExecutionController {
   private paused = false;
   private stopped = false;
@@ -16,6 +24,13 @@ export class ExecutionController implements IExecutionController {
   private pausePromise?: Promise<void>;
   private pauseResolve?: () => void;
 
+  /**
+   * Handles pause operation
+   * 
+   * @param reason? - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async pause(reason?: string): Promise<void> {
     if (this.paused) return;
 
@@ -38,6 +53,9 @@ export class ExecutionController implements IExecutionController {
     return this.pausePromise;
   }
 
+  /**
+   * Handles resume operation
+   */
   resume(): void {
     if (!this.paused) return;
 
@@ -53,6 +71,11 @@ export class ExecutionController implements IExecutionController {
     }
   }
 
+  /**
+   * Handles stop operation
+   * 
+   * @param reason? - Parameter description
+   */
   stop(reason?: string): void {
     this.stopped = true;
     this.stopReason = reason;
@@ -67,28 +90,52 @@ export class ExecutionController implements IExecutionController {
     }
   }
 
+  /**
+   * Handles enableStepMode operation
+   */
   enableStepMode(): void {
     this.stepMode = true;
     console.log(chalk.blue('🔍 Step-by-step mode enabled'));
   }
 
+  /**
+   * Handles disableStepMode operation
+   */
   disableStepMode(): void {
     this.stepMode = false;
     console.log(chalk.blue('🏃 Step-by-step mode disabled'));
   }
 
+  /**
+   * Handles isPaused operation
+   * 
+   * @returns boolean - Return value description
+   */
   isPaused(): boolean {
     return this.paused;
   }
 
+  /**
+   * Handles shouldStop operation
+   * 
+   * @returns boolean - Return value description
+   */
   shouldStop(): boolean {
     return this.stopped;
   }
 
+  /**
+   * Handles isStepMode operation
+   * 
+   * @returns boolean - Return value description
+   */
   isStepMode(): boolean {
     return this.stepMode;
   }
 
+  /**
+   * Gets state
+   */
   getState() {
     return {
       paused: this.paused,
@@ -135,6 +182,11 @@ export class ExecutionController implements IExecutionController {
     }
   }
 
+  /**
+   * Handles showPauseMenu operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async showPauseMenu(): Promise<void> {
     while (this.paused && !this.stopped) {
       const { action } = await inquirer.prompt([
@@ -173,6 +225,9 @@ export class ExecutionController implements IExecutionController {
     }
   }
 
+  /**
+   * Handles showDebugInfo operation
+   */
   private showDebugInfo(): void {
     console.log(chalk.blue('\n🔍 Debug Information:'));
     console.log(`State: ${chalk.cyan(this.paused ? 'Paused' : 'Running')}`);
@@ -188,6 +243,9 @@ export class ExecutionController implements IExecutionController {
     }
   }
 
+  /**
+   * Handles showHelp operation
+   */
   private showHelp(): void {
     console.log(chalk.blue('\n📋 Interactive Execution Help:'));
     console.log('  Resume   - Continue execution from where it was paused');

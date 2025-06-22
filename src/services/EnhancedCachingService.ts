@@ -40,6 +40,14 @@ export class EnhancedCachingService
     return new Map(this.cacheMetrics);
   }
 
+  /**
+   * Sets cachestrategy
+   * 
+   * @param key - Parameter description
+   * @param strategy - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async setCacheStrategy(key: string, strategy: CacheStrategy): Promise<void> {
     this.cacheStrategies.set(key, strategy);
     // Note: Strategy persistence would require extending AIAConfig interface
@@ -47,10 +55,22 @@ export class EnhancedCachingService
     this.emit('strategyUpdated', { key, strategy });
   }
 
+  /**
+   * Gets cachestrategy
+   * 
+   * @param key - Parameter description
+   * 
+   * @returns Promise<CacheStrategy> - Return value description
+   */
   async getCacheStrategy(key: string): Promise<CacheStrategy> {
     return this.cacheStrategies.get(key) || this.getDefaultStrategy();
   }
 
+  /**
+   * Gets cacheanalytics
+   * 
+   * @returns Promise<CacheAnalytics> - Return value description
+   */
   async getCacheAnalytics(): Promise<CacheAnalytics> {
     const allMetrics = Array.from(this.cacheMetrics.values());
     const totalHits = allMetrics.reduce((sum, m) => sum + m.hits, 0);
@@ -70,6 +90,11 @@ export class EnhancedCachingService
     };
   }
 
+  /**
+   * Handles displayCachePerformance operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async displayCachePerformance(): Promise<void> {
     const analytics = await this.getCacheAnalytics();
 
@@ -106,6 +131,13 @@ export class EnhancedCachingService
     this.displayCacheRecommendations();
   }
 
+  /**
+   * Handles warmCache operation
+   * 
+   * @param keys - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async warmCache(keys: string[]): Promise<void> {
     console.log(`🔥 Warming cache for ${keys.length} keys...`);
 
@@ -119,6 +151,11 @@ export class EnhancedCachingService
     }
   }
 
+  /**
+   * Handles suggestCacheWarmingTargets operation
+   * 
+   * @returns Promise<string[]> - Return value description
+   */
   async suggestCacheWarmingTargets(): Promise<string[]> {
     const suggestions: string[] = [];
 
@@ -139,6 +176,11 @@ export class EnhancedCachingService
     });
   }
 
+  /**
+   * Cleans up cache
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async cleanupCache(): Promise<void> {
     const beforeSize = await this.getCacheSize();
 
@@ -194,6 +236,13 @@ export class EnhancedCachingService
     this.emit('cacheSet', { key, size: this.estimateSize(value) });
   }
 
+  /**
+   * Handles delete operation
+   * 
+   * @param key - Parameter description
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   async delete(key: string): Promise<boolean> {
     const result = await this.cachingService.delete(key);
     this.cacheMetrics.delete(key);
@@ -201,24 +250,49 @@ export class EnhancedCachingService
     return result;
   }
 
+  /**
+   * Handles clear operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async clear(): Promise<void> {
     await this.cachingService.clear();
     this.cacheMetrics.clear();
     this.emit('cacheClear');
   }
 
+  /**
+   * Handles has operation
+   * 
+   * @param key - Parameter description
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   async has(key: string): Promise<boolean> {
     return this.cachingService.has(key);
   }
 
+  /**
+   * Handles keys operation
+   * 
+   * @returns Promise<string[]> - Return value description
+   */
   async keys(): Promise<string[]> {
     return this.cachingService.keys();
   }
 
+  /**
+   * Handles size operation
+   * 
+   * @returns Promise<number> - Return value description
+   */
   async size(): Promise<number> {
     return this.cachingService.size();
   }
 
+  /**
+   * Initializes defaultstrategies
+   */
   private initializeDefaultStrategies(): void {
     const defaultStrategies: Record<string, CacheStrategy> = {
       'command-suggestions': {
@@ -246,6 +320,9 @@ export class EnhancedCachingService
     }
   }
 
+  /**
+   * Handles startMetricsCollection operation
+   */
   private startMetricsCollection(): void {
     // Collect analytics every 5 minutes
     setInterval(() => {
@@ -253,6 +330,13 @@ export class EnhancedCachingService
     }, 300000);
   }
 
+  /**
+   * Creates defaultmetrics
+   * 
+   * @param key - Parameter description
+   * 
+   * @returns CacheMetrics - Return value description
+   */
   private createDefaultMetrics(key: string): CacheMetrics {
     return {
       hits: 0,
@@ -266,6 +350,11 @@ export class EnhancedCachingService
     };
   }
 
+  /**
+   * Gets defaultstrategy
+   * 
+   * @returns CacheStrategy - Return value description
+   */
   private getDefaultStrategy(): CacheStrategy {
     return {
       ttl: 600000, // 10 minutes
@@ -275,6 +364,13 @@ export class EnhancedCachingService
     };
   }
 
+  /**
+   * Calculates performanceimprovement
+   * 
+   * @param metrics - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private calculatePerformanceImprovement(metrics: CacheMetrics[]): number {
     if (metrics.length === 0) return 1;
 
@@ -292,6 +388,13 @@ export class EnhancedCachingService
     return missTime > 0 ? missTime / weightedTime : 1;
   }
 
+  /**
+   * Formats bytes
+   * 
+   * @param bytes - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private formatBytes(bytes: number): string {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -300,6 +403,13 @@ export class EnhancedCachingService
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
+  /**
+   * Gets topperformingkeys
+   * 
+   * @param limit - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private getTopPerformingKeys(limit: number): string[] {
     return Array.from(this.cacheMetrics.entries())
       .sort(([, a], [, b]) => b.hitRate - a.hitRate)
@@ -307,6 +417,9 @@ export class EnhancedCachingService
       .map(([key]) => key);
   }
 
+  /**
+   * Handles displayCacheRecommendations operation
+   */
   private displayCacheRecommendations(): void {
     console.log('\n💡 Cache Recommendations:');
 
@@ -333,6 +446,11 @@ export class EnhancedCachingService
     }
   }
 
+  /**
+   * Gets cachesize
+   * 
+   * @returns Promise<number> - Return value description
+   */
   private async getCacheSize(): Promise<number> {
     // Estimate total cache size
     let totalSize = 0;
@@ -386,12 +504,24 @@ export class EnhancedCachingService
     metrics.lastAccessed = new Date();
   }
 
+  /**
+   * Initializes metricsifneeded
+   * 
+   * @param key - Parameter description
+   */
   private initializeMetricsIfNeeded(key: string): void {
     if (!this.cacheMetrics.has(key)) {
       this.cacheMetrics.set(key, this.createDefaultMetrics(key));
     }
   }
 
+  /**
+   * Handles estimateSize operation
+   * 
+   * @param value - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private estimateSize(value: any): number {
     // Simple size estimation
     try {
@@ -401,6 +531,11 @@ export class EnhancedCachingService
     }
   }
 
+  /**
+   * Handles collectAnalytics operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async collectAnalytics(): Promise<void> {
     const analytics = await this.getCacheAnalytics();
     this.analyticsHistory.push({

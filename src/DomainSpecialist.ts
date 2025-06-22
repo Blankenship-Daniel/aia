@@ -1,4 +1,7 @@
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 
 interface Domain {
   name: string;
@@ -33,12 +36,20 @@ class DomainSpecialist {
   private vocabularies: DomainVocabulary;
   private patterns: DomainPattern[];
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     this.domains = this.initializeDomains();
     this.vocabularies = this.initializeVocabularies();
     this.patterns = this.initializePatterns();
   }
 
+  /**
+   * Initializes domains
+   * 
+   * @returns Record<string, Domain> - Return value description
+   */
   private initializeDomains(): Record<string, Domain> {
     return {
       WEB_DEVELOPMENT: {
@@ -196,6 +207,11 @@ class DomainSpecialist {
     };
   }
 
+  /**
+   * Initializes vocabularies
+   * 
+   * @returns DomainVocabulary - Return value description
+   */
   private initializeVocabularies(): DomainVocabulary {
     return {
       webDev: [
@@ -234,6 +250,11 @@ class DomainSpecialist {
     };
   }
 
+  /**
+   * Initializes patterns
+   * 
+   * @returns DomainPattern[] - Return value description
+   */
   private initializePatterns(): DomainPattern[] {
     return [
       {
@@ -407,6 +428,13 @@ class DomainSpecialist {
     return relevantTerms.some((term) => projectTypeLower.includes(term));
   }
 
+  /**
+   * Gets webdevsuggestions
+   * 
+   * @param query - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private getWebDevSuggestions(query: string): string[] {
     const suggestions: string[] = [];
     const queryLower = query.toLowerCase();
@@ -432,6 +460,13 @@ class DomainSpecialist {
     return suggestions;
   }
 
+  /**
+   * Gets devopssuggestions
+   * 
+   * @param query - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private getDevOpsSuggestions(query: string): string[] {
     const suggestions: string[] = [];
     const queryLower = query.toLowerCase();
@@ -454,6 +489,13 @@ class DomainSpecialist {
     return suggestions;
   }
 
+  /**
+   * Gets datasciencesuggestions
+   * 
+   * @param query - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private getDataScienceSuggestions(query: string): string[] {
     const suggestions: string[] = [];
     const queryLower = query.toLowerCase();

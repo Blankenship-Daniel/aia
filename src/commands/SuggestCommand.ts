@@ -22,7 +22,10 @@ import { ICommand, CommandDefinition } from '../interfaces/ICommand';
 import { ICopilotService } from '../interfaces/ICopilotService';
 import { IContextService } from '../interfaces/IContextService';
 import { CommandResult, CommandOptions } from '../types/index';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import ora from 'ora';
 import inquirer from 'inquirer';
 import { exec } from 'child_process';
@@ -30,6 +33,11 @@ import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
+/**
+ * SuggestCommand class
+ * 
+ * TODO: Add class description
+ */
 export class SuggestCommand implements ICommand {
   constructor(
     private copilotService: ICopilotService,
@@ -369,6 +377,11 @@ export class SuggestCommand implements ICommand {
     return { selected: suggestion, executed: true, output };
   }
 
+  /**
+   * Handles displaySuggestions operation
+   * 
+   * @param suggestions - Parameter description
+   */
   private displaySuggestions(suggestions: any[]): void {
     console.log('\n' + chalk.bold('💡 Command Suggestions'));
     console.log(chalk.gray('─'.repeat(50)));
@@ -405,6 +418,14 @@ export class SuggestCommand implements ICommand {
     console.log('\n' + chalk.gray('─'.repeat(50)));
   }
 
+  /**
+   * Formats suggestionchoice
+   * 
+   * @param suggestion - Parameter description
+   * @param index - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private formatSuggestionChoice(suggestion: any, index: number): string {
     const safetyIcon = this.getSafetyIcon(suggestion.safetyLevel);
     const confidence = Math.round(suggestion.confidence * 100);
@@ -413,6 +434,13 @@ export class SuggestCommand implements ICommand {
     )} ${chalk.gray(`(${confidence}%)`)}`;
   }
 
+  /**
+   * Gets safetyicon
+   * 
+   * @param safetyLevel - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private getSafetyIcon(safetyLevel: string): string {
     switch (safetyLevel) {
       case 'safe':
@@ -426,6 +454,13 @@ export class SuggestCommand implements ICommand {
     }
   }
 
+  /**
+   * Gets confidencebar
+   * 
+   * @param confidence - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private getConfidenceBar(confidence: number): string {
     const barLength = 10;
     const filledLength = Math.round(confidence * barLength);
@@ -442,6 +477,13 @@ export class SuggestCommand implements ICommand {
     return color(filled) + chalk.gray(empty);
   }
 
+  /**
+   * Handles confirmExecution operation
+   * 
+   * @param suggestion - Parameter description
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   private async confirmExecution(suggestion: any): Promise<boolean> {
     const messages = [];
 
@@ -477,6 +519,13 @@ export class SuggestCommand implements ICommand {
     return confirmed;
   }
 
+  /**
+   * Executes command
+   * 
+   * @param command - Parameter description
+   * 
+   * @returns Promise<string> - Return value description
+   */
   private async executeCommand(command: string): Promise<string> {
     try {
       const { stdout, stderr } = await execAsync(command, {

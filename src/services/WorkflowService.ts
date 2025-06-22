@@ -19,6 +19,11 @@ import { ICommandService } from '../interfaces/ICommandService';
 import { IMemoryService } from '../interfaces/IMemoryService';
 import { AsyncResult } from '../types';
 
+/**
+ * WorkflowService class
+ * 
+ * TODO: Add class description
+ */
 export class WorkflowService implements IWorkflowService {
   private configService: IConfigurationService;
   private commandService: ICommandService;

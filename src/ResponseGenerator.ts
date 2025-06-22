@@ -1,4 +1,7 @@
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 
 interface ResponseStrategy {
   type:
@@ -102,6 +105,9 @@ class ResponseAdaptationEngine {
   private userFeedback: Map<string, UserFeedbackEntry[]>;
   private responsePatterns: Map<string, unknown>;
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     this.userFeedback = new Map<string, UserFeedbackEntry[]>();
     this.responsePatterns = new Map<string, unknown>();
@@ -123,6 +129,13 @@ class ResponseAdaptationEngine {
     });
   }
 
+  /**
+   * Handles adaptToUser operation
+   * 
+   * @param userId - Parameter description
+   * 
+   * @returns UserPreferences - Return value description
+   */
   public adaptToUser(userId: string): UserPreferences {
     const feedback = this.userFeedback.get(userId) || [];
 
@@ -485,6 +498,11 @@ export class ResponseGenerator {
   }
 
   // Helper methods for response processing
+  /**
+   * Initializes templates
+   * 
+   * @returns Map<string, ResponseTemplate> - Return value description
+   */
   private initializeTemplates(): Map<string, ResponseTemplate> {
     const templates = new Map<string, ResponseTemplate>();
 
@@ -512,6 +530,13 @@ export class ResponseGenerator {
     return templates;
   }
 
+  /**
+   * Generates responseinstructions
+   * 
+   * @param strategy - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private generateResponseInstructions(strategy: ResponseStrategy): string {
     let instructions = `Please provide a ${strategy.verbosity} response in a ${strategy.style} tone, `;
     instructions += `suitable for someone with ${strategy.technicalLevel} technical knowledge. `;
@@ -536,6 +561,13 @@ export class ResponseGenerator {
     return instructions;
   }
 
+  /**
+   * Handles applyHierarchicalStructure operation
+   * 
+   * @param content - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private applyHierarchicalStructure(content: string): string {
     // Add proper headings and structure
     const lines = content.split('\n');
@@ -585,6 +617,13 @@ export class ResponseGenerator {
     return null;
   }
 
+  /**
+   * Handles addStepByStepInstructions operation
+   * 
+   * @param content - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private addStepByStepInstructions(content: string): string {
     // Convert prose to numbered steps where appropriate
     const sentences = content.split('. ');
@@ -653,6 +692,13 @@ export class ResponseGenerator {
   }
 
   // Quality assessment methods
+  /**
+   * Handles assessCoherence operation
+   * 
+   * @param content - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private assessCoherence(content: string): number {
     // Simple coherence assessment based on structure
     const hasHeadings = content.includes('##') || content.includes('#');
@@ -667,6 +713,14 @@ export class ResponseGenerator {
     return Math.min(score, 1.0);
   }
 
+  /**
+   * Handles assessCompleteness operation
+   * 
+   * @param content - Parameter description
+   * @param query - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private assessCompleteness(content: string, query: string): number {
     // Check if key terms from query appear in response
     const queryTerms = query.toLowerCase().split(/\s+/);
@@ -679,6 +733,14 @@ export class ResponseGenerator {
     return Math.min(matchedTerms.length / Math.max(queryTerms.length, 1), 1.0);
   }
 
+  /**
+   * Handles assessAccuracy operation
+   * 
+   * @param content - Parameter description
+   * @param nlpAnalysis - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private assessAccuracy(content: string, nlpAnalysis: NLPAnalysis): number {
     // Check if technical terms are used appropriately
     let score = 0.7; // Base score
@@ -694,6 +756,13 @@ export class ResponseGenerator {
     return Math.min(score, 1.0);
   }
 
+  /**
+   * Handles assessClarity operation
+   * 
+   * @param content - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private assessClarity(content: string): number {
     // Simple clarity assessment
     const sentences = content.split(/[.!?]/);
@@ -711,6 +780,14 @@ export class ResponseGenerator {
     }
   }
 
+  /**
+   * Handles assessRelevance operation
+   * 
+   * @param content - Parameter description
+   * @param query - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private assessRelevance(content: string, query: string): number {
     // Check relevance based on query keywords
     const queryKeywords = query

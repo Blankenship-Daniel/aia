@@ -1,5 +1,7 @@
-// Use require for chalk to match existing codebase patterns
-const chalk = require('chalk');
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
@@ -123,6 +125,11 @@ interface FileInfo {
   size?: number;
 }
 
+/**
+ * IndexCommand class
+ * 
+ * TODO: Add class description
+ */
 export class IndexCommand implements ICommand {
   private name = 'index';
   private description = 'Create and manage codebase index for AI analysis';
@@ -229,6 +236,13 @@ export class IndexCommand implements ICommand {
     }
   }
 
+  /**
+   * Builds index
+   * 
+   * @param options - Parameter description
+   * 
+   * @returns Promise<CommandResult> - Return value description
+   */
   private async buildIndex(options: CommandOptions): Promise<CommandResult> {
     const startTime = Date.now();
 
@@ -364,6 +378,13 @@ export class IndexCommand implements ICommand {
     }
   }
 
+  /**
+   * Handles showStats operation
+   * 
+   * @param options - Parameter description
+   * 
+   * @returns Promise<CommandResult> - Return value description
+   */
   private async showStats(options: CommandOptions): Promise<CommandResult> {
     try {
       const index = await this.codeIndexService.loadIndex();
@@ -414,6 +435,13 @@ export class IndexCommand implements ICommand {
     }
   }
 
+  /**
+   * Handles showSummary operation
+   * 
+   * @param options - Parameter description
+   * 
+   * @returns Promise<CommandResult> - Return value description
+   */
   private async showSummary(options: CommandOptions): Promise<CommandResult> {
     try {
       const index = await this.codeIndexService.loadIndex();
@@ -701,6 +729,13 @@ export class IndexCommand implements ICommand {
     }
   }
 
+  /**
+   * Handles refreshIndex operation
+   * 
+   * @param options - Parameter description
+   * 
+   * @returns Promise<CommandResult> - Return value description
+   */
   private async refreshIndex(options: CommandOptions): Promise<CommandResult> {
     console.log(chalk.blue('🔄 Refreshing codebase index...'));
 
@@ -709,6 +744,13 @@ export class IndexCommand implements ICommand {
     return await this.buildIndex(refreshOptions);
   }
 
+  /**
+   * Analyzes code
+   * 
+   * @param options - Parameter description
+   * 
+   * @returns Promise<CommandResult> - Return value description
+   */
   private async analyzeCode(options: CommandOptions): Promise<CommandResult> {
     try {
       const index = await this.codeIndexService.loadIndex();
@@ -1290,7 +1332,7 @@ export class IndexCommand implements ICommand {
 
       if (type === 'all') {
         const types = [
-          'copilot-instructions',
+          // 'copilot-instructions',
           'comprehensive',
           'minimal',
           'architecture',
@@ -1366,6 +1408,11 @@ export class IndexCommand implements ICommand {
 
   // ICommand interface implementation methods
 
+  /**
+   * Gets definition
+   * 
+   * @returns CommandDefinition - Return value description
+   */
   getDefinition(): CommandDefinition {
     return {
       name: this.name,
@@ -1409,14 +1456,31 @@ export class IndexCommand implements ICommand {
     };
   }
 
+  /**
+   * Gets name
+   * 
+   * @returns string - Return value description
+   */
   getName(): string {
     return this.name;
   }
 
+  /**
+   * Gets aliases
+   * 
+   * @returns string[] - Return value description
+   */
   getAliases(): string[] {
     return this.aliases;
   }
 
+  /**
+   * Validates args
+   * 
+   * @param args - Parameter description
+   * 
+   * @returns  - Return value description
+   */
   validateArgs(args: string[]): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
@@ -1464,6 +1528,11 @@ export class IndexCommand implements ICommand {
     return { valid: errors.length === 0, errors };
   }
 
+  /**
+   * Gets help
+   * 
+   * @returns string - Return value description
+   */
   getHelp(): string {
     return `
   Usage: aia index <action> [options]

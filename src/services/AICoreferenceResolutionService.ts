@@ -26,8 +26,16 @@ import {
 } from '../interfaces/ICoreferenceResolutionService';
 import { IAIService } from '../interfaces/IAIService';
 import { IContextService } from '../interfaces/IContextService';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 
+/**
+ * AICoreferenceResolutionService class
+ * 
+ * TODO: Add class description
+ */
 export class AICoreferenceResolutionService
   implements ICoreferenceResolutionService
 {
@@ -140,6 +148,12 @@ Respond with JSON:
 }
 `;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param aiService - Parameter description
+   * @param contextService - Parameter description
+   */
   constructor(aiService: IAIService, contextService: IContextService) {
     this.aiService = aiService;
     this.contextService = contextService;
@@ -443,6 +457,13 @@ Respond with JSON:
     }
   }
 
+  /**
+   * Parses coreferenceresponse
+   * 
+   * @param content - Parameter description
+   * 
+   * @returns  - Return value description
+   */
   private parseCoreferenceResponse(content: string): {
     references: ResolvedEntity[];
   } {
@@ -481,6 +502,13 @@ Respond with JSON:
     }
   }
 
+  /**
+   * Parses entityresponse
+   * 
+   * @param content - Parameter description
+   * 
+   * @returns EntityExtractionResult - Return value description
+   */
   private parseEntityResponse(content: string): EntityExtractionResult {
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -505,6 +533,13 @@ Respond with JSON:
     }
   }
 
+  /**
+   * Parses ambiguityresponse
+   * 
+   * @param content - Parameter description
+   * 
+   * @returns AmbiguityAnalysis - Return value description
+   */
   private parseAmbiguityResponse(content: string): AmbiguityAnalysis {
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -644,6 +679,13 @@ Respond with JSON:
     return topics;
   }
 
+  /**
+   * Handles extractTopicKeywords operation
+   * 
+   * @param text - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private extractTopicKeywords(text: string): string[] {
     const keywords = [
       'debugging',
@@ -719,6 +761,13 @@ Respond with JSON:
     return null;
   }
 
+  /**
+   * Calculates overallconfidence
+   * 
+   * @param resolutions - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private calculateOverallConfidence(resolutions: ResolvedEntity[]): number {
     if (resolutions.length === 0) return 1.0;
 

@@ -22,9 +22,17 @@ import { ICommand, CommandDefinition } from '../interfaces/ICommand';
 import { ICopilotService } from '../interfaces/ICopilotService';
 import { IMemoryService } from '../interfaces/IMemoryService';
 import { CommandResult, CommandOptions, CommandOption } from '../types/index';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import ora from 'ora';
 
+/**
+ * ExplainCommand class
+ * 
+ * TODO: Add class description
+ */
 export class ExplainCommand implements ICommand {
   constructor(
     private copilotService: ICopilotService,

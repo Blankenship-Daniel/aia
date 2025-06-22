@@ -8,6 +8,11 @@ import { CommandHistoryEntry } from '../types/index';
  * SOLID DIP: Depends on IMemoryPersistence abstraction
  */
 export class CommandMemoryService implements ICommandMemory {
+  /**
+   * Creates an instance of the class
+   * 
+   * @param private persistence - Parameter description
+   */
   constructor(private persistence: IMemoryPersistence) {}
 
   async addCommand(
@@ -71,6 +76,13 @@ export class CommandMemoryService implements ICommandMemory {
     return results.slice(0, limit).map((result) => result.entry);
   }
 
+  /**
+   * Gets recentcommands
+   * 
+   * @param limit - Parameter description
+   * 
+   * @returns Promise<CommandHistoryEntry[]> - Return value description
+   */
   async getRecentCommands(limit: number = 10): Promise<CommandHistoryEntry[]> {
     const memory = await this.persistence.loadMemory();
     return memory.commands.slice(-limit);

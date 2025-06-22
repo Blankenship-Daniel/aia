@@ -2,8 +2,10 @@
 // Separates command execution logic from main AIA class
 
 import { spawn, ChildProcess } from 'child_process';
-// @ts-ignore - chalk doesn't have types available
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 // @ts-ignore - inquirer doesn't have types available
 import inquirer from 'inquirer';
 
@@ -60,10 +62,20 @@ interface AIAInstance {
   saveMemory?: () => Promise<void>;
 }
 
+/**
+ * CommandHandler class
+ * 
+ * TODO: Add class description
+ */
 class CommandHandler {
   private aia: AIAInstance;
   private activeProcesses: Map<string, ChildProcess>;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param aia - Parameter description
+   */
   constructor(aia: AIAInstance) {
     this.aia = aia;
     this.activeProcesses = new Map();
@@ -142,10 +154,7 @@ class CommandHandler {
         captureOutput,
       });
     } catch (error) {
-      console.error(
-        chalk.red('Command execution failed:'),
-        (error as Error).message
-      );
+      console.error('Command execution failed:', (error as Error).message);
       throw error;
     }
   }
@@ -252,6 +261,13 @@ class CommandHandler {
     });
   }
 
+  /**
+   * Handles recordCommand operation
+   * 
+   * @param command - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async recordCommand(command: string): Promise<void> {
     if (!this.aia.memory.commands) {
       this.aia.memory.commands = [];
@@ -275,6 +291,9 @@ class CommandHandler {
     }
   }
 
+  /**
+   * Handles killActiveProcesses operation
+   */
   killActiveProcesses(): void {
     for (const [id, process] of this.activeProcesses) {
       try {
@@ -289,6 +308,11 @@ class CommandHandler {
     this.activeProcesses.clear();
   }
 
+  /**
+   * Gets activeprocesses
+   * 
+   * @returns string[] - Return value description
+   */
   getActiveProcesses(): string[] {
     return Array.from(this.activeProcesses.keys());
   }

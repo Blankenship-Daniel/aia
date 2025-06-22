@@ -2,7 +2,10 @@ import gradient from 'gradient-string';
 import figures from 'figures';
 import terminalSize from 'terminal-size';
 import notifier from 'node-notifier';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import boxen from 'boxen';
 
 /**

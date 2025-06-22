@@ -90,6 +90,9 @@ export default class CommandIntelligence {
   private commandChains: Map<string, string[]>;
   private platformCommands: PlatformCommands;
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     this.commandPatterns = new Map();
     this.safetyRules = this.initializeSafetyRules();

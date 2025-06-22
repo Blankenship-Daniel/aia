@@ -2,7 +2,10 @@
 // Provides consistent error handling, retry logic, and circuit breaker patterns
 
 // @ts-ignore - chalk doesn't have types available
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 
 interface RetryConfig {
   maxRetries: number;
@@ -98,6 +101,11 @@ interface RetryContext {
   retryCondition?: (error: Error) => boolean;
 }
 
+/**
+ * ErrorHandler class
+ * 
+ * TODO: Add class description
+ */
 class ErrorHandler {
   private retryConfig: RetryConfig;
   private circuitBreakers: Map<string, CircuitBreaker>;
@@ -106,6 +114,9 @@ class ErrorHandler {
   private recordedErrorPatterns: Map<string, RecordedErrorPattern>;
   private retryCounts: Record<string, number>;
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     this.retryConfig = {
       maxRetries: 3,
@@ -325,6 +336,13 @@ class ErrorHandler {
     }
   }
 
+  /**
+   * Handles shouldRetry operation
+   * 
+   * @param error - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   shouldRetry(error: Error): boolean {
     // Don't retry for these error types
     const nonRetryableErrors = [
@@ -398,6 +416,13 @@ class ErrorHandler {
     };
   }
 
+  /**
+   * Handles categorizeError operation
+   * 
+   * @param error - Parameter description
+   * 
+   * @returns ErrorClassification - Return value description
+   */
   categorizeError(error: Error): ErrorClassification {
     const errorMessage = error.message || String(error);
     let type = 'unknown';
@@ -439,6 +464,13 @@ class ErrorHandler {
     return { type, severity, recoverable, message: errorMessage };
   }
 
+  /**
+   * Handles suggestRecovery operation
+   * 
+   * @param error - Parameter description
+   * 
+   * @returns RecoveryAction - Return value description
+   */
   suggestRecovery(error: Error): RecoveryAction {
     const { type, recoverable, message = '' } = this.categorizeError(error);
 
@@ -490,6 +522,11 @@ class ErrorHandler {
   }
 
   // Get error metrics
+  /**
+   * Gets errormetrics
+   * 
+   * @returns ErrorMetrics - Return value description
+   */
   getErrorMetrics(): ErrorMetrics {
     return {
       total: this.errorMetrics.total, // Changed from totalErrors to total
@@ -501,6 +538,9 @@ class ErrorHandler {
   }
 
   // Reset error metrics
+  /**
+   * Handles resetErrorMetrics operation
+   */
   resetErrorMetrics(): void {
     this.errorMetrics = {
       total: 0,
@@ -511,6 +551,11 @@ class ErrorHandler {
     };
   }
 
+  /**
+   * Gets circuitbreakerstatussummary
+   * 
+   * @returns Record<string, Partial<CircuitBreaker>> - Return value description
+   */
   getCircuitBreakerStatusSummary(): Record<string, Partial<CircuitBreaker>> {
     const summary: Record<string, Partial<CircuitBreaker>> = {};
     for (const [serviceId, breaker] of this.circuitBreakers.entries()) {
@@ -524,24 +569,59 @@ class ErrorHandler {
     return summary;
   }
 
+  /**
+   * Handles assessSeverity operation
+   * 
+   * @param error - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   assessSeverity(error: Error): string {
     const category = this.categorizeError(error);
     return category.severity.toUpperCase();
   }
 
+  /**
+   * Handles isRecoverable operation
+   * 
+   * @param error - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   isRecoverable(error: Error): boolean {
     const category = this.categorizeError(error);
     return category.recoverable;
   }
 
+  /**
+   * Generates errorid
+   * 
+   * @returns string - Return value description
+   */
   generateErrorId(): string {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
 
+  /**
+   * Handles sleep operation
+   * 
+   * @param ms - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
+  /**
+   * Handles logError operation
+   * 
+   * @param error - Parameter description
+   * @param context - Parameter description
+   * @param unknown> = {} - Parameter description
+   * 
+   * @returns EnhancedError - Return value description
+   */
   logError(error: Error, context: Record<string, unknown> = {}): EnhancedError {
     const enhanced = this.enhanceError(error, context);
 
@@ -590,6 +670,11 @@ class ErrorHandler {
     return enhanced;
   }
 
+  /**
+   * Handles recordErrorPattern operation
+   * 
+   * @param error - Parameter description
+   */
   recordErrorPattern(error: EnhancedError): void {
     // This method now records to a separate map to avoid corrupting predefined errorPatterns
     const patternKey = error.type || 'unknown'; // Use 'type' as the key
@@ -620,6 +705,11 @@ class ErrorHandler {
     }
   }
 
+  /**
+   * Gets errorstatistics
+   * 
+   * @returns Record<string, unknown> - Return value description
+   */
   getErrorStatistics(): Record<string, unknown> {
     // Return statistics from the recordedErrorPatterns, not the predefined ones
     return {

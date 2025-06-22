@@ -5,6 +5,11 @@
 import { ICommandRegistry } from '../interfaces/ICommandRegistry';
 import { ICommand } from '../interfaces/ICommand';
 
+/**
+ * CommandRegistry class
+ * 
+ * TODO: Add class description
+ */
 export class CommandRegistry implements ICommandRegistry {
   private commands: Map<string, ICommand> = new Map();
   private aliases: Map<string, string> = new Map();

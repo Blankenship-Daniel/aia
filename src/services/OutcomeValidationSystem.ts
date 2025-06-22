@@ -41,6 +41,11 @@ export interface StepOutcome {
   duration: number;
 }
 
+/**
+ * OutcomeValidationSystem class
+ * 
+ * TODO: Add class description
+ */
 export class OutcomeValidationSystem {
   /**
    * Validate task outcome against success criteria
@@ -374,6 +379,13 @@ export class OutcomeValidationSystem {
   }
 
   // Helper methods for file analysis
+  /**
+   * Handles checkFileExists operation
+   * 
+   * @param filePath - Parameter description
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   private async checkFileExists(filePath: string): Promise<boolean> {
     try {
       const fs = await import('fs');
@@ -383,6 +395,13 @@ export class OutcomeValidationSystem {
     }
   }
 
+  /**
+   * Handles checkFileModified operation
+   * 
+   * @param filePath - Parameter description
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   private async checkFileModified(filePath: string): Promise<boolean> {
     try {
       const fs = await import('fs');
@@ -401,6 +420,13 @@ export class OutcomeValidationSystem {
     }
   }
 
+  /**
+   * Handles countMethods operation
+   * 
+   * @param filePath - Parameter description
+   * 
+   * @returns Promise<number> - Return value description
+   */
   private async countMethods(filePath: string): Promise<number> {
     try {
       const fs = await import('fs');
@@ -417,6 +443,13 @@ export class OutcomeValidationSystem {
     }
   }
 
+  /**
+   * Handles countJSDocComments operation
+   * 
+   * @param filePath - Parameter description
+   * 
+   * @returns Promise<number> - Return value description
+   */
   private async countJSDocComments(filePath: string): Promise<number> {
     try {
       const fs = await import('fs');
@@ -432,6 +465,13 @@ export class OutcomeValidationSystem {
     }
   }
 
+  /**
+   * Validates syntax
+   * 
+   * @param filePath - Parameter description
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   private async validateSyntax(filePath: string): Promise<boolean> {
     try {
       // For TypeScript files, we could use TypeScript compiler API
@@ -451,6 +491,13 @@ export class OutcomeValidationSystem {
     }
   }
 
+  /**
+   * Handles runTests operation
+   * 
+   * @param filePath - Parameter description
+   * 
+   * @returns Promise<boolean | null> - Return value description
+   */
   private async runTests(filePath: string): Promise<boolean | null> {
     try {
       // Check if tests exist for the file
@@ -502,6 +549,13 @@ export class OutcomeValidationSystem {
     return true;
   }
 
+  /**
+   * Handles runExecutionTest operation
+   * 
+   * @param command - Parameter description
+   * 
+   * @returns Promise<string> - Return value description
+   */
   private async runExecutionTest(command: string): Promise<string> {
     try {
       const { exec } = await import('child_process');
@@ -516,10 +570,26 @@ export class OutcomeValidationSystem {
   }
 
   // Helper methods
+  /**
+   * Handles interpolatePath operation
+   * 
+   * @param path - Parameter description
+   * @param outcome - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private interpolatePath(path: string, outcome: TaskOutcome): string {
     return path.replace('{filePath}', outcome.filePath || '');
   }
 
+  /**
+   * Handles matchesExpectedCount operation
+   * 
+   * @param actual - Parameter description
+   * @param expected - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private matchesExpectedCount(actual: number, expected: any): boolean {
     if (expected === 'all_methods') {
       // Would need method count comparison
@@ -528,6 +598,13 @@ export class OutcomeValidationSystem {
     return actual >= expected;
   }
 
+  /**
+   * Calculates score
+   * 
+   * @param details - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private calculateScore(details: ValidationDetail[]): number {
     let totalScore = 0;
     let maxScore = 0;
@@ -609,6 +686,13 @@ export class OutcomeValidationSystem {
     );
   }
 
+  /**
+   * Generates codemodificationsummary
+   * 
+   * @param details - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private generateCodeModificationSummary(details: ValidationDetail[]): string {
     const success = details.every((d) => !d.critical || d.passed);
 

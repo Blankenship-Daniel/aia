@@ -13,10 +13,20 @@ import * as os from 'os';
 export class MemoryPersistenceService implements IMemoryPersistence {
   private memoryPath: string;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param private configService - Parameter description
+   */
   constructor(private configService: IConfigurationService) {
     this.memoryPath = path.join(os.homedir(), '.aia', 'memory.json');
   }
 
+  /**
+   * Handles loadMemory operation
+   * 
+   * @returns Promise<MemoryData> - Return value description
+   */
   async loadMemory(): Promise<MemoryData> {
     try {
       if (await this.exists()) {
@@ -50,6 +60,13 @@ export class MemoryPersistenceService implements IMemoryPersistence {
     }
   }
 
+  /**
+   * Handles saveMemory operation
+   * 
+   * @param data - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async saveMemory(data: MemoryData): Promise<void> {
     try {
       await fs.ensureDir(path.dirname(this.memoryPath));
@@ -59,14 +76,29 @@ export class MemoryPersistenceService implements IMemoryPersistence {
     }
   }
 
+  /**
+   * Handles exists operation
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   async exists(): Promise<boolean> {
     return fs.pathExists(this.memoryPath);
   }
 
+  /**
+   * Gets memorypath
+   * 
+   * @returns string - Return value description
+   */
   getMemoryPath(): string {
     return this.memoryPath;
   }
 
+  /**
+   * Gets defaultmemory
+   * 
+   * @returns MemoryData - Return value description
+   */
   private getDefaultMemory(): MemoryData {
     return {
       conversations: [],
@@ -78,6 +110,13 @@ export class MemoryPersistenceService implements IMemoryPersistence {
     };
   }
 
+  /**
+   * Validates andmergewithdefaults
+   * 
+   * @param data - Parameter description
+   * 
+   * @returns MemoryData - Return value description
+   */
   private validateAndMergeWithDefaults(data: any): MemoryData {
     const defaultMemory = this.getDefaultMemory();
     return {

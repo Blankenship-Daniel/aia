@@ -21,7 +21,10 @@
 
 import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import {
   ICopilotService,
   ExplanationResult,
@@ -35,6 +38,11 @@ import { ICachingService } from '../interfaces/ICachingService';
 import { IAIService } from '../interfaces/IAIService';
 import { ICopilotDependencyService } from '../interfaces/ICopilotDependencyService';
 
+/**
+ * CopilotService class
+ * 
+ * TODO: Add class description
+ */
 export class CopilotService implements ICopilotService {
   private execAsync = promisify(exec);
   private readonly TIMEOUT_MS = 8000; // 8 seconds for operations
@@ -674,6 +682,13 @@ export class CopilotService implements ICopilotService {
     });
   }
 
+  /**
+   * Handles extractSuggestionFromStdout operation
+   * 
+   * @param stdout - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private extractSuggestionFromStdout(stdout: string): string {
     // Extract command suggestion from stdout as fallback
     const lines = stdout.split('\n');
@@ -692,6 +707,13 @@ export class CopilotService implements ICopilotService {
     return 'npm install'; // Safe fallback
   }
 
+  /**
+   * Handles detectTargetType operation
+   * 
+   * @param query - Parameter description
+   * 
+   * @returns 'shell' | 'git' | 'gh' - Return value description
+   */
   private detectTargetType(query: string): 'shell' | 'git' | 'gh' {
     const lowerQuery = query.toLowerCase();
 
@@ -719,6 +741,14 @@ export class CopilotService implements ICopilotService {
     return 'shell';
   }
 
+  /**
+   * Parses explanation
+   * 
+   * @param command - Parameter description
+   * @param output - Parameter description
+   * 
+   * @returns ExplanationResult - Return value description
+   */
   private parseExplanation(command: string, output: string): ExplanationResult {
     // Parse the copilot output into structured format
     const lines = output.split('\n').filter((line) => line.trim());
@@ -792,6 +822,13 @@ export class CopilotService implements ICopilotService {
     };
   }
 
+  /**
+   * Parses suggestions
+   * 
+   * @param output - Parameter description
+   * 
+   * @returns SuggestionResult[] - Return value description
+   */
   private parseSuggestions(output: string): SuggestionResult[] {
     const suggestions: SuggestionResult[] = [];
     const lines = output.split('\n').filter((line) => line.trim());
@@ -849,6 +886,13 @@ export class CopilotService implements ICopilotService {
     });
   }
 
+  /**
+   * Handles assessSafetyLevel operation
+   * 
+   * @param command - Parameter description
+   * 
+   * @returns 'safe' | 'caution' | 'dangerous' - Return value description
+   */
   private assessSafetyLevel(command: string): 'safe' | 'caution' | 'dangerous' {
     const dangerousPatterns = [
       /rm\\s+-rf/,
@@ -879,6 +923,13 @@ export class CopilotService implements ICopilotService {
     return 'safe';
   }
 
+  /**
+   * Handles extractCommandTags operation
+   * 
+   * @param command - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private extractCommandTags(command: string): string[] {
     const tags: string[] = [];
 
@@ -896,6 +947,13 @@ export class CopilotService implements ICopilotService {
     return tags;
   }
 
+  /**
+   * Handles looksLikeCommand operation
+   * 
+   * @param line - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private looksLikeCommand(line: string): boolean {
     // Basic heuristics to identify command lines
     const commandPatterns = [
@@ -908,6 +966,13 @@ export class CopilotService implements ICopilotService {
     return commandPatterns.some((pattern) => pattern.test(line));
   }
 
+  /**
+   * Handles shouldFallbackToAI operation
+   * 
+   * @param errorMessage - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private shouldFallbackToAI(errorMessage: string): boolean {
     // Determine if we should fall back to AI based on the error
     const fallbackErrors = [
@@ -931,6 +996,13 @@ export class CopilotService implements ICopilotService {
     );
   }
 
+  /**
+   * Handles hashQuery operation
+   * 
+   * @param query - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private hashQuery(query: string): string {
     // Simple hash for cache keys
     let hash = 0;
@@ -1001,6 +1073,11 @@ export class CopilotService implements ICopilotService {
     return suggestions.slice(0, options?.maxSuggestions || 5);
   }
 
+  /**
+   * Creates basiccontext
+   * 
+   * @param workingDirectory? - Parameter description
+   */
   private createBasicContext(workingDirectory?: string) {
     return {
       workingDirectory: workingDirectory || process.cwd(),

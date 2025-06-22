@@ -23,6 +23,11 @@ interface ClassificationPromptResult {
   requiredCapabilities: TaskCapability[];
 }
 
+/**
+ * AITaskClassifier class
+ * 
+ * TODO: Add class description
+ */
 export class AITaskClassifier {
   private classificationCache = new Map<string, ClassificationPromptResult>();
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
@@ -206,24 +211,52 @@ IMPORTANT GUIDELINES:
   }
 
   // Helper methods for validation and fallback logic
+  /**
+   * Validates tasktype
+   * 
+   * @param type - Parameter description
+   * 
+   * @returns TaskType - Return value description
+   */
   private validateTaskType(type: string): TaskType {
     return Object.values(TaskType).includes(type as TaskType)
       ? (type as TaskType)
       : TaskType.UNKNOWN;
   }
 
+  /**
+   * Validates complexity
+   * 
+   * @param complexity - Parameter description
+   * 
+   * @returns TaskComplexity - Return value description
+   */
   private validateComplexity(complexity: string): TaskComplexity {
     return Object.values(TaskComplexity).includes(complexity as TaskComplexity)
       ? (complexity as TaskComplexity)
       : TaskComplexity.MODERATE;
   }
 
+  /**
+   * Validates risklevel
+   * 
+   * @param risk - Parameter description
+   * 
+   * @returns RiskLevel - Return value description
+   */
   private validateRiskLevel(risk: string): RiskLevel {
     return Object.values(RiskLevel).includes(risk as RiskLevel)
       ? (risk as RiskLevel)
       : RiskLevel.MEDIUM;
   }
 
+  /**
+   * Validates capabilities
+   * 
+   * @param capabilities - Parameter description
+   * 
+   * @returns TaskCapability[] - Return value description
+   */
   private validateCapabilities(capabilities: string[]): TaskCapability[] {
     return capabilities
       .filter((cap) =>
@@ -261,6 +294,14 @@ IMPORTANT GUIDELINES:
   }
 
   // Simplified implementations of existing methods
+  /**
+   * Handles assessComplexity operation
+   * 
+   * @param task - Parameter description
+   * @param taskType - Parameter description
+   * 
+   * @returns TaskComplexity - Return value description
+   */
   private assessComplexity(task: string, taskType: TaskType): TaskComplexity {
     // Simplified complexity assessment
     const hasMultipleTargets = /all|every|each|multiple/i.test(task);
@@ -274,6 +315,13 @@ IMPORTANT GUIDELINES:
     return TaskComplexity.MODERATE;
   }
 
+  /**
+   * Handles identifyCapabilities operation
+   * 
+   * @param taskType - Parameter description
+   * 
+   * @returns TaskCapability[] - Return value description
+   */
   private identifyCapabilities(taskType: TaskType): TaskCapability[] {
     const capabilityMap: Record<TaskType, TaskCapability[]> = {
       [TaskType.ANALYSIS]: [
@@ -393,6 +441,13 @@ IMPORTANT GUIDELINES:
     return Math.round(baseSteps[taskType] * multiplier[complexity]);
   }
 
+  /**
+   * Handles determineValidationStrategy operation
+   * 
+   * @param taskType - Parameter description
+   * 
+   * @returns ValidationStrategy - Return value description
+   */
   private determineValidationStrategy(taskType: TaskType): ValidationStrategy {
     const strategyMap = {
       [TaskType.DOCUMENTATION]: ValidationStrategy.SYNTAX_VALIDATION,

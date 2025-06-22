@@ -3,7 +3,10 @@
 
 import fs from 'fs-extra';
 import path from 'path';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import { spawn, ChildProcess } from 'child_process';
 import {
   Workflow,
@@ -64,6 +67,11 @@ interface ScheduledTask {
   enabled: boolean;
 }
 
+/**
+ * WorkflowManager class
+ * 
+ * TODO: Add class description
+ */
 export class WorkflowManager {
   private workflowDirectory: string;
   private workflows: Map<string, Workflow>;
@@ -73,6 +81,11 @@ export class WorkflowManager {
   private scheduledTasks: Map<string, ScheduledTask>;
   private executionContext: ExecutionContext;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param workflowDirectory - Parameter description
+   */
   constructor(workflowDirectory: string) {
     this.workflowDirectory = workflowDirectory;
     this.workflows = new Map();
@@ -90,6 +103,11 @@ export class WorkflowManager {
   }
 
   // Initialize workflow system
+  /**
+   * Initializes the operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   public async initialize(): Promise<void> {
     await fs.ensureDir(this.workflowDirectory);
     await this.loadWorkflows();
@@ -99,6 +117,11 @@ export class WorkflowManager {
   }
 
   // Load all workflows from disk
+  /**
+   * Handles loadWorkflows operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async loadWorkflows(): Promise<void> {
     try {
       const workflowFiles = await fs.readdir(this.workflowDirectory);
@@ -158,6 +181,11 @@ export class WorkflowManager {
   }
 
   // Stop recording and save workflow
+  /**
+   * Handles stopRecording operation
+   * 
+   * @returns Promise<AsyncResult<Workflow>> - Return value description
+   */
   public async stopRecording(): Promise<AsyncResult<Workflow>> {
     if (!this.activeRecording) {
       return {
@@ -353,11 +381,23 @@ export class WorkflowManager {
   }
 
   // List all workflows
+  /**
+   * Handles listWorkflows operation
+   * 
+   * @returns Workflow[] - Return value description
+   */
   public listWorkflows(): Workflow[] {
     return Array.from(this.workflows.values());
   }
 
   // Get workflow information
+  /**
+   * Gets workflowinfo
+   * 
+   * @param workflowName - Parameter description
+   * 
+   * @returns Workflow | null - Return value description
+   */
   public getWorkflowInfo(workflowName: string): Workflow | null {
     return this.workflows.get(workflowName) || null;
   }
@@ -503,6 +543,11 @@ export class WorkflowManager {
   }
 
   // Helper methods
+  /**
+   * Handles saveRecordingState operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async saveRecordingState(): Promise<void> {
     if (!this.recordingSession) return;
 
@@ -516,6 +561,11 @@ export class WorkflowManager {
     });
   }
 
+  /**
+   * Handles loadRecordingState operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async loadRecordingState(): Promise<void> {
     const statePath = path.join(
       this.workflowDirectory,
@@ -539,6 +589,11 @@ export class WorkflowManager {
     }
   }
 
+  /**
+   * Handles clearRecordingState operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async clearRecordingState(): Promise<void> {
     const statePath = path.join(
       this.workflowDirectory,
@@ -549,11 +604,19 @@ export class WorkflowManager {
     }
   }
 
+  /**
+   * Sets upeventlisteners
+   */
   private setupEventListeners(): void {
     // Set up event listeners for triggers and scheduled tasks
     // This is a simplified implementation
   }
 
+  /**
+   * Generates executionid
+   * 
+   * @returns string - Return value description
+   */
   private generateExecutionId(): string {
     return `exec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }

@@ -31,7 +31,10 @@ import {
   CommandOption,
   AIModel,
 } from '../types/index.js';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import ora from 'ora';
 
 /**
@@ -69,6 +72,11 @@ export class AskCommand implements ICommand {
     private codeHighlightService: ICodeHighlightService
   ) {}
 
+  /**
+   * Gets definition
+   * 
+   * @returns CommandDefinition - Return value description
+   */
   getDefinition(): CommandDefinition {
     return {
       name: this.name,
@@ -223,6 +231,11 @@ export class AskCommand implements ICommand {
     });
   }
 
+  /**
+   * Gets examples
+   * 
+   * @returns string[] - Return value description
+   */
   getExamples(): string[] {
     return [
       'ask "How do I optimize this Node.js project?"',
@@ -231,6 +244,11 @@ export class AskCommand implements ICommand {
     ];
   }
 
+  /**
+   * Gets options
+   * 
+   * @returns CommandOption[] - Return value description
+   */
   getOptions(): CommandOption[] {
     return [
       {
@@ -248,14 +266,31 @@ export class AskCommand implements ICommand {
     ];
   }
 
+  /**
+   * Gets name
+   * 
+   * @returns string - Return value description
+   */
   getName(): string {
     return this.name;
   }
 
+  /**
+   * Gets aliases
+   * 
+   * @returns string[] - Return value description
+   */
   getAliases(): string[] {
     return ['q', 'query'];
   }
 
+  /**
+   * Validates args
+   * 
+   * @param args - Parameter description
+   * 
+   * @returns  - Return value description
+   */
   validateArgs(args: string[]): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
@@ -274,6 +309,11 @@ export class AskCommand implements ICommand {
     };
   }
 
+  /**
+   * Gets help
+   * 
+   * @returns string - Return value description
+   */
   getHelp(): string {
     const def = this.getDefinition();
     let help = `${def.name} - ${def.description}\n\n`;

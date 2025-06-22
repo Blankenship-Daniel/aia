@@ -16,6 +16,11 @@ import {
 } from '../types/index';
 import { TaskCapability } from './TaskComplexityAnalyzer';
 
+/**
+ * AgentExecutionEngine class
+ * 
+ * TODO: Add class description
+ */
 export class AgentExecutionEngine implements IAgentExecutionEngine {
   private readonly AI_CALL_TIMEOUT_MS = 30000;
   private readonly STEP_TIMEOUT_MS = 60000;
@@ -570,6 +575,13 @@ export class AgentExecutionEngine implements IAgentExecutionEngine {
     return prompt;
   }
 
+  /**
+   * Parses planfromresponse
+   * 
+   * @param content - Parameter description
+   * 
+   * @returns ExecutionStep[] - Return value description
+   */
   private parsePlanFromResponse(content: string): ExecutionStep[] {
     try {
       // Extract JSON from response

@@ -80,6 +80,9 @@ export class DIContainer {
   private factories: Map<string, ServiceFactory>;
   private initialized: boolean;
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     this.services = new Map();
     this.singletons = new Map();

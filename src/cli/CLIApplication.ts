@@ -28,7 +28,10 @@
  * Main CLI application that integrates the service architecture with Commander.js
  */
 import { Command } from 'commander';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import { ServiceFactory } from '../container/ServiceFactory.js';
 import { CommandRegistry } from '../services/CommandRegistry.js';
 import { ICommand } from '../interfaces/ICommand.js';
@@ -66,6 +69,9 @@ export default class CLIApplication {
   private commandRegistry: CommandRegistry;
   private initialized: boolean;
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     this.program = new Command();
     this.container = null;

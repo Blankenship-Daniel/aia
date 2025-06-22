@@ -6,10 +6,21 @@ import { ICommand, CommandDefinition } from '../interfaces/ICommand';
 import { IContextService } from '../interfaces/IContextService';
 import { CommandContext, CommandResult, CommandOptions } from '../types/index';
 
+/**
+ * ContextCommand class
+ * 
+ * TODO: Add class description
+ */
 export class ContextCommand implements ICommand {
   private contextService: IContextService;
   private logger?: any;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param contextService - Parameter description
+   * @param logger? - Parameter description
+   */
   constructor(contextService: IContextService, logger?: any) {
     this.contextService = contextService;
     this.logger = logger;

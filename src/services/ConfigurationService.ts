@@ -61,6 +61,9 @@ export class ConfigurationService implements IConfigurationService {
   private schema: Record<string, unknown>;
   private readonly notFound = Symbol('not-found');
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     this.config = this.getDefaultConfiguration();
     this.configPath = path.join(process.cwd(), '.aia', 'config.json');

@@ -6,7 +6,10 @@ import { ExecutionStep } from '../types/index';
 import * as crypto from 'crypto';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 
 export interface CachedResult {
   stepHash: string;
@@ -34,6 +37,11 @@ export interface CacheStats {
   newestEntry?: string;
 }
 
+/**
+ * ResultsCachingService class
+ * 
+ * TODO: Add class description
+ */
 export class ResultsCachingService {
   private cache = new Map<string, CachedResult>();
   private cacheDir: string;
@@ -44,6 +52,11 @@ export class ResultsCachingService {
     misses: 0,
   };
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param cacheDirectory? - Parameter description
+   */
   constructor(cacheDirectory?: string) {
     this.cacheDir = cacheDirectory || path.join(process.cwd(), '.aia', 'cache');
     this.loadCacheFromDisk();
@@ -297,6 +310,11 @@ export class ResultsCachingService {
     console.log(chalk.gray('━'.repeat(40)));
   }
 
+  /**
+   * Handles loadCacheFromDisk operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async loadCacheFromDisk(): Promise<void> {
     try {
       const cacheFile = path.join(this.cacheDir, 'results.json');
@@ -321,6 +339,11 @@ export class ResultsCachingService {
     }
   }
 
+  /**
+   * Handles saveCacheToDisk operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async saveCacheToDisk(): Promise<void> {
     try {
       await fs.ensureDir(this.cacheDir);
@@ -338,6 +361,11 @@ export class ResultsCachingService {
     }
   }
 
+  /**
+   * Cleans up cache
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async cleanupCache(): Promise<void> {
     const currentSize = this.estimateCacheSize();
 
@@ -376,6 +404,11 @@ export class ResultsCachingService {
     );
   }
 
+  /**
+   * Handles estimateCacheSize operation
+   * 
+   * @returns number - Return value description
+   */
   private estimateCacheSize(): number {
     let size = 0;
     for (const cached of this.cache.values()) {
@@ -384,6 +417,13 @@ export class ResultsCachingService {
     return size;
   }
 
+  /**
+   * Formats bytes
+   * 
+   * @param bytes - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private formatBytes(bytes: number): string {
     const units = ['B', 'KB', 'MB', 'GB'];
     let size = bytes;
@@ -397,6 +437,13 @@ export class ResultsCachingService {
     return `${size.toFixed(1)} ${units[unitIndex]}`;
   }
 
+  /**
+   * Formats duration
+   * 
+   * @param ms - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private formatDuration(ms: number): string {
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);

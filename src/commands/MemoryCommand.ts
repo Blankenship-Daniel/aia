@@ -6,10 +6,21 @@ import { ICommand, CommandDefinition } from '../interfaces/ICommand';
 import { IMemoryService } from '../interfaces/IMemoryService';
 import { CommandResult, CommandOptions } from '../types/index';
 
+/**
+ * MemoryCommand class
+ * 
+ * TODO: Add class description
+ */
 export class MemoryCommand implements ICommand {
   private memoryService: IMemoryService;
   private logger?: any;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param memoryService - Parameter description
+   * @param logger? - Parameter description
+   */
   constructor(memoryService: IMemoryService, logger?: any) {
     this.memoryService = memoryService;
     this.logger = logger;

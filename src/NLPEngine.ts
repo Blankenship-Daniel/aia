@@ -1,4 +1,7 @@
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import SemanticAnalyzer from './SemanticAnalyzer.js';
 import QueryProcessor from './QueryProcessor.js';
 import DomainSpecialist from './DomainSpecialist.js';
@@ -65,6 +68,11 @@ class NLPEngine {
   private executionLearnings: any[];
   private successfulPatterns: Map<string, number>;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param aia - Parameter description
+   */
   constructor(aia: AIA) {
     this.aia = aia;
     this.intentClassifiers = this.initializeIntentClassifiers();

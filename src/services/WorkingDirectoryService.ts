@@ -7,6 +7,11 @@ import { IMemoryPersistence } from '../interfaces/IMemoryPersistence';
  * SOLID DIP: Depends on IMemoryPersistence abstraction
  */
 export class WorkingDirectoryService implements IWorkingDirectory {
+  /**
+   * Creates an instance of the class
+   * 
+   * @param private readonly memoryPersistence - Parameter description
+   */
   constructor(private readonly memoryPersistence: IMemoryPersistence) {}
 
   /**

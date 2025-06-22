@@ -71,6 +71,11 @@ interface OptimizationResult {
   optimizedTime?: number;
 }
 
+/**
+ * PerformanceOptimizer class
+ * 
+ * TODO: Add class description
+ */
 export class PerformanceOptimizer extends EventEmitter {
   private cache: Map<string, CacheEntry>;
   private performanceMetrics: Map<string, PerformanceMetric>;
@@ -79,6 +84,9 @@ export class PerformanceOptimizer extends EventEmitter {
   private intervals: NodeJS.Timeout[]; // Store interval references for cleanup
   private thresholds: PerformanceThresholds;
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     super();
     this.cache = new Map<string, CacheEntry>();
@@ -266,6 +274,11 @@ export class PerformanceOptimizer extends EventEmitter {
   }
 
   // Memory management
+  /**
+   * Handles optimizeMemoryUsage operation
+   * 
+   * @returns Promise< - Return value description
+   */
   public async optimizeMemoryUsage(): Promise<{
     beforeUsage: MemoryUsage;
     afterUsage: MemoryUsage;
@@ -292,6 +305,9 @@ export class PerformanceOptimizer extends EventEmitter {
   }
 
   // Performance monitoring
+  /**
+   * Handles startPerformanceMonitoring operation
+   */
   public startPerformanceMonitoring(): void {
     // Memory monitoring
     const memoryInterval = setInterval(() => {
@@ -310,6 +326,9 @@ export class PerformanceOptimizer extends EventEmitter {
     this.intervals.push(memoryInterval, cacheInterval);
   }
 
+  /**
+   * Handles stopPerformanceMonitoring operation
+   */
   public stopPerformanceMonitoring(): void {
     this.intervals.forEach((interval) => clearInterval(interval));
     this.intervals = [];
@@ -342,6 +361,13 @@ export class PerformanceOptimizer extends EventEmitter {
   }
 
   // Private helper methods
+  /**
+   * Generates cachekey
+   * 
+   * @param key - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private generateCacheKey(key: string): string {
     return `cache:${key}`;
   }
@@ -363,11 +389,25 @@ export class PerformanceOptimizer extends EventEmitter {
     return `command:${command}:${this.hashString(contextStr)}`;
   }
 
+  /**
+   * Handles hashData operation
+   * 
+   * @param data - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private hashData(data: unknown[]): string {
     // Simple hash for data array
     return Buffer.from(JSON.stringify(data)).toString('base64').slice(0, 16);
   }
 
+  /**
+   * Handles hashString operation
+   * 
+   * @param str - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private hashString(str: string): string {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
@@ -378,15 +418,35 @@ export class PerformanceOptimizer extends EventEmitter {
     return hash.toString(36);
   }
 
+  /**
+   * Handles isCacheExpired operation
+   * 
+   * @param entry - Parameter description
+   * @param ttl - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private isCacheExpired(entry: CacheEntry, ttl: number): boolean {
     return Date.now() - entry.timestamp > ttl;
   }
 
+  /**
+   * Handles isIndexStale operation
+   * 
+   * @param indexData - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private isIndexStale(indexData: IndexData): boolean {
     const age = Date.now() - indexData.timestamp;
     return age > this.thresholds.indexRebuildInterval;
   }
 
+  /**
+   * Handles recordCacheHit operation
+   * 
+   * @param key - Parameter description
+   */
   private recordCacheHit(key: string): void {
     const entry = this.cache.get(key);
     if (entry) {
@@ -394,6 +454,11 @@ export class PerformanceOptimizer extends EventEmitter {
     }
   }
 
+  /**
+   * Handles recordCacheMiss operation
+   * 
+   * @param key - Parameter description
+   */
   private recordCacheMiss(key: string): void {
     // Could be used for cache miss statistics
   }
@@ -427,6 +492,13 @@ export class PerformanceOptimizer extends EventEmitter {
     }
   }
 
+  /**
+   * Handles extractText operation
+   * 
+   * @param item - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private extractText(item: unknown): string {
     if (typeof item === 'string') {
       return item;
@@ -440,6 +512,13 @@ export class PerformanceOptimizer extends EventEmitter {
     return String(item);
   }
 
+  /**
+   * Handles tokenizeText operation
+   * 
+   * @param text - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private tokenizeText(text: string): string[] {
     return text
       .toLowerCase()
@@ -448,6 +527,14 @@ export class PerformanceOptimizer extends EventEmitter {
       .filter((token) => token.length > 1);
   }
 
+  /**
+   * Generates ngrams
+   * 
+   * @param tokens - Parameter description
+   * @param size - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private generateNgrams(tokens: string[], size: number): string[] {
     const ngrams: string[] = [];
     for (let i = 0; i <= tokens.length - size; i++) {
@@ -537,6 +624,11 @@ export class PerformanceOptimizer extends EventEmitter {
       .map(([term]) => term);
   }
 
+  /**
+   * Gets memoryusage
+   * 
+   * @returns MemoryUsage - Return value description
+   */
   private getMemoryUsage(): MemoryUsage {
     const usage = process.memoryUsage();
     return {
@@ -546,6 +638,11 @@ export class PerformanceOptimizer extends EventEmitter {
     };
   }
 
+  /**
+   * Cleans up cache
+   * 
+   * @param force - Parameter description
+   */
   private cleanupCache(force: boolean = false): void {
     if (force) {
       this.cache.clear();
@@ -575,6 +672,9 @@ export class PerformanceOptimizer extends EventEmitter {
     }
   }
 
+  /**
+   * Cleans up indexes
+   */
   private cleanupIndexes(): void {
     const now = Date.now();
     const indexesToDelete: string[] = [];
@@ -588,6 +688,13 @@ export class PerformanceOptimizer extends EventEmitter {
     indexesToDelete.forEach((key) => this.indexCache.delete(key));
   }
 
+  /**
+   * Handles isCommandCacheable operation
+   * 
+   * @param command - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private isCommandCacheable(command: string): boolean {
     // Define which commands can be cached
     const cacheableCommands = ['index', 'summary', 'search', 'analyze'];
@@ -595,6 +702,9 @@ export class PerformanceOptimizer extends EventEmitter {
   }
 
   // Cleanup all resources
+  /**
+   * Cleans up the operation
+   */
   public cleanup(): void {
     // Stop performance monitoring intervals
     this.stopPerformanceMonitoring();
@@ -607,6 +717,9 @@ export class PerformanceOptimizer extends EventEmitter {
   }
 
   // Dispose method for DIContainer compatibility
+  /**
+   * Handles dispose operation
+   */
   public dispose(): void {
     this.cleanup();
   }

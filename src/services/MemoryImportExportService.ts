@@ -9,6 +9,11 @@ import * as path from 'path';
  * Implements Single Responsibility Principle
  */
 export class MemoryImportExportService implements IMemoryImportExport {
+  /**
+   * Creates an instance of the class
+   * 
+   * @param private readonly memoryPersistence - Parameter description
+   */
   constructor(private readonly memoryPersistence: IMemoryPersistence) {}
 
   /**

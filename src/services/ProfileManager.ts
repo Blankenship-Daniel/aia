@@ -12,15 +12,30 @@ import { IMemoryPersistence } from '../interfaces/IMemoryPersistence';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
+/**
+ * ProfileManager class
+ * 
+ * TODO: Add class description
+ */
 export class ProfileManager implements IProfileManager {
   private profiles: Map<string, Profile> = new Map();
   private activeProfile: string = 'default';
   private readonly STORAGE_KEY = 'profiles';
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param private persistence - Parameter description
+   */
   constructor(private persistence: IMemoryPersistence) {
     this.load();
   }
 
+  /**
+   * Handles load operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async load(): Promise<void> {
     try {
       const memoryData = await this.persistence.loadMemory();
@@ -43,6 +58,11 @@ export class ProfileManager implements IProfileManager {
     }
   }
 
+  /**
+   * Handles save operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async save(): Promise<void> {
     try {
       const memoryData = await this.persistence.loadMemory();
@@ -63,6 +83,14 @@ export class ProfileManager implements IProfileManager {
     }
   }
 
+  /**
+   * Creates the operation
+   * 
+   * @param name - Parameter description
+   * @param config? - Parameter description
+   * 
+   * @returns Profile - Return value description
+   */
   create(name: string, config?: Partial<Profile>): Profile {
     if (this.profiles.has(name)) {
       throw new Error(`Profile '${name}' already exists`);
@@ -91,6 +119,11 @@ export class ProfileManager implements IProfileManager {
     this.save();
   }
 
+  /**
+   * Handles list operation
+   * 
+   * @returns Profile[] - Return value description
+   */
   list(): Profile[] {
     return Array.from(this.profiles.values()).sort((a, b) => {
       // Active profile first, then alphabetical
@@ -100,6 +133,11 @@ export class ProfileManager implements IProfileManager {
     });
   }
 
+  /**
+   * Gets active
+   * 
+   * @returns Profile - Return value description
+   */
   getActive(): Profile {
     const profile = this.profiles.get(this.activeProfile);
     if (!profile) {
@@ -110,6 +148,11 @@ export class ProfileManager implements IProfileManager {
     return profile;
   }
 
+  /**
+   * Handles delete operation
+   * 
+   * @param name - Parameter description
+   */
   delete(name: string): void {
     if (name === 'default') {
       throw new Error('Cannot delete default profile');
@@ -129,10 +172,25 @@ export class ProfileManager implements IProfileManager {
     this.save();
   }
 
+  /**
+   * Handles exists operation
+   * 
+   * @param name - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   exists(name: string): boolean {
     return this.profiles.has(name);
   }
 
+  /**
+   * Handles export operation
+   * 
+   * @param name - Parameter description
+   * @param filePath - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async export(name: string, filePath: string): Promise<void> {
     const profile = this.profiles.get(name);
     if (!profile) {
@@ -149,6 +207,13 @@ export class ProfileManager implements IProfileManager {
     await fs.writeJson(filePath, exportData, { spaces: 2 });
   }
 
+  /**
+   * Handles import operation
+   * 
+   * @param filePath - Parameter description
+   * 
+   * @returns Promise<Profile> - Return value description
+   */
   async import(filePath: string): Promise<Profile> {
     try {
       const data = await fs.readJson(filePath);

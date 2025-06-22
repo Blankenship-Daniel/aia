@@ -2,7 +2,10 @@ import { ICommand, CommandDefinition } from '../interfaces/ICommand';
 import { IAnalyticsService } from '../interfaces/IAnalyticsService';
 import { IContextService } from '../interfaces/IContextService';
 import { CommandResult, CommandOptions } from '../types/index';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import Table from 'cli-table3';
 import boxen from 'boxen';
 import { UXEnhancements } from '../utils/UXEnhancements';
@@ -58,6 +61,11 @@ export class AnalyticsCommand implements ICommand {
     }
   }
 
+  /**
+   * Gets definition
+   * 
+   * @returns CommandDefinition - Return value description
+   */
   getDefinition(): CommandDefinition {
     return {
       name: 'analytics',
@@ -139,14 +147,31 @@ export class AnalyticsCommand implements ICommand {
     };
   }
 
+  /**
+   * Gets name
+   * 
+   * @returns string - Return value description
+   */
   getName(): string {
     return 'analytics';
   }
 
+  /**
+   * Gets aliases
+   * 
+   * @returns string[] - Return value description
+   */
   getAliases(): string[] {
     return ['insights', 'metrics'];
   }
 
+  /**
+   * Validates args
+   * 
+   * @param args - Parameter description
+   * 
+   * @returns  - Return value description
+   */
   validateArgs(args: string[]): { valid: boolean; errors: string[] } {
     return {
       valid: true,
@@ -154,6 +179,11 @@ export class AnalyticsCommand implements ICommand {
     };
   }
 
+  /**
+   * Gets help
+   * 
+   * @returns string - Return value description
+   */
   getHelp(): string {
     return `
 📊 AIA Analytics & Insights
@@ -185,6 +215,11 @@ Flags:
     `;
   }
 
+  /**
+   * Handles showUsageAnalytics operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async showUsageAnalytics(): Promise<void> {
     // Create gradient header with responsive layout
     console.log(
@@ -398,6 +433,11 @@ Flags:
     }
   }
 
+  /**
+   * Handles showPerformanceAnalytics operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async showPerformanceAnalytics(): Promise<void> {
     console.log(
       boxen(chalk.yellow.bold('⚡ Performance Analytics'), {
@@ -632,6 +672,11 @@ Flags:
     }
   }
 
+  /**
+   * Handles showProductivityReport operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async showProductivityReport(): Promise<void> {
     console.log(chalk.blue('\n📊 Productivity Report'));
     console.log(chalk.blue('======================'));
@@ -683,6 +728,13 @@ Flags:
     }
   }
 
+  /**
+   * Handles showUsageTrends operation
+   * 
+   * @param options - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async showUsageTrends(options: CommandOptions): Promise<void> {
     const timeRange = (options.trends as string) || 'week';
 
@@ -755,6 +807,11 @@ Flags:
     );
   }
 
+  /**
+   * Handles showRecommendations operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async showRecommendations(): Promise<void> {
     console.log(chalk.blue('\n💡 Optimization Recommendations'));
     console.log(chalk.blue('================================='));
@@ -806,6 +863,13 @@ Flags:
     );
   }
 
+  /**
+   * Handles exportAnalytics operation
+   * 
+   * @param options - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async exportAnalytics(options: CommandOptions): Promise<void> {
     const format = (options.export as string) || 'json';
 
@@ -859,6 +923,13 @@ Flags:
     }
   }
 
+  /**
+   * Handles clearAnalytics operation
+   * 
+   * @param options - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async clearAnalytics(options: CommandOptions): Promise<void> {
     if (!options.confirm) {
       console.log(chalk.yellow('⚠️  Clear Analytics Confirmation'));
@@ -878,6 +949,13 @@ Flags:
     }
   }
 
+  /**
+   * Gets insighticon
+   * 
+   * @param type - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private getInsightIcon(type: string): string {
     switch (type) {
       case 'achievement':

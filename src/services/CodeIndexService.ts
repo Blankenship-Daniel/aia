@@ -151,9 +151,17 @@ interface CopilotInstructions {
   hotspots: Array<{ file: string; metrics: number }>;
 }
 
+/**
+ * CodeIndexService class
+ * 
+ * TODO: Add class description
+ */
 export class CodeIndexService {
   private index: CodebaseIndex;
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     this.index = {
       files: new Map(),
@@ -179,6 +187,13 @@ export class CodeIndexService {
     };
   }
 
+  /**
+   * Handles indexCodebase operation
+   * 
+   * @param rootDir - Parameter description
+   * 
+   * @returns Promise<CodebaseIndex> - Return value description
+   */
   public async indexCodebase(rootDir: string): Promise<CodebaseIndex> {
     console.log('🔍 Building codebase index...');
 
@@ -220,6 +235,14 @@ export class CodeIndexService {
     }
   }
 
+  /**
+   * Handles indexFile operation
+   * 
+   * @param filePath - Parameter description
+   * @param baseDir - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async indexFile(filePath: string, baseDir: string): Promise<void> {
     const relativePath = path.relative(baseDir, filePath);
     const content = await fs.readFile(filePath, 'utf8');
@@ -257,6 +280,12 @@ export class CodeIndexService {
     this.index.files.set(relativePath, fileInfo);
   }
 
+  /**
+   * Parses javascriptfile
+   * 
+   * @param content - Parameter description
+   * @param fileInfo - Parameter description
+   */
   private parseJavaScriptFile(content: string, fileInfo: FileInfo): void {
     // Extract classes
     const classRegex = /class\s+(\w+)(?:\s+extends\s+(\w+))?/g;
@@ -340,6 +369,12 @@ export class CodeIndexService {
     return methods;
   }
 
+  /**
+   * Handles extractComments operation
+   * 
+   * @param content - Parameter description
+   * @param fileInfo - Parameter description
+   */
   private extractComments(content: string, fileInfo: FileInfo): void {
     // Extract JSDoc comments
     const jsdocRegex = /\/\*\*[\s\S]*?\*\//g;
@@ -356,6 +391,12 @@ export class CodeIndexService {
     }
   }
 
+  /**
+   * Parses pythonfile
+   * 
+   * @param content - Parameter description
+   * @param fileInfo - Parameter description
+   */
   private parsePythonFile(content: string, fileInfo: FileInfo): void {
     // Extract Python classes
     const classRegex = /class\s+(\w+)(?:\(([^)]+)\))?:/g;
@@ -429,6 +470,12 @@ export class CodeIndexService {
     return methods;
   }
 
+  /**
+   * Parses jsonfile
+   * 
+   * @param content - Parameter description
+   * @param fileInfo - Parameter description
+   */
   private parseJSONFile(content: string, fileInfo: FileInfo): void {
     try {
       const jsonData = JSON.parse(content);
@@ -447,6 +494,12 @@ export class CodeIndexService {
     }
   }
 
+  /**
+   * Parses markdownfile
+   * 
+   * @param content - Parameter description
+   * @param fileInfo - Parameter description
+   */
   private parseMarkdownFile(content: string, fileInfo: FileInfo): void {
     // Extract headers
     const headerRegex = /^(#+)\s+(.+)$/gm;
@@ -473,6 +526,9 @@ export class CodeIndexService {
     }
   }
 
+  /**
+   * Builds relationships
+   */
   private buildRelationships(): void {
     // Build dependency graph
     for (const [filePath, fileInfo] of Array.from(this.index.files.entries())) {
@@ -489,6 +545,9 @@ export class CodeIndexService {
     }
   }
 
+  /**
+   * Generates summary
+   */
   private generateSummary(): void {
     this.index.metadata = {
       totalFiles: this.index.files.size,
@@ -502,6 +561,11 @@ export class CodeIndexService {
     };
   }
 
+  /**
+   * Handles saveIndex operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async saveIndex(): Promise<void> {
     const indexPath = path.join(process.cwd(), '.aia', 'codebase-index.json');
     await fs.ensureDir(path.dirname(indexPath));
@@ -518,6 +582,13 @@ export class CodeIndexService {
   }
 
   // Helper methods
+  /**
+   * Handles shouldIgnore operation
+   * 
+   * @param name - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private shouldIgnore(name: string): boolean {
     const ignorePatterns = [
       'node_modules',
@@ -543,6 +614,13 @@ export class CodeIndexService {
     return ignorePatterns.includes(name);
   }
 
+  /**
+   * Handles shouldIndex operation
+   * 
+   * @param name - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private shouldIndex(name: string): boolean {
     const indexExtensions = [
       '.js',
@@ -561,6 +639,13 @@ export class CodeIndexService {
     return indexExtensions.some((ext) => name.endsWith(ext));
   }
 
+  /**
+   * Handles hashContent operation
+   * 
+   * @param content - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private hashContent(content: string): string {
     return crypto
       .createHash('sha256')
@@ -569,6 +654,13 @@ export class CodeIndexService {
       .substring(0, 16);
   }
 
+  /**
+   * Handles detectLanguage operation
+   * 
+   * @param ext - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private detectLanguage(ext: string): string {
     const languageMap: Record<string, string> = {
       '.js': 'javascript',
@@ -601,6 +693,14 @@ export class CodeIndexService {
     return typeMap[ext] || 'other';
   }
 
+  /**
+   * Handles resolveImport operation
+   * 
+   * @param fromFile - Parameter description
+   * @param importPath - Parameter description
+   * 
+   * @returns string | null - Return value description
+   */
   private resolveImport(fromFile: string, importPath: string): string | null {
     const fromDir = path.dirname(fromFile);
     const resolvedPath = path.resolve(fromDir, importPath);
@@ -618,6 +718,11 @@ export class CodeIndexService {
     return null;
   }
 
+  /**
+   * Gets languagedistribution
+   * 
+   * @returns Record<string, number> - Return value description
+   */
   public getLanguageDistribution(): Record<string, number> {
     const distribution: Record<string, number> = {};
     for (const [, fileInfo] of Array.from(this.index.files.entries())) {
@@ -658,6 +763,9 @@ export class CodeIndexService {
       .map(([file, count]) => ({ file, count }));
   }
 
+  /**
+   * Handles resetIndex operation
+   */
   private resetIndex(): void {
     this.index = {
       files: new Map(),
@@ -724,6 +832,11 @@ export class CodeIndexService {
     await this.saveIndex();
   }
 
+  /**
+   * Handles loadIndex operation
+   * 
+   * @returns Promise<CodebaseIndex | null> - Return value description
+   */
   public async loadIndex(): Promise<CodebaseIndex | null> {
     const indexPath = path.join(process.cwd(), '.aia', 'codebase-index.json');
 
@@ -744,6 +857,13 @@ export class CodeIndexService {
   }
 
   // Search functionality
+  /**
+   * Handles searchSymbols operation
+   * 
+   * @param query - Parameter description
+   * 
+   * @returns SearchResult[] - Return value description
+   */
   public searchSymbols(query: string): SearchResult[] {
     const results: SearchResult[] = [];
     const queryLower = query.toLowerCase();
@@ -777,6 +897,13 @@ export class CodeIndexService {
     return results.sort((a, b) => b.relevance - a.relevance);
   }
 
+  /**
+   * Handles searchFiles operation
+   * 
+   * @param query - Parameter description
+   * 
+   * @returns FileSearchResult[] - Return value description
+   */
   public searchFiles(query: string): FileSearchResult[] {
     const results: FileSearchResult[] = [];
     const queryLower = query.toLowerCase();
@@ -797,6 +924,13 @@ export class CodeIndexService {
     return results.sort((a, b) => b.relevance - a.relevance);
   }
 
+  /**
+   * Handles searchTodos operation
+   * 
+   * @param query - Parameter description
+   * 
+   * @returns TodoItem[] - Return value description
+   */
   public searchTodos(query: string = ''): TodoItem[] {
     if (!query) return this.index.todos;
 
@@ -806,6 +940,14 @@ export class CodeIndexService {
     );
   }
 
+  /**
+   * Calculates relevance
+   * 
+   * @param text - Parameter description
+   * @param query - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private calculateRelevance(text: string, query: string): number {
     const textLower = text.toLowerCase();
     const queryLower = query.toLowerCase();
@@ -830,6 +972,11 @@ export class CodeIndexService {
     return (matches / queryLower.length) * 0.4;
   }
 
+  /**
+   * Gets indexstats
+   * 
+   * @returns IndexStats - Return value description
+   */
   public getIndexStats(): IndexStats {
     return {
       totalFiles: this.index.files.size,
@@ -958,6 +1105,11 @@ export class CodeIndexService {
     return content;
   }
 
+  /**
+   * Handles extractCommonPatterns operation
+   * 
+   * @returns PatternInfo[] - Return value description
+   */
   private extractCommonPatterns(): PatternInfo[] {
     const patterns: PatternInfo[] = [];
 
@@ -1012,6 +1164,11 @@ export class CodeIndexService {
     return patterns;
   }
 
+  /**
+   * Handles extractFunctionPatterns operation
+   * 
+   * @returns Array< - Return value description
+   */
   private extractFunctionPatterns(): Array<{
     description: string;
     count: number;
@@ -1057,6 +1214,11 @@ export class CodeIndexService {
     return patterns.slice(0, 5);
   }
 
+  /**
+   * Handles extractAPIPatterns operation
+   * 
+   * @returns PatternInfo[] - Return value description
+   */
   private extractAPIPatterns(): PatternInfo[] {
     const patterns: PatternInfo[] = [];
 
@@ -1107,6 +1269,11 @@ export class CodeIndexService {
     return patterns;
   }
 
+  /**
+   * Handles extractConfigPatterns operation
+   * 
+   * @returns PatternInfo[] - Return value description
+   */
   private extractConfigPatterns(): PatternInfo[] {
     const patterns: PatternInfo[] = [];
     const configFiles = Array.from(this.index.files.keys()).filter(
@@ -1124,6 +1291,11 @@ export class CodeIndexService {
     return patterns;
   }
 
+  /**
+   * Handles extractTestPatterns operation
+   * 
+   * @returns PatternInfo[] - Return value description
+   */
   private extractTestPatterns(): PatternInfo[] {
     const patterns: PatternInfo[] = [];
     const testFiles = Array.from(this.index.files.keys()).filter(
@@ -1145,6 +1317,11 @@ export class CodeIndexService {
     return patterns;
   }
 
+  /**
+   * Handles extractCommonWorkflows operation
+   * 
+   * @returns WorkflowInfo[] - Return value description
+   */
   private extractCommonWorkflows(): WorkflowInfo[] {
     const workflows: WorkflowInfo[] = [];
 
@@ -1187,6 +1364,11 @@ export class CodeIndexService {
     return workflows;
   }
 
+  /**
+   * Generates structuremap
+   * 
+   * @returns Record<string, unknown> - Return value description
+   */
   private generateStructureMap(): Record<string, unknown> {
     const structure: Record<string, unknown> = {};
 
@@ -2629,16 +2811,36 @@ export class CodeIndexService {
     return index.dependencies.get(filePath) || [];
   }
 
+  /**
+   * Gets fileexports
+   * 
+   * @param filePath - Parameter description
+   * @param index - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private getFileExports(filePath: string, index: CodebaseIndex): string[] {
     const fileInfo = index.files.get(filePath);
     return fileInfo?.exports || [];
   }
 
+  /**
+   * Gets componentdescription
+   * 
+   * @param filePath - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private getComponentDescription(filePath: string): string {
     return `Core module with dynamic functionality`;
   }
 
   // Helper methods for enhanced copilot instructions
+  /**
+   * Handles loadIndexSync operation
+   * 
+   * @returns CodebaseIndex | null - Return value description
+   */
   private loadIndexSync(): CodebaseIndex | null {
     try {
       const indexPath = path.join(process.cwd(), '.aia', 'codebase-index.json');
@@ -2652,6 +2854,13 @@ export class CodeIndexService {
     return null;
   }
 
+  /**
+   * Handles countTestFiles operation
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private countTestFiles(index: CodebaseIndex): number {
     let count = 0;
     for (const [filePath] of index.files) {
@@ -2666,6 +2875,13 @@ export class CodeIndexService {
     return count;
   }
 
+  /**
+   * Gets mostimportedmodules
+   * 
+   * @param index - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private getMostImportedModules(index: CodebaseIndex): string[] {
     const importCounts = new Map<string, number>();
 

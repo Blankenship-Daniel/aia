@@ -14,16 +14,35 @@ import {
 } from '../../interfaces/IAIProvider';
 import OpenAI from 'openai';
 
+/**
+ * OpenAIProvider class
+ * 
+ * TODO: Add class description
+ */
 export class OpenAIProvider implements IAIProvider {
   name = 'openai';
   private client: OpenAI;
   private model: string;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param private apiKey - Parameter description
+   * @param model - Parameter description
+   */
   constructor(private apiKey: string, model: string) {
     this.client = new OpenAI({ apiKey });
     this.model = model;
   }
 
+  /**
+   * Handles call operation
+   * 
+   * @param prompt - Parameter description
+   * @param options - Parameter description
+   * 
+   * @returns Promise<string> - Return value description
+   */
   async call(prompt: string, options: AICallOptions): Promise<string> {
     try {
       const response = await this.client.chat.completions.create({
@@ -52,6 +71,13 @@ export class OpenAIProvider implements IAIProvider {
     }
   }
 
+  /**
+   * Validates config
+   * 
+   * @param config - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   validateConfig(config: any): boolean {
     if (!config.apiKey || typeof config.apiKey !== 'string') {
       return false;
@@ -64,6 +90,11 @@ export class OpenAIProvider implements IAIProvider {
     );
   }
 
+  /**
+   * Gets modelcapabilities
+   * 
+   * @returns ModelCapabilities - Return value description
+   */
   getModelCapabilities(): ModelCapabilities {
     const isGPT4 = this.model.includes('gpt-4');
     return {
@@ -75,6 +106,13 @@ export class OpenAIProvider implements IAIProvider {
     };
   }
 
+  /**
+   * Handles estimateTokens operation
+   * 
+   * @param text - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   estimateTokens(text: string): number {
     // Rough estimation: ~4 characters per token for English text
     return Math.ceil(text.length / 4);

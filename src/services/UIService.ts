@@ -5,7 +5,10 @@ import {
 } from '../interfaces/SpinnerService.interface';
 import { SpinnerService } from './SpinnerService';
 import boxen from 'boxen';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import figures from 'figures';
 
 /**
@@ -69,6 +72,11 @@ export interface IUIService {
 export class UIService implements IUIService {
   private spinnerService: ISpinnerService;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param spinnerService? - Parameter description
+   */
   constructor(spinnerService?: ISpinnerService) {
     // Use dependency injection pattern or create a default instance
     this.spinnerService = spinnerService || new SpinnerService();

@@ -19,8 +19,16 @@ import {
 } from '../interfaces/IModelRecommendationService';
 import { IAIService } from '../interfaces/IAIService';
 import { IContextService } from '../interfaces/IContextService';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 
+/**
+ * AIModelRecommendationService class
+ * 
+ * TODO: Add class description
+ */
 export class AIModelRecommendationService
   implements IModelRecommendationService
 {
@@ -62,6 +70,12 @@ Respond with JSON:
 }
 `;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param aiService - Parameter description
+   * @param contextService - Parameter description
+   */
   constructor(aiService: IAIService, contextService: IContextService) {
     this.aiService = aiService;
     this.contextService = contextService;
@@ -123,6 +137,13 @@ Respond with JSON:
     }
   }
 
+  /**
+   * Analyzes taskrequirements
+   * 
+   * @param task - Parameter description
+   * 
+   * @returns Promise<TaskRequirements> - Return value description
+   */
   async analyzeTaskRequirements(task: string): Promise<TaskRequirements> {
     try {
       const prompt = `
@@ -386,6 +407,13 @@ Provide a detailed analysis in JSON format:
     }
   }
 
+  /**
+   * Builds analysisprompt
+   * 
+   * @param context - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private buildAnalysisPrompt(context: ModelSelectionContext): string {
     return this.AI_ANALYSIS_PROMPT_TEMPLATE.replace('{query}', context.query)
       .replace('{availableModels}', JSON.stringify(context.availableModels))
@@ -404,6 +432,13 @@ Provide a detailed analysis in JSON format:
       );
   }
 
+  /**
+   * Parses airesponse
+   * 
+   * @param content - Parameter description
+   * 
+   * @returns ModelRecommendation - Return value description
+   */
   private parseAIResponse(content: string): ModelRecommendation {
     try {
       // Extract JSON from AI response
@@ -441,6 +476,13 @@ Provide a detailed analysis in JSON format:
     }
   }
 
+  /**
+   * Parses taskrequirements
+   * 
+   * @param content - Parameter description
+   * 
+   * @returns TaskRequirements - Return value description
+   */
   private parseTaskRequirements(content: string): TaskRequirements {
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -537,6 +579,13 @@ Provide a detailed analysis in JSON format:
 
   // Private helper methods for the new functionality
 
+  /**
+   * Calculates projectcomplexity
+   * 
+   * @param context - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private calculateProjectComplexity(context: ModelSelectionContext): number {
     let complexity = 0.5; // Base complexity
 
@@ -589,6 +638,13 @@ Provide a detailed analysis in JSON format:
     return Math.min(1.0, score);
   }
 
+  /**
+   * Gets modelpros
+   * 
+   * @param model - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private getModelPros(model: AIModel): string[] {
     const prosMap: Record<string, string[]> = {
       'gpt-4': ['High accuracy', 'Complex reasoning', 'Code generation'],
@@ -617,6 +673,13 @@ Provide a detailed analysis in JSON format:
     return prosMap[model] || ['General purpose', 'Reliable'];
   }
 
+  /**
+   * Gets modelcons
+   * 
+   * @param model - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private getModelCons(model: AIModel): string[] {
     const consMap: Record<string, string[]> = {
       'gpt-4': ['Higher cost', 'Slower response'],
@@ -629,6 +692,13 @@ Provide a detailed analysis in JSON format:
     return consMap[model] || ['Standard limitations'];
   }
 
+  /**
+   * Handles estimateCost operation
+   * 
+   * @param model - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private estimateCost(model: AIModel): number {
     const costMap: Record<string, number> = {
       'gpt-4': 0.03,
@@ -641,6 +711,13 @@ Provide a detailed analysis in JSON format:
     return costMap[model] || 0.005;
   }
 
+  /**
+   * Handles estimateResponseTime operation
+   * 
+   * @param model - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private estimateResponseTime(model: AIModel): number {
     const timeMap: Record<string, number> = {
       'gpt-4': 3000,
@@ -653,12 +730,26 @@ Provide a detailed analysis in JSON format:
     return timeMap[model] || 2000;
   }
 
+  /**
+   * Gets modelprovider
+   * 
+   * @param model - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private getModelProvider(model: AIModel): string {
     if (model.startsWith('gpt')) return 'openai';
     if (model.startsWith('claude')) return 'anthropic';
     return 'unknown';
   }
 
+  /**
+   * Calculates costeffectiveness
+   * 
+   * @param model - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private calculateCostEffectiveness(model: AIModel): number {
     const cost = this.estimateCost(model);
     const quality = this.getExpectedQuality(model);
@@ -667,6 +758,13 @@ Provide a detailed analysis in JSON format:
     return quality / Math.max(cost * 100, 0.1); // Scale cost to reasonable range
   }
 
+  /**
+   * Gets expectedquality
+   * 
+   * @param model - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private getExpectedQuality(model: AIModel): number {
     const qualityMap: Record<string, number> = {
       'gpt-4': 0.95,
@@ -680,6 +778,13 @@ Provide a detailed analysis in JSON format:
     return qualityMap[model] || 0.8;
   }
 
+  /**
+   * Gets expectedspeed
+   * 
+   * @param model - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private getExpectedSpeed(model: AIModel): number {
     const responseTime = this.estimateResponseTime(model);
 
@@ -688,6 +793,13 @@ Provide a detailed analysis in JSON format:
     return Math.max(0.1, Math.min(1.0, 500 / responseTime));
   }
 
+  /**
+   * Gets reliability
+   * 
+   * @param model - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private getReliability(model: AIModel): number {
     const reliabilityMap: Record<string, number> = {
       'gpt-4': 0.95,

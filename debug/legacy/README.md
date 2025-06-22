@@ -1,5 +1,12 @@
-# Legacy Debug Scripts
+# Legacy Debug Scripts - CLEANED
 
-This folder contains debug scripts that were used for development, pattern testing, or migration validation. They are not required for production or normal development workflows, but are preserved here for reference.
+This folder previously contained debug scripts that were used for development and pattern testing. These scripts have been removed as they are no longer needed for production or development workflows.
 
-If you need to restore any script, move it back to the main `debug/` directory.
+The codebase now uses:
+
+- Unified error handling (`src/utils/UnifiedErrorHandler.ts`)
+- Unified performance monitoring (`src/utils/UnifiedPerformanceMonitor.ts`)
+- Documentation linter (`scripts/documentation-linter.ts`)
+- Enhanced test utilities (`tests/setup.ts`)
+
+If you need to debug specific functionality, refer to the main debug utilities or create new scripts in the main `debug/` directory.

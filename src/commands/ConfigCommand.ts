@@ -1,15 +1,28 @@
 import { ICommand, CommandDefinition } from '../interfaces/ICommand';
 import { IConfigurationService } from '../interfaces/IConfigurationService';
 import { CommandResult, CommandOptions, AIAConfig } from '../types/index';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import inquirer from 'inquirer';
 
+/**
+ * ConfigCommand class
+ * 
+ * TODO: Add class description
+ */
 export class ConfigCommand implements ICommand {
   public readonly name = 'config';
   public readonly description =
     'Manage AIA configuration settings and API keys';
   public readonly aliases = ['cfg', 'configure'];
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param private configurationService - Parameter description
+   */
   constructor(private configurationService: IConfigurationService) {}
 
   public async execute(
@@ -43,6 +56,13 @@ export class ConfigCommand implements ICommand {
     }
   }
 
+  /**
+   * Handles set
+   * 
+   * @param keyValue - Parameter description
+   * 
+   * @returns Promise<CommandResult> - Return value description
+   */
   private async handleSet(keyValue: string): Promise<CommandResult> {
     const [key, value] = keyValue.split('=');
 
@@ -74,6 +94,13 @@ export class ConfigCommand implements ICommand {
     }
   }
 
+  /**
+   * Handles get
+   * 
+   * @param key - Parameter description
+   * 
+   * @returns Promise<CommandResult> - Return value description
+   */
   private async handleGet(key: string): Promise<CommandResult> {
     try {
       const value = this.configurationService.getSetting(
@@ -102,6 +129,11 @@ export class ConfigCommand implements ICommand {
     }
   }
 
+  /**
+   * Handles list
+   * 
+   * @returns Promise<CommandResult> - Return value description
+   */
   private async handleList(): Promise<CommandResult> {
     try {
       const config = this.configurationService.getConfiguration();
@@ -131,6 +163,11 @@ export class ConfigCommand implements ICommand {
     }
   }
 
+  /**
+   * Handles interactive
+   * 
+   * @returns Promise<CommandResult> - Return value description
+   */
   private async handleInteractive(): Promise<CommandResult> {
     try {
       console.log(chalk.cyan('🔧 AIA Configuration Setup'));
@@ -330,6 +367,11 @@ export class ConfigCommand implements ICommand {
   }
 
   // ICommand interface methods
+  /**
+   * Gets definition
+   * 
+   * @returns CommandDefinition - Return value description
+   */
   public getDefinition(): CommandDefinition {
     return {
       name: this.name,
@@ -372,14 +414,31 @@ export class ConfigCommand implements ICommand {
     };
   }
 
+  /**
+   * Gets name
+   * 
+   * @returns string - Return value description
+   */
   public getName(): string {
     return this.name;
   }
 
+  /**
+   * Gets aliases
+   * 
+   * @returns string[] - Return value description
+   */
   public getAliases(): string[] {
     return this.aliases;
   }
 
+  /**
+   * Validates args
+   * 
+   * @param args - Parameter description
+   * 
+   * @returns  - Return value description
+   */
   public validateArgs(args: string[]): { valid: boolean; errors: string[] } {
     // Config command doesn't require specific arguments
     return {
@@ -388,6 +447,11 @@ export class ConfigCommand implements ICommand {
     };
   }
 
+  /**
+   * Gets help
+   * 
+   * @returns string - Return value description
+   */
   public getHelp(): string {
     const definition = this.getDefinition();
     let help = `${definition.name} - ${definition.description}\n\n`;

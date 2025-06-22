@@ -1,4 +1,7 @@
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import path from 'path';
 import crypto from 'crypto';
 import axios from 'axios';
@@ -63,6 +66,11 @@ interface EnhancedValidationResult extends ValidationResult {
   usedAIAnalysis?: boolean;
 }
 
+/**
+ * SecurityValidator class
+ * 
+ * TODO: Add class description
+ */
 class SecurityValidator {
   private securityPatterns: Map<string, SecurityPattern>;
   private customRules: Map<string, SecurityRule>;
@@ -72,6 +80,11 @@ class SecurityValidator {
   private safeDiscoveryPatterns: RegExp[];
   private aiSecurityAnalyzer?: IAISecurityAnalyzer;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param aiSecurityAnalyzer? - Parameter description
+   */
   constructor(aiSecurityAnalyzer?: IAISecurityAnalyzer) {
     this.securityPatterns = new Map();
     this.customRules = new Map();
@@ -94,6 +107,9 @@ class SecurityValidator {
     this.initializeSecurityPatterns();
   }
 
+  /**
+   * Initializes securitypatterns
+   */
   private initializeSecurityPatterns(): void {
     // Whitelist of safe discovery commands that can contain special characters
     this.safeDiscoveryPatterns = [
@@ -165,6 +181,13 @@ class SecurityValidator {
     });
   }
 
+  /**
+   * Validates command
+   * 
+   * @param command - Parameter description
+   * 
+   * @returns ValidationResult - Return value description
+   */
   public validateCommand(command: string): ValidationResult {
     const result: ValidationResult = {
       allowed: true,
@@ -461,6 +484,13 @@ Analysis failed after ${analysisTime}ms.
     return 'development';
   }
 
+  /**
+   * Handles sanitizeInput operation
+   * 
+   * @param input - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   public sanitizeInput(input: string): string {
     if (!input || typeof input !== 'string') {
       return '';
@@ -490,10 +520,22 @@ Analysis failed after ${analysisTime}ms.
     return sanitized;
   }
 
+  /**
+   * Gets maxinputlength
+   * 
+   * @returns number - Return value description
+   */
   private getMaxInputLength(): number {
     return 10000; // 10KB limit
   }
 
+  /**
+   * Validates path
+   * 
+   * @param filePath - Parameter description
+   * 
+   * @returns ValidationResult - Return value description
+   */
   public validatePath(filePath: string): ValidationResult {
     const result: ValidationResult = {
       allowed: true,
@@ -644,6 +686,11 @@ Analysis failed after ${analysisTime}ms.
     });
   }
 
+  /**
+   * Gets securitymetrics
+   * 
+   * @returns SecurityMetrics - Return value description
+   */
   public getSecurityMetrics(): SecurityMetrics {
     return { ...this.metrics };
   }
@@ -655,16 +702,35 @@ Analysis failed after ${analysisTime}ms.
     return pattern ? pattern.severity : null;
   }
 
+  /**
+   * Gets patterndescription
+   * 
+   * @param patternName - Parameter description
+   * 
+   * @returns string | null - Return value description
+   */
   public getPatternDescription(patternName: string): string | null {
     const pattern = this.securityPatterns.get(patternName);
     return pattern ? pattern.description : null;
   }
 
+  /**
+   * Gets metrics
+   * 
+   * @returns SecurityMetrics - Return value description
+   */
   public getMetrics(): SecurityMetrics {
     return { ...this.metrics };
   }
 
   // Helper methods for testing and integration
+  /**
+   * Handles sanitizeCommand operation
+   * 
+   * @param command - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   public sanitizeCommand(command: string): string {
     const result = this.validateCommand(command);
     return result.sanitized;
@@ -691,6 +757,13 @@ Analysis failed after ${analysisTime}ms.
   }
 
   // Basic API key encryption (in production this should use proper encryption)
+  /**
+   * Handles encryptApiKey operation
+   * 
+   * @param apiKey - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   public encryptApiKey(apiKey: string): string {
     const algorithm = 'aes-256-cbc';
     const key = crypto.scryptSync('aia-secret', 'salt', 32);
@@ -704,6 +777,13 @@ Analysis failed after ${analysisTime}ms.
   }
 
   // Basic API key decryption
+  /**
+   * Handles decryptApiKey operation
+   * 
+   * @param encryptedKey - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   public decryptApiKey(encryptedKey: string): string {
     try {
       const algorithm = 'aes-256-cbc';
@@ -722,6 +802,13 @@ Analysis failed after ${analysisTime}ms.
     }
   }
 
+  /**
+   * Validates anthropicapikey
+   * 
+   * @param apiKey - Parameter description
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   public async validateAnthropicApiKey(apiKey: string): Promise<boolean> {
     try {
       const response = await axios.get(
@@ -749,6 +836,9 @@ Analysis failed after ${analysisTime}ms.
     }
   }
 
+  /**
+   * Handles reset operation
+   */
   public reset(): void {
     this.securityPatterns.clear();
     this.customRules.clear();

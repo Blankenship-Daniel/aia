@@ -15,6 +15,11 @@ import {
   PerformanceThresholds,
 } from '../interfaces/IPerformanceMonitor.js';
 
+/**
+ * PerformanceMonitorService class
+ * 
+ * TODO: Add class description
+ */
 export class PerformanceMonitorService implements IPerformanceMonitor {
   private methodMetrics = new Map<string, MethodMetrics>();
   private alerts: PerformanceAlert[] = [];
@@ -84,6 +89,13 @@ export class PerformanceMonitorService implements IPerformanceMonitor {
     return this.methodMetrics.get(key) || null;
   }
 
+  /**
+   * Gets classmetrics
+   * 
+   * @param className - Parameter description
+   * 
+   * @returns Promise<MethodMetrics[]> - Return value description
+   */
   async getClassMetrics(className: string): Promise<MethodMetrics[]> {
     const results: MethodMetrics[] = [];
 
@@ -98,6 +110,11 @@ export class PerformanceMonitorService implements IPerformanceMonitor {
     );
   }
 
+  /**
+   * Gets systemmetrics
+   * 
+   * @returns Promise<SystemMetrics> - Return value description
+   */
   async getSystemMetrics(): Promise<SystemMetrics> {
     const memoryUsage = process.memoryUsage();
     const cpuUsage = process.cpuUsage();
@@ -114,19 +131,41 @@ export class PerformanceMonitorService implements IPerformanceMonitor {
     };
   }
 
+  /**
+   * Sets thresholds
+   * 
+   * @param thresholds - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async setThresholds(thresholds: PerformanceThresholds): Promise<void> {
     this.thresholds = { ...this.thresholds, ...thresholds };
   }
 
+  /**
+   * Gets alerts
+   * 
+   * @returns Promise<PerformanceAlert[]> - Return value description
+   */
   async getAlerts(): Promise<PerformanceAlert[]> {
     return [...this.alerts].sort((a, b) => b.timestamp - a.timestamp);
   }
 
+  /**
+   * Handles clearMetrics operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async clearMetrics(): Promise<void> {
     this.methodMetrics.clear();
     this.alerts = [];
   }
 
+  /**
+   * Gets performancereport
+   * 
+   * @returns Promise< - Return value description
+   */
   async getPerformanceReport(): Promise<{
     systemMetrics: SystemMetrics;
     topSlowMethods: MethodMetrics[];
@@ -179,10 +218,22 @@ export class PerformanceMonitorService implements IPerformanceMonitor {
     };
   }
 
+  /**
+   * Sets enabled
+   * 
+   * @param enabled - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async setEnabled(enabled: boolean): Promise<void> {
     this.enabled = enabled;
   }
 
+  /**
+   * Handles isEnabled operation
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   async isEnabled(): Promise<boolean> {
     return this.enabled;
   }

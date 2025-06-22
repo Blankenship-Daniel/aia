@@ -90,6 +90,13 @@ export class ConversationMemoryService implements IConversationMemory {
     return searchResults;
   }
 
+  /**
+   * Gets recentconversations
+   * 
+   * @param limit - Parameter description
+   * 
+   * @returns Promise<MemoryEntry[]> - Return value description
+   */
   async getRecentConversations(limit: number = 10): Promise<MemoryEntry[]> {
     // Try cache first
     const cacheKey = `conversation:recent:${limit}`;
@@ -113,6 +120,14 @@ export class ConversationMemoryService implements IConversationMemory {
     return recentConversations;
   }
 
+  /**
+   * Handles extractSemanticTags operation
+   * 
+   * @param query - Parameter description
+   * @param response - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private extractSemanticTags(query: string, response: string): string[] {
     // Extract meaningful keywords from query and response
     const text = `${query} ${response}`.toLowerCase();

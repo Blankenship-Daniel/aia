@@ -1,6 +1,9 @@
 import { Listr, ListrTask } from 'listr2';
 import { Observable } from 'rxjs';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 
 // A placeholder for the real execution step type
 interface ExecutionStep {
@@ -8,7 +11,19 @@ interface ExecutionStep {
   execute: () => Promise<{ success: boolean; error?: string; output?: string }>;
 }
 
+/**
+ * TaskListPresenter class
+ * 
+ * TODO: Add class description
+ */
 export class TaskListPresenter {
+  /**
+   * Executes withtasklist
+   * 
+   * @param steps - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async executeWithTaskList(steps: ExecutionStep[]): Promise<void> {
     const tasks: ListrTask[] = steps.map((step) => ({
       title: step.description,
@@ -35,6 +50,14 @@ export class TaskListPresenter {
     }
   }
 
+  /**
+   * Creates steptask
+   * 
+   * @param step - Parameter description
+   * @param task - Parameter description
+   * 
+   * @returns Observable<any> - Return value description
+   */
   private createStepTask(step: ExecutionStep, task: any): Observable<any> {
     return new Observable((subscriber) => {
       task.title = `${step.description} ${chalk.gray('(Starting...)')}`;

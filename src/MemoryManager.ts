@@ -64,6 +64,11 @@ interface MemoryStats {
   indexSize: number;
 }
 
+/**
+ * MemoryManager class
+ * 
+ * TODO: Add class description
+ */
 class MemoryManager {
   private memoryPath: string;
   private memory: MemoryData | null;
@@ -72,6 +77,11 @@ class MemoryManager {
   private semanticIndex: Map<string, Set<string>>;
   private contextLinks: Map<string, string[]>;
 
+  /**
+   * Creates an instance of the class
+   * 
+   * @param memoryPath - Parameter description
+   */
   constructor(memoryPath: string) {
     this.memoryPath = memoryPath;
     this.memory = null;
@@ -81,6 +91,11 @@ class MemoryManager {
     this.contextLinks = new Map(); // Track relationships between sessions
   }
 
+  /**
+   * Handles loadMemory operation
+   * 
+   * @returns Promise<MemoryData> - Return value description
+   */
   async loadMemory(): Promise<MemoryData> {
     try {
       if (await fs.pathExists(this.memoryPath)) {
@@ -108,6 +123,11 @@ class MemoryManager {
     }
   }
 
+  /**
+   * Handles saveMemory operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async saveMemory(): Promise<void> {
     try {
       await fs.ensureDir(path.dirname(this.memoryPath));
@@ -211,6 +231,11 @@ class MemoryManager {
   }
 
   // Memory compression to manage size
+  /**
+   * Handles compressMemory operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async compressMemory(): Promise<void> {
     try {
       if (!this.memory) {
@@ -249,6 +274,11 @@ class MemoryManager {
   }
 
   // Build semantic index for faster searching
+  /**
+   * Builds semanticindex
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async buildSemanticIndex(): Promise<void> {
     try {
       if (!this.memory) {
@@ -293,6 +323,11 @@ class MemoryManager {
   }
 
   // Link related contexts and sessions
+  /**
+   * Handles linkContexts operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async linkContexts(): Promise<void> {
     try {
       if (!this.memory) {
@@ -338,6 +373,11 @@ class MemoryManager {
   }
 
   // Smart cleanup of outdated or irrelevant data
+  /**
+   * Handles smartCleanup operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async smartCleanup(): Promise<void> {
     try {
       if (!this.memory) {
@@ -408,6 +448,13 @@ class MemoryManager {
   }
 
   // Helper methods
+  /**
+   * Handles extractKeywords operation
+   * 
+   * @param text - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private extractKeywords(text: string): string[] {
     if (!text || typeof text !== 'string') {
       return [];
@@ -421,6 +468,13 @@ class MemoryManager {
       .slice(0, 20); // Limit keywords per text
   }
 
+  /**
+   * Handles isStopWord operation
+   * 
+   * @param word - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private isStopWord(word: string): boolean {
     const stopWords = new Set([
       'the',
@@ -567,6 +621,13 @@ class MemoryManager {
     return Math.min(baseScore + recencyBoost, 1.0);
   }
 
+  /**
+   * Calculates recencyboost
+   * 
+   * @param timestamp - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private calculateRecencyBoost(timestamp: string): number {
     const now = new Date().getTime();
     const itemTime = new Date(timestamp).getTime();
@@ -578,6 +639,13 @@ class MemoryManager {
     return 0;
   }
 
+  /**
+   * Calculates importancescore
+   * 
+   * @param conversation - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private calculateImportanceScore(conversation: MemoryConversation): number {
     let score = 0.5; // Base score
 
@@ -606,6 +674,13 @@ class MemoryManager {
     return Math.min(score, 1.0);
   }
 
+  /**
+   * Handles findCommonTopics operation
+   * 
+   * @param conversations - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private findCommonTopics(conversations: MemoryConversation[]): string[] {
     const allKeywords: string[] = [];
 
@@ -632,6 +707,13 @@ class MemoryManager {
       .map(([keyword]) => keyword);
   }
 
+  /**
+   * Calculates timespan
+   * 
+   * @param conversations - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private calculateTimeSpan(conversations: MemoryConversation[]): number {
     if (conversations.length === 0) return 0;
 
@@ -645,6 +727,11 @@ class MemoryManager {
     return timestamps[timestamps.length - 1] - timestamps[0];
   }
 
+  /**
+   * Handles needsCompression operation
+   * 
+   * @returns boolean - Return value description
+   */
   private needsCompression(): boolean {
     if (!this.memory) {
       return false;
@@ -653,6 +740,11 @@ class MemoryManager {
     return this.memory.conversations.length > this.compressionThreshold;
   }
 
+  /**
+   * Gets defaultmemory
+   * 
+   * @returns MemoryData - Return value description
+   */
   private getDefaultMemory(): MemoryData {
     return {
       conversations: [],
@@ -700,6 +792,11 @@ class MemoryManager {
   }
 
   // Memory statistics for monitoring
+  /**
+   * Gets memorystats
+   * 
+   * @returns MemoryStats - Return value description
+   */
   public getMemoryStats(): MemoryStats {
     if (!this.memory) {
       return {
@@ -763,6 +860,13 @@ class MemoryManager {
     await this.saveMemory();
   }
 
+  /**
+   * Handles addCommand operation
+   * 
+   * @param command - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   public async addCommand(command: MemoryCommand): Promise<void> {
     if (!this.memory) {
       await this.loadMemory();
@@ -784,6 +888,11 @@ class MemoryManager {
     await this.saveMemory();
   }
 
+  /**
+   * Gets memory
+   * 
+   * @returns MemoryData | null - Return value description
+   */
   public getMemory(): MemoryData | null {
     return this.memory;
   }

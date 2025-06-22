@@ -1,5 +1,8 @@
 import ora, { Ora } from 'ora';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import cliSpinners from 'cli-spinners';
 import figures from 'figures';
 import {
@@ -50,12 +53,22 @@ export class SpinnerService implements ISpinnerService {
 
     // Return our wrapper around ora that implements SpinnerInstance
     return {
+      /**
+       * Handles start operation
+       * 
+       * @returns SpinnerInstance - Return value description
+       */
       start(): SpinnerInstance {
         startTime = Date.now();
         spinner.start();
         return this;
       },
 
+      /**
+       * Handles succeed operation
+       * 
+       * @param message? - Parameter description
+       */
       succeed(message?: string): void {
         if (message) {
           currentText = message;
@@ -63,6 +76,11 @@ export class SpinnerService implements ISpinnerService {
         spinner.succeed(this.getTextWithTimer());
       },
 
+      /**
+       * Handles fail operation
+       * 
+       * @param message? - Parameter description
+       */
       fail(message?: string): void {
         if (message) {
           currentText = message;
@@ -70,6 +88,11 @@ export class SpinnerService implements ISpinnerService {
         spinner.fail(this.getTextWithTimer());
       },
 
+      /**
+       * Handles warn operation
+       * 
+       * @param message? - Parameter description
+       */
       warn(message?: string): void {
         if (message) {
           currentText = message;
@@ -77,6 +100,11 @@ export class SpinnerService implements ISpinnerService {
         spinner.warn(this.getTextWithTimer());
       },
 
+      /**
+       * Handles info operation
+       * 
+       * @param message? - Parameter description
+       */
       info(message?: string): void {
         if (message) {
           currentText = message;
@@ -84,21 +112,41 @@ export class SpinnerService implements ISpinnerService {
         spinner.info(this.getTextWithTimer());
       },
 
+      /**
+       * Handles stop operation
+       */
       stop(): void {
         spinner.stop();
       },
 
+      /**
+       * Handles text operation
+       * 
+       * @param message - Parameter description
+       * 
+       * @returns SpinnerInstance - Return value description
+       */
       text(message: string): SpinnerInstance {
         currentText = message;
         spinner.text = this.getTextWithTimer();
         return this;
       },
 
+      /**
+       * Gets text
+       * 
+       * @returns string - Return value description
+       */
       getText(): string {
         return currentText;
       },
 
       // Helper method to add timer if enabled
+      /**
+       * Gets textwithtimer
+       * 
+       * @returns string - Return value description
+       */
       getTextWithTimer(): string {
         if (!showTimer || !startTime) return currentText;
 

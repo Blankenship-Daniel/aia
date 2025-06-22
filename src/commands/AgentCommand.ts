@@ -26,7 +26,10 @@
  * Single Responsibility: Command orchestration and user interaction
  * Delegates execution, presentation, and resilience to specialized services
  */
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import { ICommand, CommandDefinition } from '../interfaces/ICommand';
 import { IAgentExecutionEngine } from '../interfaces/IAgentExecutionEngine';
 import { IAgentPresenter } from '../interfaces/IAgentPresenter';
@@ -227,6 +230,11 @@ export class AgentCommand implements ICommand {
     return lastResult;
   }
 
+  /**
+   * Gets definition
+   * 
+   * @returns CommandDefinition - Return value description
+   */
   public getDefinition(): CommandDefinition {
     return {
       name: this.name,
@@ -264,14 +272,31 @@ export class AgentCommand implements ICommand {
     };
   }
 
+  /**
+   * Gets name
+   * 
+   * @returns string - Return value description
+   */
   public getName(): string {
     return this.name;
   }
 
+  /**
+   * Gets aliases
+   * 
+   * @returns string[] - Return value description
+   */
   public getAliases(): string[] {
     return this.aliases;
   }
 
+  /**
+   * Validates args
+   * 
+   * @param args - Parameter description
+   * 
+   * @returns  - Return value description
+   */
   public validateArgs(args: string[]): {
     valid: boolean;
     errors: string[];
@@ -297,6 +322,11 @@ export class AgentCommand implements ICommand {
     };
   }
 
+  /**
+   * Gets help
+   * 
+   * @returns string - Return value description
+   */
   public getHelp(): string {
     return `
 ${this.description}
@@ -491,6 +521,13 @@ The agent will:
     return { contextInfo, previousExecutions };
   }
 
+  /**
+   * Handles confirmExecution operation
+   * 
+   * @param autoExecute - Parameter description
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   private async confirmExecution(autoExecute: boolean): Promise<boolean> {
     if (autoExecute) return true;
     return this.presenter.askConfirmation('Proceed with execution?');
@@ -1037,11 +1074,25 @@ The agent will:
   }
 
   // --- Extracted fallback helpers ---
+  /**
+   * Generates fallbackplan
+   * 
+   * @param execution - Parameter description
+   * 
+   * @returns AgenticStep[] - Return value description
+   */
   private generateFallbackPlan(execution: AgenticExecution): AgenticStep[] {
     // For now, fallback just uses the current plan
     return execution.plan;
   }
 
+  /**
+   * Executes fallbacksteps
+   * 
+   * @param plan - Parameter description
+   * 
+   * @returns Promise< - Return value description
+   */
   private async executeFallbackSteps(plan: AgenticStep[]): Promise<{
     results: unknown[];
     learnings: string[];

@@ -8,6 +8,11 @@ import { AgenticGoal, AgenticExecution } from '../types/index';
  * SOLID DIP: Depends on IMemoryPersistence abstraction
  */
 export class AgenticMemoryService implements IAgenticMemory {
+  /**
+   * Creates an instance of the class
+   * 
+   * @param private readonly memoryPersistence - Parameter description
+   */
   constructor(private readonly memoryPersistence: IMemoryPersistence) {}
 
   /**

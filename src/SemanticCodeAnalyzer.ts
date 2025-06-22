@@ -108,6 +108,9 @@ export default class SemanticCodeAnalyzer extends SemanticAnalyzer {
   private codePatterns: Map<string, CodePattern>;
   private architecturePatterns: Map<string, ArchitecturePattern>;
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     super();
     this.codePatterns = new Map();

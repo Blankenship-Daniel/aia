@@ -5,7 +5,10 @@
 
 import { ICodeHighlightService } from '../interfaces/ICodeHighlightService';
 import * as highlight from 'cli-highlight';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 
 /**
  * CodeHighlightService - Terminal syntax highlighting service
@@ -25,6 +28,9 @@ import chalk from 'chalk';
 export class CodeHighlightService implements ICodeHighlightService {
   private readonly theme: Record<string, any>;
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     // Initialize with default theme using chalk functions
     this.theme = {

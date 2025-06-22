@@ -18,16 +18,18 @@ git clone [repository-url]
 cd aia
 npm install
 
-# Set up development environment
-npm run setup:dev
+# Set up environment
+cp .env.example .env
+npm run setup
 
 # Verify installation
 npm run test
+npm run build
 ```
 
 ### First Commands
 ```bash
-# Start in development mode
+# Start development server
 npm run dev
 
 # Run CLI locally
@@ -41,7 +43,7 @@ Required extensions:
 - ESLint
 - Prettier
 - TypeScript Hero
-- Debug Extension Pack
+- Debug for Node.js
 
 ### VS Code Settings
 ```json
@@ -54,11 +56,21 @@ Required extensions:
 }
 ```
 
-### Environment Variables
-```env
-AIA_ENV=development
-AIA_LOG_LEVEL=debug
-AIA_CONFIG_PATH=./config/dev
+### Debug Configuration
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug CLI",
+      "program": "${workspaceFolder}/src/index.ts",
+      "args": ["ask", "test query"],
+      "preLaunchTask": "tsc: build"
+    }
+  ]
+}
 ```
 
 ## Project Structure
@@ -66,22 +78,23 @@ AIA_CONFIG_PATH=./config/dev
 ```
 aia/
 ├── src/
-│   ├── commands/     # CLI commands
-│   ├── services/     # Core services
-│   ├── interfaces/   # TypeScript interfaces
-│   ├── providers/    # AI providers
-│   ├── utils/        # Shared utilities
-│   └── types/        # Type definitions
-├── test/            # Test files
-├── config/          # Configuration
-└── docs/            # Documentation
+│   ├── commands/        # CLI commands
+│   ├── services/        # Core services
+│   ├── interfaces/      # TypeScript interfaces
+│   ├── providers/       # AI providers
+│   ├── utils/          # Shared utilities
+│   └── types/          # Type definitions
+├── tests/              # Test files
+├── config/             # Configuration
+└── docs/              # Documentation
 ```
 
 ### Key Directories
-- `commands/`: Each command is a separate module
-- `services/`: Service implementations
+- `commands/`: Each CLI command as separate module
+- `services/`: Core service implementations
 - `interfaces/`: TypeScript interface definitions
 - `providers/`: AI provider implementations
+- `utils/`: Shared utility functions
 
 ## Core Development Workflows
 
@@ -89,28 +102,21 @@ aia/
 
 1. Create feature branch:
 ```bash
-git checkout -b feature/feature-name
+git checkout -b feature/new-feature-name
 ```
 
-2. Implement following pattern:
-```typescript
-// 1. Define interface
-interface NewFeature {
-  method(): Promise<void>;
-}
+2. Implement changes following TDD:
+```bash
+# Create test first
+touch tests/services/NewFeature.test.ts
+# Implement feature
+touch src/services/NewFeature.ts
+```
 
-// 2. Create service
-@injectable()
-class NewFeatureService implements NewFeature {
-  constructor(
-    @inject(TYPES.Dependencies) private deps: Dependencies
-  ) {}
-}
-
-// 3. Add tests
-describe('NewFeatureService', () => {
-  // tests
-});
+3. Test and lint:
+```bash
+npm run test
+npm run lint
 ```
 
 ### Code Review Process
@@ -118,13 +124,13 @@ describe('NewFeatureService', () => {
    - Tests passing
    - Lint clean
    - Documentation updated
-   - Performance impact considered
-
-2. PR template requirements:
+   - Performance considered
+   
+2. Create PR with template:
    - Feature description
    - Testing approach
    - Breaking changes
-   - Dependencies added
+   - Performance impact
 
 ## Common Tasks
 
@@ -132,129 +138,101 @@ describe('NewFeatureService', () => {
 
 1. Create command file:
 ```typescript
-// src/commands/new-command.ts
-import { Command } from '../interfaces/command';
+// src/commands/newCommand.ts
+import { Command } from '../interfaces/Command';
 
-@injectable()
 export class NewCommand implements Command {
-  public static command = 'new-command';
-  public static description = 'Description';
-
-  async run(): Promise<void> {
+  public static description = 'Command description';
+  
+  public async run(): Promise<void> {
     // Implementation
   }
 }
 ```
 
-2. Register in container:
+2. Register in command index:
 ```typescript
-container.bind<Command>(TYPES.Command)
-  .to(NewCommand)
-  .inSingletonScope();
+// src/commands/index.ts
+export { NewCommand } from './newCommand';
 ```
 
 ### Creating a New Service
 
+1. Define interface:
 ```typescript
-// src/services/new-service.ts
+// src/interfaces/INewService.ts
+export interface INewService {
+  execute(): Promise<void>;
+}
+```
+
+2. Implement service:
+```typescript
+// src/services/NewService.ts
+import { injectable } from 'inversify';
+import { INewService } from '../interfaces/INewService';
+
 @injectable()
 export class NewService implements INewService {
-  constructor(
-    @inject(TYPES.Logger) private logger: ILogger,
-    @inject(TYPES.Config) private config: IConfig
-  ) {}
-
-  async initialize(): Promise<void> {
-    this.logger.debug('Initializing NewService');
+  public async execute(): Promise<void> {
     // Implementation
   }
 }
 ```
 
-## Debugging Guide
-
-### Common Issues
-
-1. Service Initialization Failures
+3. Register in container:
 ```typescript
-// Add debug logging
-this.logger.debug({
-  service: 'NewService',
-  state: 'initializing',
-  config: this.config
-});
-```
-
-2. Memory Leaks
-- Use `--inspect` flag for Node.js debugging
-- Monitor heap snapshots
-- Check for unsubscribed events
-
-### Debug Configuration
-```json
-{
-  "type": "node",
-  "request": "launch",
-  "name": "Debug CLI",
-  "program": "${workspaceFolder}/bin/run",
-  "args": ["ask", "test query"],
-  "outFiles": ["${workspaceFolder}/dist/**/*.js"]
-}
+// src/container.ts
+container.bind<INewService>('NewService').to(NewService);
 ```
 
 ## Testing Guidelines
 
-### Unit Test Structure
+### Unit Testing Pattern
 ```typescript
-describe('ServiceName', () => {
-  let service: ServiceName;
-  let mockDependency: jest.Mocked<Dependency>;
+describe('NewService', () => {
+  let service: NewService;
+  let mockDependency: jest.Mocked<IDependency>;
 
   beforeEach(() => {
     mockDependency = {
       method: jest.fn()
     };
-    service = new ServiceName(mockDependency);
+    service = new NewService(mockDependency);
   });
 
-  it('should handle expected behavior', async () => {
-    // Arrange
-    mockDependency.method.mockResolvedValue(result);
-    
-    // Act
-    const result = await service.method();
-    
-    // Assert
-    expect(result).toBeDefined();
+  it('should execute successfully', async () => {
+    await expect(service.execute()).resolves.not.toThrow();
   });
 });
 ```
 
-### Mocking Strategies
+### Mocking Strategy
 ```typescript
-// Service mocks
-const mockService = {
-  method: jest.fn().mockResolvedValue(expected)
+// Create mock implementation
+const mockAIProvider: jest.Mocked<IAIProvider> = {
+  query: jest.fn().mockResolvedValue('response'),
+  initialize: jest.fn().mockResolvedValue(undefined)
 };
 
-// AI provider mocks
-const mockAIProvider = {
-  generate: jest.fn().mockResolvedValue({
-    content: 'mocked response'
-  })
-};
+// Verify interactions
+expect(mockAIProvider.query).toHaveBeenCalledWith('test query');
 ```
 
 ## Performance Tips
 
 ### Optimization Techniques
+1. Lazy loading:
+```typescript
+const service = await import('./services/HeavyService');
+```
 
-1. Service Caching
+2. Caching:
 ```typescript
 @injectable()
-class CachedService {
+class CacheableService {
   private cache = new Map<string, any>();
-
+  
   async getData(key: string): Promise<any> {
     if (this.cache.has(key)) {
       return this.cache.get(key);
@@ -266,47 +244,49 @@ class CachedService {
 }
 ```
 
-2. Batch Processing
+3. Memory management:
 ```typescript
-async processBatch<T>(items: T[], batchSize = 100): Promise<void> {
-  for (let i = 0; i < items.length; i += batchSize) {
-    const batch = items.slice(i, i + batchSize);
-    await Promise.all(batch.map(item => this.process(item)));
+class MemoryEfficientService {
+  private cleanup(): void {
+    // Clear temporary data
+    this.tempData = null;
+    global.gc && global.gc();
   }
 }
 ```
 
 ## Troubleshooting
 
-### Common Error Patterns
+### Common Issues
 
-1. Service Initialization
-```typescript
-// Check service dependencies
-if (!this.dependency) {
-  throw new Error('Missing required dependency');
-}
+1. Dependency Injection Errors
 ```
-
-2. AI Provider Errors
-```typescript
-try {
-  await this.aiProvider.generate(prompt);
-} catch (error) {
-  this.logger.error({
-    message: 'AI provider error',
-    error: error.message,
-    prompt
-  });
-  throw new AIProviderError(error);
-}
+Error: No matching bindings found for serviceIdentifier: Symbol(IService)
 ```
+Solution: Check container registration in `src/container.ts`
 
-### When to Escalate
-- Performance degradation > 20%
-- Memory usage spikes
-- Unhandled promise rejections
-- Security vulnerabilities
+2. Type Errors
+```
+TS2339: Property 'x' does not exist on type 'Y'
+```
+Solution: Implement missing interface members or check type definitions
+
+3. Memory Leaks
+- Use Chrome DevTools Memory Profiler
+- Check for unsubscribed observables
+- Monitor heap usage with `process.memoryUsage()`
+
+### When to Ask for Help
+1. After checking:
+   - Documentation
+   - Existing issues
+   - Debug logs
+   - Stack trace
+2. Provide:
+   - Steps to reproduce
+   - Environment details
+   - Relevant logs
+   - Attempted solutions
 
 ## Code Contribution Guidelines
 
@@ -314,21 +294,23 @@ try {
 - [ ] Tests added/updated
 - [ ] Documentation updated
 - [ ] Lint passes
-- [ ] Type checks pass
+- [ ] Branch up-to-date
 - [ ] Performance impact considered
 - [ ] Breaking changes documented
 
 ### Commit Message Format
 ```
-type(scope): description
+type(scope): summary
 
-[optional body]
-
-[optional footer]
+Description
 ```
-
 Types: feat, fix, docs, style, refactor, test, chore
 
+### Code Style
+- Follow existing patterns
+- Use TypeScript features appropriately
+- Document public APIs
+- Keep functions focused and small
 ```
 
-This developer guide provides practical, actionable information focused on daily development tasks while maintaining high code quality and performance standards. Let me know if you need any section expanded or clarified.
+This guide should give developers a solid foundation for working with the codebase while focusing on practical, day-to-day development needs.

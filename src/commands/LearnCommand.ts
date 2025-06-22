@@ -24,7 +24,10 @@ import { ICopilotService } from '../interfaces/ICopilotService';
 import { IAIService } from '../interfaces/IAIService';
 import { IContextService } from '../interfaces/IContextService';
 import { CommandResult, CommandOptions } from '../types/index';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import ora from 'ora';
 import inquirer from 'inquirer';
 import Table from 'cli-table3';
@@ -32,6 +35,11 @@ import boxen from 'boxen';
 import * as cliProgress from 'cli-progress';
 import { UXEnhancements } from '../utils/UXEnhancements';
 
+/**
+ * LearnCommand class
+ * 
+ * TODO: Add class description
+ */
 export class LearnCommand implements ICommand {
   constructor(
     private copilotService: ICopilotService,
@@ -415,6 +423,13 @@ export class LearnCommand implements ICommand {
     }
   }
 
+  /**
+   * Handles convertToCommandContext operation
+   * 
+   * @param aiaContext - Parameter description
+   * 
+   * @returns any - Return value description
+   */
   private convertToCommandContext(aiaContext: any): any {
     return {
       workingDirectory: aiaContext.workingDirectory || process.cwd(),
@@ -527,6 +542,11 @@ export class LearnCommand implements ICommand {
     }
   }
 
+  /**
+   * Handles displayLearningContent operation
+   * 
+   * @param content - Parameter description
+   */
   private displayLearningContent(content: any): void {
     // Clear any potential console conflicts
     console.log(''); // Ensure clean line
@@ -743,6 +763,13 @@ export class LearnCommand implements ICommand {
     }
   }
 
+  /**
+   * Handles practiceMode operation
+   * 
+   * @param learningContent - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async practiceMode(learningContent: any[]): Promise<void> {
     console.log(chalk.bold('\n🏃 Practice Mode'));
     console.log('Try running these commands to practice:');
@@ -755,6 +782,13 @@ export class LearnCommand implements ICommand {
     });
   }
 
+  /**
+   * Handles suggestRelatedTopics operation
+   * 
+   * @param currentTopic - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async suggestRelatedTopics(currentTopic: string): Promise<void> {
     const relatedTopics = this.getRelatedTopics(currentTopic);
 
@@ -766,6 +800,13 @@ export class LearnCommand implements ICommand {
     console.log(chalk.gray('\nRun: aia learn <topic> to explore these topics'));
   }
 
+  /**
+   * Generates quiz
+   * 
+   * @param learningContent - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async generateQuiz(learningContent: any[]): Promise<void> {
     console.log(chalk.bold('\n🎯 Quick Quiz'));
     console.log('Test your knowledge:');
@@ -807,6 +848,13 @@ export class LearnCommand implements ICommand {
     console.log(chalk.gray('(File saving not implemented in this demo)'));
   }
 
+  /**
+   * Handles extractBestPractices operation
+   * 
+   * @param aiContent - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private extractBestPractices(aiContent: string): string[] {
     // Enhanced extraction to find concise, actionable best practices
     const practices = [];
@@ -876,6 +924,13 @@ export class LearnCommand implements ICommand {
     return uniquePractices;
   }
 
+  /**
+   * Handles extractCommonMistakes operation
+   * 
+   * @param aiContent - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private extractCommonMistakes(aiContent: string): string[] {
     // Enhanced extraction to find concise, actionable mistakes to avoid
     const mistakes = [];
@@ -959,6 +1014,13 @@ export class LearnCommand implements ICommand {
     return uniqueMistakes;
   }
 
+  /**
+   * Gets relatedtopics
+   * 
+   * @param topic - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private getRelatedTopics(topic: string): string[] {
     const topicMap: Record<string, string[]> = {
       git: ['github', 'version-control', 'collaboration', 'branching'],
@@ -971,6 +1033,9 @@ export class LearnCommand implements ICommand {
     return topicMap[topic] || ['git', 'shell', 'productivity', 'automation'];
   }
 
+  /**
+   * Creates basiccontext
+   */
   private createBasicContext() {
     return {
       workingDirectory: process.cwd(),

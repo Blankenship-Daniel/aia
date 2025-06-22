@@ -625,6 +625,13 @@ export class TypeScriptSymbolAnalyzer {
     return fs.existsSync(tsconfigPath) ? tsconfigPath : null;
   }
 
+  /**
+   * Handles findSourceFiles operation
+   * 
+   * @param rootPath - Parameter description
+   * 
+   * @returns Promise<string[]> - Return value description
+   */
   private async findSourceFiles(rootPath: string): Promise<string[]> {
     const files: string[] = [];
     
@@ -652,6 +659,14 @@ export class TypeScriptSymbolAnalyzer {
     return files;
   }
 
+  /**
+   * Gets snippet
+   * 
+   * @param sourceFile - Parameter description
+   * @param node - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private getSnippet(sourceFile: ts.SourceFile, node: ts.Node): string {
     const start = node.getStart();
     const end = node.getEnd();
@@ -659,12 +674,27 @@ export class TypeScriptSymbolAnalyzer {
     return lines.slice(0, 3).join('\n'); // First 3 lines
   }
 
+  /**
+   * Gets snippetfromcontent
+   * 
+   * @param content - Parameter description
+   * @param index - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private getSnippetFromContent(content: string, index: number): string {
     const lines = content.split('\n');
     const lineNumber = content.substring(0, index).split('\n').length - 1;
     return lines.slice(lineNumber, lineNumber + 3).join('\n');
   }
 
+  /**
+   * Gets modifiers
+   * 
+   * @param node - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   private getModifiers(node: ts.Declaration): string[] {
     const modifiers: string[] = [];
     if (ts.canHaveModifiers(node)) {
@@ -678,6 +708,14 @@ export class TypeScriptSymbolAnalyzer {
     return modifiers;
   }
 
+  /**
+   * Handles hasModifier operation
+   * 
+   * @param node - Parameter description
+   * @param kind - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private hasModifier(node: ts.Declaration, kind: ts.SyntaxKind): boolean {
     if (ts.canHaveModifiers(node)) {
       const modifiers = ts.getModifiers(node);
@@ -686,10 +724,24 @@ export class TypeScriptSymbolAnalyzer {
     return false;
   }
 
+  /**
+   * Handles isExported operation
+   * 
+   * @param node - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private isExported(node: ts.Declaration): boolean {
     return this.hasModifier(node, ts.SyntaxKind.ExportKeyword);
   }
 
+  /**
+   * Gets extendedclass
+   * 
+   * @param classDecl - Parameter description
+   * 
+   * @returns string | undefined - Return value description
+   */
   private getExtendedClass(classDecl: ts.ClassDeclaration): string | undefined {
     const heritageClause = classDecl.heritageClauses?.find(
       clause => clause.token === ts.SyntaxKind.ExtendsKeyword
@@ -697,6 +749,13 @@ export class TypeScriptSymbolAnalyzer {
     return heritageClause?.types[0]?.expression.getText();
   }
 
+  /**
+   * Handles determineReferenceType operation
+   * 
+   * @param node - Parameter description
+   * 
+   * @returns ReferenceContext - Return value description
+   */
   private determineReferenceType(node: ts.Node): ReferenceContext {
     const parent = node.parent;
     
@@ -719,6 +778,14 @@ export class TypeScriptSymbolAnalyzer {
     return 'call'; // Default fallback
   }
 
+  /**
+   * Handles determineReferenceTypeFromContext operation
+   * 
+   * @param lineContent - Parameter description
+   * @param identifier - Parameter description
+   * 
+   * @returns ReferenceContext - Return value description
+   */
   private determineReferenceTypeFromContext(lineContent: string, identifier: string): ReferenceContext {
     if (lineContent.includes(`import`) && lineContent.includes(identifier)) {
       return 'import';
@@ -745,6 +812,13 @@ export class TypeScriptSymbolAnalyzer {
     return 'call'; // Default fallback
   }
 
+  /**
+   * Gets context
+   * 
+   * @param node - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private getContext(node: ts.Node): string {
     // Get the surrounding context for the reference
     const sourceFile = node.getSourceFile();
@@ -753,6 +827,13 @@ export class TypeScriptSymbolAnalyzer {
     return sourceFile.getText().substring(start, end).replace(/\s+/g, ' ').trim();
   }
 
+  /**
+   * Handles isKeywordOrCommon operation
+   * 
+   * @param identifier - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   private isKeywordOrCommon(identifier: string): boolean {
     const keywords = [
       'const', 'let', 'var', 'function', 'class', 'interface', 'type', 'enum',

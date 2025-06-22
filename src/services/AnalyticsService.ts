@@ -20,7 +20,10 @@ import {
   MemoryData,
   CommandHistoryEntry,
 } from '../types/index';
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 
 /**
  * Analytics Service - Comprehensive usage analytics and performance insights
@@ -48,6 +51,11 @@ export class AnalyticsService implements IAnalyticsService {
     this.initializeFromMemory();
   }
 
+  /**
+   * Gets usageanalytics
+   * 
+   * @returns Promise<UsageAnalytics> - Return value description
+   */
   async getUsageAnalytics(): Promise<UsageAnalytics> {
     const memoryData = await this.memoryService.loadMemory();
     const commandHistory = memoryData.commands || [];
@@ -110,6 +118,11 @@ export class AnalyticsService implements IAnalyticsService {
     };
   }
 
+  /**
+   * Gets performanceanalytics
+   * 
+   * @returns Promise<PerformanceAnalytics> - Return value description
+   */
   async getPerformanceAnalytics(): Promise<PerformanceAnalytics> {
     const memoryData = await this.memoryService.loadMemory();
     const commandHistory = memoryData.commands || [];
@@ -196,6 +209,11 @@ export class AnalyticsService implements IAnalyticsService {
     };
   }
 
+  /**
+   * Generates productivityreport
+   * 
+   * @returns Promise<ProductivityReport> - Return value description
+   */
   async generateProductivityReport(): Promise<ProductivityReport> {
     const usageAnalytics = await this.getUsageAnalytics();
     const performanceAnalytics = await this.getPerformanceAnalytics();
@@ -233,6 +251,11 @@ export class AnalyticsService implements IAnalyticsService {
     };
   }
 
+  /**
+   * Handles displayAnalyticsDashboard operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async displayAnalyticsDashboard(): Promise<void> {
     console.log(chalk.blue('\n📊 AIA Analytics Dashboard'));
     console.log(chalk.blue('============================'));
@@ -485,6 +508,13 @@ export class AnalyticsService implements IAnalyticsService {
     });
   }
 
+  /**
+   * Handles exportAnalytics operation
+   * 
+   * @param format - Parameter description
+   * 
+   * @returns Promise<string> - Return value description
+   */
   async exportAnalytics(format: 'json' | 'csv'): Promise<string> {
     const [usageAnalytics, performanceAnalytics, productivityReport] =
       await Promise.all([
@@ -523,6 +553,13 @@ export class AnalyticsService implements IAnalyticsService {
     }
   }
 
+  /**
+   * Handles clearAnalytics operation
+   * 
+   * @param olderThan? - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async clearAnalytics(olderThan?: Date): Promise<void> {
     if (olderThan) {
       // Clear analytics data older than specified date
@@ -543,6 +580,11 @@ export class AnalyticsService implements IAnalyticsService {
   }
 
   // Private helper methods
+  /**
+   * Initializes frommemory
+   * 
+   * @returns Promise<void> - Return value description
+   */
   private async initializeFromMemory(): Promise<void> {
     try {
       const memoryData = await this.memoryService.loadMemory();
@@ -763,6 +805,13 @@ export class AnalyticsService implements IAnalyticsService {
     return Math.max(0, (baselineTime - optimizedTime) / 1000); // Convert to seconds
   }
 
+  /**
+   * Calculates errorsavoided
+   * 
+   * @param usageAnalytics - Parameter description
+   * 
+   * @returns number - Return value description
+   */
   private calculateErrorsAvoided(usageAnalytics: UsageAnalytics): number {
     // Estimate errors avoided through intelligent suggestions and validations
     return usageAnalytics.errorPatterns.reduce(
@@ -862,6 +911,13 @@ export class AnalyticsService implements IAnalyticsService {
     return recommendations;
   }
 
+  /**
+   * Gets insighticon
+   * 
+   * @param type - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private getInsightIcon(type: string): string {
     switch (type) {
       case 'achievement':
@@ -877,12 +933,26 @@ export class AnalyticsService implements IAnalyticsService {
     }
   }
 
+  /**
+   * Gets weekstring
+   * 
+   * @param date - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private getWeekString(date: Date): string {
     const startOfWeek = new Date(date);
     startOfWeek.setDate(date.getDate() - date.getDay());
     return `Week of ${startOfWeek.toDateString()}`;
   }
 
+  /**
+   * Formats timerange
+   * 
+   * @param hour - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private formatTimeRange(hour: number): string {
     if (hour < 6) return 'Early Morning (12AM-6AM)';
     if (hour < 12) return 'Morning (6AM-12PM)';

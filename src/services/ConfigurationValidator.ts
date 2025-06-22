@@ -12,9 +12,17 @@ import {
   ValidationResult,
 } from '../interfaces/IConfigurationValidator';
 
+/**
+ * ConfigurationValidator class
+ * 
+ * TODO: Add class description
+ */
 export class ConfigurationValidator implements IConfigurationValidator {
   private readonly providerValidators: Map<string, ProviderValidator>;
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     this.providerValidators = new Map([
       ['openai', new OpenAIValidator()],
@@ -23,6 +31,14 @@ export class ConfigurationValidator implements IConfigurationValidator {
     ]);
   }
 
+  /**
+   * Validates apikey
+   * 
+   * @param key - Parameter description
+   * @param provider - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   validateApiKey(key: string, provider: string): boolean {
     if (!key || typeof key !== 'string') {
       return false;
@@ -32,6 +48,14 @@ export class ConfigurationValidator implements IConfigurationValidator {
     return validator ? validator.validateApiKey(key) : false;
   }
 
+  /**
+   * Validates model
+   * 
+   * @param model - Parameter description
+   * @param provider - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   validateModel(model: string, provider: string): boolean {
     if (!model || typeof model !== 'string') {
       return false;
@@ -41,6 +65,13 @@ export class ConfigurationValidator implements IConfigurationValidator {
     return validator ? validator.validateModel(model) : false;
   }
 
+  /**
+   * Validates configuration
+   * 
+   * @param config - Parameter description
+   * 
+   * @returns ValidationResult - Return value description
+   */
   validateConfiguration(config: any): ValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
@@ -96,6 +127,13 @@ export class ConfigurationValidator implements IConfigurationValidator {
     };
   }
 
+  /**
+   * Gets supportedmodels
+   * 
+   * @param provider - Parameter description
+   * 
+   * @returns string[] - Return value description
+   */
   getSupportedModels(provider: string): string[] {
     const validator = this.providerValidators.get(provider.toLowerCase());
     return validator ? validator.getSupportedModels() : [];
@@ -109,29 +147,77 @@ interface ProviderValidator {
   getSupportedModels(): string[];
 }
 
+/**
+ * OpenAIValidator class
+ * 
+ * TODO: Add class description
+ */
 class OpenAIValidator implements ProviderValidator {
+  /**
+   * Validates apikey
+   * 
+   * @param key - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   validateApiKey(key: string): boolean {
     return key.startsWith('sk-') && key.length > 20;
   }
 
+  /**
+   * Validates model
+   * 
+   * @param model - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   validateModel(model: string): boolean {
     return this.getSupportedModels().includes(model);
   }
 
+  /**
+   * Gets supportedmodels
+   * 
+   * @returns string[] - Return value description
+   */
   getSupportedModels(): string[] {
     return ['gpt-4', 'gpt-3.5-turbo', 'gpt-4-turbo', 'gpt-4-vision-preview'];
   }
 }
 
+/**
+ * AnthropicValidator class
+ * 
+ * TODO: Add class description
+ */
 class AnthropicValidator implements ProviderValidator {
+  /**
+   * Validates apikey
+   * 
+   * @param key - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   validateApiKey(key: string): boolean {
     return key.startsWith('sk-ant-') && key.length > 20;
   }
 
+  /**
+   * Validates model
+   * 
+   * @param model - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   validateModel(model: string): boolean {
     return this.getSupportedModels().includes(model);
   }
 
+  /**
+   * Gets supportedmodels
+   * 
+   * @returns string[] - Return value description
+   */
   getSupportedModels(): string[] {
     return [
       'claude-3-5-sonnet-20241022',
@@ -143,15 +229,39 @@ class AnthropicValidator implements ProviderValidator {
   }
 }
 
+/**
+ * GeminiValidator class
+ * 
+ * TODO: Add class description
+ */
 class GeminiValidator implements ProviderValidator {
+  /**
+   * Validates apikey
+   * 
+   * @param key - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   validateApiKey(key: string): boolean {
     return key.length > 20;
   }
 
+  /**
+   * Validates model
+   * 
+   * @param model - Parameter description
+   * 
+   * @returns boolean - Return value description
+   */
   validateModel(model: string): boolean {
     return this.getSupportedModels().includes(model);
   }
 
+  /**
+   * Gets supportedmodels
+   * 
+   * @returns string[] - Return value description
+   */
   getSupportedModels(): string[] {
     return ['gemini-pro', 'gemini-pro-vision', 'gemini-1.5-pro'];
   }

@@ -101,6 +101,13 @@ export class CompositeMemoryService implements IMemoryService {
     return this.conversationMemory.searchConversations(query, limit);
   }
 
+  /**
+   * Gets recentconversations
+   * 
+   * @param limit? - Parameter description
+   * 
+   * @returns Promise<MemoryEntry[]> - Return value description
+   */
   async getRecentConversations(limit?: number): Promise<MemoryEntry[]> {
     return this.conversationMemory.getRecentConversations(limit);
   }
@@ -127,11 +134,23 @@ export class CompositeMemoryService implements IMemoryService {
     return this.commandMemory.searchCommands(query, limit);
   }
 
+  /**
+   * Gets recentcommands
+   * 
+   * @param limit? - Parameter description
+   * 
+   * @returns Promise<CommandHistoryEntry[]> - Return value description
+   */
   async getRecentCommands(limit?: number): Promise<CommandHistoryEntry[]> {
     return this.commandMemory.getRecentCommands(limit);
   }
 
   // Memory Statistics Operations
+  /**
+   * Gets stats
+   * 
+   * @returns Promise< - Return value description
+   */
   async getStats(): Promise<{
     totalConversations: number;
     totalCommands: number;
@@ -143,23 +162,52 @@ export class CompositeMemoryService implements IMemoryService {
   }
 
   // Memory Import/Export Operations
+  /**
+   * Handles exportMemory operation
+   * 
+   * @param filePath - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async exportMemory(filePath: string): Promise<void> {
     return this.memoryImportExport.exportMemory(filePath);
   }
 
+  /**
+   * Handles importMemory operation
+   * 
+   * @param filePath - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async importMemory(filePath: string): Promise<void> {
     return this.memoryImportExport.importMemory(filePath);
   }
 
+  /**
+   * Handles compressMemory operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async compressMemory(): Promise<void> {
     return this.memoryImportExport.compressMemory();
   }
 
+  /**
+   * Handles clearMemory operation
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async clearMemory(): Promise<void> {
     return this.memoryImportExport.clearMemory();
   }
 
   // Persistence Operations
+  /**
+   * Initializes the operation
+   * 
+   * @returns Promise< - Return value description
+   */
   async initialize(): Promise<{
     conversations: MemoryEntry[];
     commands: CommandHistoryEntry[];
@@ -188,15 +236,30 @@ export class CompositeMemoryService implements IMemoryService {
     };
   }
 
+  /**
+   * Handles loadMemory operation
+   */
   async loadMemory() {
     return this.memoryPersistence.loadMemory();
   }
 
+  /**
+   * Handles saveMemory operation
+   * 
+   * @param data - Parameter description
+   */
   async saveMemory(data: any) {
     return this.memoryPersistence.saveMemory(data);
   }
 
   // Legacy Methods - Delegated to appropriate services
+  /**
+   * Handles addAgenticGoal operation
+   * 
+   * @param goal - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async addAgenticGoal(goal: AgenticGoal): Promise<void> {
     // This would be handled by a dedicated Agentic Memory service in future
     // For now, we'll add it to the persistence layer directly
@@ -205,17 +268,35 @@ export class CompositeMemoryService implements IMemoryService {
     await this.memoryPersistence.saveMemory(memoryData);
   }
 
+  /**
+   * Gets agenticgoals
+   * 
+   * @returns Promise<AgenticGoal[]> - Return value description
+   */
   async getAgenticGoals(): Promise<AgenticGoal[]> {
     const memoryData = await this.memoryPersistence.loadMemory();
     return memoryData.agenticHistory || [];
   }
 
+  /**
+   * Handles updatePreferences operation
+   * 
+   * @param preferences - Parameter description
+   * @param unknown> - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async updatePreferences(preferences: Record<string, unknown>): Promise<void> {
     const memoryData = await this.memoryPersistence.loadMemory();
     memoryData.preferences = { ...memoryData.preferences, ...preferences };
     await this.memoryPersistence.saveMemory(memoryData);
   }
 
+  /**
+   * Gets preferences
+   * 
+   * @returns Promise<Record<string, unknown>> - Return value description
+   */
   async getPreferences(): Promise<Record<string, unknown>> {
     const memoryData = await this.memoryPersistence.loadMemory();
     return memoryData.preferences || {};
@@ -238,6 +319,13 @@ export class CompositeMemoryService implements IMemoryService {
   }
 
   // Agentic Memory Operations
+  /**
+   * Gets agentichistory
+   * 
+   * @param goal? - Parameter description
+   * 
+   * @returns Promise<any[]> - Return value description
+   */
   async getAgenticHistory(goal?: string): Promise<any[]> {
     const memoryData = await this.memoryPersistence.loadMemory();
     let history = memoryData.agenticHistory || [];
@@ -252,6 +340,13 @@ export class CompositeMemoryService implements IMemoryService {
     return history;
   }
 
+  /**
+   * Handles storeAgenticExecution operation
+   * 
+   * @param execution - Parameter description
+   * 
+   * @returns Promise<void> - Return value description
+   */
   async storeAgenticExecution(execution: any): Promise<void> {
     const memoryData = await this.memoryPersistence.loadMemory();
     if (!memoryData.agenticHistory) {

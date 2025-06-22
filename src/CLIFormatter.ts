@@ -14,7 +14,10 @@
  * @see ora - Elegant terminal spinner library for loading indicators.
  */
 
-import chalk from 'chalk';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
 import ora, { Ora } from 'ora';
 
 interface LoadingSpinner {
@@ -64,6 +67,9 @@ interface ContextInfo {
 export class CLIFormatter {
   private loadingSpinners: Map<string, LoadingSpinner>;
 
+  /**
+   * Creates an instance of the class
+   */
   constructor() {
     this.loadingSpinners = new Map();
   }
@@ -207,6 +213,12 @@ export class CLIFormatter {
   }
 
   // Update loading message
+  /**
+   * Handles updateLoading operation
+   * 
+   * @param spinnerId - Parameter description
+   * @param message - Parameter description
+   */
   public updateLoading(spinnerId: string, message: string): void {
     const loadingSpinner = this.loadingSpinners.get(spinnerId);
     if (loadingSpinner) {
@@ -216,6 +228,12 @@ export class CLIFormatter {
   }
 
   // Stop loading spinner with success
+  /**
+   * Handles stopLoadingSuccess operation
+   * 
+   * @param spinnerId - Parameter description
+   * @param message - Parameter description
+   */
   public stopLoadingSuccess(spinnerId: string, message: string): void {
     const loadingSpinner = this.loadingSpinners.get(spinnerId);
     if (loadingSpinner) {
@@ -225,6 +243,12 @@ export class CLIFormatter {
   }
 
   // Stop loading spinner with failure
+  /**
+   * Handles stopLoadingError operation
+   * 
+   * @param spinnerId - Parameter description
+   * @param message - Parameter description
+   */
   public stopLoadingError(spinnerId: string, message: string): void {
     const loadingSpinner = this.loadingSpinners.get(spinnerId);
     if (loadingSpinner) {
@@ -234,6 +258,11 @@ export class CLIFormatter {
   }
 
   // Stop loading spinner
+  /**
+   * Handles stopLoading operation
+   * 
+   * @param spinnerId - Parameter description
+   */
   public stopLoading(spinnerId: string): void {
     const loadingSpinner = this.loadingSpinners.get(spinnerId);
     if (loadingSpinner) {
@@ -243,6 +272,11 @@ export class CLIFormatter {
   }
 
   // Display memory statistics in a formatted way
+  /**
+   * Handles displayMemoryStats operation
+   * 
+   * @param stats - Parameter description
+   */
   public displayMemoryStats(stats: MemoryStats): void {
     console.log(chalk.blue('\n📊 Memory Statistics'));
     console.log(chalk.gray('─'.repeat(40)));
@@ -286,6 +320,11 @@ export class CLIFormatter {
   }
 
   // Display context information
+  /**
+   * Handles displayContext operation
+   * 
+   * @param context - Parameter description
+   */
   public displayContext(context: ContextInfo): void {
     console.log(chalk.blue('\n🔍 Current Context'));
     console.log(chalk.gray('─'.repeat(40)));
@@ -315,11 +354,23 @@ export class CLIFormatter {
   }
 
   // Display a divider line
+  /**
+   * Handles displayDivider operation
+   * 
+   * @param length - Parameter description
+   * @param char - Parameter description
+   */
   public displayDivider(length: number = 50, char: string = '─'): void {
     console.log(chalk.gray(char.repeat(length)));
   }
 
   // Display a header with styling
+  /**
+   * Handles displayHeader operation
+   * 
+   * @param title - Parameter description
+   * @param subtitle? - Parameter description
+   */
   public displayHeader(title: string, subtitle?: string): void {
     console.log(chalk.bold.blue(`\n${title}`));
     if (subtitle) {
@@ -329,6 +380,12 @@ export class CLIFormatter {
   }
 
   // Display a formatted table
+  /**
+   * Handles displayTable operation
+   * 
+   * @param headers - Parameter description
+   * @param rows - Parameter description
+   */
   public displayTable(headers: string[], rows: string[][]): void {
     if (rows.length === 0) {
       console.log(chalk.gray('No data to display'));
@@ -361,6 +418,13 @@ export class CLIFormatter {
   }
 
   // Format bytes to human readable format
+  /**
+   * Formats bytes
+   * 
+   * @param bytes - Parameter description
+   * 
+   * @returns string - Return value description
+   */
   private formatBytes(bytes: number): string {
     if (bytes === 0) return '0 Bytes';
 
@@ -372,11 +436,19 @@ export class CLIFormatter {
   }
 
   // Generate unique spinner ID
+  /**
+   * Generates spinnerid
+   * 
+   * @returns string - Return value description
+   */
   private generateSpinnerId(): string {
     return `spinner-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
   // Clean up all active spinners
+  /**
+   * Cleans up the operation
+   */
   public cleanup(): void {
     for (const [spinnerId] of this.loadingSpinners) {
       this.stopLoading(spinnerId);
@@ -384,6 +456,9 @@ export class CLIFormatter {
   }
 
   // Dispose method for DIContainer compatibility
+  /**
+   * Handles dispose operation
+   */
   public dispose(): void {
     this.cleanup();
   }
@@ -411,6 +486,13 @@ export class CLIFormatter {
   }
 
   // Display key-value pairs in a formatted way
+  /**
+   * Handles displayKeyValue operation
+   * 
+   * @param data - Parameter description
+   * @param unknown> - Parameter description
+   * @param title? - Parameter description
+   */
   public displayKeyValue(data: Record<string, unknown>, title?: string): void {
     if (title) {
       this.displayHeader(title);

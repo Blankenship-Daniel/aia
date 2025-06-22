@@ -25,6 +25,11 @@ import {
   DependencyStatus,
 } from '../interfaces/ICopilotDependencyService';
 
+/**
+ * CopilotDependencyService class
+ * 
+ * TODO: Add class description
+ */
 export class CopilotDependencyService implements ICopilotDependencyService {
   private execAsync = promisify(exec);
   private readonly TIMEOUT_MS = 15000; // 15 second timeout for dependency checks (increased for reliability)
@@ -227,6 +232,11 @@ export class CopilotDependencyService implements ICopilotDependencyService {
     }
   }
 
+  /**
+   * Handles checkCopilotExtension operation
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   private async checkCopilotExtension(): Promise<boolean> {
     try {
       const { stdout } = await this.execAsync('gh extension list', {
@@ -238,6 +248,11 @@ export class CopilotDependencyService implements ICopilotDependencyService {
     }
   }
 
+  /**
+   * Handles checkAuthentication operation
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   private async checkAuthentication(): Promise<boolean> {
     try {
       const { stdout } = await this.execAsync('gh auth status', {
@@ -266,6 +281,11 @@ export class CopilotDependencyService implements ICopilotDependencyService {
     }
   }
 
+  /**
+   * Handles checkCopilotAccess operation
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   private async checkCopilotAccess(): Promise<boolean> {
     try {
       // Try to run a simple copilot command to check access
@@ -277,6 +297,11 @@ export class CopilotDependencyService implements ICopilotDependencyService {
     }
   }
 
+  /**
+   * Handles hasHomebrew operation
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   private async hasHomebrew(): Promise<boolean> {
     try {
       await this.execAsync('which brew', { timeout: 5000 });
@@ -286,6 +311,11 @@ export class CopilotDependencyService implements ICopilotDependencyService {
     }
   }
 
+  /**
+   * Handles hasApt operation
+   * 
+   * @returns Promise<boolean> - Return value description
+   */
   private async hasApt(): Promise<boolean> {
     try {
       await this.execAsync('which apt', { timeout: 5000 });
@@ -295,6 +325,11 @@ export class CopilotDependencyService implements ICopilotDependencyService {
     }
   }
 
+  /**
+   * Gets githubcliinstallinstructions
+   * 
+   * @returns Promise<string> - Return value description
+   */
   private async getGitHubCLIInstallInstructions(): Promise<string> {
     const currentPlatform = platform();
     switch (currentPlatform) {

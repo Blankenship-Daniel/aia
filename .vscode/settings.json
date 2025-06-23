@@ -1,0 +1,39 @@
+{
+  "aia.symbolIndex": {
+    "autoUpdate": true,
+    "updateInterval": 300000,
+    "includeInCopilotContext": true,
+    "performanceTracking": true,
+    "debounceDelay": 2000,
+    "showUpdateNotifications": false,
+    "watchFileTypes": ["ts", "js", "tsx", "jsx", "md"]
+  },
+  "github.copilot.advanced": {
+    "contextFiles": [
+      ".aia/codebase-index.json",
+      ".github/copilot-instructions.md",
+      ".github/copilot-context.md",
+      ".github/copilot-symbols.json"
+    ],
+    "inlineSuggestionsEnableForLanguages": {
+      "markdown": true,
+      "typescript": true,
+      "javascript": true
+    }
+  },
+  "files.watcherExclude": {
+    "**/.aia/codebase-index.json": false,
+    "**/.github/copilot-*.json": false,
+    "**/.github/copilot-*.md": false
+  },
+  "search.exclude": {
+    "**/.aia/codebase-index.json": false
+  },
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "aia.symbolIndex.aiUpdateStrategy": "manual",
+  "aia.symbolIndex.enableAIUpdates": true
+}

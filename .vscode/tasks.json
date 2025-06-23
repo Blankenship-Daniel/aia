@@ -1,0 +1,72 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "AIA: Build Symbol Index",
+      "type": "shell",
+      "command": "aia index symbols:build --force",
+      "group": "build",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
+    {
+      "label": "AIA: Update Copilot Context",
+      "type": "shell",
+      "command": "aia index symbols:export --format markdown --output .github/copilot-context.md",
+      "dependsOn": ["AIA: Build Symbol Index"],
+      "group": "build",
+      "presentation": {
+        "reveal": "silent"
+      }
+    },
+    {
+      "label": "AIA: Watch Symbol Changes",
+      "type": "shell",
+      "command": "aia index symbols:build --watch",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(.*)$",
+          "file": 1
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^Watching for file changes",
+          "endsPattern": "^Symbol index updated"
+        }
+      }
+    },
+    {
+      "label": "AIA: Compile Extension",
+      "type": "shell",
+      "command": "npm run compile",
+      "options": {
+        "cwd": "${workspaceFolder}/.vscode/aia-copilot-bridge"
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "AIA: Install Extension Dependencies",
+      "type": "shell",
+      "command": "npm install",
+      "options": {
+        "cwd": "${workspaceFolder}/.vscode/aia-copilot-bridge"
+      },
+      "group": "build",
+      "presentation": {
+        "reveal": "always"
+      }
+    }
+  ]
+}

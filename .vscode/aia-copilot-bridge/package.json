@@ -1,0 +1,179 @@
+{
+  "name": "aia-copilot-bridge",
+  "displayName": "AIA Symbol Index for Copilot",
+  "description": "Enhances GitHub Copilot with AIA's O(1) symbol lookup",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "aia.rebuildSymbolIndex",
+        "title": "AIA: Rebuild Symbol Index"
+      },
+      {
+        "command": "aia.showSymbolStats",
+        "title": "AIA: Show Symbol Statistics"
+      },
+      {
+        "command": "aia.showPerformanceReport",
+        "title": "AIA: Show Performance Report"
+      },
+      {
+        "command": "aia.updateCopilotInstructions",
+        "title": "AIA: Update Copilot Instructions"
+      },
+      {
+        "command": "aia.toggleAutoUpdate",
+        "title": "AIA: Toggle Auto-Update"
+      },
+      {
+        "command": "aia.updateSymbolsOnly",
+        "title": "AIA: Update Symbol Index Only (Fast)"
+      },
+      {
+        "command": "aia.updateAIContextOnly",
+        "title": "AIA: Update AI Context Only (Expensive)"
+      },
+      {
+        "command": "aia.toggleAIUpdates",
+        "title": "AIA: Toggle AI Auto-Updates"
+      },
+      {
+        "command": "aia.showUpdateSettings",
+        "title": "AIA: Show Update Settings"
+      },
+      {
+        "command": "aia.resetDailyLimit",
+        "title": "AIA: Reset Daily AI Update Counter"
+      },
+      {
+        "command": "aia.configureUpdateStrategy",
+        "title": "AIA: Configure Update Strategy"
+      }
+    ],
+    "configuration": {
+      "title": "AIA Symbol Index",
+      "properties": {
+        "aia.symbolIndex.autoUpdate": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically update symbol index on file changes"
+        },
+        "aia.symbolIndex.updateInterval": {
+          "type": "number",
+          "default": 300000,
+          "description": "Update interval in milliseconds"
+        },
+        "aia.symbolIndex.includeInCopilotContext": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include symbol index in GitHub Copilot context"
+        },
+        "aia.symbolIndex.performanceTracking": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable performance tracking for symbol lookups"
+        },
+        "aia.symbolIndex.debounceDelay": {
+          "type": "number",
+          "default": 2000,
+          "description": "Delay in milliseconds before triggering local symbol updates after file changes"
+        },
+        "aia.symbolIndex.symbolDebounceDelay": {
+          "type": "number",
+          "default": 2000,
+          "description": "Delay in milliseconds before triggering local symbol index updates"
+        },
+        "aia.symbolIndex.aiDebounceDelay": {
+          "type": "number",
+          "default": 60000,
+          "description": "Delay in milliseconds before triggering expensive AI context updates (60s default to reduce costs)"
+        },
+        "aia.symbolIndex.enableAIUpdates": {
+          "type": "boolean",
+          "default": false,
+          "description": "⚠️ Enable automatic AI-powered context updates (EXPENSIVE: requires API calls)"
+        },
+        "aia.symbolIndex.aiUpdateStrategy": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "time-based",
+            "smart"
+          ],
+          "default": "manual",
+          "description": "Strategy for AI updates: manual (safest), time-based (periodic), smart (architectural changes only)"
+        },
+        "aia.symbolIndex.minAIUpdateInterval": {
+          "type": "number",
+          "default": 600000,
+          "description": "Minimum interval between AI updates in milliseconds (10 minutes default to reduce costs)"
+        },
+        "aia.symbolIndex.smartUpdateThreshold": {
+          "type": "number",
+          "default": 5,
+          "description": "Number of significant file changes required to trigger smart AI update (higher = less aggressive)"
+        },
+        "aia.symbolIndex.promptBeforeExpensiveUpdates": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show confirmation dialog before expensive AI operations"
+        },
+        "aia.symbolIndex.maxDailyAIUpdates": {
+          "type": "number",
+          "default": 10,
+          "description": "Maximum number of automatic AI updates per day (cost protection)"
+        },
+        "aia.symbolIndex.showAIUpdateNotifications": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show notifications when expensive AI updates complete"
+        },
+        "aia.symbolIndex.showUpdateNotifications": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show notifications when auto-updates complete"
+        },
+        "aia.symbolIndex.watchFileTypes": {
+          "type": "array",
+          "default": [
+            "ts",
+            "js",
+            "tsx",
+            "jsx",
+            "md"
+          ],
+          "description": "File extensions to watch for auto-updates"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^16.18.126",
+    "@types/vscode": "^1.101.0",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.28.0",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "fs-extra": "^11.3.0"
+  }
+}

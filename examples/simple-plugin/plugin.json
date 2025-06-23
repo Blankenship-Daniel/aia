@@ -1,0 +1,17 @@
+{
+  "name": "hello-plugin",
+  "version": "1.0.0",
+  "description": "A simple hello world plugin for AIA (no external dependencies)",
+  "author": "AIA Development Team",
+  "homepage": "https://github.com/example/aia-hello-plugin",
+  "main": "index.js",
+  "aia_version": "^1.0.0",
+  "commands": ["hello", "greet"],
+  "hooks": ["beforeCommand", "afterAIQuery"],
+  "permissions": ["console"],
+  "dependencies": {},
+  "config": {
+    "greeting": "Hello from AIA Plugin!",
+    "showTimestamp": true
+  }
+}

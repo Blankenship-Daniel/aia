@@ -1,0 +1,510 @@
+import { ICommand, CommandDefinition } from '../interfaces/ICommand';
+import { IConfigurationService } from '../interfaces/IConfigurationService';
+import { CommandResult, CommandOptions, AIAConfig } from '../types/index';
+// @ts-ignore - chalk may not have types available
+const { Chalk } = require('chalk');
+// Instantiate Chalk for color methods in CommonJS context
+const chalk = new Chalk({ level: 3 });
+import inquirer from 'inquirer';
+
+/**
+ * ConfigCommand class
+ *
+ * TODO: Add class description
+ */
+export class ConfigCommand implements ICommand {
+  public readonly name = 'config';
+  public readonly description =
+    'Manage AIA configuration settings and API keys';
+  public readonly aliases = ['cfg', 'configure'];
+
+  /**
+   * Creates an instance of the class
+   *
+   * @param private configurationService - Parameter description
+   */
+  constructor(private configurationService: IConfigurationService) {}
+
+  public async execute(
+    context: Record<string, unknown>,
+    args: string[],
+    options: CommandOptions
+  ): Promise<CommandResult> {
+    try {
+      // Handle set operation
+      if (options.set) {
+        return await this.handleSet(options.set as string);
+      }
+
+      // Handle get operation
+      if (options.get) {
+        return await this.handleGet(options.get as string);
+      }
+
+      // Handle list operation
+      if (options.list) {
+        return await this.handleList();
+      }
+
+      // Default to interactive mode
+      return await this.handleInteractive();
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Configuration failed',
+      };
+    }
+  }
+
+  /**
+   * Handles set
+   *
+   * @param keyValue - Parameter description
+   *
+   * @returns Promise<CommandResult> - Return value description
+   */
+  private async handleSet(keyValue: string): Promise<CommandResult> {
+    const [key, value] = keyValue.split('=');
+
+    if (!key || value === undefined) {
+      return {
+        success: false,
+        error: 'Invalid format. Use: --set key=value',
+      };
+    }
+    try {
+      // Use the correct interface method
+      await this.configurationService.setSetting(
+        key.trim() as keyof AIAConfig,
+        value.trim()
+      );
+
+      return {
+        success: true,
+        output: chalk.green(`✓ Set ${key} = ${value}`),
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to set configuration',
+      };
+    }
+  }
+
+  /**
+   * Handles get
+   *
+   * @param key - Parameter description
+   *
+   * @returns Promise<CommandResult> - Return value description
+   */
+  private async handleGet(key: string): Promise<CommandResult> {
+    try {
+      const value = this.configurationService.getSetting(
+        key as keyof AIAConfig
+      );
+
+      if (value === undefined) {
+        return {
+          success: false,
+          error: `Configuration key '${key}' not found`,
+        };
+      }
+
+      return {
+        success: true,
+        output: chalk.cyan(`${key}: ${value}`),
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get configuration',
+      };
+    }
+  }
+
+  /**
+   * Handles list
+   *
+   * @returns Promise<CommandResult> - Return value description
+   */
+  private async handleList(): Promise<CommandResult> {
+    try {
+      const config = this.configurationService.getConfiguration();
+
+      let output = chalk.cyan('Current Configuration:\n');
+
+      for (const [key, value] of Object.entries(config)) {
+        // Hide sensitive values
+        const displayValue = key.toLowerCase().includes('key')
+          ? '*'.repeat(8)
+          : String(value);
+        output += `  ${key}: ${displayValue}\n`;
+      }
+
+      return {
+        success: true,
+        output,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to list configuration',
+      };
+    }
+  }
+
+  /**
+   * Handles interactive
+   *
+   * @returns Promise<CommandResult> - Return value description
+   */
+  private async handleInteractive(): Promise<CommandResult> {
+    try {
+      console.log(chalk.cyan('🔧 AIA Configuration Setup'));
+      console.log(chalk.gray('Configure your AI API keys and preferences\n'));
+
+      const questions = [
+        {
+          type: 'list',
+          name: 'preferredModel',
+          message: 'Select your preferred AI model:',
+          choices: [
+            {
+              name: 'GPT-4 (OpenAI) - Best for code and complex tasks',
+              value: 'gpt-4',
+            },
+            {
+              name: 'GPT-3.5 Turbo (OpenAI) - Fast and efficient',
+              value: 'gpt-3.5-turbo',
+            },
+            {
+              name: 'Claude-3.5 Sonnet (Anthropic) - Great for analysis',
+              value: 'claude-3-5-sonnet-20241022',
+            },
+            {
+              name: 'Claude-3 Haiku (Anthropic) - Fast responses',
+              value: 'claude-3-haiku',
+            },
+          ],
+          default: 'gpt-4',
+        },
+        {
+          type: 'confirm',
+          name: 'autoExecute',
+          message:
+            'Enable automatic command execution (no confirmation prompts)?',
+          default: false,
+        },
+        {
+          type: 'confirm',
+          name: 'configureOutputDirectories',
+          message: 'Configure output directories for AI prompt files?',
+          default: false,
+        },
+      ];
+
+      let outputDirectoryQuestions: any[] = [];
+      const initialAnswers = await inquirer.prompt(questions);
+
+      if (initialAnswers.configureOutputDirectories) {
+        outputDirectoryQuestions = [
+          {
+            type: 'input',
+            name: 'outputDirectories.prompts',
+            message: 'Directory for general prompt files:',
+            default: './prompts',
+          },
+          {
+            type: 'input',
+            name: 'outputDirectories.copilotInstructions',
+            message: 'Directory for copilot instruction files:',
+            default: './copilot-instructions',
+          },
+          {
+            type: 'input',
+            name: 'outputDirectories.context',
+            message: 'Directory for context files:',
+            default: './context',
+          },
+          {
+            type: 'input',
+            name: 'outputDirectories.architecture',
+            message: 'Directory for architecture analysis files:',
+            default: './architecture',
+          },
+          {
+            type: 'input',
+            name: 'outputDirectories.comprehensive',
+            message: 'Directory for comprehensive analysis files:',
+            default: './comprehensive',
+          },
+          {
+            type: 'input',
+            name: 'outputDirectories.minimal',
+            message: 'Directory for minimal context files:',
+            default: './minimal',
+          },
+          {
+            type: 'input',
+            name: 'outputDirectories.developer',
+            message: 'Directory for developer reference files:',
+            default: './developer',
+          },
+          {
+            type: 'input',
+            name: 'suggestPromptsDirectory',
+            message: 'Directory for suggest-prompts command output:',
+            default: './suggested-prompts',
+          },
+        ];
+      }
+
+      const outputAnswers =
+        outputDirectoryQuestions.length > 0
+          ? await inquirer.prompt(outputDirectoryQuestions)
+          : {};
+
+      const answers = { ...initialAnswers, ...outputAnswers };
+      delete answers.configureOutputDirectories;
+
+      // Handle nested output directory settings
+      const outputDirectories: any = {};
+      const regularSettings: any = {};
+
+      for (const [key, value] of Object.entries(answers)) {
+        if (key.startsWith('outputDirectories.')) {
+          const nestedKey = key.replace('outputDirectories.', '');
+          outputDirectories[nestedKey] = value;
+        } else if (value !== '' && value !== undefined && value !== null) {
+          regularSettings[key] = value;
+        }
+      }
+
+      // Infer and set the preferred provider based on the selected model
+      if (regularSettings.preferredModel) {
+        regularSettings.preferredProvider = this.inferProviderFromModel(
+          regularSettings.preferredModel
+        );
+      }
+
+      // Save regular configuration settings
+      for (const [key, value] of Object.entries(regularSettings)) {
+        await this.configurationService.setSetting(
+          key as keyof AIAConfig,
+          value as any
+        );
+      }
+
+      // Save output directories if any were configured
+      if (Object.keys(outputDirectories).length > 0) {
+        const currentConfig = this.configurationService.getConfiguration();
+        const updatedOutputDirectories = {
+          ...currentConfig.outputDirectories,
+          ...outputDirectories,
+        };
+        await this.configurationService.setSetting(
+          'outputDirectories',
+          updatedOutputDirectories
+        );
+      }
+
+      console.log(chalk.green('\n✓ Configuration saved successfully!'));
+
+      // Show summary
+      console.log(chalk.cyan('\nConfiguration Summary:'));
+      console.log(`  Preferred Model: ${answers.preferredModel}`);
+      console.log(`  Preferred Provider: ${regularSettings.preferredProvider}`);
+      console.log(
+        `  Auto Execute: ${answers.autoExecute ? 'Enabled' : 'Disabled'}`
+      );
+
+      // Check environment variables for API keys
+      const hasOpenAI = Boolean(process.env.OPENAI_API_KEY);
+      const hasAnthropic = Boolean(process.env.ANTHROPIC_API_KEY);
+
+      console.log(chalk.cyan('\nAPI Key Status (from environment variables):'));
+      console.log(
+        `  OpenAI API: ${
+          hasOpenAI ? '✓ Found OPENAI_API_KEY' : '✗ OPENAI_API_KEY not set'
+        }`
+      );
+      console.log(
+        `  Anthropic API: ${
+          hasAnthropic
+            ? '✓ Found ANTHROPIC_API_KEY'
+            : '✗ ANTHROPIC_API_KEY not set'
+        }`
+      );
+
+      if (!hasOpenAI && !hasAnthropic) {
+        console.log(
+          chalk.yellow(
+            '\n⚠️  No API keys found in environment variables. AI features will not work.'
+          )
+        );
+        console.log(chalk.gray('Set your API keys as environment variables:'));
+        console.log(chalk.gray('  export OPENAI_API_KEY=sk-...'));
+        console.log(chalk.gray('  export ANTHROPIC_API_KEY=sk-ant-...'));
+      }
+
+      return {
+        success: true,
+        output: 'Configuration completed successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Interactive configuration failed',
+      };
+    }
+  }
+
+  // ICommand interface methods
+  /**
+   * Gets definition
+   *
+   * @returns CommandDefinition - Return value description
+   */
+  public getDefinition(): CommandDefinition {
+    return {
+      name: this.name,
+      description: this.description,
+      usage:
+        'config [--set <key=value>] [--get <key>] [--list] [--interactive]',
+      aliases: this.aliases,
+      examples: [
+        'aia config --interactive',
+        'aia config --list',
+        'aia config --get preferredModel',
+        'aia config --set preferredModel=gpt-4',
+      ],
+      options: [
+        {
+          name: 'set',
+          description: 'Set a configuration value (key=value)',
+          type: 'string',
+          required: false,
+        },
+        {
+          name: 'get',
+          description: 'Get a configuration value',
+          type: 'string',
+          required: false,
+        },
+        {
+          name: 'list',
+          description: 'List all configuration values',
+          type: 'boolean',
+          required: false,
+        },
+        {
+          name: 'interactive',
+          description: 'Interactive configuration setup',
+          type: 'boolean',
+          required: false,
+        },
+      ],
+    };
+  }
+
+  /**
+   * Gets name
+   *
+   * @returns string - Return value description
+   */
+  public getName(): string {
+    return this.name;
+  }
+
+  /**
+   * Gets aliases
+   *
+   * @returns string[] - Return value description
+   */
+  public getAliases(): string[] {
+    return this.aliases;
+  }
+
+  /**
+   * Validates args
+   *
+   * @param args - Parameter description
+   *
+   * @returns  - Return value description
+   */
+  public validateArgs(args: string[]): { valid: boolean; errors: string[] } {
+    // Config command doesn't require specific arguments
+    return {
+      valid: true,
+      errors: [],
+    };
+  }
+
+  /**
+   * Gets help
+   *
+   * @returns string - Return value description
+   */
+  public getHelp(): string {
+    const definition = this.getDefinition();
+    let help = `${definition.name} - ${definition.description}\n\n`;
+    help += `Usage: ${definition.usage}\n\n`;
+
+    if (definition.aliases && definition.aliases.length > 0) {
+      help += `Aliases: ${definition.aliases.join(', ')}\n\n`;
+    }
+
+    if (definition.options && definition.options.length > 0) {
+      help += 'Options:\n';
+      definition.options.forEach((opt) => {
+        const required = opt.required ? ' (required)' : '';
+        const defaultValue =
+          opt.default !== undefined ? ` (default: ${opt.default})` : '';
+        help += `  --${opt.name}: ${opt.description}${required}${defaultValue}\n`;
+      });
+      help += '\n';
+    }
+
+    if (definition.examples && definition.examples.length > 0) {
+      help += 'Examples:\n';
+      definition.examples.forEach((example) => {
+        help += `  ${example}\n`;
+      });
+    }
+
+    return help;
+  }
+
+  /**
+   * Infer the AI provider from the model name.
+   * @param model Model name to analyze
+   * @returns Provider name ('openai', 'anthropic', 'gemini')
+   */
+  private inferProviderFromModel(model: string): string {
+    const modelLower = model.toLowerCase();
+
+    if (modelLower.includes('claude') || modelLower.includes('anthropic')) {
+      return 'anthropic';
+    } else if (modelLower.includes('gpt') || modelLower.includes('openai')) {
+      return 'openai';
+    } else if (modelLower.includes('gemini') || modelLower.includes('google')) {
+      return 'gemini';
+    }
+
+    // Default to openai for unknown models
+    return 'openai';
+  }
+}

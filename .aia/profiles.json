@@ -1,0 +1,19 @@
+{
+  "default": {
+    "openaiApiKey": "",
+    "anthropicApiKey": "",
+    "preferredModel": "gpt-3.5-turbo",
+    "autoExecute": false,
+    "maxMemorySize": 50,
+    "logLevel": "info",
+    "enableTelemetry": false,
+    "advanced": {
+      "commandTimeout": 300,
+      "maxRetries": 3,
+      "enablePlugins": true,
+      "enableWorkflows": true,
+      "customPromptTemplate": "",
+      "enabledFeatures": []
+    }
+  }
+}

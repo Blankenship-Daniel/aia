@@ -9,7 +9,7 @@ PR_BRANCH = os.environ["PR_BRANCH"]
 GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 
-openai.api_key = OPENAI_API_KEY
+client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
 # Source extensions to check
 SOURCE_EXTENSIONS = [".ts", ".js", ".py"]
@@ -60,7 +60,7 @@ Source file: {filename}
 Code:
 {source_code}
 """
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=800

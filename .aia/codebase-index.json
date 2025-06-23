@@ -15,7 +15,7 @@
     "largestFiles": [
       {
         "path": ".aia/codebase-index.json",
-        "size": 396690
+        "size": 398620
       },
       {
         "path": "package-lock.json",
@@ -64,16 +64,16 @@
         "count": 1
       }
     ],
-    "indexedAt": "2025-06-23T17:16:41.824Z"
+    "indexedAt": "2025-06-23T17:26:41.918Z"
   },
   "files": [
     [
       ".aia/codebase-index.json",
       {
         "path": ".aia/codebase-index.json",
-        "size": 396690,
-        "hash": "f2bd170abd59e97d",
-        "lastModified": "2025-06-23T17:06:43.732Z",
+        "size": 398620,
+        "hash": "a8ae8a409a2dc733",
+        "lastModified": "2025-06-23T17:16:41.827Z",
         "type": "config",
         "language": "json",
         "symbols": [
@@ -214,15 +214,15 @@
       ".github/bots/gen_missing_tests.py",
       {
         "path": ".github/bots/gen_missing_tests.py",
-        "size": 2941,
-        "hash": "d7c6f3d90401f439",
-        "lastModified": "2025-06-23T17:09:45.537Z",
+        "size": 4236,
+        "hash": "1780ca01af48a31e",
+        "lastModified": "2025-06-23T17:21:53.697Z",
         "type": "source",
         "language": "python",
         "symbols": [
           {
             "type": "function",
-            "name": "find_python_files"
+            "name": "find_source_files"
           },
           {
             "type": "function",
@@ -230,7 +230,7 @@
           },
           {
             "type": "function",
-            "name": "suggest_test_filename"
+            "name": "suggest_test_filenames"
           },
           {
             "type": "function",
@@ -13762,7 +13762,7 @@
   ],
   "functions": [
     [
-      "find_python_files",
+      "find_source_files",
       {
         "file": ".github/bots/gen_missing_tests.py",
         "async": false
@@ -13776,7 +13776,7 @@
       }
     ],
     [
-      "suggest_test_filename",
+      "suggest_test_filenames",
       {
         "file": ".github/bots/gen_missing_tests.py",
         "async": false

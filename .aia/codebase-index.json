@@ -1,12 +1,14 @@
 {
   "metadata": {
-    "totalFiles": 251,
+    "totalFiles": 253,
     "totalClasses": 146,
-    "totalFunctions": 72,
+    "totalFunctions": 76,
     "totalTodos": 7,
     "languages": {
       "json": 19,
+      "python": 1,
       "markdown": 25,
+      "unknown": 1,
       "javascript": 24,
       "typescript": 183
     },
@@ -62,7 +64,7 @@
         "count": 1
       }
     ],
-    "indexedAt": "2025-06-23T17:06:43.728Z"
+    "indexedAt": "2025-06-23T17:16:41.824Z"
   },
   "files": [
     [
@@ -70,8 +72,8 @@
       {
         "path": ".aia/codebase-index.json",
         "size": 396690,
-        "hash": "97ef4e98d916956c",
-        "lastModified": "2025-06-23T16:56:49.159Z",
+        "hash": "f2bd170abd59e97d",
+        "lastModified": "2025-06-23T17:06:43.732Z",
         "type": "config",
         "language": "json",
         "symbols": [
@@ -204,6 +206,48 @@
           }
         ],
         "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/bots/gen_missing_tests.py",
+      {
+        "path": ".github/bots/gen_missing_tests.py",
+        "size": 2941,
+        "hash": "d7c6f3d90401f439",
+        "lastModified": "2025-06-23T17:09:45.537Z",
+        "type": "source",
+        "language": "python",
+        "symbols": [
+          {
+            "type": "function",
+            "name": "find_python_files"
+          },
+          {
+            "type": "function",
+            "name": "find_test_files"
+          },
+          {
+            "type": "function",
+            "name": "suggest_test_filename"
+          },
+          {
+            "type": "function",
+            "name": "generate_test_stub"
+          },
+          {
+            "type": "function",
+            "name": "main"
+          }
+        ],
+        "imports": [
+          "os",
+          "glob",
+          "openai",
+          "github",
+          "Github"
+        ],
         "exports": [],
         "dependencies": []
       }
@@ -1080,6 +1124,21 @@
             "name": "CodeBlock_unknown"
           }
         ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/workflows/test-gen-bot.yml",
+      {
+        "path": ".github/workflows/test-gen-bot.yml",
+        "size": 877,
+        "hash": "4e67b8c494e666f8",
+        "lastModified": "2025-06-23T17:08:42.833Z",
+        "type": "other",
+        "language": "unknown",
+        "symbols": [],
         "imports": [],
         "exports": [],
         "dependencies": []
@@ -13703,6 +13762,41 @@
   ],
   "functions": [
     [
+      "find_python_files",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "find_test_files",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "suggest_test_filename",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "generate_test_stub",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "main",
+      {
+        "file": "scripts/error-handling-integration.ts",
+        "async": false
+      }
+    ],
+    [
       "spinnerServiceExample",
       {
         "file": "examples/spinner-example.js",
@@ -13727,13 +13821,6 @@
       "sleep",
       {
         "file": "examples/spinner-example.js",
-        "async": false
-      }
-    ],
-    [
-      "main",
-      {
-        "file": "scripts/error-handling-integration.ts",
         "async": false
       }
     ],

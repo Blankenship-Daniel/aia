@@ -62,7 +62,7 @@
         "count": 1
       }
     ],
-    "indexedAt": "2025-06-22T18:14:25.096Z"
+    "indexedAt": "2025-06-23T16:56:49.156Z"
   },
   "files": [
     [
@@ -70,8 +70,8 @@
       {
         "path": ".aia/codebase-index.json",
         "size": 396690,
-        "hash": "e3a0521bc48ad09a",
-        "lastModified": "2025-06-22T10:07:18.562Z",
+        "hash": "e9c09ce455c789f9",
+        "lastModified": "2025-06-23T00:38:10.708Z",
         "type": "config",
         "language": "json",
         "symbols": [
@@ -214,7 +214,7 @@
         "path": ".github/copilot-context.md",
         "size": 2448,
         "hash": "55ded38278f60fe6",
-        "lastModified": "2025-06-22T18:14:20.332Z",
+        "lastModified": "2025-06-23T16:56:40.895Z",
         "type": "documentation",
         "language": "markdown",
         "symbols": [
@@ -290,7 +290,7 @@
         "path": ".github/copilot-relationships.json",
         "size": 121,
         "hash": "6eef005ed3528d2a",
-        "lastModified": "2025-06-22T18:14:20.332Z",
+        "lastModified": "2025-06-23T16:56:40.895Z",
         "type": "config",
         "language": "json",
         "symbols": [
@@ -317,8 +317,8 @@
       {
         "path": ".github/copilot-symbols.json",
         "size": 208,
-        "hash": "bb02ce537e15e1d7",
-        "lastModified": "2025-06-22T18:14:20.332Z",
+        "hash": "996737291df98fbb",
+        "lastModified": "2025-06-23T16:56:40.895Z",
         "type": "config",
         "language": "json",
         "symbols": [

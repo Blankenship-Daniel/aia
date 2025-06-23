@@ -62,7 +62,7 @@
         "count": 1
       }
     ],
-    "indexedAt": "2025-06-23T16:56:49.156Z"
+    "indexedAt": "2025-06-23T17:06:43.728Z"
   },
   "files": [
     [
@@ -70,8 +70,8 @@
       {
         "path": ".aia/codebase-index.json",
         "size": 396690,
-        "hash": "e9c09ce455c789f9",
-        "lastModified": "2025-06-23T00:38:10.708Z",
+        "hash": "97ef4e98d916956c",
+        "lastModified": "2025-06-23T16:56:49.159Z",
         "type": "config",
         "language": "json",
         "symbols": [

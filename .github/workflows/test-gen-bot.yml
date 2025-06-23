@@ -1,0 +1,32 @@
+name: Test Generation Bot
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  generate-missing-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed to commit to PR branch
+      pull-requests: write # Needed to comment on PRs
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install openai PyGithub
+
+      - name: Run Test Generation Bot
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          PR_BRANCH: ${{ github.head_ref }}
+          REPO_NAME: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          python .github/bots/gen_missing_tests.py

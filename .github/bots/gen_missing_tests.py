@@ -28,6 +28,10 @@ class TestGeneratorConfig:
         self.github_token = os.environ.get("GITHUB_TOKEN", "")
         self.openai_api_key = os.environ.get("OPENAI_API_KEY", "")
         
+        # Feature flags
+        self.enable_incremental_commits = os.environ.get("ENABLE_INCREMENTAL_COMMITS", "true").lower() == "true"
+        self.batch_size = int(os.environ.get("COMMIT_BATCH_SIZE", "3"))
+        
         # Add configuration validation
         self.validate()
     
@@ -104,6 +108,38 @@ class GitOperations:
     """Safe git operations handler following AIA patterns."""
     
     @staticmethod
+    def check_git_status() -> Tuple[bool, str]:
+        """Check current git repository status."""
+        try:
+            success, stdout, stderr = run_command(["git", "status", "--porcelain"])
+            if not success:
+                return False, f"Failed to check git status: {stderr}"
+            return True, stdout.strip()
+        except Exception as e:
+            return False, f"Git status check failed: {e}"
+    
+    @staticmethod
+    def ensure_clean_state() -> bool:
+        """Ensure we're in a clean git state before operations."""
+        try:
+            # Check if we're in a git repository
+            success, _, stderr = run_command(["git", "rev-parse", "--git-dir"])
+            if not success:
+                logger.error(f"Not in a git repository: {stderr}")
+                return False
+            
+            # Check for any ongoing merge/rebase operations
+            success, stdout, _ = run_command(["git", "status", "--porcelain=v1"])
+            if success and any(line.startswith('UU ') for line in stdout.split('\n')):
+                logger.error("Git repository has unresolved merge conflicts")
+                return False
+                
+            return True
+        except Exception as e:
+            logger.error(f"Failed to ensure clean git state: {e}")
+            return False
+    
+    @staticmethod
     def configure_git() -> bool:
         """Configure git with bot credentials."""
         commands = [
@@ -119,10 +155,33 @@ class GitOperations:
         return True
     
     @staticmethod
-    def stage_commit_push(files: List[str], branch: str) -> bool:
-        """Stage, commit and push files safely."""
+    def branch_exists_remotely(branch: str) -> bool:
+        """Check if a branch exists on the remote."""
         try:
+            success, _, _ = run_command(["git", "ls-remote", "--heads", "origin", branch])
+            return success
+        except Exception:
+            return False
+    
+    @staticmethod
+    def stage_commit_push(files: List[str], branch: str) -> bool:
+        """Stage, commit and push files safely with proper branch handling."""
+        try:
+            # First, fetch the latest changes from remote
+            logger.info("Fetching latest changes from remote...")
+            success, _, stderr = run_command(["git", "fetch", "origin"])
+            if not success:
+                logger.warning(f"Failed to fetch from remote: {stderr}")
+                # Continue anyway, might still work
+            
+            # Check if we have any changes to commit
+            success, stdout, _ = run_command(["git", "status", "--porcelain"])
+            if not success or not stdout.strip():
+                logger.info("No changes to commit")
+                return True
+            
             # Stage files
+            logger.info(f"Staging {len(files)} files...")
             success, _, stderr = run_command(["git", "add"] + files)
             if not success:
                 logger.error(f"Failed to stage files: {stderr}")
@@ -130,6 +189,7 @@ class GitOperations:
             
             # Commit
             commit_msg = "test: add AI-generated test stubs for new code"
+            logger.info("Committing changes...")
             success, _, stderr = run_command(
                 ["git", "commit", "-m", commit_msg]
             )
@@ -137,17 +197,80 @@ class GitOperations:
                 logger.error(f"Failed to commit: {stderr}")
                 return False
             
-            # Push
+            # Try to pull and rebase if the branch exists remotely
+            if GitOperations.branch_exists_remotely(branch):
+                logger.info(f"Branch {branch} exists remotely, attempting to sync...")
+                success, _, stderr = run_command(
+                    ["git", "pull", "--rebase", "origin", branch]
+                )
+                if not success:
+                    logger.warning(f"Pull rebase failed: {stderr}")
+                    # Continue anyway, might still work with force push
+            else:
+                logger.info(f"Branch {branch} does not exist remotely, will create new branch")
+            
+            # Push with retry logic
+            max_retries = 3
+            for attempt in range(max_retries):
+                logger.info(f"Pushing to {branch} (attempt {attempt + 1}/{max_retries})...")
+                success, _, stderr = run_command(
+                    ["git", "push", "origin", f"HEAD:{branch}"]
+                )
+                if success:
+                    logger.info("Successfully pushed changes")
+                    return True
+                
+                logger.warning(f"Push attempt {attempt + 1} failed: {stderr}")
+                
+                # Log specific error types for better debugging
+                if "rejected" in stderr.lower() and "fetch first" in stderr.lower():
+                    logger.info("Push rejected because remote has newer commits")
+                elif "non-fast-forward" in stderr.lower():
+                    logger.info("Push rejected due to non-fast-forward update")
+                elif "authentication" in stderr.lower():
+                    logger.error("Authentication failed - check GitHub token permissions")
+                    return False
+                
+                # If not the last attempt, try to pull and rebase again
+                if attempt < max_retries - 1:
+                    logger.info("Retrying with fresh pull...")
+                    run_command(["git", "pull", "--rebase", "origin", branch])
+            
+            # If all retries failed, try force push as last resort (with caution)
+            logger.warning("All push attempts failed, trying force push...")
             success, _, stderr = run_command(
-                ["git", "push", "origin", f"HEAD:{branch}"]
+                ["git", "push", "--force-with-lease", "origin", f"HEAD:{branch}"]
             )
             if not success:
-                logger.error(f"Failed to push: {stderr}")
+                logger.error(f"Force push also failed: {stderr}")
                 return False
+                
+            logger.info("Force push succeeded")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Git operation failed: {e}")
+            return False
+    
+    @staticmethod
+    def setup_git_for_github_actions() -> bool:
+        """Setup git configuration for GitHub Actions environment."""
+        try:
+            # In GitHub Actions, we need to ensure we're on the correct branch
+            success, current_branch, _ = run_command(["git", "branch", "--show-current"])
+            if not success or not current_branch.strip():
+                logger.warning("Not on a specific branch, might be in detached HEAD")
+                
+            # Check if origin remote exists
+            success, remotes, _ = run_command(["git", "remote", "-v"])
+            if success and "origin" in remotes:
+                logger.info("Git remote 'origin' is configured")
+            else:
+                logger.warning("Git remote 'origin' not found")
                 
             return True
         except Exception as e:
-            logger.error(f"Git operation failed: {e}")
+            logger.error(f"Failed to setup git for GitHub Actions: {e}")
             return False
 
 
@@ -229,11 +352,11 @@ Code:
             logger.error(f"Failed to generate test stub for {filename}: {e}")
             return f"// Failed to generate test stub: {e}"
     
-    def generate_tests_for_files(self, files_missing_tests: List[str]) -> List[str]:
-        """Generate tests for all files missing tests."""
+    def generate_tests_for_files(self, files_missing_tests: List[str], enable_incremental_commits: bool = True) -> List[str]:
+        """Generate tests for all files missing tests with optional incremental commits."""
         new_tests = []
         
-        for src_file in files_missing_tests:
+        for i, src_file in enumerate(files_missing_tests):
             try:
                 ext = os.path.splitext(src_file)[1]
                 
@@ -253,11 +376,62 @@ Code:
                 new_tests.append(test_filename)
                 logger.info(f"Generated test file: {test_filename}")
                 
+                # Incremental commit for expensive operations
+                if enable_incremental_commits and (i + 1) % self.config.batch_size == 0:  # Commit every N tests
+                    batch_start = max(0, len(new_tests) - self.config.batch_size)
+                    batch_tests = new_tests[batch_start:]
+                    if self._commit_batch(batch_tests, f"test: add AI-generated tests (batch {(i+1)//self.config.batch_size})"):
+                        logger.info(f"✅ Committed and pushed batch of {len(batch_tests)} tests")
+                    else:
+                        logger.warning(f"⚠️ Failed to commit batch at test {i+1}, but continuing generation")
+                
             except Exception as e:
                 logger.error(f"Failed to generate test for {src_file}: {e}")
                 continue
         
         return new_tests
+    
+    def _commit_batch(self, test_files: List[str], commit_message: str) -> bool:
+        """Commit a batch of test files incrementally."""
+        try:
+            # Check if files actually exist and have content
+            valid_files = [f for f in test_files if os.path.exists(f) and os.path.getsize(f) > 0]
+            if not valid_files:
+                logger.warning("No valid files to commit in batch")
+                return False
+                
+            # Stage only these specific files
+            logger.info(f"Staging {len(valid_files)} files for batch commit...")
+            success, _, stderr = run_command(["git", "add"] + valid_files)
+            if not success:
+                logger.error(f"Failed to stage batch: {stderr}")
+                return False
+            
+            # Check if there are actually changes to commit
+            success, status_output, _ = run_command(["git", "status", "--porcelain"])
+            if not success or not status_output.strip():
+                logger.info("No changes to commit in this batch")
+                return True  # Not an error, just nothing to commit
+            
+            # Commit this batch
+            success, _, stderr = run_command(["git", "commit", "-m", commit_message])
+            if not success:
+                logger.error(f"Failed to commit batch: {stderr}")
+                return False
+            
+            # Push immediately to save progress
+            success, _, stderr = run_command(["git", "push", "origin", "HEAD"])
+            if not success:
+                logger.warning(f"Failed to push batch (but committed locally): {stderr}")
+                # Still return True since we have the local commit
+                # The final push can pick up these commits
+                return True
+                
+            return True
+        except Exception as e:
+            logger.error(f"Batch commit failed: {e}")
+            return False
+        
 
 def find_source_files() -> List[str]:
     """
@@ -412,23 +586,42 @@ def main():
         repo = g.get_repo(config.repo_name)
         pr = repo.get_pull(config.pr_number)
         
-        # Generate tests using context manager
+        # Git operations with safety checks - setup early for incremental commits
+        git_ops = GitOperations()
+        
+        # Setup git for GitHub Actions environment
+        if not git_ops.setup_git_for_github_actions():
+            logger.error("Failed to setup git for GitHub Actions")
+            return 1
+        
+        # Ensure clean git state
+        if not git_ops.ensure_clean_state():
+            logger.error("Git repository is not in a clean state")
+            return 1
+            
+        if not git_ops.configure_git():
+            logger.error("Failed to configure git")
+            return 1
+        
+        # Generate tests using context manager with incremental commits
         with TestGenerator(config) as test_generator:
-            new_tests = test_generator.generate_tests_for_files(files_missing_tests)
+            new_tests = test_generator.generate_tests_for_files(files_missing_tests, enable_incremental_commits=config.enable_incremental_commits)
         
         if not new_tests:
             logger.warning("No tests were generated")
             return 1
         
-        # Git operations
-        git_ops = GitOperations()
-        if not git_ops.configure_git():
-            logger.error("Failed to configure git")
-            return 1
-            
-        if not git_ops.stage_commit_push(new_tests, config.pr_branch):
-            logger.error("Failed to commit and push changes")
-            return 1
+        # Final commit for any remaining tests not yet committed
+        remaining_tests = [t for t in new_tests if os.path.exists(t)]
+        if remaining_tests:
+            # Check what's uncommitted
+            status_ok, status_info = git_ops.check_git_status()
+            if status_ok and status_info.strip():
+                logger.info(f"Committing final batch of {len(remaining_tests)} tests")
+                if not git_ops.stage_commit_push(remaining_tests, config.pr_branch):
+                    logger.warning("Failed to commit final batch, but some tests may have been committed incrementally")
+            else:
+                logger.info("All tests were committed incrementally")
         
         # Create PR comment
         if not create_pr_comment(pr, new_tests):

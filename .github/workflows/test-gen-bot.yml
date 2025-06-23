@@ -12,6 +12,10 @@ jobs:
       pull-requests: write # Needed to comment on PRs
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0 # Fetch full history to allow rebasing
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -21,6 +25,14 @@ jobs:
       - name: Install dependencies
         run: pip install openai PyGithub
 
+      - name: Debug Git State
+        run: |
+          echo "Current branch: $(git branch --show-current)"
+          echo "Git status:"
+          git status
+          echo "Remote branches:"
+          git branch -r
+
       - name: Run Test Generation Bot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -28,5 +40,7 @@ jobs:
           PR_BRANCH: ${{ github.head_ref }}
           REPO_NAME: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          ENABLE_INCREMENTAL_COMMITS: 'true' # Enable progressive saving
+          COMMIT_BATCH_SIZE: '2' # Commit every 2 tests to reduce API loss risk
         run: |
           python .github/bots/gen_missing_tests.py

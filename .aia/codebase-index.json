@@ -2,7 +2,7 @@
   "metadata": {
     "totalFiles": 254,
     "totalClasses": 149,
-    "totalFunctions": 87,
+    "totalFunctions": 92,
     "totalTodos": 7,
     "languages": {
       "json": 19,
@@ -15,7 +15,7 @@
     "largestFiles": [
       {
         "path": ".aia/codebase-index.json",
-        "size": 398622
+        "size": 409569
       },
       {
         "path": "package-lock.json",
@@ -64,16 +64,16 @@
         "count": 1
       }
     ],
-    "indexedAt": "2025-06-23T17:49:08.180Z"
+    "indexedAt": "2025-06-23T18:46:42.021Z"
   },
   "files": [
     [
       ".aia/codebase-index.json",
       {
         "path": ".aia/codebase-index.json",
-        "size": 398622,
-        "hash": "2cab1b4da342c60e",
-        "lastModified": "2025-06-23T17:46:41.915Z",
+        "size": 409569,
+        "hash": "27b4d23223e6604d",
+        "lastModified": "2025-06-23T18:36:41.818Z",
         "type": "config",
         "language": "json",
         "symbols": [
@@ -214,9 +214,9 @@
       ".github/bots/REFACTORING_SUMMARY.md",
       {
         "path": ".github/bots/REFACTORING_SUMMARY.md",
-        "size": 7330,
-        "hash": "ff2da44eb502e38e",
-        "lastModified": "2025-06-23T17:49:04.921Z",
+        "size": 7347,
+        "hash": "d62b69ca1066d0c7",
+        "lastModified": "2025-06-23T17:49:22.602Z",
         "type": "documentation",
         "language": "markdown",
         "symbols": [
@@ -398,9 +398,9 @@
       ".github/bots/gen_missing_tests.py",
       {
         "path": ".github/bots/gen_missing_tests.py",
-        "size": 14458,
-        "hash": "72868b0963affd2d",
-        "lastModified": "2025-06-23T17:48:37.235Z",
+        "size": 22575,
+        "hash": "11ad7a9bc6ebd09a",
+        "lastModified": "2025-06-23T18:46:36.973Z",
         "type": "source",
         "language": "python",
         "symbols": [
@@ -434,11 +434,27 @@
           },
           {
             "type": "function",
+            "name": "check_git_status"
+          },
+          {
+            "type": "function",
+            "name": "ensure_clean_state"
+          },
+          {
+            "type": "function",
             "name": "configure_git"
           },
           {
             "type": "function",
+            "name": "branch_exists_remotely"
+          },
+          {
+            "type": "function",
             "name": "stage_commit_push"
+          },
+          {
+            "type": "function",
+            "name": "setup_git_for_github_actions"
           },
           {
             "type": "function",
@@ -459,6 +475,10 @@
           {
             "type": "function",
             "name": "generate_tests_for_files"
+          },
+          {
+            "type": "function",
+            "name": "_commit_batch"
           },
           {
             "type": "function",
@@ -499,7 +519,10 @@
           "Path",
           "openai",
           "github",
-          "Github"
+          "Github",
+          "remote",
+          "remote...",
+          "remote"
         ],
         "exports": [],
         "dependencies": []
@@ -1386,9 +1409,9 @@
       ".github/workflows/test-gen-bot.yml",
       {
         "path": ".github/workflows/test-gen-bot.yml",
-        "size": 877,
-        "hash": "4e67b8c494e666f8",
-        "lastModified": "2025-06-23T17:08:42.833Z",
+        "size": 1254,
+        "hash": "faed5e4767a49014",
+        "lastModified": "2025-06-23T18:43:56.889Z",
         "type": "other",
         "language": "unknown",
         "symbols": [],
@@ -10456,13 +10479,37 @@
         "file": ".github/bots/gen_missing_tests.py",
         "methods": [
           {
+            "name": "check_git_status",
+            "async": false,
+            "static": true,
+            "visibility": "public"
+          },
+          {
+            "name": "ensure_clean_state",
+            "async": false,
+            "static": true,
+            "visibility": "public"
+          },
+          {
             "name": "configure_git",
             "async": false,
             "static": true,
             "visibility": "public"
           },
           {
+            "name": "branch_exists_remotely",
+            "async": false,
+            "static": true,
+            "visibility": "public"
+          },
+          {
             "name": "stage_commit_push",
+            "async": false,
+            "static": true,
+            "visibility": "public"
+          },
+          {
+            "name": "setup_git_for_github_actions",
             "async": false,
             "static": true,
             "visibility": "public"
@@ -14127,6 +14174,20 @@
       }
     ],
     [
+      "check_git_status",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "ensure_clean_state",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
       "configure_git",
       {
         "file": ".github/bots/gen_missing_tests.py",
@@ -14134,7 +14195,21 @@
       }
     ],
     [
+      "branch_exists_remotely",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
       "stage_commit_push",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "setup_git_for_github_actions",
       {
         "file": ".github/bots/gen_missing_tests.py",
         "async": false
@@ -14163,6 +14238,13 @@
     ],
     [
       "generate_tests_for_files",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "_commit_batch",
       {
         "file": ".github/bots/gen_missing_tests.py",
         "async": false

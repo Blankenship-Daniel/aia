@@ -1,19 +1,21 @@
 {
   "metadata": {
-    "totalFiles": 251,
-    "totalClasses": 146,
-    "totalFunctions": 72,
+    "totalFiles": 254,
+    "totalClasses": 149,
+    "totalFunctions": 92,
     "totalTodos": 7,
     "languages": {
       "json": 19,
-      "markdown": 25,
+      "markdown": 26,
+      "python": 1,
+      "unknown": 1,
       "javascript": 24,
       "typescript": 183
     },
     "largestFiles": [
       {
         "path": ".aia/codebase-index.json",
-        "size": 396690
+        "size": 409569
       },
       {
         "path": "package-lock.json",
@@ -62,16 +64,16 @@
         "count": 1
       }
     ],
-    "indexedAt": "2025-06-23T16:56:49.156Z"
+    "indexedAt": "2025-06-23T18:46:42.021Z"
   },
   "files": [
     [
       ".aia/codebase-index.json",
       {
         "path": ".aia/codebase-index.json",
-        "size": 396690,
-        "hash": "e9c09ce455c789f9",
-        "lastModified": "2025-06-23T00:38:10.708Z",
+        "size": 409569,
+        "hash": "27b4d23223e6604d",
+        "lastModified": "2025-06-23T18:36:41.818Z",
         "type": "config",
         "language": "json",
         "symbols": [
@@ -204,6 +206,324 @@
           }
         ],
         "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/bots/REFACTORING_SUMMARY.md",
+      {
+        "path": ".github/bots/REFACTORING_SUMMARY.md",
+        "size": 7347,
+        "hash": "d62b69ca1066d0c7",
+        "lastModified": "2025-06-23T17:49:22.602Z",
+        "type": "documentation",
+        "language": "markdown",
+        "symbols": [
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Test Generation Bot Refactoring Summary",
+            "name": "Test Generation Bot Refactoring Summary"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Overview",
+            "name": "Overview"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Key Improvements Implemented",
+            "name": "Key Improvements Implemented"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "1. ✅ **Error Handling and Safety**",
+            "name": "1. ✅ **Error Handling and Safety**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "2. ✅ **Configuration Management**",
+            "name": "2. ✅ **Configuration Management**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "3. ✅ **Architecture Alignment**",
+            "name": "3. ✅ **Architecture Alignment**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "4. ✅ **Enhanced Test Patterns**",
+            "name": "4. ✅ **Enhanced Test Patterns**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "5. ✅ **Logging and Monitoring**",
+            "name": "5. ✅ **Logging and Monitoring**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "6. ✅ **Type Safety and Documentation**",
+            "name": "6. ✅ **Type Safety and Documentation**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "7. ✅ **Resource Management**",
+            "name": "7. ✅ **Resource Management**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "8. ✅ **Enhanced Git Operations**",
+            "name": "8. ✅ **Enhanced Git Operations**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "9. ✅ **Improved PR Comments**",
+            "name": "9. ✅ **Improved PR Comments**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "10. ✅ **Test Generation Enhancement**",
+            "name": "10. ✅ **Test Generation Enhancement**"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Code Structure Overview",
+            "name": "Code Structure Overview"
+          },
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Core Components",
+            "name": "Core Components"
+          },
+          {
+            "type": "header",
+            "level": 1,
+            "text": "Utility Functions",
+            "name": "Utility Functions"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Architectural Benefits Achieved",
+            "name": "Architectural Benefits Achieved"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "🎯 **Reliability**",
+            "name": "🎯 **Reliability**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "🔧 **Maintainability**",
+            "name": "🔧 **Maintainability**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "🚀 **Extensibility**",
+            "name": "🚀 **Extensibility**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "🛡️ **Security**",
+            "name": "🛡️ **Security**"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "📊 **Monitoring and Observability**",
+            "name": "📊 **Monitoring and Observability**"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Testing Improvements",
+            "name": "Testing Improvements"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "TypeScript Test Generation",
+            "name": "TypeScript Test Generation"
+          },
+          {
+            "type": "header",
+            "level": 3,
+            "text": "Test Organization",
+            "name": "Test Organization"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Compliance with AIA Standards",
+            "name": "Compliance with AIA Standards"
+          },
+          {
+            "type": "header",
+            "level": 2,
+            "text": "Future Enhancements",
+            "name": "Future Enhancements"
+          },
+          {
+            "type": "codeblock",
+            "language": "python",
+            "content": "# Core Components\nTestGeneratorConfig     # Configuration management with validation\nGitOperations          # Safe git operations\nTestGenerator          # Test generation with resource management\nrun_command()          # Safe command execution\ncreate_pr_comment()    # Enhanced PR commenting\nmain()                 # Comprehensive main function with error handling\n\n# Utility Functions\nfind_source_files()           # Type-safe file discovery\nfind_test_files()            # Test file detection\nsuggest_test_filenames()     # Test filename suggestions\nidentify_files_missing_tests() # Missing test identification",
+            "name": "CodeBlock_python"
+          }
+        ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/bots/gen_missing_tests.py",
+      {
+        "path": ".github/bots/gen_missing_tests.py",
+        "size": 22575,
+        "hash": "11ad7a9bc6ebd09a",
+        "lastModified": "2025-06-23T18:46:36.973Z",
+        "type": "source",
+        "language": "python",
+        "symbols": [
+          {
+            "type": "class",
+            "name": "TestGeneratorConfig"
+          },
+          {
+            "type": "class",
+            "name": "GitOperations"
+          },
+          {
+            "type": "class",
+            "name": "TestGenerator"
+          },
+          {
+            "type": "function",
+            "name": "__init__"
+          },
+          {
+            "type": "function",
+            "name": "_get_pr_number"
+          },
+          {
+            "type": "function",
+            "name": "validate"
+          },
+          {
+            "type": "function",
+            "name": "run_command"
+          },
+          {
+            "type": "function",
+            "name": "check_git_status"
+          },
+          {
+            "type": "function",
+            "name": "ensure_clean_state"
+          },
+          {
+            "type": "function",
+            "name": "configure_git"
+          },
+          {
+            "type": "function",
+            "name": "branch_exists_remotely"
+          },
+          {
+            "type": "function",
+            "name": "stage_commit_push"
+          },
+          {
+            "type": "function",
+            "name": "setup_git_for_github_actions"
+          },
+          {
+            "type": "function",
+            "name": "__init__"
+          },
+          {
+            "type": "function",
+            "name": "__enter__"
+          },
+          {
+            "type": "function",
+            "name": "__exit__"
+          },
+          {
+            "type": "function",
+            "name": "generate_test_stub"
+          },
+          {
+            "type": "function",
+            "name": "generate_tests_for_files"
+          },
+          {
+            "type": "function",
+            "name": "_commit_batch"
+          },
+          {
+            "type": "function",
+            "name": "find_source_files"
+          },
+          {
+            "type": "function",
+            "name": "find_test_files"
+          },
+          {
+            "type": "function",
+            "name": "suggest_test_filenames"
+          },
+          {
+            "type": "function",
+            "name": "identify_files_missing_tests"
+          },
+          {
+            "type": "function",
+            "name": "create_pr_comment"
+          },
+          {
+            "type": "function",
+            "name": "main"
+          }
+        ],
+        "imports": [
+          "os",
+          "sys",
+          "glob",
+          "logging",
+          "subprocess",
+          "datetime",
+          "datetime",
+          "typing",
+          "List",
+          "pathlib",
+          "Path",
+          "openai",
+          "github",
+          "Github",
+          "remote",
+          "remote...",
+          "remote"
+        ],
         "exports": [],
         "dependencies": []
       }
@@ -1080,6 +1400,21 @@
             "name": "CodeBlock_unknown"
           }
         ],
+        "imports": [],
+        "exports": [],
+        "dependencies": []
+      }
+    ],
+    [
+      ".github/workflows/test-gen-bot.yml",
+      {
+        "path": ".github/workflows/test-gen-bot.yml",
+        "size": 1254,
+        "hash": "faed5e4767a49014",
+        "lastModified": "2025-06-23T18:43:56.889Z",
+        "type": "other",
+        "language": "unknown",
+        "symbols": [],
         "imports": [],
         "exports": [],
         "dependencies": []
@@ -10107,6 +10442,114 @@
   ],
   "classes": [
     [
+      "TestGeneratorConfig",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "methods": [
+          {
+            "name": "__init__",
+            "async": false,
+            "static": false,
+            "visibility": "private"
+          },
+          {
+            "name": "_get_pr_number",
+            "async": false,
+            "static": false,
+            "visibility": "private"
+          },
+          {
+            "name": "validate",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "run_command",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          }
+        ]
+      }
+    ],
+    [
+      "GitOperations",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "methods": [
+          {
+            "name": "check_git_status",
+            "async": false,
+            "static": true,
+            "visibility": "public"
+          },
+          {
+            "name": "ensure_clean_state",
+            "async": false,
+            "static": true,
+            "visibility": "public"
+          },
+          {
+            "name": "configure_git",
+            "async": false,
+            "static": true,
+            "visibility": "public"
+          },
+          {
+            "name": "branch_exists_remotely",
+            "async": false,
+            "static": true,
+            "visibility": "public"
+          },
+          {
+            "name": "stage_commit_push",
+            "async": false,
+            "static": true,
+            "visibility": "public"
+          },
+          {
+            "name": "setup_git_for_github_actions",
+            "async": false,
+            "static": true,
+            "visibility": "public"
+          }
+        ]
+      }
+    ],
+    [
+      "TestGenerator",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "methods": [
+          {
+            "name": "__init__",
+            "async": false,
+            "static": false,
+            "visibility": "private"
+          },
+          {
+            "name": "_get_pr_number",
+            "async": false,
+            "static": false,
+            "visibility": "private"
+          },
+          {
+            "name": "validate",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          },
+          {
+            "name": "run_command",
+            "async": false,
+            "static": false,
+            "visibility": "public"
+          }
+        ]
+      }
+    ],
+    [
       "HelloPlugin",
       {
         "file": "examples/simple-plugin/index.js",
@@ -13703,6 +14146,153 @@
   ],
   "functions": [
     [
+      "__init__",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "_get_pr_number",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "validate",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "run_command",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "check_git_status",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "ensure_clean_state",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "configure_git",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "branch_exists_remotely",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "stage_commit_push",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "setup_git_for_github_actions",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "__enter__",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "__exit__",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "generate_test_stub",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "generate_tests_for_files",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "_commit_batch",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "find_source_files",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "find_test_files",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "suggest_test_filenames",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "identify_files_missing_tests",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "create_pr_comment",
+      {
+        "file": ".github/bots/gen_missing_tests.py",
+        "async": false
+      }
+    ],
+    [
+      "main",
+      {
+        "file": "scripts/error-handling-integration.ts",
+        "async": false
+      }
+    ],
+    [
       "spinnerServiceExample",
       {
         "file": "examples/spinner-example.js",
@@ -13727,13 +14317,6 @@
       "sleep",
       {
         "file": "examples/spinner-example.js",
-        "async": false
-      }
-    ],
-    [
-      "main",
-      {
-        "file": "scripts/error-handling-integration.ts",
         "async": false
       }
     ],
